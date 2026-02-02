@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import heroBg from '../assets/hero-bg.png';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -70,7 +71,7 @@ const LandingPage = () => {
                         <div className="w-full lg:w-1/2 order-1 lg:order-2">
                             <div
                                 className="relative w-full aspect-square md:aspect-video lg:aspect-square bg-center bg-no-repeat bg-cover rounded-2xl shadow-2xl overflow-hidden border-4 border-white dark:border-background-dark"
-                                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA3xlW2f_LXgdeFZs_hU54Ftk2ZyFOZcxBMSD7F2vqeAYxbEnEtOFbdXMPSyqN_Hmq6BZlrhPxnzLe_xM-nY1IplE2Qrz8R_7liQINycb-OzDMrFJm4QoVHGFGMEwW8A4ibSOkmKOrTh6oVNvX71emVVtjZpJNAUUfDzEq6eAj5aUai835hKMClBaJpLDOKMmZwz_FufTkMj1NHzVdUxNalHu24jGrmf3aPnfQ_Hl2G3sfipzAniTErtjta-BbMX5m4zUZQKYcr3aU")' }}
+                                style={{ backgroundImage: `url(${heroBg})` }}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
                             </div>
