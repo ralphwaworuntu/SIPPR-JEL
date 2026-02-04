@@ -1,213 +1,233 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import heroBg from '../assets/hero-bg.png';
+
+import heroSlide1 from '../assets/hero-slide-1.jpg';
+import heroSlide2 from '../assets/hero-slide-2.jpg';
+import { Reveal } from '../components/Reveal';
+import { Footer } from '../components/Footer';
+
 
 const LandingPage = () => {
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [currentBgIndex, setCurrentBgIndex] = useState(0);
+    const backgroundImages = [heroSlide1, heroSlide2];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentBgIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
-        <div className="bg-background-light dark:bg-background-dark text-[#0d1b12] dark:text-white transition-colors duration-300 min-h-screen font-display">
-            {/* Top Navigation Bar */}
-            <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-solid border-[#e7f3eb] dark:border-[#1a3523] px-4 md:px-20 lg:px-40 py-3">
-                <div className="max-w-[1200px] mx-auto flex items-center justify-between">
-                    {/* Logo removed as requested */}
-                    <div className="hidden md:flex flex-1 justify-center gap-8 items-center w-full">
-                        <nav className="flex items-center gap-9">
-                            <a className="text-[#0d1b12] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#about">Tentang Program</a>
-                            <a className="text-[#0d1b12] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#stats">Statistik</a>
-                            <a className="text-[#0d1b12] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">Bantuan</a>
-                        </nav>
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary text-[#0d1b12] text-sm font-bold hover:brightness-95 transition-all"
-                        >
-                            Login
-                        </button>
-                    </div>
-                    {/* Mobile Menu Icon (Visual Only) */}
-                    <div className="md:hidden flex items-center">
-                        <span className="material-symbols-outlined text-[#0d1b12] dark:text-white">menu</span>
-                    </div>
+        <div className="bg-background-light dark:bg-background-dark text-[#0d1b12] dark:text-white transition-colors duration-300 min-h-screen font-display flex flex-col">
+            {/* Top Navigation Bar - Solid & Clean (Reference Match) */}
+            <header className="sticky top-0 z-50 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 px-4 md:px-10 lg:px-20 py-3 flex items-center justify-between shadow-sm relative backdrop-blur-md transition-all duration-300">
+                {/* Logo Section */}
+                <div className="flex items-center gap-4 z-20 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <span className="text-slate-700 dark:text-white font-bold text-xl tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:text-primary">GMIT Emaus Liliba</span>
                 </div>
+
+                {/* Centered Desktop Navigation */}
+                <nav className={`hidden ${isMenuOpen ? '' : 'lg:flex'} absolute inset-0 items-center justify-center pointer-events-none`}>
+                    <div className="flex items-center gap-8 pointer-events-auto">
+                        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-slate-600 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-all hover:scale-105 bg-transparent border-none cursor-pointer">Depan</button>
+                        <a className="text-slate-600 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-all hover:scale-105" href="#about">Tentang Kami</a>
+                        <a className="text-slate-600 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-all hover:scale-105" href="#stats">Post</a>
+                        <button onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })} className="text-slate-600 dark:text-slate-300 text-sm font-semibold hover:text-primary transition-all hover:scale-105 bg-transparent border-none cursor-pointer">Kontak</button>
+                    </div>
+                </nav>
+
+                {/* Right Actions */}
+                <div className="flex items-center gap-3 z-20">
+                    {/* Login Button - Dark Grey Rounded */}
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="flex items-center justify-center rounded-lg h-10 px-5 bg-slate-600 text-white text-sm font-bold hover:bg-slate-700 transition-all shadow-sm hover:scale-105 hover:shadow-md active:scale-95"
+                    >
+                        Login
+                    </button>
+
+                    {/* Menu Button - White Square */}
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className={`lg:hidden flex items-center justify-center size-10 rounded-lg border transition-all shadow-sm ${isMenuOpen ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>{isMenuOpen ? 'close' : 'menu'}</span>
+                    </button>
+                </div>
+
+                {/* Dropdown Menu (Vertical List Below Header) */}
+                {isMenuOpen && (
+                    <div className="absolute top-full left-0 right-0 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl flex flex-col py-4 px-4 md:px-10 lg:px-20 animate-fade-in-down">
+                        <button onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setIsMenuOpen(false); }} className="py-3 text-left text-slate-700 dark:text-slate-200 font-semibold text-base hover:text-primary transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 bg-transparent">Depan</button>
+                        <a onClick={() => setIsMenuOpen(false)} className="py-3 text-slate-700 dark:text-slate-200 font-semibold text-base hover:text-primary transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0" href="#about">Tentang Kami</a>
+                        <a onClick={() => setIsMenuOpen(false)} className="py-3 text-slate-700 dark:text-slate-200 font-semibold text-base hover:text-primary transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0" href="#stats">Post</a>
+                        <button onClick={() => { document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }} className="py-3 text-left text-slate-700 dark:text-slate-200 font-semibold text-base hover:text-primary transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 bg-transparent">Kontak</button>
+                    </div>
+                )}
             </header>
 
-            <main className="flex flex-col items-center">
-                {/* Hero Section */}
-                <section className="w-full max-w-[1200px] px-4 md:px-20 lg:px-40 py-10 md:py-20 @container">
-                    <div className="flex flex-col gap-10 md:gap-12 lg:flex-row items-center">
-                        <div className="w-full lg:w-1/2 flex flex-col gap-6 md:gap-8 justify-center order-2 lg:order-1">
-                            <div className="flex flex-col gap-4 text-left">
-                                <h1 className="text-[#0d1b12] dark:text-white text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight">
-                                    Optimalkan Potensi Jemaat Untuk Pelayanan
+            <main className="flex flex-col items-center w-full">
+                {/* Hero Section - Full Screen Immersive */}
+                <section
+                    className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden"
+                >
+                    {/* Background Images Slider */}
+                    {backgroundImages.map((img, index) => (
+                        <div
+                            key={index}
+                            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${index === currentBgIndex ? 'opacity-100' : 'opacity-0'}`}
+                            style={{ backgroundImage: `url(${img})` }}
+                        />
+                    ))}
+                    {/* Dark Overlay for readability */}
+                    {/* Dark Overlay for readability - Darker to match reference style */}
+                    <div className="absolute inset-0 bg-black/60"></div>
+
+                    {/* Content Container */}
+                    <div className="relative z-10 px-4 md:px-10 lg:px-20 text-center flex flex-col items-center gap-8 max-w-[1000px]">
+                        <div className="flex flex-col gap-4 items-center">
+                            <Reveal delay={200}>
+                                <div className="flex flex-col items-center gap-2 mb-2">
+                                    <h2 className="text-white text-xl md:text-3xl font-bold uppercase tracking-[0.15em] drop-shadow-lg">
+                                        GMIT EMAUS LILIBA
+                                    </h2>
+                                </div>
+                            </Reveal>
+
+                            <Reveal delay={400}>
+                                <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-black italic leading-tight tracking-tight drop-shadow-xl">
+                                    "Pendataan dan Pemetaan <br className="hidden md:block" />
+                                    SDM Profesional"
                                 </h1>
-                                <p className="text-[#0d1b12] dark:text-gray-400 text-base md:text-lg font-normal leading-relaxed max-w-[500px]">
-                                    Sistem Manajemen SDM untuk mendata dan mengoptimalkan talenta profesional jemaat GMIT Emaus Liliba demi pelayanan yang lebih berdampak dan profesional.
+                            </Reveal>
+
+                            <Reveal delay={600}>
+                                <p className="text-slate-100 text-lg md:text-xl font-medium leading-relaxed max-w-[800px] drop-shadow-md">
+                                    "Layanilah seorang akan yang lain, sesuai dengan karunia yang telah diperoleh tiap-tiap orang sebagai pengurus yang baik dari kasih karunia Allah."
+                                    <span className="block mt-2 text-sm text-slate-300 font-normal opacity-90">(1 Petrus 4:10)</span>
                                 </p>
-                            </div>
-                            <div className="flex flex-wrap gap-4">
+                            </Reveal>
+                        </div>
+
+                        <Reveal delay={800} className="w-full md:w-auto">
+                            <div className="flex flex-wrap justify-center gap-4 mt-4 w-full md:w-auto">
                                 <button
                                     onClick={() => navigate('/form')}
-                                    className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-12 md:h-14 px-6 bg-primary text-[#0d1b12] text-base font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                                    className="min-w-[110px] cursor-pointer rounded-full h-10 px-6 bg-white text-slate-900 hover:bg-slate-100 text-sm font-bold shadow-md hover:shadow-lg hover:scale-105 transition-all"
                                 >
-                                    Isi Data Jemaat
-                                </button>
-                                <button
-                                    onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-                                    className="flex min-w-[160px] cursor-pointer items-center justify-center rounded-xl h-12 md:h-14 px-6 bg-[#e7f3eb] dark:bg-white/10 text-[#0d1b12] dark:text-white text-base font-bold hover:bg-[#d5e9db] dark:hover:bg-white/20 transition-all"
-                                >
-                                    Pelajari Program
+                                    Mulai
                                 </button>
                             </div>
-                        </div>
-                        <div className="w-full lg:w-1/2 order-1 lg:order-2">
-                            <div
-                                className="relative w-full aspect-square md:aspect-video lg:aspect-square bg-center bg-no-repeat bg-cover rounded-2xl shadow-2xl overflow-hidden border-4 border-white dark:border-background-dark"
-                                style={{ backgroundImage: `url(${heroBg})` }}
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>
+                        </Reveal>
+                    </div>
+
+                    {/* Gradient Fade at Bottom of Hero for Smooth Transition */}
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background-light to-transparent z-0 pointer-events-none"></div>
+                </section>
+
+                {/* Stats Bar - Clean Block Layout (No Overlap) */}
+                <section className="w-full max-w-[1200px] px-4 md:px-20 lg:px-40 py-16 bg-transparent" id="stats">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <Reveal delay={0} className="h-full">
+                            <div className="group flex flex-col gap-4 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 h-full">
+                                <span className="material-symbols-outlined text-primary mb-2 text-4xl">groups</span>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Jemaat Terdata</p>
+                                    <p className="text-slate-900 dark:text-white text-4xl font-extrabold mt-1">1,240+</p>
+                                </div>
                             </div>
-                        </div>
+                        </Reveal>
+                        <Reveal delay={200} className="h-full">
+                            <div className="group flex flex-col gap-4 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 h-full">
+                                <span className="material-symbols-outlined text-primary mb-2 text-4xl">verified_user</span>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Kategori Keahlian</p>
+                                    <p className="text-slate-900 dark:text-white text-4xl font-extrabold mt-1">45</p>
+                                </div>
+                            </div>
+                        </Reveal>
+                        <Reveal delay={400} className="h-full">
+                            <div className="group flex flex-col gap-4 rounded-3xl p-8 bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 h-full">
+                                <span className="material-symbols-outlined text-primary mb-2 text-4xl">volunteer_activism</span>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm font-semibold uppercase tracking-wider">Program Pelayanan</p>
+                                    <p className="text-slate-900 dark:text-white text-4xl font-extrabold mt-1">12</p>
+                                </div>
+                            </div>
+                        </Reveal>
                     </div>
                 </section>
 
-                {/* Stats Bar */}
-                <section className="w-full max-w-[1200px] px-4 md:px-20 lg:px-40 py-12" id="stats">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="flex flex-col gap-2 rounded-2xl p-8 bg-white dark:bg-[#152c1c] border border-[#cfe7d7] dark:border-[#1a3523] shadow-sm">
-                            <span className="material-symbols-outlined text-primary mb-2 text-3xl">groups</span>
-                            <p className="text-[#0d1b12] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Jemaat Terdata</p>
-                            <p className="text-[#0d1b12] dark:text-white text-4xl font-extrabold">1,240+</p>
-                        </div>
-                        <div className="flex flex-col gap-2 rounded-2xl p-8 bg-white dark:bg-[#152c1c] border border-[#cfe7d7] dark:border-[#1a3523] shadow-sm">
-                            <span className="material-symbols-outlined text-primary mb-2 text-3xl">verified_user</span>
-                            <p className="text-[#0d1b12] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Kategori Keahlian</p>
-                            <p className="text-[#0d1b12] dark:text-white text-4xl font-extrabold">45</p>
-                        </div>
-                        <div className="flex flex-col gap-2 rounded-2xl p-8 bg-white dark:bg-[#152c1c] border border-[#cfe7d7] dark:border-[#1a3523] shadow-sm">
-                            <span className="material-symbols-outlined text-primary mb-2 text-3xl">volunteer_activism</span>
-                            <p className="text-[#0d1b12] dark:text-gray-400 text-sm font-medium uppercase tracking-wider">Program Pelayanan</p>
-                            <p className="text-[#0d1b12] dark:text-white text-4xl font-extrabold">12</p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Feature Section */}
-                <section className="w-full bg-white dark:bg-[#0d1b12]/50 py-20" id="about">
+                {/* Feature Section with Organic Gradient */}
+                <section className="w-full bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/50 dark:to-slate-950 pb-24 pt-10" id="about">
                     <div className="max-w-[1200px] mx-auto px-4 md:px-20 lg:px-40 flex flex-col gap-12 @container">
                         <div className="flex flex-col gap-4 text-center items-center">
-                            <h2 className="text-[#0d1b12] dark:text-white text-3xl md:text-4xl font-black tracking-tight max-w-[720px]">
-                                Mengapa HR Bank Sangat Penting?
+                            <h2 className="text-slate-900 dark:text-white text-3xl md:text-4xl font-black tracking-tight max-w-[720px]">
+                                Mengapa Pendataan dan Pemetaan SDM Profesional GMIT Emaus Liliba Sangat Penting?
                             </h2>
                             <div className="w-20 h-1.5 bg-primary rounded-full"></div>
-                            <p className="text-[#0d1b12] dark:text-gray-400 text-base md:text-lg font-normal leading-relaxed max-w-[720px]">
-                                Kami percaya setiap keahlian profesional—baik medis, teknis, edukasi, maupun kreatif—adalah karunia Tuhan untuk kemajuan pelayanan gereja bersama.
+                            <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg font-normal leading-relaxed max-w-[720px]">
+                                Program ini merupakan langkah strategis kita untuk mengidentifikasi potensi, mensinergikan kolaborasi, dan melakukan perencanaan berbasis data yang lebih baik untuk pelayanan gereja.
                             </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Feature 1 */}
-                            <div className="group flex flex-col gap-5 rounded-2xl border border-[#cfe7d7] dark:border-[#1a3523] bg-background-light dark:bg-background-dark p-8 hover:border-primary transition-all duration-300">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>database</span>
+                            <Reveal delay={0} className="h-full">
+                                <div className="group flex flex-col gap-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 hover:border-primary/50 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 h-full">
+                                    <div className="size-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 group-hover:bg-primary group-hover:text-slate-900 transition-all">
+                                        <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>search_check</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <h3 className="text-slate-900 dark:text-white text-xl font-bold">Identifikasi Potensi</h3>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                                            Mengenali kekayaan talenta, profesi, dan keahlian spesifik yang Tuhan titipkan kepada setiap anggota jemaat.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    <h3 className="text-[#0d1b12] dark:text-white text-xl font-bold">Pendataan Digital</h3>
-                                    <p className="text-[#4c9a66] dark:text-gray-400 text-sm md:text-base leading-relaxed">
-                                        Transformasi data manual jemaat ke dalam sistem digital yang aman, terpusat, dan mudah diakses oleh pengurus gereja.
-                                    </p>
-                                </div>
-                            </div>
+                            </Reveal>
                             {/* Feature 2 */}
-                            <div className="group flex flex-col gap-5 rounded-2xl border border-[#cfe7d7] dark:border-[#1a3523] bg-background-light dark:bg-background-dark p-8 hover:border-primary transition-all duration-300">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>search_check</span>
+                            <Reveal delay={200} className="h-full">
+                                <div className="group flex flex-col gap-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 hover:border-primary/50 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 h-full">
+                                    <div className="size-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 group-hover:bg-primary group-hover:text-slate-900 transition-all">
+                                        <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>diversity_3</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <h3 className="text-slate-900 dark:text-white text-xl font-bold">Sinergi & Kolaborasi</h3>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                                            Membangun jejaring profesional antar jemaat guna mendukung pelayanan internal yang lebih efektif serta misi eksternal yang lebih berdampak nyata bagi masyarakat.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    <h3 className="text-[#0d1b12] dark:text-white text-xl font-bold">Pemetaan Talenta</h3>
-                                    <p className="text-[#4c9a66] dark:text-gray-400 text-sm md:text-base leading-relaxed">
-                                        Memudahkan gereja mencari tenaga ahli dari berbagai bidang profesi untuk kebutuhan insidentil maupun rutin.
-                                    </p>
-                                </div>
-                            </div>
+                            </Reveal>
                             {/* Feature 3 */}
-                            <div className="group flex flex-col gap-5 rounded-2xl border border-[#cfe7d7] dark:border-[#1a3523] bg-background-light dark:bg-background-dark p-8 hover:border-primary transition-all duration-300">
-                                <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-all">
-                                    <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>diversity_3</span>
+                            <Reveal delay={400} className="h-full">
+                                <div className="group flex flex-col gap-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 hover:border-primary/50 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 h-full">
+                                    <div className="size-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 group-hover:bg-primary group-hover:text-slate-900 transition-all">
+                                        <span className="material-symbols-outlined" style={{ fontSize: '30px' }}>Database</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <h3 className="text-slate-900 dark:text-white text-xl font-bold">Perencanaan Berbasis Data</h3>
+                                        <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                                            Menyediakan pangkalan data yang akurat dan valid sebagai dasar penyusunan program pelayanan yang tepat sasaran, inovatif, dan relevan dengan kebutuhan jemaat.                                   </p>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                    <h3 className="text-[#0d1b12] dark:text-white text-xl font-bold">Kolaborasi Pelayanan</h3>
-                                    <p className="text-[#4c9a66] dark:text-gray-400 text-sm md:text-base leading-relaxed">
-                                        Mengintegrasikan keahlian jemaat langsung ke program-program gereja seperti aksi sosial, edukasi, dan pembangunan.
-                                    </p>
-                                </div>
-                            </div>
+                            </Reveal>
                         </div>
                     </div>
                 </section>
 
-                {/* Call to Action Section */}
-                <section className="w-full max-w-[1200px] px-4 md:px-20 lg:px-40 py-20">
-                    <div className="relative rounded-3xl bg-primary p-8 md:p-16 lg:p-20 overflow-hidden text-center flex flex-col items-center gap-8">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full -ml-24 -mb-24"></div>
-                        <div className="relative z-10 flex flex-col gap-4">
-                            <h2 className="text-[#0d1b12] text-3xl md:text-4xl lg:text-5xl font-black leading-tight max-w-[800px]">
-                                Siap berkontribusi dengan talenta Anda?
-                            </h2>
-                            <p className="text-[#0d1b12]/80 text-lg font-medium max-w-[650px] mx-auto">
-                                Mari bersama membangun jemaat yang lebih berdaya melalui pemetaan SDM yang transparan, akuntabel, dan profesional.
-                            </p>
-                        </div>
-                        <div className="relative z-10">
-                            <button
-                                onClick={() => navigate('/form')}
-                                className="flex min-w-[240px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-[#0d1b12] text-white text-lg font-bold hover:scale-105 transition-all shadow-xl"
-                            >
-                                Mulai Isi Data Sekarang
-                            </button>
-                            <p className="mt-4 text-sm text-[#0d1b12]/60 font-semibold italic">Proses pendaftaran hanya membutuhkan waktu 5 menit</p>
-                        </div>
-                    </div>
-                </section>
+
             </main>
 
             {/* Footer */}
-            <footer className="w-full bg-[#e7f3eb] dark:bg-[#08150d] py-12 px-4 md:px-20 lg:px-40 mt-10">
-                <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-                    <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="size-6 text-primary">
-                                <svg fill="currentColor" viewBox="0 0 48 48">
-                                    <path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"></path>
-                                </svg>
-                            </div>
-                            <span className="font-bold text-lg dark:text-white">GMIT Emaus Liliba</span>
-                        </div>
-                        <p className="text-[#4c9a66] dark:text-gray-400 text-sm leading-relaxed max-w-sm">
-                            Gereja Masehi Injili di Timor (GMIT) Jemaat Emaus Liliba. <br />
-                            Jl. Piet A. Tallo, Liliba, Kota Kupang, Nusa Tenggara Timur.
-                        </p>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h4 className="font-bold text-[#0d1b12] dark:text-white uppercase tracking-wider text-xs">Navigasi</h4>
-                        <ul className="flex flex-col gap-2 text-sm text-[#4c9a66] dark:text-gray-400">
-                            <li><a className="hover:text-primary transition-colors" href="#">Beranda</a></li>
-                            <li><a className="hover:text-primary transition-colors" href="#">Tentang Program</a></li>
-                            <li><a className="hover:text-primary transition-colors" href="#">Daftar Keahlian</a></li>
-                            <li><a className="hover:text-primary transition-colors" href="#">Kebijakan Privasi</a></li>
-                        </ul>
-                    </div>
-                    <div className="flex flex-col gap-4">
-                        <h4 className="font-bold text-[#0d1b12] dark:text-white uppercase tracking-wider text-xs">Kontak Kami</h4>
-                        <ul className="flex flex-col gap-2 text-sm text-[#4c9a66] dark:text-gray-400">
-                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">mail</span> info@gmit-emaus.or.id</li>
-                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">call</span> +62 380 123 4567</li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="max-w-[1200px] mx-auto border-t border-[#cfe7d7] dark:border-[#1a3523] mt-12 pt-8 text-center text-xs text-[#4c9a66] dark:text-gray-500">
-                    © 2024 GMIT Emaus Liliba. All rights reserved. Built for professional ecclesiastical management.
-                </div>
-            </footer>
-        </div>
+            <Footer />
+
+
+
+        </div >
     );
 };
 

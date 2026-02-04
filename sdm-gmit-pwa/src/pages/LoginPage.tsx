@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn } from '../lib/auth-client';
+// import { signIn } from '../lib/auth-client';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Loader } from 'lucide-react';
 
@@ -15,6 +15,13 @@ const LoginPage = () => {
         setLoading(true);
         setError('');
 
+        // BYPASS LOGIN FOR DEMO/UI DEVELOPMENT (Backend is offline)
+        setTimeout(() => {
+            setLoading(false);
+            navigate('/admin');
+        }, 1500);
+
+        /* 
         await (signIn as any).emailAndPassword({
             email,
             password,
@@ -28,6 +35,7 @@ const LoginPage = () => {
                 setError(ctx.error.message || 'Login failed');
             }
         });
+        */
     };
 
     return (

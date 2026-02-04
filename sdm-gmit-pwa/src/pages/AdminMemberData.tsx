@@ -1,4 +1,5 @@
 
+import { Footer } from '../components/Footer';
 
 const AdminMemberData = () => {
     return (
@@ -28,7 +29,7 @@ const AdminMemberData = () => {
                         <a className="text-[#0d1b12] dark:text-[#f8fcf9] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Reports</a>
                         <a className="text-[#0d1b12] dark:text-[#f8fcf9] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Settings</a>
                     </div>
-                    <button className="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#0d1b12] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all shadow-md">
+                    <button onClick={() => alert("Fitur Tambah Member akan segera hadir")} className="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-[#0d1b12] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-opacity-90 transition-all shadow-md">
                         <span className="truncate">Add Member</span>
                     </button>
                     <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDaSny3xWKY_3ZURYiXIkzDviC6TusAQ5TRDJy7rsv8kHM3oIboTSRjyJH591wGP2O2gyztn1KXeBVfCdZgftlAazB1u8ucDG1LhMTWv1PYqDwSIJJtMhz0Cww3RGbFW4r2heSsZ6zRI_2LDmzUGmLinNnsLCFo39UOcjHBo2tBHSL7yvX0QZiqQExGb0QcJmGXbEshtHKcs3EYyHTWLN8slVPXC7CbV270LEeIZexxdH3oHMnqCo9WTIbzkubiyPDstXCC7E-OAzM")' }}></div>
@@ -43,7 +44,7 @@ const AdminMemberData = () => {
                         <p className="text-[#4c9a66] text-base font-normal leading-normal">Manage congregation professional skills data and human resource analytics.</p>
                     </div>
                     <div className="flex gap-3 items-end">
-                        <button className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-[#e7f3eb] dark:bg-[#1b2e21] text-[#0d1b12] dark:text-[#f8fcf9] text-sm font-bold leading-normal tracking-[0.015em] border border-[#cfe7d7] dark:border-[#2a4a35] hover:bg-[#cfe7d7] dark:hover:bg-[#2a4a35] transition-colors">
+                        <button onClick={() => alert("Mengunduh data member...")} className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-[#e7f3eb] dark:bg-[#1b2e21] text-[#0d1b12] dark:text-[#f8fcf9] text-sm font-bold leading-normal tracking-[0.015em] border border-[#cfe7d7] dark:border-[#2a4a35] hover:bg-[#cfe7d7] dark:hover:bg-[#2a4a35] transition-colors">
                             <span className="material-symbols-outlined text-lg">download</span>
                             <span className="truncate">Export to CSV</span>
                         </button>
@@ -201,17 +202,7 @@ const AdminMemberData = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
-                <footer className="px-10 py-6 border-t border-[#cfe7d7] dark:border-[#2a4a35] mt-auto">
-                    <div className="flex justify-between items-center text-xs text-[#4c9a66] font-medium">
-                        <p>© 2024 GMIT Emaus Liliba HR Portal. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <a className="hover:text-primary transition-colors" href="#">Data Privacy Policy</a>
-                            <a className="hover:text-primary transition-colors" href="#">Admin Support</a>
-                            <a className="hover:text-primary transition-colors" href="#">System Logs</a>
-                        </div>
-                    </div>
-                </footer>
+                <Footer />
             </main>
         </div>
     );

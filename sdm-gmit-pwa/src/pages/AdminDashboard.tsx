@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { authClient } from '../lib/auth-client';
 import { useNavigate } from 'react-router-dom';
+import { Footer } from '../components/Footer';
 
 const AdminDashboard = () => {
     // const { data: session } = useSession(); // Will enable when server is running
@@ -36,18 +37,18 @@ const AdminDashboard = () => {
                         <span className="material-symbols-outlined">table_view</span>
                         Member Data
                     </a>
-                    <a className="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+                    <a className="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Fitur Data Jemaat akan segera tersedia."); }}>
                         <span className="material-symbols-outlined">groups</span>
                         Congregation
                     </a>
-                    <a className="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+                    <a className="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#" onClick={(e) => { e.preventDefault(); alert("Fitur Laporan akan segera tersedia."); }}>
                         <span className="material-symbols-outlined">bar_chart</span>
                         Reports
                     </a>
                 </nav>
 
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800">
-                    <a className="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+                    <a className="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer" onClick={() => alert("Pengaturan akan segera tersedia.")}>
                         <span className="material-symbols-outlined">settings</span>
                         Settings
                     </a>
@@ -304,9 +305,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 text-center text-slate-400 text-sm pt-8">
-                        © 2024 GMIT Emaus Liliba - HR Management System. Built for Church Growth.
-                    </footer>
+                    <Footer />
                 </div>
             </main>
         </div>

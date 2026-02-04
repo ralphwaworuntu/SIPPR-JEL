@@ -8,15 +8,16 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#13ec5b",
-                "background-light": "#f6f8f6",
-                "background-dark": "#102216",
+                "primary": "#13ec5b", // Keeping accent
+                "secondary": "#64748b", // Slate-500 for secondary text
+                "background-light": "#f8fafc", // Slate-50
+                "background-dark": "#0f172a", // Slate-900
             },
             fontFamily: {
                 "display": ["Manrope", "sans-serif"],
                 "sans": ["Manrope", "sans-serif"],
             },
-            borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+            borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1rem", "2xl": "1.5rem", "full": "9999px" },
         },
     },
     plugins: [],
