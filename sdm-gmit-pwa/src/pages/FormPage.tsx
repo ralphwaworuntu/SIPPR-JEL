@@ -86,12 +86,26 @@ const FormPage = () => {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateStep(4)) return;
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const response = await fetch('/api/congregants', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Gagal menyimpan data');
+            }
+
+            const result = await response.json();
+            console.log("Success:", result);
+
             setIsSubmitting(false);
             // Success State Transition
             setIsSuccess(true);
@@ -99,7 +113,11 @@ const FormPage = () => {
 
             // Clear draft
             localStorage.removeItem('gmit-form-draft');
-        }, 1500);
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            alert("Terjadi kesalahan saat mengirim data. Silakan coba lagi.");
+            setIsSubmitting(false);
+        }
     };
 
     const prevStep = () => {
@@ -172,16 +190,7 @@ const FormPage = () => {
                     >
                         Kembali ke Beranda
                     </button>
-                    {!isSuccess && (
-                        <>
-                            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block mx-1"></div>
-                            <button
-                                className="flex items-center justify-center rounded-lg h-9 px-4 bg-primary/10 text-primary text-sm font-bold border border-primary/20 cursor-default transition-transform hover:scale-105"
-                            >
-                                Formulir Jemaat
-                            </button>
-                        </>
-                    )}
+
                 </div>
             </header>
 
