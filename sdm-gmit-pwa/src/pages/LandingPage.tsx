@@ -2,10 +2,35 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import heroBg from '../assets/hero-bg.png';
 import { Footer } from '../components/Footer';
+import { Globe, Activity, Users, Heart } from 'lucide-react';
+import { Reveal } from '../components/Reveal';
+import { CountUp } from '../components/CountUp';
+import heroSlide2 from '../assets/hero-slide-2.jpg';
 
 const LandingPage = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const features = [
+        {
+            title: "Database Terintegrasi",
+            desc: "Sistem pendataan jemaat yang komprehensif, mencakup data pribadi, keluarga, dan potensi pelayanan.",
+            icon: <Globe className="h-10 w-10 text-indigo-500 mb-4" />,
+            delay: 100
+        },
+        {
+            title: "Identifikasi Potensi",
+            desc: "Temukan dan kembangkan talenta jemaat untuk pelayanan dengan fitur pemetaan minat dan bakat.",
+            icon: <Activity className="h-10 w-10 text-pink-500 mb-4" />,
+            delay: 200
+        },
+        {
+            title: "Sinergi Kolaborasi",
+            desc: "Hubungkan profesional dan pelayan Tuhan untuk dampak yang lebih besar dalam pelayanan gereja.",
+            icon: <Users className="h-10 w-10 text-purple-500 mb-4" />,
+            delay: 300
+        }
+    ];
 
     return (
         <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 min-h-screen font-display selection:bg-primary/20">
@@ -93,6 +118,13 @@ const LandingPage = () => {
                             >
                                 Statistik
                             </a>
+                            <a
+                                href="#kontak"
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="block px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg transition-colors"
+                            >
+                                Kontak
+                            </a>
                             <div className="my-2 h-px bg-slate-100 dark:bg-slate-800"></div>
                             <button
                                 onClick={() => { navigate('/login'); setIsSidebarOpen(false); }}
@@ -104,7 +136,7 @@ const LandingPage = () => {
 
                         <div className="absolute bottom-6 left-6 right-6">
                             <p className="text-xs text-center text-slate-400">
-                                © 2024 GMIT Emaus Liliba <br /> All rights reserved.
+                                © {new Date().getFullYear()} GMIT Emaus Liliba <br /> All rights reserved.
                             </p>
                         </div>
                     </div>
@@ -165,95 +197,124 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Stats Section */}
-                <section className="w-full bg-slate-50 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800" id="stats">
-                    <div className="max-w-[1200px] mx-auto px-4 md:px-20 lg:px-40 py-16">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
-                            {[
-                                { icon: "groups", label: "Jemaat Terdata", value: "1,240+" },
-                                { icon: "verified_user", label: "Kategori Keahlian", value: "45" },
-                                { icon: "volunteer_activism", label: "Program Aktif", value: "12" }
-                            ].map((stat, idx) => (
-                                <div key={idx} className="flex flex-col items-center text-center px-4 py-4 md:py-0">
-                                    <span className="material-symbols-outlined text-primary text-4xl mb-4">{stat.icon}</span>
-                                    <h3 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">{stat.value}</h3>
+                {/* STATS SECTION (From Remote, Styled with Clean Layout) */}
+                <section className="relative z-30 mt-10 px-4 pb-20 w-full max-w-[1200px]" id="stats">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            { label: "Jemaat Terdata", value: 1240, suffix: "+", icon: "groups" },
+                            { label: "Kategori Keahlian", value: 45, icon: "verified_user" },
+                            { label: "Program Aktif", value: 12, icon: "volunteer_activism" }
+                        ].map((stat, idx) => (
+                            <Reveal key={idx} delay={idx * 200}>
+                                <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all duration-300">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-primary">
+                                            <span className="material-symbols-outlined text-3xl">
+                                                {stat.icon}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <h3 className="text-5xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
+                                        <CountUp end={stat.value} suffix={stat.suffix} />
+                                    </h3>
                                     <p className="text-slate-500 font-bold uppercase tracking-wider text-xs">{stat.label}</p>
                                 </div>
-                            ))}
-                        </div>
+                            </Reveal>
+                        ))}
                     </div>
                 </section>
 
-                {/* Features Section */}
-                <section className="w-full px-4 md:px-20 lg:px-40 py-24" id="about">
-                    <div className="max-w-[1200px] mx-auto flex flex-col gap-16">
-                        <div className="text-center max-w-2xl mx-auto space-y-4">
-                            <span className="text-primary font-bold tracking-widest uppercase text-xs">Features</span>
-                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
-                                Sistem Manajemen Terintegrasi
-                            </h2>
-                            <p className="text-slate-500 text-lg">
-                                Mengelola data jemaat kini lebih mudah, aman, dan efisien dengan teknologi terkini.
-                            </p>
+                {/* LATAR BELAKANG SECTION (From Remote) */}
+                <section className="py-24 px-4 bg-slate-50 dark:bg-slate-900 w-full" id="about">
+                    <div className="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12 items-center">
+                        <Reveal>
+                            <div className="relative rounded-2xl overflow-hidden shadow-lg h-[400px]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 mix-blend-multiply opacity-80 z-10"></div>
+                                <img src={heroSlide2} alt="Latar Belakang" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 flex items-center justify-center z-20">
+                                    <Globe className="w-24 h-24 text-white/50" />
+                                </div>
+                            </div>
+                        </Reveal>
+                        <Reveal delay={200}>
+                            <div>
+                                <span className="text-primary font-bold tracking-widest uppercase text-xs mb-3 block">Latar Belakang</span>
+                                <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
+                                    Membangun Pelayanan Berbasis <span className="text-primary">Data</span>
+                                </h2>
+                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                                    Program pendataan ini lahir dari kebutuhan untuk memahami potensi dan pergumulan setiap anggota jemaat secara real-time dan akurat.
+                                </p>
+                                <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                                    Dengan database yang terintegrasi, gereja dapat merancang program pelayanan yang lebih tepat sasaran, efektif, dan menjangkau setiap pribadi.
+                                </p>
+                            </div>
+                        </Reveal>
+                    </div>
+                </section>
+
+                {/* OBJECTIVES SECTION (From Remote) */}
+                <section className="py-24 px-4 w-full" id="tujuan">
+                    <div className="max-w-[1200px] mx-auto">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <Reveal>
+                                <span className="text-primary font-bold tracking-widest uppercase text-xs mb-3 block">Tujuan</span>
+                                <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight mb-6">
+                                    Platform Digital untuk <br />
+                                    <span className="text-primary">Pelayan Masa Depan</span>
+                                </h2>
+                            </Reveal>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[
-                                {
-                                    icon: "database",
-                                    title: "Pendataan Digital",
-                                    desc: "Transformasi data manual ke digital yang aman dan terpusat.",
-                                    color: "bg-blue-500"
-                                },
-                                {
-                                    icon: "search_check",
-                                    title: "Pemetaan Talenta",
-                                    desc: "Pencarian tenaga ahli jemaat yang cepat dan akurat.",
-                                    color: "bg-emerald-500"
-                                },
-                                {
-                                    icon: "diversity_3",
-                                    title: "Kolaborasi Pelayanan",
-                                    desc: "Sinergi antar jemaat untuk pelayanan yang berdampak.",
-                                    color: "bg-purple-500"
-                                }
-                            ].map((feature, idx) => (
-                                <div key={idx} className="group bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-200 dark:border-slate-800 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md">
-                                    <div className={`size-14 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-primary mb-6`}>
-                                        <span className="material-symbols-outlined text-3xl">{feature.icon}</span>
+                            {features.map((item, i) => (
+                                <Reveal key={i} delay={item.delay}>
+                                    <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center h-full">
+                                        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center mb-6">
+                                            {item.icon}
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{item.title}</h3>
+                                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                                            {item.desc}
+                                        </p>
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
-                                    <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-                                        {feature.desc}
-                                    </p>
-                                </div>
+                                </Reveal>
                             ))}
                         </div>
                     </div>
                 </section>
 
-                {/* CTA Section */}
-                <section className="w-full px-4 md:px-20 lg:px-40 pb-24">
-                    <div className="max-w-[1200px] mx-auto">
-                        <div className="rounded-2xl bg-slate-900 dark:bg-primary/20 relative overflow-hidden px-8 py-20 text-center">
-
-                            <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-                                <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                                    Siap Berkontribusi?
-                                </h2>
-                                <p className="text-slate-300 text-lg">
-                                    Mari bersama membangun jemaat yang lebih berdaya guna. Data Anda aman dan vertikal hanya untuk kepentingan pelayanan.
-                                </p>
-                                <button
-                                    onClick={() => navigate('/form')}
-                                    className="px-10 py-4 bg-white text-slate-900 rounded-lg font-bold text-lg shadow-sm hover:bg-slate-50 transition-colors"
-                                >
-                                    Mulai Isi Formulir
-                                </button>
-                                <p className="text-slate-400 text-sm font-medium">✨ Gratis, Aman, dan Terintegrasi</p>
-                            </div>
-                        </div>
+                {/* CONTACT FORM SECTION (From Remote) */}
+                <section className="py-24 px-4 bg-slate-50 dark:bg-slate-900 w-full" id="kontak">
+                    <div className="max-w-3xl mx-auto text-center mb-12">
+                        <Reveal>
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Hubungi Kami</h2>
+                            <p className="text-slate-600 dark:text-slate-400">Punya pertanyaan atau butuh bantuan? Kirimkan pesan kepada kami.</p>
+                        </Reveal>
                     </div>
+                    <Reveal delay={200}>
+                        <div className="max-w-2xl mx-auto bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
+                            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                                        <input type="text" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-900 focus:ring-0 transition-all text-slate-900 dark:text-white outline-none" placeholder="Nama Anda" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+                                        <input type="email" className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-900 focus:ring-0 transition-all text-slate-900 dark:text-white outline-none" placeholder="email@contoh.com" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Pesan</label>
+                                    <textarea rows={4} className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-900 focus:ring-0 transition-all text-slate-900 dark:text-white resize-none outline-none" placeholder="Tulis pesan Anda disini..."></textarea>
+                                </div>
+                                <button type="submit" className="w-full py-3.5 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/20">
+                                    Kirim Pesan
+                                </button>
+                            </form>
+                        </div>
+                    </Reveal>
                 </section>
             </main>
 
