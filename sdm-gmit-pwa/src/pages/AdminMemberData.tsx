@@ -9,6 +9,7 @@ import { Modal } from '../components/ui/Modal';
 import { AddMemberForm } from '../components/admin/forms/AddMemberForm';
 import { MemberDetailModal } from '../components/admin/details/MemberDetailModal';
 import { useMemberData, calculateAge, type Member } from '../hooks/useMemberData';
+import { useReferences } from '../hooks/useReferences';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
 const AdminMemberData = () => {
@@ -25,6 +26,8 @@ const AdminMemberData = () => {
         sortConfig, handleSort,
         stats
     } = useMemberData();
+
+    const { references, isLoading: isReferencesLoading } = useReferences();
 
     // UI State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -281,13 +284,13 @@ const AdminMemberData = () => {
                         <select
                             value={filterSector}
                             onChange={(e) => setFilterSector(e.target.value)}
-                            className="h-10 pl-3 pr-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium border-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+                            disabled={isReferencesLoading}
+                            className="h-10 pl-3 pr-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium border-none focus:ring-2 focus:ring-primary/50 cursor-pointer disabled:opacity-50"
                         >
                             <option value="Semua">Semua Sektor</option>
-                            <option value="Efata">Efata</option>
-                            <option value="Betel">Betel</option>
-                            <option value="Sion">Sion</option>
-                            <option value="Eden">Eden</option>
+                            {references.sectors.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
                         </select>
                         <button
                             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
@@ -318,8 +321,9 @@ const AdminMemberData = () => {
                                 className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
                             >
                                 <option value="Semua">Semua</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
+                                {references.gender.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                         <div>
@@ -345,9 +349,9 @@ const AdminMemberData = () => {
                                 className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
                             >
                                 <option value="Semua">Semua</option>
-                                <option value="Sidi">Sidi</option>
-                                <option value="Baptis">Baptis</option>
-                                <option value="Katekisasi">Katekisasi</option>
+                                {references.statusGerejawi.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -770,10 +774,9 @@ const AdminMemberData = () => {
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
                                 <option value="">-- Pilih Sektor --</option>
-                                <option value="Efata">Efata</option>
-                                <option value="Betel">Betel</option>
-                                <option value="Sion">Sion</option>
-                                <option value="Eden">Eden</option>
+                                {references.sectors.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                     )}
@@ -787,9 +790,9 @@ const AdminMemberData = () => {
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
                                 <option value="">-- Pilih Status --</option>
-                                <option value="Sidi">Sidi</option>
-                                <option value="Baptis">Baptis</option>
-                                <option value="Katekisasi">Katekisasi</option>
+                                {references.statusGerejawi.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                     )}

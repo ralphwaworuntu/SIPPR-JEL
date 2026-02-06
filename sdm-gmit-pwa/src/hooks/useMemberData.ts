@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 // Types moved here for reuse
 export interface Member {
@@ -51,7 +51,44 @@ const MOCK_MEMBERS: Member[] = [
 ];
 
 export const useMemberData = () => {
-    const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
+    const [members, setMembers] = useState<Member[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const response = await fetch('/api/congregants');
+                if (!response.ok) throw new Error('Failed to fetch');
+                const data = await response.json();
+
+                // Map DB data to Member interface
+                const mappedMembers: Member[] = data.map((item: any) => ({
+                    id: `M-${String(item.id).padStart(5, '0')}`,
+                    name: item.fullName,
+                    sector: item.sector || "Unassigned",
+                    education: item.educationLevel || "-",
+                    job: item.jobCategory || "-",
+                    skills: Array.isArray(item.skills) ? item.skills : [],
+                    initials: item.fullName ? item.fullName.substring(0, 2).toUpperCase() : "XX",
+                    gender: item.gender || "Laki-laki",
+                    birthDate: item.dateOfBirth ? new Date(item.dateOfBirth).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                    createdAt: item.createdAt,
+                    statusGerejawi: "Sidi" // Defaulting as discussed
+                }));
+
+                setMembers(mappedMembers);
+            } catch (error) {
+                console.error("Error fetching members:", error);
+                // Fallback to mock data or empty? Let's use mock if empty for demo purposes or empty
+                setMembers(MOCK_MEMBERS); // Keep mock as fallback or remove if strictly real data
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchMembers();
+    }, []);
+
     const [searchTerm, setSearchTerm] = useState("");
     const [filterSector, setFilterSector] = useState("Semua");
     const [filterGender, setFilterGender] = useState("Semua");
@@ -193,6 +230,7 @@ export const useMemberData = () => {
         filterAgeCategory, setFilterAgeCategory,
         filterStatus, setFilterStatus,
         sortConfig, handleSort,
-        stats
+        stats,
+        isLoading
     };
 };

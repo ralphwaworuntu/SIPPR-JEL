@@ -1,5 +1,6 @@
 import React from 'react';
 import { type FormData } from '../../types';
+import { useReferences } from '../../hooks/useReferences';
 
 interface StepProps {
     data: FormData;
@@ -7,27 +8,9 @@ interface StepProps {
 }
 
 const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
-    const interestOptions = [
-        'Pendidikan / Mengajar',
-        'Kesehatan',
-        'Teknologi & Multimedia',
-        'Musik & Liturgi',
-        'Sosial & Diakonia',
-        'Hukum & Advokasi',
-        'Ekonomi & Bisnis',
-        'Konstruksi & Pembangunan',
-        'Administrasi & Sekretariat',
-        'Transportasi & Logistik'
-    ];
+    const { references, isLoading } = useReferences();
 
-    const contributionOptions = [
-        'Tenaga Ahli / Konsultan',
-        'Mentor / Pelatih',
-        'Dukungan Teknis',
-        'Donatur / Finansial',
-        'Manajemen Proyek',
-        'Relawan Lapangan'
-    ];
+    // Use references directly in render now, removed local arrays
 
     const handleCheckboxChange = (field: 'interestAreas' | 'contributionTypes', value: string) => {
         const current = data[field];
@@ -83,7 +66,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                 <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bidang Minat Pelayanan</label>
                 <p className="text-sm text-[#4c9a66]">Pilih bidang di mana Anda berminat untuk berkontribusi.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {interestOptions.map(option => (
+                    {isLoading ? <p className="text-sm text-gray-500">Memuat opsi...</p> : references.interestAreas.map(option => (
                         <label key={option} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${data.interestAreas.includes(option) ? 'border-primary bg-primary/5' : 'border-[#cfe7d7] hover:bg-[#e7f3eb] dark:border-[#1d3324] dark:hover:bg-[#1d3324]'}`}>
                             <input
                                 type="checkbox"
@@ -100,7 +83,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
             <div className="space-y-4">
                 <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bentuk Kontribusi</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {contributionOptions.map(option => (
+                    {isLoading ? <p className="text-sm text-gray-500">Memuat opsi...</p> : references.contributionTypes.map(option => (
                         <label key={option} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${data.contributionTypes.includes(option) ? 'border-primary bg-primary/5' : 'border-[#cfe7d7] hover:bg-[#e7f3eb] dark:border-[#1d3324] dark:hover:bg-[#1d3324]'}`}>
                             <input
                                 type="checkbox"
