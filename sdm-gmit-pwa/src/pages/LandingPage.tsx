@@ -156,8 +156,8 @@ const LandingPage = () => {
                         <nav className="flex flex-col p-4">
                             {[
                                 { name: 'Depan', href: '#' },
-                                { name: 'Tentang', href: '#tentang' },
                                 { name: 'Statistik', href: '#stats' },
+                                { name: 'Tentang', href: '#tentang' },
                                 { name: 'Fitur', href: '#fitur' },
                                 { name: 'FAQ', href: '#faq' }
                             ].map((item, index) => (
