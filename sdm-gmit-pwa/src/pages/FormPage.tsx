@@ -3,6 +3,7 @@ import { initialFormData, type FormData } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { useFormPersist } from '../hooks/useFormPersist';
+import { motion } from 'framer-motion';
 
 import Step1Identity from '../components/form/Step1Identity';
 import Step2Professional from '../components/form/Step2Professional';
@@ -139,9 +140,15 @@ const FormPage = () => {
         })();
 
         return (
-            <div key={step} className="animate-slideIn">
+            <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+            >
                 {stepContent}
-            </div>
+            </motion.div>
         );
     };
 
@@ -197,7 +204,12 @@ const FormPage = () => {
             <main className="max-w-[1000px] mx-auto px-4 py-12 w-full flex-grow">
                 {/* Header Section - Hide on Success */}
                 {!isSuccess && (
-                    <div className="mb-10 text-center animate-fadeIn">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="mb-10 text-center"
+                    >
                         <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary">
                             <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>edit_document</span>
                         </div>
@@ -207,12 +219,17 @@ const FormPage = () => {
                         <p className="text-black/80 dark:text-slate-400 text-lg font-medium max-w-2xl mx-auto">
                             Mari bergabung dalam database profesional. Bantu kami melayani Anda dan jemaat dengan lebih baik.
                         </p>
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Progress Bar - Updated Theme - Hide on Success */}
                 {!isSuccess && (
-                    <div className="flex flex-col gap-4 p-6 mb-8 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fadeIn">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="flex flex-col gap-4 p-6 mb-8 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700"
+                    >
                         <div className="flex justify-between items-end mb-2">
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Langkah {step} dari 4</span>
@@ -233,11 +250,16 @@ const FormPage = () => {
                             <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${step >= 3 ? 'text-primary' : 'text-black/40 dark:text-slate-600'}`}>Keahlian</span>
                             <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${step >= 4 ? 'text-primary' : 'text-black/40 dark:text-slate-600'}`}>Review</span>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Form Card - Updated Theme */}
-                <div className={`bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden ${isSuccess ? 'max-w-xl mx-auto' : ''}`}>
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className={`bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden ${isSuccess ? 'max-w-xl mx-auto' : ''}`}
+                >
                     <div className="p-8 md:p-10">
                         {renderStep()}
                     </div>
@@ -273,7 +295,7 @@ const FormPage = () => {
                             </button>
                         </div>
                     )}
-                </div>
+                </motion.div>
 
 
             </main>
