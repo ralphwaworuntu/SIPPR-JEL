@@ -1,16 +1,27 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import heroBg from '../assets/hero-bg.png';
-import logoGmit from '../assets/logo-gmit.png';
 import { Footer } from '../components/Footer';
 import { Reveal } from '../components/Reveal';
-import { ChevronUp, MapPin, Phone, Mail } from 'lucide-react'; // Removed Sun, Moon
+import { Hero } from '../components/Hero';
+import { StatsCounter } from '../components/StatsCounter';
+import { FeatureCard } from '../components/FeatureCard';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { ChevronUp, Moon, Sun } from 'lucide-react';
 
 const LandingPage = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isAboutExpanded, setIsAboutExpanded] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
+
+    // Scroll Progress
+    const { scrollYProgress } = useScroll();
+    const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    });
+
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('theme') === 'dark' ||
@@ -25,7 +36,6 @@ const LandingPage = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
-            // Don't close if clicking on the hamburger button
             if (buttonRef.current && buttonRef.current.contains(target)) {
                 return;
             }
@@ -52,7 +62,7 @@ const LandingPage = () => {
         }
     }, [isDarkMode]);
 
-    // Scroll Effect (Back to Top & Smooth Scroll settings)
+    // Scroll Effect
     useEffect(() => {
         const handleScroll = () => {
             setShowBackToTop(window.scrollY > 400);
@@ -72,23 +82,25 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 min-h-screen font-display selection:bg-primary/20">
+        <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 min-h-screen font-display selection:bg-indigo-500/30">
+            {/* Scroll Progress Bar */}
+            <motion.div
+                className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 origin-left z-[100]"
+                style={{ scaleX }}
+            />
+
             {/* Top Navigation Bar */}
-            <header className="w-full sticky top-0 z-50 bg-white dark:bg-slate-950 shadow-sm py-3 transition-all duration-300">
+            <header className="w-full sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm border-b border-indigo-500/5 py-3 transition-all duration-300">
                 <div className="max-w-[1240px] mx-auto px-6 flex items-center justify-between">
                     {/* Left: Brand */}
                     <div
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                         className="flex items-center gap-3 cursor-pointer group"
                     >
-                        <img
-                            src={logoGmit}
-                            alt="Logo GMIT Emaus Liliba"
-                            className="h-12 w-auto"
-                        />
-                        <div className="hidden sm:flex flex-col">
-                            <span className="text-lg font-bold tracking-tight text-slate-800 dark:text-white -mt-1">
-                                GMIT EMAUS LILIBA
+                        {/* Use simple text or small logo if needed here since main hero has big logo */}
+                        <div className="flex flex-col">
+                            <span className="text-lg font-bold tracking-tight text-slate-800 dark:text-white">
+                                GMIT <span className="text-indigo-600">JEL</span>
                             </span>
                         </div>
                     </div>
@@ -97,31 +109,29 @@ const LandingPage = () => {
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
                             { name: 'Depan', href: '#' },
-                            { name: 'Tentang Program', href: '#tentang' },
-                            { name: 'Visi & Misi', href: '#tujuan' },
-                            { name: 'Alur Pengisian', href: '#alur' },
-                            { name: 'Fitur Unggulan', href: '#fitur' },
+                            { name: 'Tentang', href: '#tentang' },
+                            { name: 'Statistik', href: '#stats' },
+                            { name: 'Fitur', href: '#fitur' },
                             { name: 'FAQ', href: '#faq' }
                         ].map((item, index) => (
                             <a
                                 key={index}
                                 href={item.href}
-                                className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                className="relative text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
                             >
                                 {item.name}
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover:w-full"></span>
                             </a>
                         ))}
                     </nav>
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-3">
-                        {/* Removed Dark Mode Toggle */}
-
                         <button
                             onClick={() => navigate('/login')}
-                            className="hidden md:block px-6 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-md"
+                            className="hidden md:block px-6 py-2.5 text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full hover:scale-105 transition-all shadow-lg"
                         >
-                            Masuk
+                            Masuk Admin
                         </button>
 
                         {/* Mobile Menu Button */}
@@ -141,26 +151,31 @@ const LandingPage = () => {
                 {isSidebarOpen && (
                     <div
                         ref={menuRef}
-                        className="absolute top-full left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg z-[60]"
+                        className="absolute top-full left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 shadow-2xl z-[60]"
                     >
-                        <nav className="flex flex-col">
+                        <nav className="flex flex-col p-4">
                             {[
                                 { name: 'Depan', href: '#' },
-                                { name: 'Tentang Program', href: '#tentang' },
-                                { name: 'Visi & Misi', href: '#tujuan' },
-                                { name: 'Alur Pengisian', href: '#alur' },
-                                { name: 'Fitur Unggulan', href: '#fitur' },
+                                { name: 'Tentang', href: '#tentang' },
+                                { name: 'Statistik', href: '#stats' },
+                                { name: 'Fitur', href: '#fitur' },
                                 { name: 'FAQ', href: '#faq' }
                             ].map((item, index) => (
                                 <a
                                     key={index}
                                     href={item.href}
                                     onClick={() => setIsSidebarOpen(false)}
-                                    className="px-6 py-4 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-b-0"
+                                    className="px-4 py-4 text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-slate-800/50 rounded-xl transition-all"
                                 >
                                     {item.name}
                                 </a>
                             ))}
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="mt-4 w-full py-3 text-sm font-bold bg-indigo-600 text-white rounded-xl shadow-lg"
+                            >
+                                Masuk Admin
+                            </button>
                         </nav>
                     </div>
                 )}
@@ -168,39 +183,17 @@ const LandingPage = () => {
 
             <main className="w-full">
                 {/* HERO SECTION */}
-                <section className="relative w-full min-h-[85vh] flex flex-col overflow-hidden">
-                    {/* Background Image & Overlay */}
-                    <div className="absolute inset-0 z-0">
-                        <img
-                            src={heroBg}
-                            alt="Background"
-                            className="w-full h-full object-cover"
-                        />
-                        {/* Dark Overlay */}
-                        <div className="absolute inset-0 bg-black/50"></div>
-                    </div>
+                <Hero />
 
-                    {/* Hero Content */}
-                    <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-20">
-                        <div className="max-w-4xl text-center text-white flex flex-col items-center gap-6">
-                            {/* Logo & Title */}
-                            <div className="flex flex-col items-center gap-6">
-
-                                <h1 className="text-xl md:text-2xl lg:text-3xl font-medium italic leading-relaxed drop-shadow-lg">
-                                    Pendataan & Pemetaan SDM Profesional<br />
-                                    Jemaat GMIT Emaus Liliba
-                                </h1>
-                            </div>
-
-
-                            {/* CTA Button - Outlined */}
-                            <div className="pt-4">
-                                <button
-                                    onClick={() => navigate('/form')}
-                                    className="px-10 py-3 bg-transparent border-2 border-white text-white rounded-full font-semibold text-base hover:bg-white hover:text-slate-900 transition-all duration-300"
-                                >
-                                    Mulai
-                                </button>
+                {/* LIVE STATS SECTION */}
+                <section id="stats" className="relative py-12 -mt-10 mb-10 z-20">
+                    <div className="max-w-[1000px] mx-auto px-6">
+                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 md:p-12">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                                <StatsCounter value={500} suffix="+" label="Jemaat Terdata" />
+                                <StatsCounter value={15} suffix="+" label="Sektor Pelayanan" />
+                                <StatsCounter value={50} suffix="+" label="Profesi & Keahlian" />
+                                <StatsCounter value={100} suffix="%" label="Aman & Terjaga" />
                             </div>
                         </div>
                     </div>
@@ -210,166 +203,37 @@ const LandingPage = () => {
                 <section id="tentang" className="pt-16 pb-24 w-full bg-white dark:bg-slate-950">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center max-w-3xl mx-auto">
-                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary mb-4 block">
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase text-indigo-600 dark:text-indigo-400 mb-4 block">
                                 Latar Belakang Program
                             </span>
                             <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-6">
-                                Pendataan dan Pemetaan SDM Profesional Jemaat GMIT Emaus Liliba
+                                Pendataan Profesional & Terintegrasi
                             </h2>
-                            <div className="relative">
+                            <div className="relative group">
                                 <p className={`text-slate-500 dark:text-slate-400 text-lg leading-relaxed text-justify transition-all duration-300 ${!isAboutExpanded ? 'line-clamp-3' : ''}`}>
                                     Sistem Informasi ini dibangun untuk menjawab kebutuhan gereja, maka GMIT JEL melalui UPPMJ dan Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah “Bank Data SDM GMIT JEL”. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merupakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.
                                 </p>
                                 {/* Fade Effect Overlay */}
                                 {!isAboutExpanded && (
-                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none"></div>
+                                    <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none"></div>
                                 )}
                             </div>
                             <button
                                 onClick={() => setIsAboutExpanded(!isAboutExpanded)}
-                                className="mt-4 inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold text-sm hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors group"
+                                className="mt-8 px-6 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
                             >
-                                {isAboutExpanded ? 'Tutup' : 'Selengkapnya'}
-                                <span className={`material-symbols-outlined text-lg transition-transform duration-300 ${isAboutExpanded ? 'rotate-180' : ''}`}>
-                                    expand_more
+                                <span className="flex items-center gap-2">
+                                    {isAboutExpanded ? 'Tutup Ringkasan' : 'Baca Selengkapnya'}
+                                    <span className={`material-symbols-outlined text-lg transition-transform duration-300 ${isAboutExpanded ? 'rotate-180' : ''}`}>
+                                        expand_more
+                                    </span>
                                 </span>
                             </button>
                         </div>
                     </div>
                 </section>
 
-                {/* TUJUAN PROGRAM SECTION */}
-                <section id="tujuan" className="py-24 w-full bg-white dark:bg-slate-950">
-                    <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
-                        <div className="text-center max-w-2xl mx-auto mb-16">
-                            <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold tracking-wider uppercase mb-4">
-                                Visi & Misi
-                            </span>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
-                                Tujuan Program
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[
-                                {
-                                    title: "Identifikasi Potensi",
-                                    desc: "Memetakan potensi dan keahlian setiap jemaat untuk dioptimalkan dalam pelayanan.",
-                                    icon: "search",
-                                    color: "from-emerald-400 to-teal-500"
-                                },
-                                {
-
-                                    title: "Sinergi & Kolaborasi",
-                                    desc: "Membangun kerja sama antar jemaat sesuai bidang keahlian untuk pelayanan yang efektif.",
-                                    icon: "diversity_3",
-                                    color: "from-teal-400 to-cyan-500"
-                                },
-                                {
-
-                                    title: "Perencanaan Berbasis Data",
-                                    desc: "Membuat keputusan pelayanan yang tepat berdasarkan data yang akurat dan terkini.",
-                                    icon: "analytics",
-                                    color: "from-cyan-400 to-blue-500"
-                                }
-                            ].map((goal, i) => (
-                                <Reveal key={i} delay={i * 100}>
-                                    <div className="group relative h-full">
-                                        {/* Card */}
-                                        <div className="relative h-full p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-1 overflow-hidden">
-                                            {/* Background Number */}
-                                            <span className="absolute -right-4 -top-4 text-[120px] font-black text-slate-100 dark:text-slate-800/50 leading-none pointer-events-none select-none"></span>
-
-                                            {/* Icon */}
-                                            <div className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${goal.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                                                <span className="material-symbols-outlined text-3xl text-white">{goal.icon}</span>
-                                            </div>
-
-                                            <h3 className="relative text-xl font-bold text-slate-900 dark:text-white mb-3">{goal.title}</h3>
-                                            <p className="relative text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
-                                                {goal.desc}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Reveal>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ALUR PENGISIAN */}
-                <section id="alur" className="py-28 w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
-                    <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
-                        {/* Header */}
-                        <div className="text-center mb-20">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/50 mb-6">
-                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                <span className="text-xs font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400">
-                                    3 Langkah Mudah
-                                </span>
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-4">
-                                Alur Pengisian Data
-                            </h2>
-                            <p className="text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto">
-                                Proses pendataan dirancang sesederhana mungkin untuk memudahkan seluruh lapisan jemaat
-                            </p>
-                        </div>
-
-                        {/* Timeline Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[
-                                {
-                                    step: "01",
-                                    title: "Akses Portal",
-                                    desc: "Buka website dan klik tombol 'Daftar' atau 'Isi Data Jemaat'",
-                                    icon: "computer",
-                                    gradient: "from-blue-500 to-indigo-600"
-                                },
-                                {
-                                    step: "02",
-                                    title: "Lengkapi Data",
-                                    desc: "Isi data diri, keluarga, dan keprofesian dengan lengkap",
-                                    icon: "edit_note",
-                                    gradient: "from-indigo-500 to-purple-600"
-                                },
-                                {
-                                    step: "03",
-                                    title: "Selesai",
-                                    desc: "Data tersimpan aman dan akan divalidasi oleh admin",
-                                    icon: "verified",
-                                    gradient: "from-purple-500 to-pink-600"
-                                }
-                            ].map((item, i) => (
-                                <Reveal key={i} delay={i * 150}>
-                                    <div className="group relative">
-                                        {/* Connector Line */}
-                                        {i < 2 && (
-                                            <div className="hidden md:block absolute top-12 -right-4 w-8 h-0.5 bg-gradient-to-r from-slate-300 to-transparent dark:from-slate-700 z-0"></div>
-                                        )}
-
-                                        {/* Card */}
-                                        <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-slate-800 group-hover:-translate-y-2">
-                                            {/* Step Badge */}
-                                            <div className={`absolute -top-4 left-8 px-4 py-1.5 rounded-full bg-gradient-to-r ${item.gradient} text-white text-sm font-bold shadow-lg`}>
-                                                Step {item.step}
-                                            </div>
-
-                                            {/* Icon */}
-                                            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                                                <span className="material-symbols-outlined text-3xl text-white">{item.icon}</span>
-                                            </div>
-
-                                            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3">{item.title}</h3>
-                                            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
-                                        </div>
-                                    </div>
-                                </Reveal>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* FITUR KEUNGGULAN */}
+                {/* FITUR KEUNGGULAN (Advanced Interactive Cards) */}
                 <section id="fitur" className="py-24 w-full bg-slate-50 dark:bg-slate-900">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -384,7 +248,7 @@ const LandingPage = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {[
                                 { title: "Keamanan Data", desc: "Enkripsi end-to-end untuk melindungi privasi data jemaat.", icon: "security", gradient: "from-rose-500 to-pink-600" },
                                 { title: "Akses Mudah", desc: "Dapat diakses kapan saja melalui Smartphone (Mobile Friendly).", icon: "devices", gradient: "from-amber-500 to-orange-600" },
@@ -393,17 +257,14 @@ const LandingPage = () => {
                                 { title: "Laporan Visual", desc: "Dashboard statistik visual untuk pemantauan pertumbuhan jemaat.", icon: "query_stats", gradient: "from-violet-500 to-purple-600" },
                                 { title: "Integrasi Pelayanan", desc: "Terhubung langsung dengan program kerja majelis jemaat.", icon: "hub", gradient: "from-cyan-500 to-blue-600" }
                             ].map((feature, i) => (
-                                <Reveal key={i} delay={i * 50}>
-                                    <div className="group h-full p-6 rounded-2xl bg-white dark:bg-slate-800 hover:shadow-xl transition-all duration-500 border border-slate-100 dark:border-slate-700 group-hover:-translate-y-1">
-                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md`}>
-                                            <span className="material-symbols-outlined text-2xl text-white">{feature.icon}</span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{feature.title}</h3>
-                                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
-                                            {feature.desc}
-                                        </p>
-                                    </div>
-                                </Reveal>
+                                <FeatureCard
+                                    key={i}
+                                    title={feature.title}
+                                    desc={feature.desc}
+                                    icon={feature.icon}
+                                    gradient={feature.gradient}
+                                    delay={i}
+                                />
                             ))}
                         </div>
                     </div>
@@ -444,6 +305,17 @@ const LandingPage = () => {
                 </section>
 
             </main>
+
+            {/* Back To Top */}
+            {showBackToTop && (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-8 right-8 p-3 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 transition-all z-50 animate-bounce"
+                    aria-label="Back to top"
+                >
+                    <ChevronUp className="w-6 h-6" />
+                </button>
+            )}
 
             {/* Footer */}
             <Footer />
