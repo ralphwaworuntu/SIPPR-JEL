@@ -6,7 +6,7 @@ import { Hero } from '../components/Hero';
 import { StatsCounter } from '../components/StatsCounter';
 import { FeatureCard } from '../components/FeatureCard';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { ChevronUp, Moon, Sun } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ const LandingPage = () => {
         restDelta: 0.001
     });
 
-    const [isDarkMode, setIsDarkMode] = useState(() => {
+    const [isDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('theme') === 'dark' ||
                 (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
