@@ -4,6 +4,8 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
 import { db } from "./db";
 import { congregants } from "./schema";
+import { z } from "zod";
+import { REFERENCES } from "./references";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -28,34 +30,62 @@ app.get("/", (req, res) => {
     res.send("SDM GMIT Server is Running (MySQL)");
 });
 
+// Zod Schema
+const congregantSchema = z.object({
+    fullName: z.string().min(1, "Nama lengkap wajib diisi"),
+    gender: z.enum(["Laki-laki", "Perempuan"]),
+    dateOfBirth: z.string().or(z.date()), // Handle both string from JSON and Date obj
+    phone: z.string().min(1, "Nomor telepon wajib diisi"),
+    sector: z.string().refine(val => REFERENCES.sectors.includes(val) || REFERENCES.categories.includes(val), "Sektor tidak valid"),
+    lingkungan: z.string().optional(),
+    rayon: z.string().optional(),
+    address: z.string().min(1, "Alamat wajib diisi"),
+    educationLevel: z.string().optional(),
+    jobCategory: z.string().optional(),
+    skills: z.array(z.string()).optional(),
+    willingnessToServe: z.union([z.boolean(), z.string()]).transform(val => {
+        if (typeof val === 'boolean') return val;
+        return ['Aktif', 'On-demand', 'Bersedia'].includes(val);
+    }),
+});
+
 // API Routes
+
+// GET References
+app.get("/api/references", (req, res) => {
+    res.json(REFERENCES);
+});
+
 app.post("/api/congregants", async (req, res) => {
     try {
         const data = req.body;
 
-        // Basic validation (can use Zod later)
-        if (!data.fullName || !data.sector) {
-            res.status(400).json({ error: "Missing required fields" });
+        // Validation with Zod
+        const validation = congregantSchema.safeParse(data);
+
+        if (!validation.success) {
+            res.status(400).json({
+                error: "Validation Error",
+                details: validation.error.format()
+            });
             return;
         }
 
-        // Map frontend data to schema
-        // Frontend sends camelCase, schema handles mapping if defined, but here we defined schema with camelCase keys mostly or snake_case in DB
-        // Drizzle defaults: we defined `fullName` as `varchar("full_name")` so we pass `fullName` to insert.
+        const validData = validation.data;
 
         const newCongregant = await db.insert(congregants).values({
-            fullName: data.fullName,
-            gender: data.gender,
-            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-            phone: data.phone,
-            sector: data.sector,
-            lingkungan: data.lingkungan,
-            rayon: data.rayon,
-            address: data.address,
-            educationLevel: data.educationLevel,
-            jobCategory: data.jobCategory,
-            skills: data.skills, // JSON
-            willingnessToServe: ['Aktif', 'On-demand', 'Bersedia', true].includes(data.willingnessToServe),
+            fullName: validData.fullName,
+            gender: validData.gender,
+            dateOfBirth: new Date(validData.dateOfBirth),
+            phone: validData.phone,
+            sector: validData.sector,
+            lingkungan: validData.lingkungan,
+            rayon: validData.rayon,
+            address: validData.address,
+            educationLevel: validData.educationLevel,
+            jobCategory: validData.jobCategory,
+            skills: validData.skills, // JSON
+            willingnessToServe: validData.willingnessToServe,
             status: 'PENDING'
         });
 
