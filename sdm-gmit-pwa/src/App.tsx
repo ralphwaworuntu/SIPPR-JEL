@@ -1,14 +1,26 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 import LandingPage from './pages/LandingPage';
 import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminMemberData from './pages/AdminMemberData';
-import AdminFamilyData from './pages/AdminFamilyData';
-import AdminReports from './pages/AdminReports';
-import AdminSettings from './pages/AdminSettings';
+import NotFoundPage from './pages/NotFoundPage';
 import { Toaster } from './components/ui/Toast';
+
+// Lazy Load Admin Pages for Performance
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const AdminMemberData = React.lazy(() => import('./pages/AdminMemberData'));
+const AdminFamilyData = React.lazy(() => import('./pages/AdminFamilyData'));
+const AdminReports = React.lazy(() => import('./pages/AdminReports'));
+const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
+
+// Loading Fallback Component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+    <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,39 +33,85 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
+// Inner component to handle routing animations and logic that requires Router context
+const AppContent = () => {
+  const location = useLocation();
+
+  // Offline Detection
+  useEffect(() => {
+    const handleOffline = () => toast.error("Koneksi Internet Terputus. Anda sedang offline.");
+    const handleOnline = () => toast.success("Koneksi Internet Tersambung.");
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+        className="w-full"
+      >
+        <Suspense fallback={<PageLoader />}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/form" element={<FormPage />} />
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/members" element={
+              <ProtectedRoute>
+                <AdminMemberData />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/families" element={
+              <ProtectedRoute>
+                <AdminFamilyData />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/reports" element={
+              <ProtectedRoute>
+                <AdminReports />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <ProtectedRoute>
+                <AdminSettings />
+              </ProtectedRoute>
+            } />
+
+            {/* Catch-all Route for 404 */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/form" element={<FormPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={
-          <ProtectedRoute>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/members" element={
-          <ProtectedRoute>
-            <AdminMemberData />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/families" element={
-          <ProtectedRoute>
-            <AdminFamilyData />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/reports" element={
-          <ProtectedRoute>
-            <AdminReports />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/settings" element={
-          <ProtectedRoute>
-            <AdminSettings />
-          </ProtectedRoute>
-        } />
-      </Routes>
+      <AppContent />
       <Toaster />
     </Router>
   )

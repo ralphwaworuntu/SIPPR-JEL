@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AdminHeader } from '../admin/AdminHeader';
 import { AdminSidebar } from '../admin/AdminSidebar';
+import { Footer } from '../Footer';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -28,9 +29,7 @@ export const AdminLayout = ({ children, title = "Dashboard" }: AdminLayoutProps)
                         {children}
                     </div>
                     <div className="mt-12">
-                        <footer className="w-full text-center text-xs text-slate-500 dark:text-slate-600 py-6 border-t border-slate-100 dark:border-slate-800">
-                            © Crafted with <span className="material-symbols-outlined text-primary align-middle text-sm">favorite</span> by UPPMJ &amp; Satuan Pelayanan Profesional GMIT Emaus Liliba.
-                        </footer>
+                        <Footer />
                     </div>
                 </div>
             </main>
