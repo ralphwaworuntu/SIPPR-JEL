@@ -17,7 +17,8 @@ async function createDb() {
         port: 3306
     });
 
-    console.log(`Creating database ${dbName} if not exists...`);
+    console.log(`Resetting database ${dbName}...`);
+    await connection.query(`DROP DATABASE IF EXISTS \`${dbName}\``);
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
     console.log("Database created or already exists.");
 

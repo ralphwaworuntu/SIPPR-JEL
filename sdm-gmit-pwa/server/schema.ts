@@ -1,4 +1,4 @@
-import { mysqlTable, serial, varchar, date, text, timestamp, boolean, json, int } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, date, text, timestamp, boolean, json, int, datetime } from "drizzle-orm/mysql-core";
 
 export const user = mysqlTable("user", {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -6,16 +6,16 @@ export const user = mysqlTable("user", {
     email: varchar("email", { length: 255 }).notNull().unique(),
     emailVerified: boolean("emailVerified").notNull(),
     image: text("image"),
-    createdAt: timestamp("createdAt").notNull(),
-    updatedAt: timestamp("updatedAt").notNull()
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow()
 });
 
 export const session = mysqlTable("session", {
     id: varchar("id", { length: 36 }).primaryKey(),
     expiresAt: timestamp("expiresAt").notNull(),
     token: varchar("token", { length: 255 }).notNull().unique(),
-    createdAt: timestamp("createdAt").notNull(),
-    updatedAt: timestamp("updatedAt").notNull(),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
     ipAddress: text("ipAddress"),
     userAgent: text("userAgent"),
     userId: varchar("userId", { length: 36 }).notNull().references(() => user.id)
@@ -29,12 +29,12 @@ export const account = mysqlTable("account", {
     accessToken: text("accessToken"),
     refreshToken: text("refreshToken"),
     idToken: text("idToken"),
-    accessTokenExpiresAt: timestamp("accessTokenExpiresAt"),
-    refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt"),
+    accessTokenExpiresAt: datetime("accessTokenExpiresAt"),
+    refreshTokenExpiresAt: datetime("refreshTokenExpiresAt"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("createdAt").notNull(),
-    updatedAt: timestamp("updatedAt").notNull()
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow()
 });
 
 export const verification = mysqlTable("verification", {
@@ -42,12 +42,12 @@ export const verification = mysqlTable("verification", {
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expiresAt").notNull(),
-    createdAt: timestamp("createdAt"),
-    updatedAt: timestamp("updatedAt")
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow()
 });
 
 export const congregants = mysqlTable("congregants", {
-    id: serial("id").primaryKey(),
+    id: int("id").primaryKey().autoincrement(),
     fullName: varchar("full_name", { length: 255 }).notNull(),
     gender: varchar("gender", { length: 20 }), // Laki-laki / Perempuan
     dateOfBirth: date("date_of_birth"),
