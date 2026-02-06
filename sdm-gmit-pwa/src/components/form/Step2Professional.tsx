@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { type FormData } from '../../types';
+import { useReferences } from '../../hooks/useReferences';
 
 interface StepProps {
     data: FormData;
@@ -7,6 +8,7 @@ interface StepProps {
 }
 
 const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
+    const { references, isLoading } = useReferences();
     const [skillInput, setSkillInput] = useState('');
 
     const addSkill = () => {
@@ -43,15 +45,12 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                             id="educationLevel"
                             value={data.educationLevel}
                             onChange={(e) => update({ educationLevel: e.target.value })}
+                            disabled={isLoading}
                         >
-                            <option value="">Pilih Jenjang</option>
-                            <option value="SD">SD</option>
-                            <option value="SMP">SMP</option>
-                            <option value="SMA">SMA / SMK</option>
-                            <option value="D3">Diploma (D3)</option>
-                            <option value="S1">Sarjana (S1 / D4)</option>
-                            <option value="S2">Magister (S2)</option>
-                            <option value="S3">Doktor (S3)</option>
+                            <option value="">{isLoading ? "Memuat..." : "Pilih Jenjang"}</option>
+                            {references.educationLevels.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
                         </select>
                     </div>
                     <div className="flex flex-col gap-2">
@@ -83,24 +82,10 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                 id="jobCategory"
                                 value={data.jobCategory}
                                 onChange={(e) => update({ jobCategory: e.target.value })}
+                                disabled={isLoading}
                             >
-                                <option value="">Pilih atau Cari Kategori...</option>
-                                {[
-                                    'Tenaga Profesional',
-                                    'Teknisi dan Asisten Tenaga Profesional',
-                                    'Tenaga Tata Usaha',
-                                    'Tenaga Usaha Jasa dan Penjualan',
-                                    'Pekerja Pertanian, Kehutanan dan Perikanan',
-                                    'Pekerja Pengolahan, Kerajinan',
-                                    'Operator dan Perakit Mesin',
-                                    'Pekerja Kasar',
-                                    'TNI / Polri',
-                                    'Wirausaha',
-                                    'Pelajar / Mahasiswa',
-                                    'Mengurus Rumah Tangga',
-                                    'Pensiunan',
-                                    'Belum/Tidak Bekerja'
-                                ].map(opt => (
+                                <option value="">{isLoading ? "Memuat..." : "Pilih atau Cari Kategori..."}</option>
+                                {references.jobCategories.map(opt => (
                                     <option key={opt} value={opt}>{opt}</option>
                                 ))}
                             </select>

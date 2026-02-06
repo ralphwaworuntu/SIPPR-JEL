@@ -46,5 +46,29 @@ export const REFERENCES = {
     gender: [
         "Laki-laki",
         "Perempuan"
+    ],
+    interestAreas: [
+        'Pendidikan / Mengajar',
+        'Kesehatan',
+        'Teknologi & Multimedia',
+        'Musik & Liturgi',
+        'Sosial & Diakonia',
+        'Hukum & Advokasi',
+        'Ekonomi & Bisnis',
+        'Konstruksi & Pembangunan',
+        'Administrasi & Sekretariat',
+        'Transportasi & Logistik'
+    ],
+    contributionTypes: [
+        'Tenaga Ahli / Konsultan',
+        'Mentor / Pelatih',
+        'Dukungan Teknis',
+        'Donatur / Finansial',
+        'Manajemen Proyek',
+        'Relawan Lapangan'
+    ],
+    willingnessToServe: [
+        'Aktif',
+        'On-demand'
     ]
 };

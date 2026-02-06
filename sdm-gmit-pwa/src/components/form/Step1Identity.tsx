@@ -2,6 +2,7 @@ import { useState } from 'react';
 import MapPicker from '../MapPicker';
 import type { FormData } from '../../types';
 import { checkDuplicateName } from '../../lib/validation';
+import { useReferences } from '../../hooks/useReferences';
 
 interface StepProps {
     data: FormData;
@@ -9,6 +10,7 @@ interface StepProps {
 }
 
 const Step1Identity = ({ data, update }: StepProps) => {
+    const { references, isLoading } = useReferences();
     const [nameError, setNameError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
 
@@ -53,12 +55,6 @@ const Step1Identity = ({ data, update }: StepProps) => {
         if (number.length > 15) number = number.substring(0, 15);
 
         return number;
-        // Advanced: grouping with dashes 812-3456-7890
-        // const match = number.match(/^(\d{1,3})(\d{0,4})(\d{0,4})$/);
-        // if (match) {
-        //    return [match[1], match[2], match[3]].filter(x => x).join('-');
-        // }
-        // return number;
     };
 
     const calculateAge = (dob: string) => {
@@ -238,12 +234,21 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         id="sector"
                         value={data.sector}
                         onChange={(e) => update({ sector: e.target.value })}
+                        disabled={isLoading}
                     >
-                        <option value="">Pilih Sektor...</option>
-                        <option value="Pemuda">Pemuda</option>
-                        <option value="Kaum Perempuan">Kaum Perempuan</option>
-                        <option value="Kaum Bapak">Kaum Bapak</option>
-                        <option value="Lansia">Lansia</option>
+                        <option value="">{isLoading ? "Memuat..." : "Pilih Sektor..."}</option>
+
+                        <optgroup label="Sektor Wilayah (Geografis)">
+                            {references.sectors.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </optgroup>
+
+                        <optgroup label="Kategorial (Fungsional)">
+                            {references.categories.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </optgroup>
                     </select>
                 </div>
 
@@ -255,10 +260,11 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         id="lingkungan"
                         value={data.lingkungan}
                         onChange={(e) => update({ lingkungan: e.target.value })}
+                        disabled={isLoading}
                     >
                         <option value="">Pilih Lingkungan...</option>
-                        {Array.from({ length: 7 }, (_, i) => i + 1).map(num => (
-                            <option key={num} value={num.toString()}>{`Lingkungan ${num}`}</option>
+                        {references.lingkungan.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
                         ))}
                     </select>
                 </div>
@@ -271,10 +277,11 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         id="rayon"
                         value={data.rayon}
                         onChange={(e) => update({ rayon: e.target.value })}
+                        disabled={isLoading}
                     >
                         <option value="">Pilih Rayon...</option>
-                        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                            <option key={num} value={num.toString()}>{`Rayon ${num}`}</option>
+                        {references.rayons.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
                         ))}
                     </select>
                 </div>

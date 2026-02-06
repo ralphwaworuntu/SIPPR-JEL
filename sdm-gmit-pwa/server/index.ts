@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
@@ -7,6 +7,8 @@ import { congregants } from "./schema";
 import { z } from "zod";
 import { REFERENCES } from "./references";
 import * as dotenv from "dotenv";
+import { errorHandler } from "./middleware/errorHandler";
+import { AppError } from "./utils/AppError";
 
 dotenv.config();
 
@@ -56,7 +58,7 @@ app.get("/api/references", (req, res) => {
     res.json(REFERENCES);
 });
 
-app.post("/api/congregants", async (req, res) => {
+app.post("/api/congregants", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = req.body;
 
@@ -64,11 +66,7 @@ app.post("/api/congregants", async (req, res) => {
         const validation = congregantSchema.safeParse(data);
 
         if (!validation.success) {
-            res.status(400).json({
-                error: "Validation Error",
-                details: validation.error.format()
-            });
-            return;
+            return next(new AppError(`Validation Error: ${JSON.stringify(validation.error.format())}`, 400));
         }
 
         const validData = validation.data;
@@ -91,21 +89,22 @@ app.post("/api/congregants", async (req, res) => {
 
         res.status(201).json({ success: true, message: "Data berhasil disimpan", id: newCongregant[0].insertId });
     } catch (error) {
-        console.error("Error saving congregant:", error);
-        res.status(500).json({ error: "Failed to save data" });
+        next(error);
     }
 });
 
 // GET Congregants
-app.get("/api/congregants", async (req, res) => {
+app.get("/api/congregants", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await db.select().from(congregants);
         res.json(result);
     } catch (error) {
-        console.error("Error fetching congregants:", error);
-        res.status(500).json({ error: "Failed to fetch data" });
+        next(error);
     }
 });
+
+// Global Error Handler
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
