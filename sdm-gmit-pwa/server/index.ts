@@ -66,6 +66,17 @@ app.post("/api/congregants", async (req, res) => {
     }
 });
 
+// GET Congregants
+app.get("/api/congregants", async (req, res) => {
+    try {
+        const result = await db.select().from(congregants);
+        res.json(result);
+    } catch (error) {
+        console.error("Error fetching congregants:", error);
+        res.status(500).json({ error: "Failed to fetch data" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
