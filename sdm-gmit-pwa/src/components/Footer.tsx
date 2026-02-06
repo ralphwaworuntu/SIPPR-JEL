@@ -1,4 +1,4 @@
-import { Heart } from 'lucide-react';
+import { Heart, Facebook, Youtube, Instagram } from 'lucide-react';
 
 export const Footer = () => {
     return (
@@ -38,10 +38,20 @@ export const Footer = () => {
                     <div>
                         <h4 className="font-bold text-base text-slate-900 dark:text-white mb-4">Ikuti Kami</h4>
                         <div className="flex gap-4 justify-center md:justify-start">
-                            {/* Placeholder Social Links */}
-                            {['facebook', 'youtube', 'instagram'].map((social) => (
-                                <a key={social} href="#" className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all">
-                                    <span className="capitalize text-xs">{social[0]}</span>
+                            {[
+                                { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
+                                { icon: Youtube, href: "https://youtube.com", label: "YouTube" },
+                                { icon: Instagram, href: "https://instagram.com", label: "Instagram" }
+                            ].map((social, index) => (
+                                <a
+                                    key={index}
+                                    href={social.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={social.label}
+                                    className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all transform hover:scale-110"
+                                >
+                                    <social.icon className="w-5 h-5" />
                                 </a>
                             ))}
                         </div>
@@ -51,9 +61,7 @@ export const Footer = () => {
                 <div className="py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-500">
                     <p>
                         © {new Date().getFullYear()} GMIT Emaus Liliba. Developed by UPPMJ & Satuan Pelayanan Profesional.
-                        <span className="block mt-2 md:inline md:mt-0 md:ml-4 opacity-70">
-                            Crafted with <Heart className="inline w-3 h-3 text-red-500 fill-red-500 mx-0.5" /> for the Kingdom.
-                        </span>
+
                     </p>
                 </div>
             </div>
