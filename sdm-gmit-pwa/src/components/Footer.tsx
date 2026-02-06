@@ -37,11 +37,11 @@ export const Footer = () => {
                     {/* Socials */}
                     <div>
                         <h4 className="font-bold text-base text-slate-900 dark:text-white mb-4">Ikuti Kami</h4>
-                        <div className="flex gap-4 justify-center md:justify-start">
+                        <div className="flex flex-col gap-3">
                             {[
-                                { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-                                { icon: Youtube, href: "https://youtube.com", label: "YouTube" },
-                                { icon: Instagram, href: "https://instagram.com", label: "Instagram" }
+                                { icon: Facebook, href: "https://facebook.com/gmitemaus", label: "Facebook", username: "GMIT Emaus Liliba" },
+                                { icon: Youtube, href: "https://youtube.com/@gmitemaus", label: "YouTube", username: "GMIT Emaus Official" },
+                                { icon: Instagram, href: "https://instagram.com/gmit_emaus", label: "Instagram", username: "@gmit_emaus" }
                             ].map((social, index) => (
                                 <a
                                     key={index}
@@ -49,9 +49,12 @@ export const Footer = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={social.label}
-                                    className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all transform hover:scale-110"
+                                    className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
                                 >
-                                    <social.icon className="w-5 h-5" />
+                                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                        <social.icon className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-sm font-medium">{social.username}</span>
                                 </a>
                             ))}
                         </div>
