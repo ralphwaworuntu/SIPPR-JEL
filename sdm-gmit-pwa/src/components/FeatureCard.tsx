@@ -1,5 +1,5 @@
 import { motion, useMotionTemplate, useMotionValue, useSpring } from "framer-motion";
-import { MouseEvent } from "react";
+import type { MouseEvent } from "react";
 
 interface FeatureCardProps {
     title: string;

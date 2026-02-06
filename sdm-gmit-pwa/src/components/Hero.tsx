@@ -53,14 +53,7 @@ export const Hero = () => {
 
                     {/* Staggered Text */}
                     <div className="flex flex-col items-center gap-4">
-                        <motion.span
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3, duration: 0.8 }}
-                            className="text-indigo-300 font-bold tracking-[0.2em] uppercase text-sm md:text-base bg-indigo-900/40 backdrop-blur-sm px-4 py-1.5 rounded-full border border-indigo-500/30"
-                        >
-                            Sistem Pendataan Terpadu
-                        </motion.span>
+
 
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
@@ -71,7 +64,7 @@ export const Hero = () => {
                             Bank Data SDM
                             <br />
                             <span className="text-2xl md:text-4xl lg:text-5xl font-serif italic text-indigo-100 font-normal">
-                                GMIT Emaus Liliba
+                                Jemaat GMIT Emaus Liliba
                             </span>
                         </motion.h1>
 
