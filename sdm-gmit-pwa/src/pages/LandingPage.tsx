@@ -4,7 +4,7 @@ import heroBg from '../assets/hero-bg.png';
 import logoGmit from '../assets/logo-gmit.png';
 import { Footer } from '../components/Footer';
 import { Reveal } from '../components/Reveal';
-import { Moon, Sun, ChevronUp, MapPin, Phone, Mail } from 'lucide-react';
+import { ChevronUp, MapPin, Phone, Mail } from 'lucide-react'; // Removed Sun, Moon
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -115,13 +115,7 @@ const LandingPage = () => {
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-3">
-                        {/* Dark Mode Toggle */}
-                        <button
-                            onClick={() => setIsDarkMode(!isDarkMode)}
-                            className="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        >
-                            {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                        </button>
+                        {/* Removed Dark Mode Toggle */}
 
                         <button
                             onClick={() => navigate('/login')}
