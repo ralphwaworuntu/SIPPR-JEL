@@ -37,7 +37,7 @@ export const Footer = () => {
                     {/* Socials */}
                     <div>
                         <h4 className="font-bold text-base text-slate-900 dark:text-white mb-4">Ikuti Kami</h4>
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-3 w-fit mx-auto md:mx-0">
                             {[
                                 { icon: Facebook, href: "https://facebook.com/gmitemaus", label: "Facebook", username: "GMIT Emaus Liliba" },
                                 { icon: Youtube, href: "https://youtube.com/@gmitemaus", label: "YouTube", username: "GMIT Emaus Official" },
