@@ -222,9 +222,15 @@ const LandingPage = () => {
                             <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-6">
                                 Pendataan dan Pemetaan SDM Profesional Jemaat GMIT Emaus Liliba
                             </h2>
-                            <p className={`text-slate-500 dark:text-slate-400 text-lg leading-relaxed text-justify ${!isAboutExpanded ? 'line-clamp-3' : ''}`}>
-                                Sistem Informasi ini dibangun untuk menjawab kebutuhan gereja, maka GMIT JEL melalui UPPMJ dan Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah “Bank Data SDM GMIT JEL”. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merpakan langkah strategis menuju gereja yang memberdayakan, yangmana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.
-                            </p>
+                            <div className="relative">
+                                <p className={`text-slate-500 dark:text-slate-400 text-lg leading-relaxed text-justify transition-all duration-300 ${!isAboutExpanded ? 'line-clamp-3' : ''}`}>
+                                    Sistem Informasi ini dibangun untuk menjawab kebutuhan gereja, maka GMIT JEL melalui UPPMJ dan Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah “Bank Data SDM GMIT JEL”. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merupakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.
+                                </p>
+                                {/* Fade Effect Overlay */}
+                                {!isAboutExpanded && (
+                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none"></div>
+                                )}
+                            </div>
                             <button
                                 onClick={() => setIsAboutExpanded(!isAboutExpanded)}
                                 className="mt-4 inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-semibold text-sm hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors group"
