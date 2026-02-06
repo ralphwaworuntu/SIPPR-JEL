@@ -109,8 +109,8 @@ const LandingPage = () => {
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
                             { name: 'Depan', href: '#' },
-                            { name: 'Tentang', href: '#tentang' },
                             { name: 'Statistik', href: '#stats' },
+                            { name: 'Tentang', href: '#tentang' },
                             { name: 'Fitur', href: '#fitur' },
                             { name: 'FAQ', href: '#faq' }
                         ].map((item, index) => (
