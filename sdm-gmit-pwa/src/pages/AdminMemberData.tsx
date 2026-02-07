@@ -17,15 +17,14 @@ const AdminMemberData = () => {
 
     // Custom Hook
     const {
-        members, setMembers, filteredMembers,
+        setMembers, filteredMembers,
         searchTerm, setSearchTerm,
         filterSector, setFilterSector,
         filterGender, setFilterGender,
         filterAgeCategory, setFilterAgeCategory,
         filterStatus, setFilterStatus,
-        sortConfig, handleSort,
-        stats
-    } = useMemberData();
+        sortConfig, handleSort, stats,
+        addMember, updateMember, deleteMember } = useMemberData();
 
     const { references, isLoading: isReferencesLoading } = useReferences();
 
@@ -108,28 +107,26 @@ const AdminMemberData = () => {
             title: "Hapus Data Terpilih",
             message: `Apakah Anda yakin ingin menghapus ${selectedIds.length} data member terpilih? Tindakan ini tidak dapat dibatalkan.`,
             variant: 'danger',
-            action: () => {
-                setMembers(members.filter(m => !selectedIds.includes(m.id)));
+            action: async () => {
+                // Execute deletions sequentially or Promise.all
+                const deletePromises = selectedIds.map(id => deleteMember(id));
+                await Promise.all(deletePromises);
+
                 setSelectedIds([]);
-                toast.success(`${selectedIds.length} data berhasil dihapus`);
                 setConfirmDialog(prev => ({ ...prev, isOpen: false }));
             }
         });
     };
 
-    const handleBulkEditSubmit = () => {
+    const handleBulkEditSubmit = async () => {
         if (!bulkEditField || !bulkEditValue) return;
 
-        const updatedMembers = members.map(m => {
-            if (selectedIds.includes(m.id)) {
-                return { ...m, [bulkEditField]: bulkEditValue };
-            }
-            return m;
-        });
+        const updatePromises = selectedIds.map(id =>
+            updateMember(id, { [bulkEditField]: bulkEditValue })
+        );
 
-        // @ts-ignore
-        setMembers(updatedMembers);
-        toast.success(`${selectedIds.length} data berhasil diperbarui`);
+        await Promise.all(updatePromises);
+
         setIsBulkEditModalOpen(false);
         setSelectedIds([]);
     };
@@ -464,9 +461,8 @@ const AdminMemberData = () => {
                                                                 title: "Hapus Data Member",
                                                                 message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
                                                                 variant: 'danger',
-                                                                action: () => {
-                                                                    setMembers(members.filter(m => m.id !== member.id));
-                                                                    toast.success('Data berhasil dihapus');
+                                                                action: async () => {
+                                                                    await deleteMember(member.id);
                                                                     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
                                                                 }
                                                             });
@@ -606,38 +602,31 @@ const AdminMemberData = () => {
                 <AddMemberForm
                     onClose={() => setIsAddModalOpen(false)}
                     initialData={isEditMode ? selectedMember : undefined}
-                    onSuccess={(newData) => {
+                    onSuccess={async (newData) => {
                         if (isEditMode && selectedMember) {
-                            const updatedMembers = members.map(m =>
-                                m.id === selectedMember.id ? {
-                                    ...m,
-                                    ...newData,
-                                    name: newData.namaLengkap,
-                                    birthDate: newData.tanggalLahir,
-                                    job: newData.pekerjaan,
-                                    skills: typeof newData.keahlian === 'string' ? newData.keahlian.split(',').map((s: string) => s.trim()) : m.skills
-                                } : m
-                            );
-                            setMembers(updatedMembers);
-                            toast.success("Data berhasil diperbarui");
-                        } else {
-                            const newId = `M-00${Math.floor(Math.random() * 899) + 100}`;
-                            const initials = newData.namaLengkap.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
-                            // @ts-ignore - Mocking simplifying
-                            const newMember: Member = {
-                                id: newId,
+                            await updateMember(selectedMember.id, {
+                                ...newData,
                                 name: newData.namaLengkap,
-                                initials,
-                                sector: newData.sektor,
-                                education: newData.pendidikan,
+                                birthDate: newData.tanggalLahir,
                                 job: newData.pekerjaan,
                                 skills: typeof newData.keahlian === 'string' ? newData.keahlian.split(',').map((s: string) => s.trim()) : [],
                                 gender: newData.jenisKelamin,
+                                statusGerejawi: newData.statusGerejawi,
+                                sector: newData.sektor,
+                                education: newData.pendidikan
+                            });
+                        } else {
+                            await addMember({
+                                ...newData,
+                                fullName: newData.namaLengkap,
                                 birthDate: newData.tanggalLahir,
-                                statusGerejawi: newData.statusGerejawi
-                            };
-                            setMembers([newMember, ...members]);
-                            toast.success("Data berhasil ditambahkan");
+                                jobCategory: newData.pekerjaan,
+                                skills: typeof newData.keahlian === 'string' ? newData.keahlian.split(',').map((s: string) => s.trim()) : [],
+                                gender: newData.jenisKelamin,
+                                statusGerejawi: newData.statusGerejawi,
+                                sector: newData.sektor,
+                                educationLevel: newData.pendidikan
+                            });
                         }
                         setIsAddModalOpen(false);
                     }}

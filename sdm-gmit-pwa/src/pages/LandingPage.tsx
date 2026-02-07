@@ -8,10 +8,12 @@ import heroSlide2 from '../assets/hero-slide-2.jpg';
 import { Reveal } from '../components/Reveal';
 import { Footer } from '../components/Footer';
 import { CountUp } from '../components/CountUp';
+import { useMemberData } from '../hooks/useMemberData';
 
 
 
 const LandingPage = () => {
+    const { stats } = useMemberData();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentBgIndex, setCurrentBgIndex] = useState(0);
@@ -214,7 +216,7 @@ const LandingPage = () => {
                 <section className="relative z-30 mt-10 px-4 pb-20" id="stats">
                     <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { label: "Jemaat Terdata", value: 1240, suffix: "+", icon: "groups" },
+                            { label: "Jemaat Terdata", value: stats.total, suffix: "+", icon: "groups" },
                             { label: "Kategori Keahlian", value: 45, icon: "verified_user" },
                             { label: "Program Aktif", value: 12, icon: "volunteer_activism" }
                         ].map((stat, idx) => (

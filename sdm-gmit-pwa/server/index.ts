@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
 import { db } from "./db";
 import { congregants } from "./schema";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { REFERENCES } from "./references";
 import * as dotenv from "dotenv";
@@ -49,6 +50,7 @@ const congregantSchema = z.object({
         if (typeof val === 'boolean') return val;
         return ['Aktif', 'On-demand', 'Bersedia'].includes(val);
     }),
+    statusGerejawi: z.enum(["Sidi", "Baptis", "Katekisasi"]).optional(),
 });
 
 // API Routes
@@ -84,7 +86,8 @@ app.post("/api/congregants", async (req: Request, res: Response, next: NextFunct
             jobCategory: validData.jobCategory,
             skills: validData.skills, // JSON
             willingnessToServe: validData.willingnessToServe,
-            status: 'PENDING'
+            status: 'PENDING',
+            statusGerejawi: validData.statusGerejawi || 'Sidi'
         });
 
         res.status(201).json({ success: true, message: "Data berhasil disimpan", id: newCongregant[0].insertId });
@@ -98,6 +101,46 @@ app.get("/api/congregants", async (req: Request, res: Response, next: NextFuncti
     try {
         const result = await db.select().from(congregants);
         res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// UPDATE Congregant
+app.put("/api/congregants/:id", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+
+        // Validation (Partial)
+        const validation = congregantSchema.partial().safeParse(data);
+
+        if (!validation.success) {
+            return next(new AppError(`Validation Error: ${JSON.stringify(validation.error.format())}`, 400));
+        }
+
+        const validData = validation.data;
+
+        // @ts-ignore
+        await db.update(congregants).set({
+            ...validData,
+            dateOfBirth: validData.dateOfBirth ? new Date(validData.dateOfBirth) : undefined,
+            // @ts-ignore
+        }).where(eq(congregants.id, Number(id)));
+
+        res.json({ success: true, message: "Data berhasil diperbarui" });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// DELETE Congregant
+app.delete("/api/congregants/:id", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        // @ts-ignore
+        await db.delete(congregants).where(eq(congregants.id, Number(id)));
+        res.json({ success: true, message: "Data berhasil dihapus" });
     } catch (error) {
         next(error);
     }

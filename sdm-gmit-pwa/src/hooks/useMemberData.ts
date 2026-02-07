@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
+import { toast } from '../components/ui/Toast';
 
 // Types moved here for reuse
 export interface Member {
     id: string;
+    originalId?: number; // Keep track of DB ID
     name: string;
     sector: string;
     education: string;
@@ -13,7 +15,27 @@ export interface Member {
     birthDate: string; // YYYY-MM-DD
     createdAt: string; // ISO Date String
     statusGerejawi: "Sidi" | "Baptis" | "Katekisasi";
+    willingnessToServe: boolean;
+    status: "PENDING" | "VALIDATED";
 }
+
+// Helper to map UI Member to API payload
+const mapMemberToPayload = (member: Partial<Member>) => {
+    return {
+        fullName: member.name,
+        gender: member.gender,
+        dateOfBirth: member.birthDate ? new Date(member.birthDate).toISOString() : undefined,
+        // Mocking missing required fields for update if not provided
+        phone: "0000000000",
+        address: "Alamat tidak tersedia",
+        sector: member.sector,
+        educationLevel: member.education,
+        jobCategory: member.job,
+        skills: member.skills,
+        willingnessToServe: member.willingnessToServe,
+        statusGerejawi: member.statusGerejawi
+    };
+};
 
 export const calculateAge = (birthDate: string) => {
     const today = new Date();
@@ -34,58 +56,115 @@ export const getAgeCategory = (age: number) => {
     return "Lansia";
 };
 
-// Initial MOCK DATA
-const MOCK_MEMBERS: Member[] = [
-    { name: "John Doe", id: "M-00245", sector: "Efata", education: "S2", job: "Senior Developer", skills: ["Python", "SQL"], initials: "JD", gender: "Laki-laki", birthDate: "1985-05-15", createdAt: "2023-01-15T08:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Jane Smith", id: "M-00289", sector: "Betel", education: "S1", job: "Perawat", skills: ["P3K", "Anak"], initials: "JS", gender: "Perempuan", birthDate: "1992-10-20", createdAt: "2023-03-10T09:30:00Z", statusGerejawi: "Sidi" },
-    { name: "Robert King", id: "M-00312", sector: "Sion", education: "D3", job: "Wiraswasta", skills: ["Manajemen", "Pemasaran"], initials: "RK", gender: "Laki-laki", birthDate: "1978-02-12", createdAt: "2023-05-20T14:15:00Z", statusGerejawi: "Baptis" },
-    { name: "Alice Wong", id: "M-00105", sector: "Eden", education: "S3", job: "Dosen", skills: ["Penelitian", "Publikasi"], initials: "AW", gender: "Perempuan", birthDate: "1980-08-30", createdAt: "2023-06-05T11:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Charlie Brown", id: "M-00441", sector: "Efata", education: "SMA", job: "Pelajar", skills: ["Musik"], initials: "CB", gender: "Laki-laki", birthDate: "2008-01-10", createdAt: "2024-01-12T16:45:00Z", statusGerejawi: "Katekisasi" },
-    { name: "Sarah Connor", id: "M-00555", sector: "Betel", education: "S1", job: "Wirausaha", skills: ["Cooking", "Management"], initials: "SC", gender: "Perempuan", birthDate: "1995-03-12", createdAt: "2024-02-28T10:20:00Z", statusGerejawi: "Sidi" },
-    { name: "Michael Jordan", id: "M-00230", sector: "Sion", education: "S1", job: "Atlet", skills: ["Basket", "Olahraga"], initials: "MJ", gender: "Laki-laki", birthDate: "1988-02-17", createdAt: "2024-04-15T13:10:00Z", statusGerejawi: "Sidi" },
-    { name: "Emily Blunt", id: "M-00111", sector: "Eden", education: "S2", job: "Aktris", skills: ["Akting", "Menyanyi"], initials: "EB", gender: "Perempuan", birthDate: "1983-02-23", createdAt: "2025-01-05T09:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Tom Holland", id: "M-00777", sector: "Efata", education: "SMA", job: "Aktor", skills: ["Akting", "Gymnastic"], initials: "TH", gender: "Laki-laki", birthDate: "1996-06-01", createdAt: "2025-03-20T15:30:00Z", statusGerejawi: "Sidi" },
-    { name: "Zendaya", id: "M-00888", sector: "Betel", education: "SMA", job: "Aktris", skills: ["Akting", "Menyanyi", "Modeling"], initials: "Z", gender: "Perempuan", birthDate: "1996-09-01", createdAt: "2025-03-22T10:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Grandpa Joe", id: "M-00999", sector: "Sion", education: "SD", job: "Pensiunan", skills: ["Berkebun"], initials: "GJ", gender: "Laki-laki", birthDate: "1950-01-01", createdAt: "2025-05-18T08:45:00Z", statusGerejawi: "Sidi" },
-    { name: "Baby Shark", id: "M-00123", sector: "Eden", education: "TK", job: "Balita", skills: ["Main", "Tidur"], initials: "BS", gender: "Laki-laki", birthDate: "2022-01-01", createdAt: "2025-06-01T07:15:00Z", statusGerejawi: "Baptis" }
-];
+
 
 export const useMemberData = () => {
     const [members, setMembers] = useState<Member[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await fetch('/api/congregants');
-                if (!response.ok) throw new Error('Failed to fetch');
-                const data = await response.json();
+    const fetchMembers = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch('/api/congregants');
+            if (!response.ok) throw new Error('Failed to fetch');
+            const data = await response.json();
 
-                // Map DB data to Member interface
-                const mappedMembers: Member[] = data.map((item: any) => ({
-                    id: `M-${String(item.id).padStart(5, '0')}`,
-                    name: item.fullName,
-                    sector: item.sector || "Unassigned",
-                    education: item.educationLevel || "-",
-                    job: item.jobCategory || "-",
-                    skills: Array.isArray(item.skills) ? item.skills : [],
-                    initials: item.fullName ? item.fullName.substring(0, 2).toUpperCase() : "XX",
-                    gender: item.gender || "Laki-laki",
-                    birthDate: item.dateOfBirth ? new Date(item.dateOfBirth).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                    createdAt: item.createdAt,
-                    statusGerejawi: "Sidi" // Defaulting as discussed
-                }));
+            // Map DB data to Member interface
+            const mappedMembers: Member[] = data.map((item: any) => ({
+                id: `M-${String(item.id).padStart(5, '0')}`,
+                originalId: item.id,
+                name: item.fullName,
+                sector: item.sector || "Unassigned",
+                education: item.educationLevel || "-",
+                job: item.jobCategory || "-",
+                skills: typeof item.skills === 'string' ? JSON.parse(item.skills) : (Array.isArray(item.skills) ? item.skills : []),
+                initials: item.fullName ? item.fullName.substring(0, 2).toUpperCase() : "XX",
+                gender: item.gender || "Laki-laki",
+                birthDate: item.dateOfBirth ? new Date(item.dateOfBirth).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                createdAt: item.createdAt,
+                statusGerejawi: item.statusGerejawi || "Sidi",
+                willingnessToServe: Boolean(item.willingnessToServe),
+                status: item.status || "PENDING"
+            }));
 
-                setMembers(mappedMembers);
-            } catch (error) {
-                console.error("Error fetching members:", error);
-                // Fallback to mock data or empty? Let's use mock if empty for demo purposes or empty
-                setMembers(MOCK_MEMBERS); // Keep mock as fallback or remove if strictly real data
-            } finally {
-                setIsLoading(false);
+            setMembers(mappedMembers);
+        } catch (error) {
+            console.error("Error fetching members:", error);
+            // Fallback to empty array and show error
+            toast.error("Gagal mengambil data dari server. Pastikan server backend berjalan.");
+            setMembers([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const addMember = async (newMemberData: any) => {
+        try {
+            const response = await fetch('http://localhost:3000/api/congregants', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newMemberData) // Ensure payload matches schema
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menambah anggota');
             }
-        };
+            toast.success("Anggota berhasil ditambahkan");
+            fetchMembers(); // Refresh data
+            return true;
+        } catch (error: any) {
+            console.error("Error adding member:", error);
+            toast.error(error.message);
+            return false;
+        }
+    };
 
+    const updateMember = async (id: string, updatedData: Partial<Member>) => {
+        try {
+            // Try to find original ID from members list if possible, or parse
+            const member = members.find(m => m.id === id);
+            const dbId = member?.originalId || parseInt(id.replace('M-', ''));
+
+            const payload = mapMemberToPayload(updatedData);
+
+            const response = await fetch(`http://localhost:3000/api/congregants/${dbId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error('Gagal update anggota');
+
+            toast.success("Data berhasil diperbarui");
+            fetchMembers();
+            return true;
+        } catch (error) {
+            console.error("Error updating member:", error);
+            toast.error("Gagal update anggota");
+            return false;
+        }
+    };
+
+    const deleteMember = async (id: string) => {
+        try {
+            const member = members.find(m => m.id === id);
+            const dbId = member?.originalId || parseInt(id.replace('M-', ''));
+
+            const response = await fetch(`http://localhost:3000/api/congregants/${dbId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Gagal menghapus anggota');
+
+            toast.success("Anggota berhasil dihapus");
+            fetchMembers();
+            return true;
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            toast.error("Gagal menghapus anggota");
+            return false;
+        }
+    };
+
+    useEffect(() => {
         fetchMembers();
     }, []);
 
@@ -188,15 +267,11 @@ export const useMemberData = () => {
             // Education
             educationCounts[m.education] = (educationCounts[m.education] || 0) + 1;
 
-            // Willingness (Mock logic based on age/status for now as field doesn't exist)
-            // In real app, this would be a field in Member interface
-            const age = calculateAge(m.birthDate);
-            if (m.statusGerejawi === "Sidi" && age > 17 && age < 60) {
+            // Willingness
+            if (m.willingnessToServe) {
                 willingnessCounts["Bersedia"]++;
-            } else if (age > 60) {
-                willingnessCounts["Tidak"]++;
             } else {
-                willingnessCounts["Ragu-ragu"]++;
+                willingnessCounts["Tidak"]++;
             }
         });
 
@@ -231,6 +306,7 @@ export const useMemberData = () => {
         filterStatus, setFilterStatus,
         sortConfig, handleSort,
         stats,
-        isLoading
+        isLoading,
+        addMember, updateMember, deleteMember, refreshMembers: fetchMembers
     };
 };

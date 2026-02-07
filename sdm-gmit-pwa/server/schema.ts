@@ -69,6 +69,7 @@ export const congregants = mysqlTable("congregants", {
 
     willingnessToServe: boolean("willingness_to_serve").default(false),
 
+    statusGerejawi: varchar("status_gerejawi", { length: 50 }).default('Sidi'), // Sidi, Baptis, Katekisasi
     status: varchar("status", { length: 20 }).default('PENDING'), // PENDING, VALIDATED
 
     createdAt: timestamp("created_at").defaultNow(),

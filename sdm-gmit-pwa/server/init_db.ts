@@ -35,6 +35,7 @@ async function initDb() {
         job_category VARCHAR(100),
         skills JSON,
         willingness_to_serve BOOLEAN DEFAULT FALSE,
+        status_gerejawi VARCHAR(50) DEFAULT 'Sidi',
         status VARCHAR(20) DEFAULT 'PENDING',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authClient, useSession } from '../../lib/auth-client';
+import { useMemberData } from '../../hooks/useMemberData';
 
 interface AdminHeaderProps {
     title: string;
@@ -16,16 +17,35 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
     const { data: session } = useSession();
     const user = session?.user;
 
+    // Real Data for Notifications
+    const { members, refreshMembers } = useMemberData();
+
+    // Polling for new members every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshMembers();
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [refreshMembers]);
+
+    // Derived Notifications (Pending Members)
+    const notifications = useMemo(() => {
+        const pending = members.filter(m => m.status === 'PENDING')
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        return pending.map(m => ({
+            id: m.id,
+            text: `Jemaat baru: ${m.name}`,
+            time: new Date(m.createdAt).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            unread: true
+        }));
+    }, [members]);
+
+    const unreadCount = notifications.length;
+
     // Refs for click outside handling
     const profileRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLButtonElement>(null);
-
-    // Mock Notifications
-    const notifications = [
-        { id: 1, text: "Jemaat baru terdaftar: Bpk. Stefanus", time: "Baru saja", unread: true },
-        { id: 2, text: "Laporan bulanan siap diunduh", time: "1 jam lalu", unread: false },
-        { id: 3, text: "Jadwal pelayanan diperbarui", time: "Kemarin", unread: false },
-    ];
 
     const handleLogout = async () => {
         await authClient.signOut();
@@ -84,31 +104,37 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
                         className={`relative p-2 rounded-lg transition-colors ${isNotifOpen ? 'bg-slate-100 dark:bg-slate-800 text-primary' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                     >
                         <span className="material-symbols-outlined">notifications</span>
-                        <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        {unreadCount > 0 && <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></span>}
                     </button>
 
                     {/* Notification Dropdown */}
                     {isNotifOpen && (
                         <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up origin-top-right">
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Notifikasi</h3>
+                                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Notifikasi ({unreadCount})</h3>
                                 <button className="text-[10px] font-bold text-primary hover:underline">Tandai semua dibaca</button>
                             </div>
                             <div className="max-h-[300px] overflow-y-auto">
-                                {notifications.map((notif) => (
-                                    <div key={notif.id} className={`p-4 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer ${notif.unread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
-                                        <div className="flex gap-3">
-                                            <div className={`mt-1 size-2 rounded-full shrink-0 ${notif.unread ? 'bg-primary' : 'bg-slate-300'}`}></div>
-                                            <div>
-                                                <p className={`text-xs ${notif.unread ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-600 dark:text-slate-400'}`}>{notif.text}</p>
-                                                <p className="text-[10px] text-slate-400 mt-1">{notif.time}</p>
+                                {notifications.length > 0 ? (
+                                    notifications.map((notif) => (
+                                        <div key={notif.id} className={`p-4 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer ${notif.unread ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`} onClick={() => navigate('/admin/members')}>
+                                            <div className="flex gap-3">
+                                                <div className={`mt-1 size-2 rounded-full shrink-0 ${notif.unread ? 'bg-primary' : 'bg-slate-300'}`}></div>
+                                                <div>
+                                                    <p className={`text-xs ${notif.unread ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-600 dark:text-slate-400'}`}>{notif.text}</p>
+                                                    <p className="text-[10px] text-slate-400 mt-1">{notif.time}</p>
+                                                </div>
                                             </div>
                                         </div>
+                                    ))
+                                ) : (
+                                    <div className="p-8 text-center text-slate-500 text-xs">
+                                        Tidak ada notifikasi baru
                                     </div>
-                                ))}
+                                )}
                             </div>
                             <div className="p-2 text-center border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                                <button className="text-xs font-bold text-slate-500 hover:text-primary transition-colors">Lihat Semua</button>
+                                <button onClick={() => navigate('/admin/members')} className="text-xs font-bold text-slate-500 hover:text-primary transition-colors">Lihat Semua Data</button>
                             </div>
                         </div>
                     )}
