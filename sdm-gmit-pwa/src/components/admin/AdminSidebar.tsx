@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { authClient } from '../../lib/auth-client';
 import { useSettings } from '../../hooks/useSettings';
@@ -18,6 +19,28 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
             console.error("Logout failed", error);
         } finally {
             navigate('/login');
+        }
+    };
+
+    const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+    useEffect(() => {
+        const handleBeforeInstallPrompt = (e: any) => {
+            e.preventDefault();
+            setInstallPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    }, []);
+
+    const handleInstallClick = () => {
+        if (installPrompt) {
+            installPrompt.prompt();
+            installPrompt.userChoice.then((choiceResult: any) => {
+                if (choiceResult.outcome === 'accepted') {
+                    setInstallPrompt(null);
+                }
+            });
         }
     };
 
@@ -113,6 +136,16 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                             </>
                         )}
                     </NavLink>
+
+                    {installPrompt && (
+                        <div
+                            onClick={handleInstallClick}
+                            className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                        >
+                            <span className="material-symbols-outlined text-sm">download</span>
+                            <span className="text-sm font-medium">Install App</span>
+                        </div>
+                    )}
 
                     <div className="pt-2">
                         <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl flex items-center justify-between group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onClick={handleLogout}>

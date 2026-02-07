@@ -10,6 +10,7 @@ import { AddMemberForm } from '../components/admin/forms/AddMemberForm';
 import { MemberDetailModal } from '../components/admin/details/MemberDetailModal';
 import { useMemberData, calculateAge, type Member } from '../hooks/useMemberData';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { TableSkeleton } from '../components/skeletons/TableSkeleton';
 
 const AdminMemberData = () => {
     const [searchParams] = useSearchParams();
@@ -23,7 +24,8 @@ const AdminMemberData = () => {
         filterAgeCategory, setFilterAgeCategory,
         filterStatus, setFilterStatus,
         sortConfig, handleSort,
-        stats
+        stats,
+        isLoading
     } = useMemberData();
 
     // UI State
@@ -356,139 +358,213 @@ const AdminMemberData = () => {
 
             {/* List View */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-1 flex flex-col">
-                {viewMode === 'table' ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                    <th className="px-6 py-4 w-12">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIds.length === currentMembers.length && currentMembers.length > 0}
-                                            onChange={toggleAll}
-                                            className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                                        />
-                                    </th>
-                                    {[
-                                        { label: "Nama Lengkap", key: "name", width: "min-w-[200px]" },
-                                        { label: "Sektor", key: "sector", width: "min-w-[150px]" },
-                                        { label: "Umur", key: "birthDate", width: "w-20" },
-                                        { label: "Pendidikan", key: "education", width: "min-w-[150px]" },
-                                        { label: "Pekerjaan", key: "job", width: "min-w-[150px]" },
-                                        { label: "Status", key: "statusGerejawi", width: "min-w-[100px]" },
-                                    ].map((col) => (
-                                        <th
-                                            key={col.key}
-                                            onClick={() => handleSort(col.key as keyof Member)}
-                                            className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
-                                        >
-                                            <div className="flex items-center gap-1">
-                                                {col.label}
-                                                {sortConfig.key === col.key && (
-                                                    <span className="material-symbols-outlined text-sm font-bold">
-                                                        {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
-                                                    </span>
-                                                )}
-                                            </div>
+                {isLoading ? (
+                    <TableSkeleton />
+                ) : viewMode === 'table' ? (
+                    <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                        <th className="px-6 py-4 w-12">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.length === currentMembers.length && currentMembers.length > 0}
+                                                onChange={toggleAll}
+                                                className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                                            />
                                         </th>
-                                    ))}
-                                    <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                                {currentMembers.length > 0 ? (
-                                    currentMembers.map((member) => (
-                                        <tr
-                                            key={member.id}
-                                            className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
-                                            onClick={() => setSelectedMember(member)}
-                                        >
-                                            <td className="px-6 py-4 relative">
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-left"></div>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedIds.includes(member.id)}
-                                                    onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.initials}</div>
-                                                    <div>
-                                                        <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
-                                                        <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                                            <span>{member.id}</span>
-                                                            <span className="size-1 rounded-full bg-slate-300"></span>
-                                                            <span>{member.gender}</span>
+                                        {[
+                                            { label: "Nama Lengkap", key: "name", width: "min-w-[200px]" },
+                                            { label: "Sektor", key: "sector", width: "min-w-[150px]" },
+                                            { label: "Umur", key: "birthDate", width: "w-20" },
+                                            { label: "Pendidikan", key: "education", width: "min-w-[150px]" },
+                                            { label: "Pekerjaan", key: "job", width: "min-w-[150px]" },
+                                            { label: "Status", key: "statusGerejawi", width: "min-w-[100px]" },
+                                        ].map((col) => (
+                                            <th
+                                                key={col.key}
+                                                onClick={() => handleSort(col.key as keyof Member)}
+                                                className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    {col.label}
+                                                    {sortConfig.key === col.key && (
+                                                        <span className="material-symbols-outlined text-sm font-bold">
+                                                            {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        ))}
+                                        <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                    {currentMembers.length > 0 ? (
+                                        currentMembers.map((member) => (
+                                            <tr
+                                                key={member.id}
+                                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
+                                                onClick={() => setSelectedMember(member)}
+                                            >
+                                                <td className="px-6 py-4 relative">
+                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-left"></div>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedIds.includes(member.id)}
+                                                        onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                                                    />
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.initials}</div>
+                                                        <div>
+                                                            <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
+                                                            <div className="flex items-center gap-1 text-slate-500 text-xs">
+                                                                <span>{member.id}</span>
+                                                                <span className="size-1 rounded-full bg-slate-300"></span>
+                                                                <span>{member.gender}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">{member.sector}</span>
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{calculateAge(member.birthDate)} Thn</td>
-                                            <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{member.education}</td>
-                                            <td className="px-6 py-4 text-slate-900 dark:text-white text-sm font-medium">{member.job}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${member.statusGerejawi === 'Sidi' ? 'bg-green-50 text-green-600 border-green-100' :
-                                                    member.statusGerejawi === 'Baptis' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                        'bg-orange-50 text-orange-600 border-orange-100'
-                                                    }`}>{member.statusGerejawi}</span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedMember(member);
-                                                            setIsEditMode(true);
-                                                            setIsAddModalOpen(true);
-                                                        }}
-                                                        className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors tooltip"
-                                                        title="Edit"
-                                                    >
-                                                        <span className="material-symbols-outlined text-lg">edit</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setConfirmDialog({
-                                                                isOpen: true,
-                                                                title: "Hapus Data Member",
-                                                                message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
-                                                                variant: 'danger',
-                                                                action: () => {
-                                                                    setMembers(members.filter(m => m.id !== member.id));
-                                                                    toast.success('Data berhasil dihapus');
-                                                                    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-                                                                }
-                                                            });
-                                                        }}
-                                                        className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors tooltip"
-                                                        title="Hapus"
-                                                    >
-                                                        <span className="material-symbols-outlined text-lg">delete</span>
-                                                    </button>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">{member.sector}</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{calculateAge(member.birthDate)} Thn</td>
+                                                <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{member.education}</td>
+                                                <td className="px-6 py-4 text-slate-900 dark:text-white text-sm font-medium">{member.job}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${member.statusGerejawi === 'Sidi' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                        member.statusGerejawi === 'Baptis' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                            'bg-orange-50 text-orange-600 border-orange-100'
+                                                        }`}>{member.statusGerejawi}</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedMember(member);
+                                                                setIsEditMode(true);
+                                                                setIsAddModalOpen(true);
+                                                            }}
+                                                            className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors tooltip"
+                                                            title="Edit"
+                                                        >
+                                                            <span className="material-symbols-outlined text-lg">edit</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setConfirmDialog({
+                                                                    isOpen: true,
+                                                                    title: "Hapus Data Member",
+                                                                    message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
+                                                                    variant: 'danger',
+                                                                    action: () => {
+                                                                        setMembers(members.filter(m => m.id !== member.id));
+                                                                        toast.success('Data berhasil dihapus');
+                                                                        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                    }
+                                                                });
+                                                            }}
+                                                            className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors tooltip"
+                                                            title="Hapus"
+                                                        >
+                                                            <span className="material-symbols-outlined text-lg">delete</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
+                                                    <p>Tidak ada data member yang cocok dengan filter Anda.</p>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
-                                                <p>Tidak ada data member yang cocok dengan filter Anda.</p>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View (Fallback for Table) */}
+                        <div className="md:hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+                            {currentMembers.length > 0 ? (
+                                currentMembers.map((member) => (
+                                    <div key={member.id} className="p-4 flex flex-col gap-3" onClick={() => setSelectedMember(member)}>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex gap-3 items-center">
+                                                <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">
+                                                    {member.initials}
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
+                                                    <p className="text-xs text-slate-500">{member.id} • {member.sector}</p>
+                                                </div>
                                             </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${member.statusGerejawi === 'Sidi' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                member.statusGerejawi === 'Baptis' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                    'bg-orange-50 text-orange-600 border-orange-100'
+                                                }`}>{member.statusGerejawi}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                                            <div>
+                                                <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan</span>
+                                                <span className="font-medium text-slate-700 dark:text-slate-300">{member.job}</span>
+                                            </div>
+                                            <div>
+                                                <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pendidikan</span>
+                                                <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 mt-1">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedMember(member);
+                                                    setIsEditMode(true);
+                                                    setIsAddModalOpen(true);
+                                                }}
+                                                className="flex-1 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setConfirmDialog({
+                                                        isOpen: true,
+                                                        title: "Hapus Data Member",
+                                                        message: `Apakah Anda yakin ingin menghapus data ${member.name}?`,
+                                                        variant: 'danger',
+                                                        action: () => {
+                                                            setMembers(members.filter(m => m.id !== member.id));
+                                                            toast.success('Data berhasil dihapus');
+                                                            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                        }
+                                                    });
+                                                }}
+                                                className="px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/30 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="p-8 text-center text-slate-500">Tidak ada data.</div>
+                            )}
+                        </div>
+                    </>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                         {currentMembers.length > 0 ? (

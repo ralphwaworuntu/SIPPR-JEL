@@ -4,16 +4,16 @@ export type ToastType = 'success' | 'error' | 'info';
 
 interface ToastMessage {
     id: number;
-    message: string;
+    message: React.ReactNode;
     type: ToastType;
 }
 
-let addToastHandler: ((message: string, type: ToastType) => void) | null = null;
+let addToastHandler: ((message: React.ReactNode, type: ToastType) => void) | null = null;
 
 export const toast = {
-    success: (msg: string) => addToastHandler && addToastHandler(msg, 'success'),
-    error: (msg: string) => addToastHandler && addToastHandler(msg, 'error'),
-    info: (msg: string) => addToastHandler && addToastHandler(msg, 'info'),
+    success: (msg: React.ReactNode) => addToastHandler && addToastHandler(msg, 'success'),
+    error: (msg: React.ReactNode) => addToastHandler && addToastHandler(msg, 'error'),
+    info: (msg: React.ReactNode) => addToastHandler && addToastHandler(msg, 'info'),
     promise: <T,>(
         promise: Promise<T>,
         msgs: { loading: string; success: string; error: string }
@@ -35,12 +35,12 @@ export const Toaster = () => {
     const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
     useEffect(() => {
-        addToastHandler = (message: string, type: ToastType) => {
+        addToastHandler = (message: React.ReactNode, type: ToastType) => {
             const id = Date.now();
             setToasts(prev => [...prev, { id, message, type }]);
             setTimeout(() => {
                 setToasts(prev => prev.filter(t => t.id !== id));
-            }, 3000);
+            }, 5000); // Increased duration to 5s for better readability
         };
         return () => { addToastHandler = null; };
     }, []);
@@ -58,7 +58,7 @@ export const Toaster = () => {
                     <span className="material-symbols-outlined text-xl">
                         {t.type === 'success' ? 'check_circle' : t.type === 'error' ? 'error' : 'info'}
                     </span>
-                    <p className="text-sm font-bold">{t.message}</p>
+                    <div className="text-sm font-bold">{t.message}</div>
                 </div>
             ))}
         </div>

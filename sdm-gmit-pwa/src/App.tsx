@@ -1,12 +1,14 @@
 import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast } from './components/ui/Toast';
 import LandingPage from './pages/LandingPage';
 import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import SeedUser from './pages/SeedUser';
 import { Toaster } from './components/ui/Toast';
+import { OfflineBanner } from './components/ui/OfflineBanner';
 
 // Lazy Load Admin Pages for Performance
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
@@ -26,10 +28,15 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+import { useSession } from './lib/auth-client';
+import { Navigate } from 'react-router-dom';
+
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // const { data: session, isPending } = useSession();
-  // if (isPending) return <div>Loading...</div>;
-  // if (!session) return <Navigate to="/login" />;
+  const { data: session, isPending } = useSession();
+
+  if (isPending) return <PageLoader />;
+  if (!session) return <Navigate to="/login" replace />;
+
   return <>{children}</>;
 }
 
@@ -38,9 +45,14 @@ const AppContent = () => {
   const location = useLocation();
 
   // Offline Detection
+  const [isOffline, setIsOffline] = React.useState(!navigator.onLine);
+
   useEffect(() => {
-    const handleOffline = () => toast.error("Koneksi Internet Terputus. Anda sedang offline.");
-    const handleOnline = () => toast.success("Koneksi Internet Tersambung.");
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => {
+      setIsOffline(false);
+      toast.success("Koneksi Internet Tersambung Kembali.");
+    };
 
     window.addEventListener('offline', handleOffline);
     window.addEventListener('online', handleOnline);
@@ -57,54 +69,58 @@ const AppContent = () => {
   }, [location.pathname]);
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.3 }}
-        className="w-full"
-      >
-        <Suspense fallback={<PageLoader />}>
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/form" element={<FormPage />} />
-            <Route path="/login" element={<LoginPage />} />
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="w-full"
+        >
+          <Suspense fallback={<PageLoader />}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/form" element={<FormPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/seed-user" element={<SeedUser />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/members" element={
-              <ProtectedRoute>
-                <AdminMemberData />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/families" element={
-              <ProtectedRoute>
-                <AdminFamilyData />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/reports" element={
-              <ProtectedRoute>
-                <AdminReports />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/settings" element={
-              <ProtectedRoute>
-                <AdminSettings />
-              </ProtectedRoute>
-            } />
+              {/* Admin Routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/members" element={
+                <ProtectedRoute>
+                  <AdminMemberData />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/families" element={
+                <ProtectedRoute>
+                  <AdminFamilyData />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/reports" element={
+                <ProtectedRoute>
+                  <AdminReports />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/settings" element={
+                <ProtectedRoute>
+                  <AdminSettings />
+                </ProtectedRoute>
+              } />
 
-            {/* Catch-all Route for 404 */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
-      </motion.div>
-    </AnimatePresence>
+              {/* Catch-all Route for 404 */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </motion.div>
+      </AnimatePresence>
+      {isOffline && <OfflineBanner />}
+    </>
   );
 };
 

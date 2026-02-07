@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { signIn } from '../lib/auth-client';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Loader2, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
-import { toast } from 'sonner';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -18,40 +17,30 @@ const LoginPage = () => {
         setError('');
 
 
+
         try {
             // Attempt Real Login
-            const signInClient = signIn as any;
-            await signInClient.emailAndPassword({
+            await signIn.email({
                 email,
                 password,
             }, {
                 onSuccess: () => {
                     navigate('/admin');
                 },
-                onError: (ctx: any) => {
-                    // Check if it's a connection error (backend might be down)
-                    if (ctx.error.status === 0 || ctx.error.message?.includes('fetch')) {
-                        // Fallback mechanism for demo/dev purposes if backend is missing
-                        if (email === 'admin@gmitemaus.org' && password === 'admin') {
-                            toast.success("Login Berhasil (Mode Demo)");
-                            setTimeout(() => navigate('/admin'), 1000);
-                            return;
-                        }
-                        setError("Gagal terhubung ke server. Pastikan backend aktif.");
+                onError: (ctx) => {
+                    console.error("Login Error Context:", ctx);
+                    if (ctx.error.status === 0 || ctx.error.message?.includes('fetch') || ctx.error.message?.includes('Network Error')) {
+                        setError("Gagal terhubung ke server backend (Port 3000). Pastikan server backend sedang berjalan.");
                     } else {
-                        setError(ctx.error.message || 'Email atau password salah');
+                        setError(ctx.error.message || 'Email atau password yang dimasukan salah');
                     }
                     setLoading(false);
                 }
             });
         } catch (err) {
             // Unexpected error
-            if (email === 'admin@gmitemaus.org' && password === 'admin') {
-                navigate('/admin');
-            } else {
-                setError('Terjadi kesalahan sistem. Coba lagi nanti.');
-                setLoading(false);
-            }
+            setError('Terjadi kesalahan pada sistem. Coba lagi nanti.');
+            setLoading(false);
         }
     };
 
@@ -67,10 +56,10 @@ const LoginPage = () => {
                         <Shield className="w-10 h-10 text-white" />
                     </div>
                     <h1 className="text-3xl font-black text-white tracking-tight mb-2">
-                        GMIT Emaus
+                        GMIT Emaus Liliba
                     </h1>
                     <p className="text-slate-400 text-sm">
-                        Sistem Informasi Manajemen Jemaat
+                        Sistem Informasi Bank Data SDM
                     </p>
                 </div>
 
@@ -146,16 +135,11 @@ const LoginPage = () => {
                     </button>
                 </form>
 
-                {/* Footer / Demo Hint */}
+                {/* Footer */}
                 <div className="mt-8 pt-6 border-t border-white/5 text-center">
                     <p className="text-slate-500 text-xs">
                         Belum punya akun? <span className="text-slate-400 cursor-not-allowed">Hubungi Sekretariat</span>
                     </p>
-                    <div className="mt-4 px-4 py-2 bg-slate-800/50 rounded-lg inline-block border border-slate-700/50">
-                        <p className="text-[10px] text-slate-400 font-mono">
-                            Demo: admin@gmitemaus.org / admin
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

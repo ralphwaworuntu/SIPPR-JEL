@@ -11,6 +11,7 @@ import { BirthdayWidget } from '../components/dashboard/BirthdayWidget';
 import { useSession } from '../lib/auth-client';
 import { useSettings } from '../hooks/useSettings';
 import { useMemberData } from '../hooks/useMemberData';
+import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -154,7 +155,15 @@ const AdminDashboard = () => {
     const user = session?.user;
 
     // Get Real Data
-    const { stats, members } = useMemberData();
+    const { stats, members, isLoading } = useMemberData();
+
+    if (isLoading) {
+        return (
+            <AdminLayout title="Dashboard Overview">
+                <DashboardSkeleton />
+            </AdminLayout>
+        );
+    }
 
     // Get 5 most recent members based on createdAt
     const recentMembers = useMemo(() => {

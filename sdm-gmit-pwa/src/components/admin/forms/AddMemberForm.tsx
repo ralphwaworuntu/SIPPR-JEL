@@ -1,5 +1,25 @@
 import { useState } from 'react';
 import { toast } from '../../ui/Toast';
+import { z } from 'zod';
+
+const memberSchema = z.object({
+    namaLengkap: z.string().min(3, "Nama Lengkap minimal 3 karakter"),
+    nik: z.string().regex(/^\d{16}$/, "NIK harus 16 digit angka").optional().or(z.literal('')),
+    tempatLahir: z.string().optional(),
+    tanggalLahir: z.string().optional(),
+    jenisKelamin: z.string(),
+    alamat: z.string().optional(),
+    noHp: z.string().optional(),
+    sektor: z.string().min(1, "Sektor wajib dipilih"),
+    statusGerejawi: z.string(),
+    pendidikan: z.string(),
+    pekerjaan: z.string().optional(),
+    keahlian: z.string().optional(),
+});
+
+type ValidationErrors = {
+    [key: string]: string;
+};
 
 interface AddMemberFormProps {
     onClose: () => void;
@@ -10,6 +30,7 @@ interface AddMemberFormProps {
 export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberFormProps) => {
     const [activeTab, setActiveTab] = useState<'pribadi' | 'gereja' | 'profesional'>('pribadi');
     const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState<ValidationErrors>({});
 
     // Form State (Simplified for basic needs)
     const [formData, setFormData] = useState({
@@ -29,21 +50,44 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        // Clear error when user types
+        if (errors[e.target.name]) {
+            setErrors({ ...errors, [e.target.name]: '' });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setErrors({});
+
+        // Zod Validation
+        const result = memberSchema.safeParse(formData);
+
+        if (!result.success) {
+            const newErrors: ValidationErrors = {};
+            result.error.issues.forEach((issue) => {
+                newErrors[issue.path[0]] = issue.message;
+            });
+            setErrors(newErrors);
+            setIsLoading(false);
+
+            // Auto switch tab to where the first error is
+            const firstErrorField = Object.keys(newErrors)[0];
+            if (['namaLengkap', 'nik', 'tempatLahir', 'tanggalLahir', 'jenisKelamin', 'alamat'].includes(firstErrorField)) {
+                setActiveTab('pribadi');
+            } else if (['sektor', 'statusGerejawi'].includes(firstErrorField)) {
+                setActiveTab('gereja');
+            } else {
+                setActiveTab('profesional');
+            }
+
+            toast.error("Mohon perbaiki input yang salah.");
+            return;
+        }
 
         // Simulate API Call
         await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Validation Check (Simple)
-        if (!formData.namaLengkap || !formData.sektor) {
-            toast.error("Mohon lengkapi data wajib!");
-            setIsLoading(false);
-            return;
-        }
 
         toast.success(initialData ? "Data jemaat berhasil diperbarui!" : "Data jemaat berhasil ditambahkan!");
         onSuccess(formData);
@@ -87,10 +131,10 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 name="namaLengkap"
                                 value={formData.namaLengkap}
                                 onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                className={`w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border ${errors.namaLengkap ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} focus:ring-2 focus:ring-primary/50`}
                                 placeholder="Contoh: John Doe"
                             />
+                            {errors.namaLengkap && <p className="text-red-500 text-xs mt-1">{errors.namaLengkap}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">NIK</label>
@@ -98,9 +142,10 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 name="nik"
                                 value={formData.nik}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                className={`w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border ${errors.nik ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'} focus:ring-2 focus:ring-primary/50`}
                                 placeholder="16 digit NIK"
                             />
+                            {errors.nik && <p className="text-red-500 text-xs mt-1">{errors.nik}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Jenis Kelamin</label>

@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../lib/api-client';
 
 // Types moved here for reuse
 export interface Member {
@@ -34,24 +36,7 @@ export const getAgeCategory = (age: number) => {
     return "Lansia";
 };
 
-// Initial MOCK DATA
-const MOCK_MEMBERS: Member[] = [
-    { name: "John Doe", id: "M-00245", sector: "Efata", education: "S2", job: "Senior Developer", skills: ["Python", "SQL"], initials: "JD", gender: "Laki-laki", birthDate: "1985-05-15", createdAt: "2023-01-15T08:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Jane Smith", id: "M-00289", sector: "Betel", education: "S1", job: "Perawat", skills: ["P3K", "Anak"], initials: "JS", gender: "Perempuan", birthDate: "1992-10-20", createdAt: "2023-03-10T09:30:00Z", statusGerejawi: "Sidi" },
-    { name: "Robert King", id: "M-00312", sector: "Sion", education: "D3", job: "Wiraswasta", skills: ["Manajemen", "Pemasaran"], initials: "RK", gender: "Laki-laki", birthDate: "1978-02-12", createdAt: "2023-05-20T14:15:00Z", statusGerejawi: "Baptis" },
-    { name: "Alice Wong", id: "M-00105", sector: "Eden", education: "S3", job: "Dosen", skills: ["Penelitian", "Publikasi"], initials: "AW", gender: "Perempuan", birthDate: "1980-08-30", createdAt: "2023-06-05T11:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Charlie Brown", id: "M-00441", sector: "Efata", education: "SMA", job: "Pelajar", skills: ["Musik"], initials: "CB", gender: "Laki-laki", birthDate: "2008-01-10", createdAt: "2024-01-12T16:45:00Z", statusGerejawi: "Katekisasi" },
-    { name: "Sarah Connor", id: "M-00555", sector: "Betel", education: "S1", job: "Wirausaha", skills: ["Cooking", "Management"], initials: "SC", gender: "Perempuan", birthDate: "1995-03-12", createdAt: "2024-02-28T10:20:00Z", statusGerejawi: "Sidi" },
-    { name: "Michael Jordan", id: "M-00230", sector: "Sion", education: "S1", job: "Atlet", skills: ["Basket", "Olahraga"], initials: "MJ", gender: "Laki-laki", birthDate: "1988-02-17", createdAt: "2024-04-15T13:10:00Z", statusGerejawi: "Sidi" },
-    { name: "Emily Blunt", id: "M-00111", sector: "Eden", education: "S2", job: "Aktris", skills: ["Akting", "Menyanyi"], initials: "EB", gender: "Perempuan", birthDate: "1983-02-23", createdAt: "2025-01-05T09:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Tom Holland", id: "M-00777", sector: "Efata", education: "SMA", job: "Aktor", skills: ["Akting", "Gymnastic"], initials: "TH", gender: "Laki-laki", birthDate: "1996-06-01", createdAt: "2025-03-20T15:30:00Z", statusGerejawi: "Sidi" },
-    { name: "Zendaya", id: "M-00888", sector: "Betel", education: "SMA", job: "Aktris", skills: ["Akting", "Menyanyi", "Modeling"], initials: "Z", gender: "Perempuan", birthDate: "1996-09-01", createdAt: "2025-03-22T10:00:00Z", statusGerejawi: "Sidi" },
-    { name: "Grandpa Joe", id: "M-00999", sector: "Sion", education: "SD", job: "Pensiunan", skills: ["Berkebun"], initials: "GJ", gender: "Laki-laki", birthDate: "1950-01-01", createdAt: "2025-05-18T08:45:00Z", statusGerejawi: "Sidi" },
-    { name: "Baby Shark", id: "M-00123", sector: "Eden", education: "TK", job: "Balita", skills: ["Main", "Tidur"], initials: "BS", gender: "Laki-laki", birthDate: "2022-01-01", createdAt: "2025-06-01T07:15:00Z", statusGerejawi: "Baptis" }
-];
-
 export const useMemberData = () => {
-    const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterSector, setFilterSector] = useState("Semua");
     const [filterGender, setFilterGender] = useState("Semua");
@@ -60,45 +45,26 @@ export const useMemberData = () => {
 
     const [sortConfig, setSortConfig] = useState<{ key: keyof Member | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
 
-    // Derived Logic
-    const filteredMembers = useMemo(() => {
-        let result = [...members];
+    // Fetch Data from API
+    const { data: rawMembers = [], isLoading, isError } = useQuery({
+        queryKey: ['members', { searchTerm, filterSector, filterGender, filterAgeCategory, filterStatus }],
+        queryFn: async () => {
+            const params: Record<string, any> = {};
+            if (searchTerm) params.search = searchTerm;
+            if (filterSector !== "Semua") params.sector = filterSector;
+            if (filterGender !== "Semua") params.gender = filterGender;
+            if (filterAgeCategory !== "Semua") params.ageCategory = filterAgeCategory;
+            if (filterStatus !== "Semua") params.status = filterStatus;
 
-        // 1. Search
-        if (searchTerm) {
-            const lowerTerm = searchTerm.toLowerCase();
-            result = result.filter(m =>
-                m.name.toLowerCase().includes(lowerTerm) ||
-                m.id.toLowerCase().includes(lowerTerm) ||
-                m.job.toLowerCase().includes(lowerTerm)
-            );
-        }
+            const response = await apiClient.get<Member[]>('/members', { params });
+            return response.data;
+        },
+        staleTime: 1000 * 60 * 2, // 2 minutes
+    });
 
-        // 2. Sector
-        if (filterSector !== "Semua") {
-            result = result.filter(m => m.sector === filterSector);
-        }
-
-        // 3. Gender
-        if (filterGender !== "Semua") {
-            result = result.filter(m => m.gender === filterGender);
-        }
-
-        // 4. Age Category
-        if (filterAgeCategory !== "Semua") {
-            result = result.filter(m => {
-                const age = calculateAge(m.birthDate);
-                const category = getAgeCategory(age);
-                return category === filterAgeCategory;
-            });
-        }
-
-        // 5. Status Gerejawi
-        if (filterStatus !== "Semua") {
-            result = result.filter(m => m.statusGerejawi === filterStatus);
-        }
-
-        // 6. Sorting
+    // Client-side Sorting (Optional: can be moved to backend too, but keeping here for responsiveness)
+    const members = useMemo(() => {
+        let result = [...rawMembers];
         if (sortConfig.key) {
             result.sort((a, b) => {
                 // @ts-ignore
@@ -112,9 +78,8 @@ export const useMemberData = () => {
                 return 0;
             });
         }
-
         return result;
-    }, [members, searchTerm, filterSector, filterGender, filterAgeCategory, filterStatus, sortConfig]);
+    }, [rawMembers, sortConfig]);
 
     const handleSort = (key: keyof Member) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -124,7 +89,7 @@ export const useMemberData = () => {
         setSortConfig({ key, direction });
     };
 
-    // Stats
+    // Stats Calculation (based on the currently fetched/filtered data)
     const stats = useMemo(() => {
         // Simple Counters
         const sectorCounts: Record<string, number> = {};
@@ -151,8 +116,7 @@ export const useMemberData = () => {
             // Education
             educationCounts[m.education] = (educationCounts[m.education] || 0) + 1;
 
-            // Willingness (Mock logic based on age/status for now as field doesn't exist)
-            // In real app, this would be a field in Member interface
+            // Willingness
             const age = calculateAge(m.birthDate);
             if (m.statusGerejawi === "Sidi" && age > 17 && age < 60) {
                 willingnessCounts["Bersedia"]++;
@@ -171,7 +135,7 @@ export const useMemberData = () => {
             total: members.length,
             sectorDominant: dominant,
             activeSkills: skillCount,
-            growth: 12, // Mock growth for now
+            growth: 12, // Placeholder
             professionalCount,
             volunteerCount: willingnessCounts["Bersedia"],
             distributions: {
@@ -185,14 +149,16 @@ export const useMemberData = () => {
 
     return {
         members,
-        setMembers,
-        filteredMembers,
+        setMembers: () => { }, // No-op since we use query
+        filteredMembers: members, // Alias for compatibility
         searchTerm, setSearchTerm,
         filterSector, setFilterSector,
         filterGender, setFilterGender,
         filterAgeCategory, setFilterAgeCategory,
         filterStatus, setFilterStatus,
         sortConfig, handleSort,
-        stats
+        stats,
+        isLoading,
+        isError
     };
 };
