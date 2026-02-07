@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from '../components/ui/Toast';
 import { jsPDF } from 'jspdf';
@@ -26,13 +27,16 @@ const AdminMemberData = () => {
         sortConfig, handleSort,
         stats,
         isLoading,
-        deleteMutation
+        deleteMutation,
+        importMutation
     } = useMemberData();
 
     // UI State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
+
     const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -59,6 +63,40 @@ const AdminMemberData = () => {
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Dropzone Logic
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (acceptedFiles?.length > 0) {
+            setImportFile(acceptedFiles[0]);
+            toast.success(`File ${acceptedFiles[0].name} siap diupload`);
+        }
+    }, []);
+
+    const handleImportSubmit = async () => {
+        if (!importFile) return;
+
+        const formData = new FormData();
+        formData.append('file', importFile);
+
+        try {
+            await importMutation.mutateAsync(formData);
+            toast.success('Data berhasil diimport');
+            setIsImportModalOpen(false);
+            setImportFile(null);
+        } catch (error) {
+            console.error(error);
+            toast.error('Gagal mengimport data. Pastikan format CSV sesuai.');
+        }
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: {
+            'text/csv': ['.csv'],
+            'application/vnd.ms-excel': ['.csv']
+        },
+        maxFiles: 1
+    });
 
     // Initial Action from URL
     useEffect(() => {
@@ -748,82 +786,41 @@ const AdminMemberData = () => {
             >
                 <div className="flex flex-col gap-6">
                     <div
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                            e.preventDefault();
-                            const file = e.dataTransfer.files[0];
-                            if (file && file.type === "text/csv") {
-                                // @ts-ignore
-                                import('papaparse').then((Papa) => {
-                                    Papa.parse(file, {
-                                        header: true,
-                                        complete: (results: any) => {
-                                            const importedMembers: Member[] = results.data.map((row: any) => ({
-                                                id: row.ID || `M-IMP-${Math.random().toString(36).substr(2, 5)}`,
-                                                name: row.Nama || "Tanpa Nama",
-                                                sector: row.Sektor || "Efata",
-                                                education: row.Pendidikan || "SMA",
-                                                job: row.Pekerjaan || "Belum Bekerja",
-                                                skills: row.Keahlian ? row.Keahlian.split(';') : [],
-                                                initials: (row.Nama || "X").substring(0, 2).toUpperCase(),
-                                                gender: row.Gender || "Laki-laki",
-                                                birthDate: row.Umur ? new Date(new Date().getFullYear() - parseInt(row.Umur), 0, 1).toISOString() : new Date().toISOString(),
-                                                statusGerejawi: row.Status || "Sidi"
-                                            }));
-                                            setMembers(prev => [...importedMembers, ...prev]);
-                                            toast.success(`${importedMembers.length} data berhasil diimport!`);
-                                            setIsImportModalOpen(false);
-                                        },
-                                        error: (error: any) => {
-                                            toast.error("Gagal membaca file CSV: " + error.message);
-                                        }
-                                    });
-                                });
-                            } else {
-                                toast.error("File harus berformat CSV");
-                            }
-                        }}
-                        className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative"
+                        {...getRootProps()}
+                        className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors relative ${isDragActive
+                            ? 'border-primary bg-primary/5'
+                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            }`}
                     >
-                        <input
-                            type="file"
-                            accept=".csv"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    // @ts-ignore
-                                    import('papaparse').then((Papa) => {
-                                        Papa.parse(file, {
-                                            header: true,
-                                            complete: (results: any) => {
-                                                const importedMembers: Member[] = results.data.map((row: any) => ({
-                                                    id: row.ID || `M-IMP-${Math.random().toString(36).substr(2, 5)}`,
-                                                    name: row.Nama || "Tanpa Nama",
-                                                    sector: row.Sektor || "Efata",
-                                                    education: row.Pendidikan || "SMA",
-                                                    job: row.Pekerjaan || "Belum Bekerja",
-                                                    skills: row.Keahlian ? row.Keahlian.split(';') : [],
-                                                    initials: (row.Nama || "X").substring(0, 2).toUpperCase(),
-                                                    gender: row.Gender || "Laki-laki",
-                                                    birthDate: row.Umur ? new Date(new Date().getFullYear() - parseInt(row.Umur), 0, 1).toISOString() : new Date().toISOString(),
-                                                    statusGerejawi: row.Status || "Sidi"
-                                                }));
-                                                setMembers(prev => [...importedMembers, ...prev]);
-                                                toast.success(`${importedMembers.length} data berhasil diimport!`);
-                                                setIsImportModalOpen(false);
-                                            },
-                                            error: (error: any) => {
-                                                toast.error("Gagal membaca file CSV: " + error.message);
-                                            }
-                                        });
-                                    });
-                                }
-                            }}
-                        />
+                        <input {...getInputProps()} />
                         <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
-                        <p className="font-bold text-slate-900 dark:text-white">Klik atau drag & drop file CSV</p>
-                        <p className="text-sm text-slate-500 mt-1">Format: Nama, Sektor, Pendidikan, Pekerjaan</p>
+                        {importFile ? (
+                            <div className="flex flex-col items-center gap-2">
+                                <p className="font-bold text-primary">{importFile.name}</p>
+                                <p className="text-sm text-slate-500">{(importFile.size / 1024).toFixed(2)} KB</p>
+                            </div>
+                        ) : (
+                            <>
+                                <p className="font-bold text-slate-900 dark:text-white">Klik atau drag & drop file CSV</p>
+                                <p className="text-sm text-slate-500 mt-1">Format: Nama, Sektor, Pendidikan, Pekerjaan</p>
+                            </>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => { setIsImportModalOpen(false); setImportFile(null); }}
+                            className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg dark:text-slate-300 dark:hover:bg-slate-800"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            onClick={handleImportSubmit}
+                            disabled={!importFile || importMutation.isPending}
+                            className="px-4 py-2 bg-primary text-slate-900 font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {importMutation.isPending && <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>}
+                            Upload & Import
+                        </button>
                     </div>
                 </div>
             </Modal>

@@ -178,6 +178,16 @@ export const useMemberData = () => {
         },
     });
 
+    const importMutation = useMutation({
+        mutationFn: (formData: FormData) => apiClient.post('/members/import', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+        },
+    });
+
     return {
         members,
         setMembers,
@@ -193,6 +203,7 @@ export const useMemberData = () => {
         isError,
         addMutation,
         updateMutation,
-        deleteMutation
+        deleteMutation,
+        importMutation
     };
 };

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { toNodeHandler } from "better-auth/node";
+import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
+import rateLimit from "express-rate-limit";
 import { auth } from "./auth";
 import { db } from "./db";
 import { congregants } from "./schema";
@@ -20,8 +21,41 @@ app.use(cors({
 
 app.use(express.json());
 
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." }
+});
+app.use("/api", limiter);
+
+// Middleware: Authenticated only
+const requireAuth = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+        const session = await auth.api.getSession({
+            headers: fromNodeHeaders(req.headers)
+        });
+
+        if (!session) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+
+        next();
+    } catch (error) {
+        console.error("Auth Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 // Better Auth Handler
 app.all("/api/auth/*", toNodeHandler(auth));
+
+// Protect API Routes
+app.use("/api/members", requireAuth);
+app.use("/api/dashboard", requireAuth);
 
 // Public Route
 app.get("/", (req, res) => {
@@ -170,6 +204,52 @@ app.get("/api/dashboard/stats", async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Failed to fetch stats" });
     }
+});
+
+import multer from "multer";
+import fs from "fs";
+import csv from "csv-parser";
+
+const upload = multer({ dest: "uploads/" });
+
+// 6. Bulk Import CSV
+app.post("/api/members/import", upload.single('file'), async (req, res) => {
+    const file = (req as any).file;
+    if (!file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return;
+    }
+
+    const results: any[] = [];
+    fs.createReadStream(file.path)
+        .pipe(csv())
+        .on('data', (data: any) => results.push(data))
+        .on('end', async () => {
+            try {
+                // Bulk insert
+                const insertData = results.map(row => ({
+                    fullName: row.Nama || row.Name || "Tanpa Nama",
+                    sector: row.Sektor || "Efata",
+                    educationLevel: row.Pendidikan || "SMA",
+                    jobCategory: row.Pekerjaan || "Belum Bekerja",
+                    gender: row.Gender || "Laki-laki",
+                    dateOfBirth: row.Umur ? new Date(new Date().getFullYear() - parseInt(row.Umur), 0, 1) : null,
+                    skills: row.Keahlian ? JSON.stringify(row.Keahlian.split(';')) : JSON.stringify([]),
+                    status: 'VALIDATED'
+                }));
+
+                if (insertData.length > 0) {
+                    await db.insert(congregants).values(insertData);
+                }
+
+                fs.unlinkSync(file.path);
+
+                res.json({ success: true, count: insertData.length });
+            } catch (error) {
+                console.error("Import error:", error);
+                res.status(500).json({ error: "Failed to import data" });
+            }
+        });
 });
 
 app.listen(PORT, () => {
