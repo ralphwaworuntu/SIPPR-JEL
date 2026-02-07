@@ -171,6 +171,19 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     </select>
                 </div>
 
+                {/* Place of Birth */}
+                <div className="flex flex-col">
+                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Tempat Lahir</label>
+                    <input
+                        className="form-input w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder-gray-400"
+                        placeholder="Contoh: Kupang"
+                        type="text"
+                        id="placeOfBirth"
+                        value={data.placeOfBirth}
+                        onChange={(e) => update({ placeOfBirth: e.target.value })}
+                    />
+                </div>
+
                 {/* Date of Birth & Age */}
                 {/* Date of Birth */}
                 <div className="flex flex-col">

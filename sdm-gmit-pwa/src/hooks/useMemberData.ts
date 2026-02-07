@@ -6,6 +6,8 @@ export interface Member {
     id: string;
     originalId?: number; // Keep track of DB ID
     name: string;
+    phone: string;
+    placeOfBirth: string;
     sector: string;
     education: string;
     job: string;
@@ -24,9 +26,10 @@ const mapMemberToPayload = (member: Partial<Member>) => {
     return {
         fullName: member.name,
         gender: member.gender,
+        placeOfBirth: member.placeOfBirth,
         dateOfBirth: member.birthDate ? new Date(member.birthDate).toISOString() : undefined,
         // Mocking missing required fields for update if not provided
-        phone: "0000000000",
+        phone: member.phone || "0000000000",
         address: "Alamat tidak tersedia",
         sector: member.sector,
         educationLevel: member.education,
@@ -74,6 +77,8 @@ export const useMemberData = () => {
                 id: `M-${String(item.id).padStart(5, '0')}`,
                 originalId: item.id,
                 name: item.fullName,
+                phone: item.phone || "-",
+                placeOfBirth: item.placeOfBirth || "-",
                 sector: item.sector || "Unassigned",
                 education: item.educationLevel || "-",
                 job: item.jobCategory || "-",
@@ -100,7 +105,7 @@ export const useMemberData = () => {
 
     const addMember = async (newMemberData: any) => {
         try {
-            const response = await fetch('http://localhost:3000/api/congregants', {
+            const response = await fetch('/api/congregants', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newMemberData) // Ensure payload matches schema
@@ -125,21 +130,29 @@ export const useMemberData = () => {
             const member = members.find(m => m.id === id);
             const dbId = member?.originalId || parseInt(id.replace('M-', ''));
 
+            if (isNaN(dbId)) {
+                throw new Error("Invalid Member ID");
+            }
+
             const payload = mapMemberToPayload(updatedData);
 
-            const response = await fetch(`http://localhost:3000/api/congregants/${dbId}`, {
+            const response = await fetch(`/api/congregants/${dbId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) throw new Error('Gagal update anggota');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal update anggota');
+            }
 
             toast.success("Data berhasil diperbarui");
             fetchMembers();
             return true;
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating member:", error);
-            toast.error("Gagal update anggota");
+            toast.error(error.message || "Gagal update anggota");
             return false;
         }
     };
@@ -149,17 +162,25 @@ export const useMemberData = () => {
             const member = members.find(m => m.id === id);
             const dbId = member?.originalId || parseInt(id.replace('M-', ''));
 
-            const response = await fetch(`http://localhost:3000/api/congregants/${dbId}`, {
+            if (isNaN(dbId)) {
+                throw new Error("Invalid Member ID");
+            }
+
+            const response = await fetch(`/api/congregants/${dbId}`, {
                 method: 'DELETE',
             });
-            if (!response.ok) throw new Error('Gagal menghapus anggota');
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Gagal menghapus anggota');
+            }
 
             toast.success("Anggota berhasil dihapus");
             fetchMembers();
             return true;
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting member:", error);
-            toast.error("Gagal menghapus anggota");
+            toast.error(error.message || "Gagal menghapus anggota");
             return false;
         }
     };

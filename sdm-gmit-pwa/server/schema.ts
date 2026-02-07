@@ -50,6 +50,7 @@ export const congregants = mysqlTable("congregants", {
     id: int("id").primaryKey().autoincrement(),
     fullName: varchar("full_name", { length: 255 }).notNull(),
     gender: varchar("gender", { length: 20 }), // Laki-laki / Perempuan
+    placeOfBirth: varchar("place_of_birth", { length: 100 }),
     dateOfBirth: date("date_of_birth"),
     phone: varchar("phone", { length: 20 }),
 

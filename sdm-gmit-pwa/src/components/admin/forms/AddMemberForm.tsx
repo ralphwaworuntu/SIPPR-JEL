@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from '../../ui/Toast';
+import { useReferences } from '../../../hooks/useReferences';
 
 interface AddMemberFormProps {
     onClose: () => void;
@@ -11,18 +12,19 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
     const [activeTab, setActiveTab] = useState<'pribadi' | 'gereja' | 'profesional'>('pribadi');
     const [isLoading, setIsLoading] = useState(false);
 
+    const { references, isLoading: isReferencesLoading } = useReferences();
+
     // Form State (Simplified for basic needs)
     const [formData, setFormData] = useState({
         namaLengkap: initialData?.name || '',
-        nik: initialData?.nik || '',
         tempatLahir: initialData?.tempatLahir || '',
         tanggalLahir: initialData?.tanggalLahir || '',
         jenisKelamin: initialData?.gender || 'Laki-laki',
         alamat: initialData?.address || '',
         noHp: initialData?.phone || '',
-        sektor: initialData?.sector || 'Efata',
+        sektor: initialData?.sector || references.sectors[0] || 'Efata',
         statusGerejawi: initialData?.statusGerejawi || 'Sidi',
-        pendidikan: initialData?.education || 'S1',
+        pendidikan: initialData?.education || references.educationLevels[5] || 'Sarjana (S1)',
         pekerjaan: initialData?.job || '',
         keahlian: initialData?.skills ? initialData.skills.join(', ') : ''
     });
@@ -35,9 +37,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         e.preventDefault();
         setIsLoading(true);
 
-        // Simulate API Call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
         // Validation Check (Simple)
         if (!formData.namaLengkap || !formData.sektor) {
             toast.error("Mohon lengkapi data wajib!");
@@ -45,9 +44,15 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             return;
         }
 
-        toast.success(initialData ? "Data jemaat berhasil diperbarui!" : "Data jemaat berhasil ditambahkan!");
-        onSuccess(formData);
-        onClose();
+        try {
+            await onSuccess(formData);
+            // toast.success is handled in parent
+            // onClose is handled in parent callback or here if we want to double ensure
+        } catch (error) {
+            console.error("Submit error", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -93,13 +98,22 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">NIK</label>
+                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tempat Lahir</label>
                             <input
-                                name="nik"
-                                value={formData.nik}
+                                name="tempatLahir"
+                                value={formData.tempatLahir}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                                placeholder="16 digit NIK"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">No HP / WhatsApp</label>
+                            <input
+                                name="noHp"
+                                value={formData.noHp}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                placeholder="Contoh: 08123456789"
                             />
                         </div>
                         <div>
@@ -110,18 +124,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
-                                <option>Laki-laki</option>
-                                <option>Perempuan</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
                             </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tempat Lahir</label>
-                            <input
-                                name="tempatLahir"
-                                value={formData.tempatLahir}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                            />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tanggal Lahir</label>
@@ -156,10 +161,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
-                                <option>Efata</option>
-                                <option>Betel</option>
-                                <option>Sion</option>
-                                <option>Eden</option>
+                                {references.sectors.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                         <div>
@@ -170,9 +174,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
-                                <option>Sidi</option>
-                                <option>Baptis Anak</option>
-                                <option>Katekisasi</option>
+                                {references.statusGerejawi.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -188,13 +192,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
                             >
-                                <option>SD</option>
-                                <option>SMP</option>
-                                <option>SMA/SMK</option>
-                                <option>D3</option>
-                                <option>S1</option>
-                                <option>S2</option>
-                                <option>S3</option>
+                                {references.educationLevels.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
                             </select>
                         </div>
                         <div>

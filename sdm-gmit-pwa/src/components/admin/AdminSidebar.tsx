@@ -67,20 +67,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                             </>
                         )}
                     </NavLink>
-                    <NavLink
-                        to="/admin/families"
-                        className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                            ? 'bg-primary/10 text-primary font-bold'
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
-                            }`}
-                    >
-                        {({ isActive }) => (
-                            <>
-                                <span className={`material-symbols-outlined ${isActive ? 'filled' : ''}`}>home_work</span>
-                                Data Keluarga
-                            </>
-                        )}
-                    </NavLink>
+
                     <NavLink
                         to="/admin/reports"
                         className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive

@@ -37,6 +37,7 @@ app.get("/", (req, res) => {
 const congregantSchema = z.object({
     fullName: z.string().min(1, "Nama lengkap wajib diisi"),
     gender: z.enum(["Laki-laki", "Perempuan"]),
+    placeOfBirth: z.string().optional(),
     dateOfBirth: z.string().or(z.date()), // Handle both string from JSON and Date obj
     phone: z.string().min(1, "Nomor telepon wajib diisi"),
     sector: z.string().refine(val => REFERENCES.sectors.includes(val) || REFERENCES.categories.includes(val), "Sektor tidak valid"),
@@ -76,6 +77,7 @@ app.post("/api/congregants", async (req: Request, res: Response, next: NextFunct
         const newCongregant = await db.insert(congregants).values({
             fullName: validData.fullName,
             gender: validData.gender,
+            placeOfBirth: validData.placeOfBirth,
             dateOfBirth: new Date(validData.dateOfBirth),
             phone: validData.phone,
             sector: validData.sector,

@@ -19,7 +19,7 @@ const FormPage = () => {
 
     // Auto-save hook
     const { isSaving, lastSaved } = useFormPersist('gmit-form-draft', formData, (savedData) => {
-        setFormData(savedData);
+        setFormData({ ...initialFormData, ...savedData });
     });
 
     const progressPercentage = Math.round(((step - 1) / 4) * 100);

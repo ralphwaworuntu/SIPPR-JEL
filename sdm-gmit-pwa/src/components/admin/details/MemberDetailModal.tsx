@@ -140,7 +140,7 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
                         </div>
                         <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2">
                             <span className="text-xs text-slate-500 font-medium">Tempat Lahir</span>
-                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Kupang</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.placeOfBirth || '-'}</span>
                         </div>
                         <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2">
                             <span className="text-xs text-slate-500 font-medium">Alamat</span>

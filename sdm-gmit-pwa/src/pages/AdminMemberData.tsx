@@ -445,6 +445,16 @@ const AdminMemberData = () => {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedMember(member);
+                                                        }}
+                                                        className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors tooltip"
+                                                        title="Lihat Detail"
+                                                    >
+                                                        <span className="material-symbols-outlined text-lg">visibility</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedMember(member);
                                                             setIsEditMode(true);
                                                             setIsAddModalOpen(true);
                                                         }}
@@ -596,11 +606,17 @@ const AdminMemberData = () => {
             {/* Modals */}
             <Modal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setSelectedMember(null);
+                }}
                 title={isEditMode ? "Edit Data Jemaat" : "Tambah Jemaat Baru"}
             >
                 <AddMemberForm
-                    onClose={() => setIsAddModalOpen(false)}
+                    onClose={() => {
+                        setIsAddModalOpen(false);
+                        setSelectedMember(null);
+                    }}
                     initialData={isEditMode ? selectedMember : undefined}
                     onSuccess={async (newData) => {
                         if (isEditMode && selectedMember) {
@@ -613,7 +629,9 @@ const AdminMemberData = () => {
                                 gender: newData.jenisKelamin,
                                 statusGerejawi: newData.statusGerejawi,
                                 sector: newData.sektor,
-                                education: newData.pendidikan
+                                education: newData.pendidikan,
+                                phone: newData.noHp,
+                                placeOfBirth: newData.tempatLahir
                             });
                         } else {
                             await addMember({
@@ -625,16 +643,19 @@ const AdminMemberData = () => {
                                 gender: newData.jenisKelamin,
                                 statusGerejawi: newData.statusGerejawi,
                                 sector: newData.sektor,
-                                educationLevel: newData.pendidikan
+                                educationLevel: newData.pendidikan,
+                                phone: newData.noHp,
+                                placeOfBirth: newData.tempatLahir
                             });
                         }
                         setIsAddModalOpen(false);
+                        setSelectedMember(null);
                     }}
                 />
             </Modal>
 
             <Modal
-                isOpen={!!selectedMember}
+                isOpen={!!selectedMember && !isAddModalOpen}
                 onClose={() => setSelectedMember(null)}
                 title="Detail Jemaat"
             >

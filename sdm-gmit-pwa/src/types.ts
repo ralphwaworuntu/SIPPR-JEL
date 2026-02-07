@@ -2,6 +2,7 @@ export interface FormData {
     // Step 1: Identity
     fullName: string;
     gender: 'Laki-laki' | 'Perempuan' | '';
+    placeOfBirth: string;
     dateOfBirth: string;
     phone: string;
     address: string;
@@ -33,6 +34,7 @@ export interface FormData {
 export const initialFormData: FormData = {
     fullName: '',
     gender: '',
+    placeOfBirth: '',
     dateOfBirth: '',
     phone: '',
     address: '',
