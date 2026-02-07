@@ -11,6 +11,7 @@ import { BirthdayWidget } from '../components/dashboard/BirthdayWidget';
 import { useSession } from '../lib/auth-client';
 import { useSettings } from '../hooks/useSettings';
 import { useMemberData } from '../hooks/useMemberData';
+import { useDashboardStats } from '../hooks/useDashboardStats';
 import { DashboardSkeleton } from '../components/skeletons/DashboardSkeleton';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -154,16 +155,21 @@ const AdminDashboard = () => {
     const { profile } = useSettings();
     const user = session?.user;
 
-    // Get Real Data
-    const { stats, members, isLoading } = useMemberData();
+    // Get Real Data (Split into stats and list for performance)
+    const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
+    const { members, isLoading: isMembersLoading } = useMemberData(); // Still need members for Recent Activity list
 
-    if (isLoading) {
+    if (isStatsLoading || isMembersLoading) {
         return (
             <AdminLayout title="Dashboard Overview">
                 <DashboardSkeleton />
             </AdminLayout>
         );
     }
+
+    if (!stats) return null; // Should handle error state ideally
+
+    // Get 5 most recent members based on createdAt
 
     // Get 5 most recent members based on createdAt
     const recentMembers = useMemo(() => {

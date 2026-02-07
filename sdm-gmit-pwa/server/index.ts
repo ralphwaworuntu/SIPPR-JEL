@@ -29,40 +29,146 @@ app.get("/", (req, res) => {
 });
 
 // API Routes
-app.post("/api/congregants", async (req, res) => {
+
+// Helper to map DB congregant to Frontend Member
+const mapCongregantToMember = (c: any) => ({
+    id: c.id.toString(),
+    name: c.fullName,
+    sector: c.sector || "-",
+    education: c.educationLevel || "-",
+    job: c.jobCategory || "-",
+    skills: typeof c.skills === 'string' ? JSON.parse(c.skills) : (c.skills || []),
+    initials: (c.fullName || "X").substring(0, 2).toUpperCase(),
+    gender: c.gender || "Laki-laki",
+    birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
+    createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+    statusGerejawi: "Sidi" // Placeholder as schema doesn't have it explicitly yet or mapped differently
+});
+
+import { eq, like, and, desc, sql } from "drizzle-orm";
+
+// 1. GET Members (with Search & Filter)
+app.get("/api/members", async (req, res) => {
+    try {
+        const { search, sector, gender, education } = req.query;
+
+        const filters = [];
+        if (search) filters.push(like(congregants.fullName, `%${search}%`));
+        if (sector && sector !== "Semua") filters.push(eq(congregants.sector, String(sector)));
+        if (gender && gender !== "Semua") filters.push(eq(congregants.gender, String(gender)));
+
+        const result = await db.select()
+            .from(congregants)
+            .where(and(...filters))
+            .orderBy(desc(congregants.createdAt));
+
+        res.json(result.map(mapCongregantToMember));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch members" });
+    }
+});
+
+// 2. POST Member
+app.post("/api/members", async (req, res) => {
     try {
         const data = req.body;
-
-        // Basic validation (can use Zod later)
-        if (!data.fullName || !data.sector) {
-            res.status(400).json({ error: "Missing required fields" });
-            return;
-        }
-
-        // Map frontend data to schema
-        // Frontend sends camelCase, schema handles mapping if defined, but here we defined schema with camelCase keys mostly or snake_case in DB
-        // Drizzle defaults: we defined `fullName` as `varchar("full_name")` so we pass `fullName` to insert.
-
-        const newCongregant = await db.insert(congregants).values({
-            fullName: data.fullName,
+        await db.insert(congregants).values({
+            fullName: data.name,
             gender: data.gender,
-            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-            phone: data.phone,
+            dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
             sector: data.sector,
-            lingkungan: data.lingkungan,
-            rayon: data.rayon,
-            address: data.address,
-            educationLevel: data.educationLevel,
-            jobCategory: data.jobCategory,
-            skills: data.skills, // JSON
-            willingnessToServe: ['Aktif', 'On-demand', 'Bersedia', true].includes(data.willingnessToServe),
-            status: 'PENDING'
+            educationLevel: data.education,
+            jobCategory: data.job,
+            skills: data.skills,
+            status: 'VALIDATED' // Auto validate for admin
+        });
+        res.status(201).json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to create member" });
+    }
+});
+
+// 3. PUT Member
+app.put("/api/members/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+
+        await db.update(congregants)
+            .set({
+                fullName: data.name,
+                gender: data.gender,
+                dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
+                sector: data.sector,
+                educationLevel: data.education,
+                jobCategory: data.job,
+                skills: data.skills,
+            })
+            .where(eq(congregants.id, Number(id)));
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to update member" });
+    }
+});
+
+// 4. DELETE Member
+app.delete("/api/members/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.delete(congregants).where(eq(congregants.id, Number(id)));
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete member" });
+    }
+});
+
+// 5. Dashboard Stats (Aggregated)
+app.get("/api/dashboard/stats", async (req, res) => {
+    try {
+        // Parallel queries for performance
+        const [totalRes, genderRes, sectorRes] = await Promise.all([
+            db.select({ count: sql<number>`count(*)` }).from(congregants),
+            db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
+            db.select({ sector: congregants.sector, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.sector),
+        ]);
+
+        const total = totalRes[0]?.count || 0;
+
+        const genderCounts: Record<string, number> = {};
+        genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
+
+        const sectorCounts: Record<string, number> = {};
+        let dominant = "-";
+        let maxSec = 0;
+        sectorRes.forEach(s => {
+            if (s.sector) {
+                sectorCounts[s.sector] = s.count;
+                if (s.count > maxSec) { maxSec = s.count; dominant = s.sector; }
+            }
         });
 
-        res.status(201).json({ success: true, message: "Data berhasil disimpan", id: newCongregant[0].insertId });
+        res.json({
+            total,
+            sectorDominant: dominant,
+            activeSkills: 0, // Implement skill counting if needed
+            growth: 0,
+            professionalCount: 0, // Needs education filter query
+            volunteerCount: 0,
+            distributions: {
+                sector: sectorCounts,
+                gender: genderCounts,
+                education: {},
+                willingness: {}
+            }
+        });
     } catch (error) {
-        console.error("Error saving congregant:", error);
-        res.status(500).json({ error: "Failed to save data" });
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch stats" });
     }
 });
 
