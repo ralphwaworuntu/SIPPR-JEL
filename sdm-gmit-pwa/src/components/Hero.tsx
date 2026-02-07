@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import heroBg from '../assets/hero-bg.png';
-import logoGmit from '../assets/logo-gmit.png';
+
 
 export const Hero = () => {
     const ref = useRef(null);

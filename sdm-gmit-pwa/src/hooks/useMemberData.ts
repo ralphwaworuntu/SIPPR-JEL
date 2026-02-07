@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 // Types moved here for reuse
@@ -156,6 +156,28 @@ export const useMemberData = () => {
         };
     }, [members]);
 
+    // Mutations
+    const addMutation = useMutation({
+        mutationFn: (newMember: Omit<Member, "id">) => apiClient.post('/members', newMember),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: (member: Member) => apiClient.put(`/members/${member.id}`, member),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => apiClient.delete(`/members/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+        },
+    });
+
     return {
         members,
         setMembers,
@@ -168,6 +190,9 @@ export const useMemberData = () => {
         sortConfig, handleSort,
         stats,
         isLoading,
-        isError
+        isError,
+        addMutation,
+        updateMutation,
+        deleteMutation
     };
 };

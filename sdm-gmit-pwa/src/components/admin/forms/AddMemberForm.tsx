@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from '../../ui/Toast';
 import { z } from 'zod';
+import { useMemberData } from '../../../hooks/useMemberData';
 
 const memberSchema = z.object({
     namaLengkap: z.string().min(3, "Nama Lengkap minimal 3 karakter"),
@@ -28,16 +29,18 @@ interface AddMemberFormProps {
 }
 
 export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberFormProps) => {
+    const { addMutation, updateMutation } = useMemberData();
     const [activeTab, setActiveTab] = useState<'pribadi' | 'gereja' | 'profesional'>('pribadi');
-    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<ValidationErrors>({});
+
+    const isLoading = addMutation.isPending || updateMutation.isPending;
 
     // Form State (Simplified for basic needs)
     const [formData, setFormData] = useState({
         namaLengkap: initialData?.name || '',
         nik: initialData?.nik || '',
         tempatLahir: initialData?.tempatLahir || '',
-        tanggalLahir: initialData?.tanggalLahir || '',
+        tanggalLahir: initialData?.birthDate || '', // Fix: Map birthDate correctly
         jenisKelamin: initialData?.gender || 'Laki-laki',
         alamat: initialData?.address || '',
         noHp: initialData?.phone || '',
@@ -58,7 +61,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
         setErrors({});
 
         // Zod Validation
@@ -71,7 +73,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 newErrors[field] = issue.message;
             });
             setErrors(newErrors);
-            setIsLoading(false);
 
             // Auto switch tab to where the first error is
             const firstErrorField = Object.keys(newErrors)[0];
@@ -87,12 +88,43 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             return;
         }
 
-        // Simulate API Call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Prepare Payload
+        const payload: any = {
+            name: formData.namaLengkap,
+            nik: formData.nik,
+            birthDate: formData.tanggalLahir, // Standardize to birthDate
+            gender: formData.jenisKelamin,
+            sector: formData.sektor,
+            statusGerejawi: formData.statusGerejawi,
+            education: formData.pendidikan,
+            job: formData.pekerjaan,
+            skills: formData.keahlian.split(',').map((s: string) => s.trim()).filter(Boolean),
+            initials: formData.namaLengkap.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
+        };
 
-        toast.success(initialData ? "Data jemaat berhasil diperbarui!" : "Data jemaat berhasil ditambahkan!");
-        onSuccess(formData);
-        onClose();
+        if (initialData) {
+            updateMutation.mutate({ ...initialData, ...payload }, {
+                onSuccess: () => {
+                    toast.success("Data jemaat berhasil diperbarui!");
+                    onSuccess(payload); // Optional: keep for parent update if needed, but react-query handles it
+                    onClose();
+                },
+                onError: (error) => {
+                    toast.error(`Gagal memperbarui data: ${error.message}`);
+                }
+            });
+        } else {
+            addMutation.mutate(payload, {
+                onSuccess: () => {
+                    toast.success("Data jemaat berhasil ditambahkan!");
+                    onSuccess(payload);
+                    onClose();
+                },
+                onError: (error) => {
+                    toast.error(`Gagal menambah data: ${error.message}`);
+                }
+            });
+        }
     };
 
     return (

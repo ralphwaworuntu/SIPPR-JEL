@@ -25,7 +25,8 @@ const AdminMemberData = () => {
         filterStatus, setFilterStatus,
         sortConfig, handleSort,
         stats,
-        isLoading
+        isLoading,
+        deleteMutation
     } = useMemberData();
 
     // UI State
@@ -107,11 +108,18 @@ const AdminMemberData = () => {
             title: "Hapus Data Terpilih",
             message: `Apakah Anda yakin ingin menghapus ${selectedIds.length} data member terpilih? Tindakan ini tidak dapat dibatalkan.`,
             variant: 'danger',
-            action: () => {
-                setMembers(members.filter(m => !selectedIds.includes(m.id)));
-                setSelectedIds([]);
-                toast.success(`${selectedIds.length} data berhasil dihapus`);
-                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+            action: async () => {
+                try {
+                    // Delete one by one for now (Promise.all could be used but might overload backend if too many)
+                    await Promise.all(selectedIds.map(id => deleteMutation.mutateAsync(id)));
+
+                    setSelectedIds([]);
+                    toast.success(`${selectedIds.length} data berhasil dihapus`);
+                } catch (error) {
+                    toast.error("Gagal menghapus beberapa data.");
+                } finally {
+                    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                }
             }
         });
     };
@@ -466,10 +474,15 @@ const AdminMemberData = () => {
                                                                     title: "Hapus Data Member",
                                                                     message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
                                                                     variant: 'danger',
-                                                                    action: () => {
-                                                                        setMembers(members.filter(m => m.id !== member.id));
-                                                                        toast.success('Data berhasil dihapus');
-                                                                        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                    action: async () => {
+                                                                        try {
+                                                                            await deleteMutation.mutateAsync(member.id);
+                                                                            toast.success('Data berhasil dihapus');
+                                                                        } catch (error) {
+                                                                            toast.error('Gagal menghapus data');
+                                                                        } finally {
+                                                                            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                        }
                                                                     }
                                                                 });
                                                             }}
