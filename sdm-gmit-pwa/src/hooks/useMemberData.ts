@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
 
 // Types moved here for reuse
@@ -37,6 +37,7 @@ export const getAgeCategory = (age: number) => {
 };
 
 export const useMemberData = () => {
+    const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [filterSector, setFilterSector] = useState("Semua");
     const [filterGender, setFilterGender] = useState("Semua");
@@ -61,6 +62,14 @@ export const useMemberData = () => {
         },
         staleTime: 1000 * 60 * 2, // 2 minutes
     });
+
+    const setMembers = (action: Member[] | ((prev: Member[]) => Member[])) => {
+        const queryKey = ['members', { searchTerm, filterSector, filterGender, filterAgeCategory, filterStatus }];
+        queryClient.setQueryData(queryKey, (oldData: Member[] | undefined) => {
+            const current = oldData || [];
+            return typeof action === 'function' ? action(current) : action;
+        });
+    };
 
     // Client-side Sorting (Optional: can be moved to backend too, but keeping here for responsiveness)
     const members = useMemo(() => {
@@ -149,7 +158,7 @@ export const useMemberData = () => {
 
     return {
         members,
-        setMembers: () => { }, // No-op since we use query
+        setMembers,
         filteredMembers: members, // Alias for compatibility
         searchTerm, setSearchTerm,
         filterSector, setFilterSector,

@@ -67,7 +67,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         if (!result.success) {
             const newErrors: ValidationErrors = {};
             result.error.issues.forEach((issue) => {
-                newErrors[issue.path[0]] = issue.message;
+                const field = String(issue.path[0]);
+                newErrors[field] = issue.message;
             });
             setErrors(newErrors);
             setIsLoading(false);
