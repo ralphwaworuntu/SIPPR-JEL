@@ -1,3 +1,4 @@
+import { notInArray, sql } from "drizzle-orm";
 import express from "express";
 import cors from "cors";
 import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
@@ -69,14 +70,28 @@ const mapCongregantToMember = (c: any) => ({
     id: c.id.toString(),
     name: c.fullName,
     sector: c.sector || "-",
+    lingkungan: c.lingkungan || "-",
+    rayon: c.rayon || "-",
+    address: c.address || "-",
+    latitude: c.latitude || null,
+    longitude: c.longitude || null,
+    phone: c.phone || "-",
     education: c.educationLevel || "-",
+    educationLevel: c.educationLevel || "-",
+    major: c.major || "-",
     job: c.jobCategory || "-",
+    jobCategory: c.jobCategory || "-",
+    jobTitle: c.jobTitle || "-",
+    companyName: c.companyName || "-",
+    yearsOfExperience: c.yearsOfExperience || 0,
     skills: typeof c.skills === 'string' ? JSON.parse(c.skills) : (c.skills || []),
+    willingnessToServe: c.willingnessToServe || "Not-available",
+    interestAreas: typeof c.interestAreas === 'string' ? JSON.parse(c.interestAreas) : (c.interestAreas || []),
+    contributionTypes: typeof c.contributionTypes === 'string' ? JSON.parse(c.contributionTypes) : (c.contributionTypes || []),
     initials: (c.fullName || "X").substring(0, 2).toUpperCase(),
     gender: c.gender || "Laki-laki",
     birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
-    statusGerejawi: "Sidi" // Placeholder as schema doesn't have it explicitly yet or mapped differently
 });
 
 import { eq, like, and, desc, sql } from "drizzle-orm";
@@ -103,7 +118,7 @@ app.get("/api/members", async (req, res) => {
     }
 });
 
-// 2. POST Member
+// 2. POST Member (Admin)
 app.post("/api/members", async (req, res) => {
     try {
         const data = req.body;
@@ -111,16 +126,68 @@ app.post("/api/members", async (req, res) => {
             fullName: data.name,
             gender: data.gender,
             dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
+            phone: data.phone,
+            address: data.address,
             sector: data.sector,
+            lingkungan: data.lingkungan,
+            rayon: data.rayon,
             educationLevel: data.education,
-            jobCategory: data.job,
-            skills: data.skills,
+            major: data.major,
+            jobCategory: data.jobCategory,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            yearsOfExperience: data.yearsOfExperience,
+            skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
+            willingnessToServe: data.willingnessToServe,
+            interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+            contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+            latitude: data.latitude?.toString(),
+            longitude: data.longitude?.toString(),
             status: 'VALIDATED' // Auto validate for admin
         });
         res.status(201).json({ success: true });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to create member" });
+    }
+});
+
+// 2b. Public Registration Route (No Auth)
+app.post("/api/congregants", async (req, res) => {
+    try {
+        const data = req.body;
+        console.log("New Registration Attempt:", data.fullName);
+
+        await db.insert(congregants).values({
+            fullName: data.fullName,
+            gender: data.gender,
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+            phone: data.phone,
+            address: data.address,
+            sector: data.sector,
+            lingkungan: data.lingkungan,
+            rayon: data.rayon,
+            educationLevel: data.educationLevel,
+            major: data.major,
+            jobCategory: data.jobCategory,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            yearsOfExperience: data.yearsOfExperience || 0,
+            skills: data.skills ? JSON.stringify(data.skills) : JSON.stringify([]),
+            willingnessToServe: data.willingnessToServe,
+            interestAreas: data.interestAreas ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+            contributionTypes: data.contributionTypes ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+            latitude: data.latitude?.toString(),
+            longitude: data.longitude?.toString(),
+            status: 'PENDING'
+        });
+
+        console.log("Registration Successful:", data.fullName);
+        res.status(201).json({ success: true, message: "Pendaftaran berhasil" });
+    } catch (error) {
+        console.error("Submission Error:", error);
+        console.error("Error saving congregant:", error);
+        res.status(500).json({ error: "Gagal menyimpan data pendaftaran. Pastikan data lengkap." });
     }
 });
 
@@ -135,10 +202,23 @@ app.put("/api/members/:id", async (req, res) => {
                 fullName: data.name,
                 gender: data.gender,
                 dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
+                phone: data.phone,
+                address: data.address,
                 sector: data.sector,
+                lingkungan: data.lingkungan,
+                rayon: data.rayon,
                 educationLevel: data.education,
-                jobCategory: data.job,
-                skills: data.skills,
+                major: data.major,
+                jobCategory: data.jobCategory,
+                jobTitle: data.jobTitle,
+                companyName: data.companyName,
+                yearsOfExperience: data.yearsOfExperience,
+                skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
+                willingnessToServe: data.willingnessToServe,
+                interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+                contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+                latitude: data.latitude?.toString(),
+                longitude: data.longitude?.toString(),
             })
             .where(eq(congregants.id, Number(id)));
 
@@ -165,17 +245,38 @@ app.delete("/api/members/:id", async (req, res) => {
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
         // Parallel queries for performance
-        const [totalRes, genderRes, sectorRes] = await Promise.all([
+        const [totalRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes] = await Promise.all([
+            // 1. Total Count
             db.select({ count: sql<number>`count(*)` }).from(congregants),
+
+            // 2. Gender Distribution
             db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
+
+            // 3. Sector Distribution
             db.select({ sector: congregants.sector, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.sector),
+
+            // 4. Willingness Distribution
+            db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.willingnessToServe),
+
+            // 5. Education Distribution
+            db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.educationLevel),
+
+            // 6. Skills (Get all skills to parse and sum)
+            db.select({ skills: congregants.skills }).from(congregants),
+
+            // 7. Professional Count (Filter out non-working categories)
+            db.select({ count: sql<number>`count(*)` })
+                .from(congregants)
+                .where(notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-']))
         ]);
 
         const total = totalRes[0]?.count || 0;
 
+        // Process Gender
         const genderCounts: Record<string, number> = {};
         genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
 
+        // Process Sector
         const sectorCounts: Record<string, number> = {};
         let dominant = "-";
         let maxSec = 0;
@@ -186,22 +287,53 @@ app.get("/api/dashboard/stats", async (req, res) => {
             }
         });
 
+        // Process Willingness
+        const willingnessCounts: Record<string, number> = {};
+        let volunteerCount = 0;
+        willingnessRes.forEach(w => {
+            if (w.willingness) {
+                willingnessCounts[w.willingness] = w.count;
+                if (['Aktif', 'On-demand'].includes(w.willingness)) {
+                    volunteerCount += w.count;
+                }
+            }
+        });
+
+        // Process Education
+        const educationCounts: Record<string, number> = {};
+        educationRes.forEach(e => { if (e.education) educationCounts[e.education] = e.count; });
+
+        // Process Skills
+        let activeSkills = 0;
+        skillsRes.forEach(row => {
+            try {
+                const skills = typeof row.skills === 'string' ? JSON.parse(row.skills) : row.skills;
+                if (Array.isArray(skills)) {
+                    activeSkills += skills.length;
+                }
+            } catch (e) {
+                // Ignore parsing errors
+            }
+        });
+
+        const professionalCount = professionalRes[0]?.count || 0;
+
         res.json({
             total,
             sectorDominant: dominant,
-            activeSkills: 0, // Implement skill counting if needed
-            growth: 0,
-            professionalCount: 0, // Needs education filter query
-            volunteerCount: 0,
+            activeSkills,
+            growth: 12, // Placeholder for now, requires historical tracking
+            professionalCount,
+            volunteerCount,
             distributions: {
                 sector: sectorCounts,
                 gender: genderCounts,
-                education: {},
-                willingness: {}
+                education: educationCounts,
+                willingness: willingnessCounts
             }
         });
     } catch (error) {
-        console.error(error);
+        console.error("Dashboard Stats Error:", error);
         res.status(500).json({ error: "Failed to fetch stats" });
     }
 });

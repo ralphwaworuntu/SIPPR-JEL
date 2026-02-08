@@ -25,7 +25,7 @@ export const AdminLayout = ({ children, title = "Dashboard" }: AdminLayoutProps)
                 />
 
                 <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth flex flex-col">
-                    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in w-full flex-1">
+                    <div className="max-w-7xl mx-auto space-y-8 w-full flex-1">
                         {children}
                     </div>
                     <div className="mt-12">

@@ -36,6 +36,7 @@ const AdminFamilyData = () => {
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [selectedFamily, setSelectedFamily] = useState<Family | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
     // Confirm Dialog State
@@ -378,7 +379,10 @@ const AdminFamilyData = () => {
                                         <tr
                                             key={family.id}
                                             className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
-                                            onClick={() => setSelectedFamily(family)}
+                                            onClick={() => {
+                                                setSelectedFamily(family);
+                                                setIsDetailModalOpen(true);
+                                            }}
                                         >
                                             <td className="px-6 py-4">
                                                 <input
@@ -425,6 +429,7 @@ const AdminFamilyData = () => {
                                                             e.stopPropagation();
                                                             setSelectedFamily(family);
                                                             setIsEditMode(true);
+                                                            setIsDetailModalOpen(false);
                                                             setIsAddModalOpen(true);
                                                         }}
                                                         className="p-2 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors"
@@ -462,7 +467,10 @@ const AdminFamilyData = () => {
                             currentItems.map((family) => (
                                 <div
                                     key={family.id}
-                                    onClick={() => setSelectedFamily(family)}
+                                    onClick={() => {
+                                        setSelectedFamily(family);
+                                        setIsDetailModalOpen(true);
+                                    }}
                                     className="relative group bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all cursor-pointer animate-fade-in-up"
                                 >
                                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -566,19 +574,33 @@ const AdminFamilyData = () => {
 
             {/* Detail Modal */}
             <Modal
-                isOpen={!!selectedFamily && !isAddModalOpen}
-                onClose={() => setSelectedFamily(null)}
+                isOpen={isDetailModalOpen}
+                onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedFamily(null);
+                }}
                 title="Detail Keluarga"
             >
                 <FamilyDetailModal
                     family={selectedFamily}
-                    onClose={() => setSelectedFamily(null)}
+                    onClose={() => {
+                        setIsDetailModalOpen(false);
+                        setSelectedFamily(null);
+                    }}
+                    onEdit={() => {
+                        setIsDetailModalOpen(false);
+                        setIsEditMode(true);
+                        setIsAddModalOpen(true);
+                    }}
                 />
             </Modal>
 
             <Modal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    if (!isDetailModalOpen) setSelectedFamily(null);
+                }}
                 title={isEditMode ? "Edit Kartu Keluarga" : "Tambah Kartu Keluarga Baru"}
             >
                 <AddFamilyForm

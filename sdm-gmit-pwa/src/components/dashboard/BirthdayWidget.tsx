@@ -5,52 +5,40 @@ export const BirthdayWidget = () => {
     const { members } = useMemberData();
 
     const upcomingBirthdays = useMemo(() => {
+        if (!members) return [];
         const today = new Date();
         const nextWeek = new Date();
         nextWeek.setDate(today.getDate() + 7);
 
         return members
+            .filter(m => m && m.birthDate) // Ensure member and birthDate exist
             .map(m => {
                 const birthDate = new Date(m.birthDate);
-                // Create data object for this year's birthday
-                // const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+                if (isNaN(birthDate.getTime())) return null;
 
-                // If birthday passed this year, look at next year (optional logic, but for "upcoming" we focus on near future)
-                // For simplicity: check if it matches in the next 30 days regardless of year wrap
-
-                // Better simple logic:
-                // Set birth year to current year for comparison
                 let targetDate = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-                if (targetDate < today) {
-                    // check if it's really passed or just different time
-                    // if really passed, maybe show next year? No, just hide.
-                }
 
-                // Simplified: Check month and day
                 return {
                     ...m,
                     thisYearBirthday: targetDate,
                     age: today.getFullYear() - birthDate.getFullYear()
                 };
             })
-            .filter(m => {
-                // Check if birthday is between today and next 7 days
-                // Only comparing Month and Date
+            .filter((m): m is any => {
+                if (!m) return false;
+
                 const bMonth = new Date(m.birthDate).getMonth();
                 const bDate = new Date(m.birthDate).getDate();
 
                 const tMonth = today.getMonth();
                 const tDate = today.getDate();
 
-                // Check exact match or future in same month
                 if (bMonth === tMonth && bDate >= tDate) return true;
-                // Check next month if near end of month
-                if (bMonth === (tMonth + 1) % 12 && bDate <= 7) return true; // Loose logic
+                if (bMonth === (tMonth + 1) % 12 && bDate <= 7) return true;
 
                 return false;
             })
             .sort((a, b) => {
-                // Sort by day proximity
                 const dateA = new Date(a.birthDate).getDate();
                 const dateB = new Date(b.birthDate).getDate();
                 return dateA - dateB;

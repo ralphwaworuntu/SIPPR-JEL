@@ -39,6 +39,7 @@ const AdminMemberData = () => {
 
     const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
@@ -183,7 +184,7 @@ const AdminMemberData = () => {
     const handleExportCSV = () => {
         const headers = ["Nama,ID,Sektor,Pendidikan,Pekerjaan,Keahlian,Gender,Umur,Status"];
         const rows = filteredMembers.map(m =>
-            `"${m.name}","${m.id}","${m.sector}","${m.education}","${m.job}","${m.skills.join(';')}","${m.gender}","${calculateAge(m.birthDate)}","${m.statusGerejawi}"`
+            `"${m.name}","${m.id}","${m.sector}","${m.education}","${m.job}","${Array.isArray(m.skills) ? m.skills.join(';') : ''}","${m.gender}","${calculateAge(m.birthDate)}","${m.statusGerejawi}"`
         );
         const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
         const encodedUri = encodeURI(csvContent);
@@ -226,7 +227,7 @@ const AdminMemberData = () => {
     return (
         <AdminLayout title="Data Jemaat">
             {/* Page Header */}
-            <div className="flex flex-wrap justify-between gap-3 mb-6 animate-fade-in-up">
+            <div className="flex flex-wrap justify-between gap-3 mb-6">
                 <div className="flex min-w-72 flex-col gap-1">
                     <p className="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Manajemen Data</p>
                     <p className="text-slate-500 text-sm font-normal">Kelola data profesional dan potensi SDM jemaat.</p>
@@ -253,7 +254,7 @@ const AdminMemberData = () => {
 
             {/* Bulk Action Bar */}
             {selectedIds.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 animate-fade-in-up border border-slate-700">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border border-slate-700">
                     <span className="font-bold text-sm">{selectedIds.length} terpilih</span>
                     <div className="h-4 w-px bg-slate-700"></div>
                     <div className="flex gap-2">
@@ -331,11 +332,11 @@ const AdminMemberData = () => {
                             onChange={(e) => setFilterSector(e.target.value)}
                             className="h-10 pl-3 pr-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium border-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
                         >
-                            <option value="Semua">Semua Sektor</option>
-                            <option value="Efata">Efata</option>
-                            <option value="Betel">Betel</option>
-                            <option value="Sion">Sion</option>
-                            <option value="Eden">Eden</option>
+                            <option value="Semua">Semua Sektor Kat.</option>
+                            <option value="Pemuda">Pemuda</option>
+                            <option value="Kaum Perempuan">Kaum Perempuan</option>
+                            <option value="Kaum Bapak">Kaum Bapak</option>
+                            <option value="Lansia">Lansia</option>
                         </select>
                         <button
                             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
@@ -423,11 +424,11 @@ const AdminMemberData = () => {
                                         </th>
                                         {[
                                             { label: "Nama Lengkap", key: "name", width: "min-w-[200px]" },
-                                            { label: "Sektor", key: "sector", width: "min-w-[150px]" },
+                                            { label: "Sektor Kat.", key: "sector", width: "min-w-[150px]" },
                                             { label: "Umur", key: "birthDate", width: "w-20" },
                                             { label: "Pendidikan", key: "education", width: "min-w-[150px]" },
                                             { label: "Pekerjaan", key: "job", width: "min-w-[150px]" },
-                                            { label: "Status", key: "statusGerejawi", width: "min-w-[100px]" },
+                                            { label: "Rayon", key: "rayon", width: "min-w-[100px]" },
                                         ].map((col) => (
                                             <th
                                                 key={col.key}
@@ -453,7 +454,10 @@ const AdminMemberData = () => {
                                             <tr
                                                 key={member.id}
                                                 className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
-                                                onClick={() => setSelectedMember(member)}
+                                                onClick={() => {
+                                                    setSelectedMember(member);
+                                                    setIsDetailModalOpen(true);
+                                                }}
                                             >
                                                 <td className="px-6 py-4 relative">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-left"></div>
@@ -485,10 +489,7 @@ const AdminMemberData = () => {
                                                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{member.education}</td>
                                                 <td className="px-6 py-4 text-slate-900 dark:text-white text-sm font-medium">{member.job}</td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${member.statusGerejawi === 'Sidi' ? 'bg-green-50 text-green-600 border-green-100' :
-                                                        member.statusGerejawi === 'Baptis' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                            'bg-orange-50 text-orange-600 border-orange-100'
-                                                        }`}>{member.statusGerejawi}</span>
+                                                    <span className="text-slate-600 dark:text-slate-400 text-xs font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">R{member.rayon}L{member.lingkungan}</span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -497,6 +498,7 @@ const AdminMemberData = () => {
                                                                 e.stopPropagation();
                                                                 setSelectedMember(member);
                                                                 setIsEditMode(true);
+                                                                setIsDetailModalOpen(false);
                                                                 setIsAddModalOpen(true);
                                                             }}
                                                             className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors tooltip"
@@ -562,10 +564,7 @@ const AdminMemberData = () => {
                                                     <p className="text-xs text-slate-500">{member.id} • {member.sector}</p>
                                                 </div>
                                             </div>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${member.statusGerejawi === 'Sidi' ? 'bg-green-50 text-green-600 border-green-100' :
-                                                member.statusGerejawi === 'Baptis' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                                    'bg-orange-50 text-orange-600 border-orange-100'
-                                                }`}>{member.statusGerejawi}</span>
+                                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">R{member.rayon} - L{member.lingkungan}</span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
                                             <div>
@@ -622,7 +621,10 @@ const AdminMemberData = () => {
                             currentMembers.map((member) => (
                                 <div
                                     key={member.id}
-                                    onClick={() => setSelectedMember(member)}
+                                    onClick={() => {
+                                        setSelectedMember(member);
+                                        setIsDetailModalOpen(true);
+                                    }}
                                     className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer relative group"
                                 >
                                     <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -652,10 +654,10 @@ const AdminMemberData = () => {
                                         </div>
                                     </div>
                                     <div className="mt-4 flex flex-wrap gap-1">
-                                        {member.skills.slice(0, 3).map((skill, skIdx) => (
+                                        {Array.isArray(member.skills) && member.skills.slice(0, 3).map((skill, skIdx) => (
                                             <span key={skIdx} className="bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700">{skill}</span>
                                         ))}
-                                        {member.skills.length > 3 && <span className="text-xs text-slate-400 pl-1">+{member.skills.length - 3}</span>}
+                                        {Array.isArray(member.skills) && member.skills.length > 3 && <span className="text-xs text-slate-400 pl-1">+{member.skills.length - 3}</span>}
                                     </div>
                                 </div>
                             ))
@@ -723,58 +725,41 @@ const AdminMemberData = () => {
             {/* Modals */}
             <Modal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    if (!isDetailModalOpen) setSelectedMember(null);
+                }}
                 title={isEditMode ? "Edit Data Jemaat" : "Tambah Jemaat Baru"}
             >
                 <AddMemberForm
                     onClose={() => setIsAddModalOpen(false)}
                     initialData={isEditMode ? selectedMember : undefined}
-                    onSuccess={(newData) => {
-                        if (isEditMode && selectedMember) {
-                            const updatedMembers = members.map(m =>
-                                m.id === selectedMember.id ? {
-                                    ...m,
-                                    ...newData,
-                                    name: newData.namaLengkap,
-                                    birthDate: newData.tanggalLahir,
-                                    job: newData.pekerjaan,
-                                    skills: typeof newData.keahlian === 'string' ? newData.keahlian.split(',').map((s: string) => s.trim()) : m.skills
-                                } : m
-                            );
-                            setMembers(updatedMembers);
-                            toast.success("Data berhasil diperbarui");
-                        } else {
-                            const newId = `M-00${Math.floor(Math.random() * 899) + 100}`;
-                            const initials = newData.namaLengkap.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
-                            // @ts-ignore - Mocking simplifying
-                            const newMember: Member = {
-                                id: newId,
-                                name: newData.namaLengkap,
-                                initials,
-                                sector: newData.sektor,
-                                education: newData.pendidikan,
-                                job: newData.pekerjaan,
-                                skills: typeof newData.keahlian === 'string' ? newData.keahlian.split(',').map((s: string) => s.trim()) : [],
-                                gender: newData.jenisKelamin,
-                                birthDate: newData.tanggalLahir,
-                                statusGerejawi: newData.statusGerejawi
-                            };
-                            setMembers([newMember, ...members]);
-                            toast.success("Data berhasil ditambahkan");
-                        }
+                    onSuccess={() => {
+                        // All mutations inside AddMemberForm already invalidate query
                         setIsAddModalOpen(false);
                     }}
                 />
             </Modal>
 
             <Modal
-                isOpen={!!selectedMember}
-                onClose={() => setSelectedMember(null)}
+                isOpen={isDetailModalOpen}
+                onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedMember(null);
+                }}
                 title="Detail Jemaat"
             >
                 <MemberDetailModal
                     member={selectedMember}
-                    onClose={() => setSelectedMember(null)}
+                    onClose={() => {
+                        setIsDetailModalOpen(false);
+                        setSelectedMember(null);
+                    }}
+                    onEdit={() => {
+                        setIsDetailModalOpen(false);
+                        setIsEditMode(true);
+                        setIsAddModalOpen(true);
+                    }}
                 />
             </Modal>
 

@@ -1,8 +1,9 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
-import DistributionMap from '../components/admin/DistributionMap';
+import { LingkunganChart } from '../components/admin/LingkunganChart';
 import { StatCard } from '../components/dashboard/StatCard';
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 import { QuickActions } from '../components/dashboard/QuickActions';
@@ -61,7 +62,9 @@ const DynamicChart = ({ initialMetric, customData }: DynamicChartProps) => {
 
     // Calculate total for center text in doughnut
     const total = data.data.reduce((a, b) => a + b, 0);
-    const centerValue = initialMetric === 'willingness' ? `${Math.round((data.data[0] / total) * 100)}%` : total.toLocaleString();
+    const centerValue = initialMetric === 'willingness'
+        ? (total > 0 ? `${Math.round((data.data[0] / total) * 100)}%` : '0%')
+        : total.toLocaleString();
 
     return (
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col relative group">
@@ -153,26 +156,17 @@ const DynamicChart = ({ initialMetric, customData }: DynamicChartProps) => {
 const AdminDashboard = () => {
     const { data: session } = useSession();
     const { profile } = useSettings();
+    const navigate = useNavigate();
     const user = session?.user;
 
     // Get Real Data (Split into stats and list for performance)
-    const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
-    const { members, isLoading: isMembersLoading } = useMemberData(); // Still need members for Recent Activity list
-
-    if (isStatsLoading || isMembersLoading) {
-        return (
-            <AdminLayout title="Dashboard Overview">
-                <DashboardSkeleton />
-            </AdminLayout>
-        );
-    }
-
-    if (!stats) return null; // Should handle error state ideally
-
-    // Get 5 most recent members based on createdAt
+    console.log("AdminDashboard: Loading data...");
+    const { data: stats, isLoading: isStatsLoading, isError: isStatsError, error: statsError } = useDashboardStats();
+    const { members, isLoading: isMembersLoading, isError: isMembersError } = useMemberData();
 
     // Get 5 most recent members based on createdAt
     const recentMembers = useMemo(() => {
+        if (!members || members.length === 0) return [];
         return [...members]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 5);
@@ -180,31 +174,42 @@ const AdminDashboard = () => {
 
     // Transform API stats to Chart Data
     const chartsData = useMemo(() => {
-        // Gender
-        const genderLabels = Object.keys(stats.distributions.gender);
-        const genderData = Object.values(stats.distributions.gender);
+        type DistributionType = Record<string, number>;
+        const distributions = stats?.distributions as {
+            sector?: DistributionType;
+            gender?: DistributionType;
+            education?: DistributionType;
+            willingness?: DistributionType;
+        } || {};
 
-        // Willingness
-        const willLabels = ["Bersedia", "Ragu-ragu", "Tidak"];
+        // Gender
+        const distGender = distributions.gender || {};
+        const genderLabels = Object.keys(distGender);
+        const genderData = Object.values(distGender) as number[];
+
+        // Willingness (only 2 options: Aktif = Bersedia, On-demand = Ragu-ragu)
+        const willLabels = ["Bersedia", "Ragu-ragu"];
+        const distWillingness = distributions.willingness || {};
         const willData = [
-            stats.distributions.willingness["Bersedia"] || 0,
-            stats.distributions.willingness["Ragu-ragu"] || 0,
-            stats.distributions.willingness["Tidak"] || 0
+            distWillingness["Aktif"] || 0,
+            distWillingness["On-demand"] || 0
         ];
 
         // Education
         const eduOrder = ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3'];
-        const eduLabels = Object.keys(stats.distributions.education).sort((a, b) => eduOrder.indexOf(a) - eduOrder.indexOf(b));
-        const eduData = eduLabels.map(k => stats.distributions.education[k]);
+        const distEdu = distributions.education || {};
+        const eduLabels = Object.keys(distEdu).sort((a, b) => eduOrder.indexOf(a) - eduOrder.indexOf(b));
+        const eduData = eduLabels.map(k => distEdu[k] as number);
 
         // Sector
-        const sectorLabels = Object.keys(stats.distributions.sector);
-        const sectorData = Object.values(stats.distributions.sector);
+        const distSector = distributions.sector || {};
+        const sectorLabels = Object.keys(distSector);
+        const sectorData = Object.values(distSector) as number[];
 
         return {
             gender: {
-                labels: genderLabels,
-                data: genderData,
+                labels: genderLabels.length > 0 ? genderLabels : ["No Data"],
+                data: genderData.length > 0 ? genderData : [0],
                 colors: ['#10b981', '#cbd5e1'],
                 type: 'doughnut' as const,
                 totalLabel: 'Total'
@@ -212,32 +217,64 @@ const AdminDashboard = () => {
             willingness: {
                 labels: willLabels,
                 data: willData,
-                colors: ['#10b981', '#cbd5e1', '#f43f5e'],
+                colors: ['#10b981', '#f59e0b'],  // Green for Bersedia, Amber for Ragu-ragu
                 type: 'doughnut' as const,
                 totalLabel: 'Bersedia'
             },
             education: {
-                labels: eduLabels,
-                data: eduData,
-                colors: Array(eduLabels.length).fill('#6366f1'),
+                labels: eduLabels.length > 0 ? eduLabels : ["No Data"],
+                data: eduData.length > 0 ? eduData : [0],
+                colors: Array(Math.max(1, eduLabels.length)).fill('#6366f1'),
                 type: 'bar' as const,
                 totalLabel: 'Total'
             },
             sector: {
-                labels: sectorLabels,
-                data: sectorData,
+                labels: sectorLabels.length > 0 ? sectorLabels : ["No Data"],
+                data: sectorData.length > 0 ? sectorData : [0],
                 colors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
                 type: 'bar' as const,
                 totalLabel: 'Jemaat'
             }
         };
-    }, [stats]);
+    }, [stats, members]);
+
+    if (isStatsLoading || isMembersLoading) {
+        console.log("AdminDashboard: Data is loading...");
+        return (
+            <AdminLayout title="Dashboard Overview">
+                <DashboardSkeleton />
+            </AdminLayout>
+        );
+    }
+
+    if (isStatsError || isMembersError || !stats) {
+        console.error("AdminDashboard: Error loading data", { isStatsError, isMembersError, statsError });
+        return (
+            <AdminLayout title="Dashboard Overview">
+                <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 text-center">
+                    <div className="size-16 bg-red-100 dark:bg-red-900/20 text-red-600 rounded-2xl flex items-center justify-center mb-4">
+                        <span className="material-symbols-outlined text-3xl">error</span>
+                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Gagal Memuat Data</h2>
+                    <p className="text-slate-500 dark:text-slate-400 max-w-sm mb-6">
+                        {statsError instanceof Error ? statsError.message : "Terjadi kesalahan saat mengambil statistik dashboard dari server."}
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:opacity-90 transition-opacity"
+                    >
+                        Coba Lagi
+                    </button>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout title="Dashboard Overview">
 
             {/* 1. Bento Grid Hero Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 animate-fade-in-up">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                 {/* Clock Widget (1x2) */}
                 <div className="md:col-span-1 md:row-span-1 lg:row-span-1 h-60">
                     <ClockWidget />
@@ -247,21 +284,21 @@ const AdminDashboard = () => {
                 <div className="md:col-span-2 lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-center h-60 relative overflow-hidden">
                     <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none"></div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 relative z-10">
-                        Halo, {profile.firstName || user?.name || 'Admin'}! 👋
+                        Halo, {profile?.firstName || user?.name || 'Admin'}! 👋
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400 max-w-md relative z-10">
-                        Ada <strong className="text-slate-900 dark:text-white">{members.length} jemaat</strong> terdaftar.
+                        Ada <strong className="text-slate-900 dark:text-white">{(members || []).length} jemaat</strong> terdaftar.
                         Minggu ini ada <strong className="text-green-600">3 penambahan</strong> data baru.
                     </p>
                     <div className="mt-6 flex gap-3 relative z-10">
                         <button
-                            onClick={() => window.location.href = '#/admin/members?action=add'}
+                            onClick={() => navigate('/admin/members?action=add')}
                             className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold shadow-lg hover:scale-105 transition-transform"
                         >
                             + Tambah Jemaat
                         </button>
                         <button
-                            onClick={() => window.location.href = '#/admin/reports'}
+                            onClick={() => navigate('/admin/reports')}
                             className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                         >
                             Lihat Laporan
@@ -335,11 +372,11 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* 3. Map & Activity Section */}
+            {/* 3. Lingkungan & Activity Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Map (2 cols) */}
+                {/* Lingkungan Chart (2 cols) */}
                 <div className="lg:col-span-2 h-[400px]">
-                    <MapSection sectorData={stats.distributions.sector} />
+                    <LingkunganChart members={members} />
                 </div>
                 {/* Activity (1 col) */}
                 <div className="lg:col-span-1 h-[400px]">
@@ -348,53 +385,6 @@ const AdminDashboard = () => {
             </div>
 
         </AdminLayout>
-    );
-};
-
-interface MapSectionProps {
-    sectorData: Record<string, number>;
-}
-
-const MapSection = ({ sectorData }: MapSectionProps) => {
-    const mapRef = useRef<HTMLDivElement>(null);
-
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            mapRef.current?.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    };
-
-    return (
-        <div ref={mapRef} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-full flex flex-col relative group">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 absolute top-0 left-0 right-0 z-10 backdrop-blur-sm">
-                <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">Sebaran Domisili</h3>
-                </div>
-                <button onClick={toggleFullscreen} className="text-slate-400 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
-                    <span className="material-symbols-outlined text-lg">fullscreen</span>
-                </button>
-            </div>
-
-            <div className="flex-1 w-full relative bg-slate-50 dark:bg-slate-800/50 pt-14">
-                <DistributionMap sectorData={sectorData} />
-                {/* Legend Overlay */}
-                <div className="absolute bottom-4 left-4 p-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-800 shadow-lg z-[400]">
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Legenda</h4>
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <div className="size-2 bg-[#6366f1] rounded-full"></div>
-                            <span className="text-[10px] font-medium text-slate-700 dark:text-slate-200">Ada Data</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="size-2 bg-slate-300 rounded-full"></div>
-                            <span className="text-[10px] font-medium text-slate-700 dark:text-slate-200">Kosong</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     );
 };
 

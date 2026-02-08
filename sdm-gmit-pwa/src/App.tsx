@@ -1,21 +1,21 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from './components/ui/Toast';
 import LandingPage from './pages/LandingPage';
 import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SeedUser from './pages/SeedUser';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminMemberData from './pages/AdminMemberData';
+import AdminFamilyData from './pages/AdminFamilyData';
+import AdminReports from './pages/AdminReports';
+import AdminSettings from './pages/AdminSettings';
 import { Toaster } from './components/ui/Toast';
 import { OfflineBanner } from './components/ui/OfflineBanner';
-
-// Lazy Load Admin Pages for Performance
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-const AdminMemberData = React.lazy(() => import('./pages/AdminMemberData'));
-const AdminFamilyData = React.lazy(() => import('./pages/AdminFamilyData'));
-const AdminReports = React.lazy(() => import('./pages/AdminReports'));
-const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
+import ErrorBoundary from './components/ui/ErrorBoundary';
+import { useSession } from './lib/auth-client';
+import { Navigate } from 'react-router-dom';
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -28,9 +28,6 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-import { useSession } from './lib/auth-client';
-import { Navigate } from 'react-router-dom';
-
 function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { data: session, isPending } = useSession();
 
@@ -40,7 +37,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
-// Inner component to handle routing animations and logic that requires Router context
+// Inner component to handle routing logic
 const AppContent = () => {
   const location = useLocation();
 
@@ -69,65 +66,54 @@ const AppContent = () => {
   }, [location.pathname]);
 
   return (
-    <>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-          className="w-full"
-        >
-          <Suspense fallback={<PageLoader />}>
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/form" element={<FormPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/seed-user" element={<SeedUser />} />
+    <div className="min-h-screen w-full">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/form" element={<FormPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/seed-user" element={<SeedUser />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/members" element={
-                <ProtectedRoute>
-                  <AdminMemberData />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/families" element={
-                <ProtectedRoute>
-                  <AdminFamilyData />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/reports" element={
-                <ProtectedRoute>
-                  <AdminReports />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/settings" element={
-                <ProtectedRoute>
-                  <AdminSettings />
-                </ProtectedRoute>
-              } />
+        {/* Admin Routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/members" element={
+          <ProtectedRoute>
+            <AdminMemberData />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/families" element={
+          <ProtectedRoute>
+            <AdminFamilyData />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/reports" element={
+          <ProtectedRoute>
+            <AdminReports />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/settings" element={
+          <ProtectedRoute>
+            <AdminSettings />
+          </ProtectedRoute>
+        } />
 
-              {/* Catch-all Route for 404 */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </motion.div>
-      </AnimatePresence>
+        {/* Catch-all Route for 404 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
       {isOffline && <OfflineBanner />}
-    </>
+    </div>
   );
 };
 
 function App() {
   return (
     <Router>
-      <AppContent />
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
       <Toaster />
     </Router>
   )

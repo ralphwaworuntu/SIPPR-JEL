@@ -6,15 +6,29 @@ import { apiClient } from '../lib/api-client';
 export interface Member {
     id: string;
     name: string;
+    address?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    phone?: string;
     sector: string;
+    lingkungan: string;
+    rayon: string;
     education: string;
+    educationLevel?: string;
+    major?: string;
     job: string;
+    jobCategory: string;
+    jobTitle?: string;
+    companyName?: string;
+    yearsOfExperience?: number;
     skills: string[];
+    willingnessToServe?: string;
+    interestAreas: string[];
+    contributionTypes: string[];
     initials: string;
     gender: "Laki-laki" | "Perempuan";
     birthDate: string; // YYYY-MM-DD
     createdAt: string; // ISO Date String
-    statusGerejawi: "Sidi" | "Baptis" | "Katekisasi";
 }
 
 export const calculateAge = (birthDate: string) => {
@@ -58,7 +72,24 @@ export const useMemberData = () => {
             if (filterStatus !== "Semua") params.status = filterStatus;
 
             const response = await apiClient.get<Member[]>('/members', { params });
-            return response.data;
+            return response.data.map(m => ({
+                ...m,
+                skills: Array.isArray(m.skills)
+                    ? m.skills
+                    : (typeof m.skills === 'string'
+                        ? (m.skills as string).split(',').map(s => s.trim()).filter(Boolean)
+                        : []),
+                interestAreas: Array.isArray(m.interestAreas)
+                    ? m.interestAreas
+                    : (typeof m.interestAreas === 'string'
+                        ? JSON.parse(m.interestAreas)
+                        : []),
+                contributionTypes: Array.isArray(m.contributionTypes)
+                    ? m.contributionTypes
+                    : (typeof m.contributionTypes === 'string'
+                        ? JSON.parse(m.contributionTypes)
+                        : []),
+            }));
         },
         staleTime: 1000 * 60 * 2, // 2 minutes
     });
@@ -110,35 +141,44 @@ export const useMemberData = () => {
         let dominant = "-";
 
         members.forEach(m => {
+            if (!m) return;
             // Sector
-            sectorCounts[m.sector] = (sectorCounts[m.sector] || 0) + 1;
-            if (sectorCounts[m.sector] > maxCount) {
-                maxCount = sectorCounts[m.sector];
-                dominant = m.sector;
+            const sector = m.sector || "Lainnya";
+            sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+            if (sectorCounts[sector] > maxCount) {
+                maxCount = sectorCounts[sector];
+                dominant = sector;
             }
 
             // Gender
-            if (genderCounts[m.gender] !== undefined) {
-                genderCounts[m.gender]++;
+            const gender = m.gender;
+            if (gender && genderCounts[gender] !== undefined) {
+                genderCounts[gender]++;
             }
 
             // Education
-            educationCounts[m.education] = (educationCounts[m.education] || 0) + 1;
+            const edu = m.education || "Lainnya";
+            educationCounts[edu] = (educationCounts[edu] || 0) + 1;
 
             // Willingness
-            const age = calculateAge(m.birthDate);
-            if (m.statusGerejawi === "Sidi" && age > 17 && age < 60) {
-                willingnessCounts["Bersedia"]++;
-            } else if (age > 60) {
-                willingnessCounts["Tidak"]++;
-            } else {
-                willingnessCounts["Ragu-ragu"]++;
+            if (m.willingnessToServe) {
+                const status = m.willingnessToServe === 'Aktif' ? 'Bersedia' : (m.willingnessToServe === 'On-demand' ? 'Ragu-ragu' : 'Tidak');
+                willingnessCounts[status]++;
+            } else if (m.birthDate) {
+                const age = calculateAge(m.birthDate);
+                if (age > 17 && age < 60) {
+                    willingnessCounts["Bersedia"]++;
+                } else if (age >= 60) {
+                    willingnessCounts["Tidak"]++;
+                } else {
+                    willingnessCounts["Ragu-ragu"]++;
+                }
             }
         });
 
         // Calculate Profession/Skill stats
-        const professionalCount = members.filter(m => m.education.startsWith('S') || m.education === 'D3').length;
-        const skillCount = members.reduce((acc, curr) => acc + curr.skills.length, 0);
+        const professionalCount = members.filter(m => m.education && (m.education.startsWith('S') || m.education === 'D3')).length;
+        const skillCount = members.reduce((acc, curr) => acc + (curr.skills?.length || 0), 0);
 
         return {
             total: members.length,

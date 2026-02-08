@@ -73,9 +73,13 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
 
                 <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
 
-                <a href="/admin/settings" className="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Pengaturan">
+                <button
+                    onClick={() => navigate('/admin/settings')}
+                    className="relative p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    title="Pengaturan"
+                >
                     <span className="material-symbols-outlined">settings</span>
-                </a>
+                </button>
 
                 <div className="relative">
                     <button
@@ -89,7 +93,7 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
 
                     {/* Notification Dropdown */}
                     {isNotifOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-fade-in-up origin-top-right">
+                        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden origin-top-right">
                             <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Notifikasi</h3>
                                 <button className="text-[10px] font-bold text-primary hover:underline">Tandai semua dibaca</button>

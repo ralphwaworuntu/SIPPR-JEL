@@ -1,13 +1,16 @@
 import { toast } from '../../ui/Toast';
 import { jsPDF } from 'jspdf';
+import { calculateAge } from '../../../hooks/useMemberData';
 
 interface MemberDetailModalProps {
     member: any;
     onClose: () => void;
+    onEdit?: () => void;
 }
 
-export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) => {
+export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModalProps) => {
     if (!member) return null;
+
 
     const handlePrintCard = () => {
         const doc = new jsPDF({
@@ -52,14 +55,14 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
         doc.setFontSize(6);
         doc.setFont("helvetica", "normal");
 
-        doc.text("Sektor", 5, 32);
+        doc.text("Sektor Kategorial", 5, 32);
         doc.setFont("helvetica", "bold");
         doc.text(": " + member.sector, 25, 32);
 
         doc.setFont("helvetica", "normal");
-        doc.text("Status", 5, 36);
+        doc.text("Rayon/Ling.", 5, 36);
         doc.setFont("helvetica", "bold");
-        doc.text(": " + member.statusGerejawi, 25, 36);
+        doc.text(`: R${member.rayon} / L${member.lingkungan}`, 25, 36);
 
         // Details Column 2
         doc.setFont("helvetica", "normal");
@@ -70,7 +73,7 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
         doc.setFont("helvetica", "normal");
         doc.text("Pekerjaan", 5, 44);
         doc.setFont("helvetica", "bold");
-        doc.text(": " + member.job, 25, 44);
+        doc.text(": " + (member.job || member.jobCategory), 25, 44);
 
         // Footer Decoration
         doc.setDrawColor(37, 99, 235); // primary blue
@@ -95,20 +98,31 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
                     {member.initials}
                 </div>
                 <div className="flex-1 z-10">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{member.name}</h3>
-                    <p className="text-slate-500 font-mono text-xs font-bold mb-2 tracking-wide text-opacity-80">ID: {member.id}</p>
-                    <div className="flex flex-wrap gap-2">
-                        <span className="px-2 py-0.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
-                            {member.sector}
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{member.name}</h3>
+                            <p className="text-slate-500 font-mono text-xs font-bold mb-1 tracking-wide text-opacity-80">ID: {member.id}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-[10px] font-bold border ${member.willingnessToServe === 'Active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                            {member.willingnessToServe === 'Active' ? 'RELAWAN AKTIF' : member.willingnessToServe === 'On-demand' ? 'RELAWAN ON-DEMAND' : 'JEMAAT'}
                         </span>
-                        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded border border-blue-100 dark:border-blue-800 uppercase tracking-wider">
-                            {member.job}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="px-2 py-0.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
+                            Sektor Kat.: {member.sector}
+                        </span>
+                        <span className="px-2 py-0.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
+                            Rayon {member.rayon}
+                        </span>
+                        <span className="px-2 py-0.5 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
+                            Lingkungan {member.lingkungan}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Stats Grid - Contextual info */}
+            {/* Quick Stats Grid */}
             <div className="grid grid-cols-3 gap-3">
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center">
                     <span className="material-symbols-outlined text-primary mb-1 text-xl">school</span>
@@ -118,12 +132,12 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center">
                     <span className="material-symbols-outlined text-orange-500 mb-1 text-xl">cake</span>
                     <span className="text-[10px] text-slate-400 uppercase font-bold">Usia</span>
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">34 Thn</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">{calculateAge(member.birthDate)} Thn</span>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center">
-                    <span className="material-symbols-outlined text-green-500 mb-1 text-xl">verified</span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold">Status</span>
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">Aktif</span>
+                    <span className="material-symbols-outlined text-green-500 mb-1 text-xl">medical_services</span>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold">Keahlian</span>
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">{Array.isArray(member.skills) ? member.skills.length : 0}</span>
                 </div>
             </div>
 
@@ -134,38 +148,111 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
                         <span className="material-symbols-outlined text-slate-400 text-lg">person</span> Data Pribadi
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
-                        <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                        <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800/50 pb-2">
                             <span className="text-xs text-slate-500 font-medium">Jenis Kelamin</span>
-                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Laki-laki</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.gender}</span>
                         </div>
-                        <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2">
-                            <span className="text-xs text-slate-500 font-medium">Tempat Lahir</span>
-                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Kupang</span>
+                        <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                            <span className="text-xs text-slate-500 font-medium">No. HP</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.phone || "-"}</span>
                         </div>
-                        <div className="flex justify-between border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                        <div className="flex flex-col gap-1 border-b border-slate-50 dark:border-slate-800/50 pb-2">
                             <span className="text-xs text-slate-500 font-medium">Alamat</span>
-                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 text-right max-w-[150px]">Jl. Perintis Kemerdekaan No. 45</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-relaxed">{member.address || "-"}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="space-y-3">
                     <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">
-                        <span className="material-symbols-outlined text-slate-400 text-lg">workspace_premium</span> Keahlian & Potensi
+                        <span className="material-symbols-outlined text-slate-400 text-lg">work</span> Profil Profesional
                     </h4>
-                    <div>
-                        <div className="flex flex-wrap gap-1.5">
-                            {member.skills && member.skills.length > 0 ? (
-                                member.skills.map((skill: string, idx: number) => (
-                                    <span key={idx} className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
-                                        <span className="size-1.5 rounded-full bg-primary/50"></span>
-                                        {skill}
-                                    </span>
-                                ))
-                            ) : (
-                                <span className="text-xs text-slate-400 italic">Belum ada data keahlian</span>
-                            )}
+                    <div className="grid grid-cols-1 gap-3">
+                        <div className="flex flex-col gap-1 border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                            <span className="text-xs text-slate-500 font-medium">Pekerjaan & Instansi</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.job || member.jobCategory} {member.companyName ? `at ${member.companyName}` : ''}</span>
                         </div>
+                        <div className="flex justify-between items-center border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                            <span className="text-xs text-slate-500 font-medium">Lama Pengalaman</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.yearsOfExperience || 0} Tahun</span>
+                        </div>
+                        <div className="flex flex-col gap-1 border-b border-slate-50 dark:border-slate-800/50 pb-2">
+                            <span className="text-xs text-slate-500 font-medium">Pendidikan & Jurusan</span>
+                            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{member.education} {member.major ? `- ${member.major}` : ''}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2 space-y-4">
+                    <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">
+                        <span className="material-symbols-outlined text-slate-400 text-lg">volunteer_activism</span> Komitmen Pelayanan
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <span className="text-[10px] uppercase font-bold text-slate-400">Minat Pelayanan</span>
+                            <div className="flex flex-wrap gap-1.5">
+                                {Array.isArray(member.interestAreas) && member.interestAreas.length > 0 ? (
+                                    member.interestAreas.map((area: string, i: number) => (
+                                        <span key={i} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded-lg border border-blue-100 dark:border-blue-800">
+                                            {area}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[10px] text-slate-400 italic">Belum memilih</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <span className="text-[10px] uppercase font-bold text-slate-400">Bentuk Kontribusi</span>
+                            <div className="flex flex-wrap gap-1.5">
+                                {Array.isArray(member.contributionTypes) && member.contributionTypes.length > 0 ? (
+                                    member.contributionTypes.map((type: string, i: number) => (
+                                        <span key={i} className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-[10px] font-bold rounded-lg border border-green-100 dark:border-green-800">
+                                            {type}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <span className="text-[10px] text-slate-400 italic">Belum memilih</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2 space-y-3">
+                    <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">
+                        <span className="material-symbols-outlined text-slate-400 text-lg">location_on</span> Lokasi Peta
+                    </h4>
+                    {member.latitude && member.longitude ? (
+                        <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${member.latitude},${member.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors text-xs font-bold text-slate-600 dark:text-slate-300"
+                        >
+                            <span className="material-symbols-outlined text-sm text-primary">map</span>
+                            Lihat di Google Maps
+                        </a>
+                    ) : (
+                        <span className="text-xs text-slate-400 italic">Koordinat lokasi tidak tersedia</span>
+                    )}
+                </div>
+
+                <div className="col-span-1 md:col-span-2 space-y-3">
+                    <h4 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-2">
+                        <span className="material-symbols-outlined text-slate-400 text-lg">star</span> Keahlian (Skills)
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                        {Array.isArray(member.skills) && member.skills.length > 0 ? (
+                            member.skills.map((skill: string, idx: number) => (
+                                <span key={idx} className="bg-primary/5 text-primary px-3 py-1.5 rounded-xl text-xs font-bold border border-primary/10 shadow-sm flex items-center gap-1.5">
+                                    <span className="size-1.5 rounded-full bg-primary animate-pulse"></span>
+                                    {skill}
+                                </span>
+                            ))
+                        ) : (
+                            <span className="text-xs text-slate-400 italic">Belum ada data keahlian</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -174,18 +261,23 @@ export const MemberDetailModal = ({ member, onClose }: MemberDetailModalProps) =
             <div className="flex flex-wrap justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                 <button
                     onClick={handlePrintCard}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 transition-colors shadow-sm"
                 >
                     <span className="material-symbols-outlined text-lg">id_card</span>
                     Cetak Kartu Anggota
                 </button>
                 <div className="flex gap-2">
-                    <button className="px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        Riwayat
-                    </button>
+                    {onEdit && (
+                        <button
+                            onClick={onEdit}
+                            className="px-4 py-2 rounded-xl text-sm font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        >
+                            Edit Data
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 rounded-xl text-sm font-bold bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:opacity-90 transition-opacity shadow-lg"
+                        className="px-8 py-2.5 rounded-xl text-sm font-bold bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:opacity-90 transition-all shadow-lg active:scale-95"
                     >
                         Tutup
                     </button>

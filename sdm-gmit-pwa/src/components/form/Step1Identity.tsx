@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import MapPicker from '../MapPicker';
 import type { FormData } from '../../types';
 import { checkDuplicateName } from '../../lib/validation';
 
@@ -71,57 +70,6 @@ const Step1Identity = ({ data, update }: StepProps) => {
             age--;
         }
         return `${age} Tahun`;
-    };
-
-    const handleSearchAddress = async () => {
-        if (!data.address) return;
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.address)}&limit=1`);
-            const results = await response.json();
-            if (results && results.length > 0) {
-                const { lat, lon } = results[0];
-                update({ latitude: parseFloat(lat), longitude: parseFloat(lon) });
-            } else {
-                alert("Lokasi tidak ditemukan. Coba masukkan alamat yang lebih spesifik (misal: 'Jalan El Tari Kupang').");
-            }
-        } catch (error) {
-            console.error("Geocoding error:", error);
-            alert("Gagal mencari lokasi. Pastikan koneksi internet lancar.");
-        }
-    };
-
-    const handleMapLocationSelect = async (lat: number, lng: number) => {
-        update({ latitude: lat, longitude: lng });
-
-        // Reverse geocoding (Limit calls to avoid spamming API)
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=id`);
-            const result = await response.json();
-            if (result && result.address) {
-                const addr = result.address;
-                const parts = [];
-
-                // Format: Jalan ..., Kel. ..., Kec. ..., Kota ...
-                if (addr.road) parts.push(addr.road);
-                if (addr.suburb) parts.push(`Kel. ${addr.suburb}`);
-                else if (addr.village) parts.push(`Desa ${addr.village}`);
-
-                if (addr.city_district) parts.push(`Kec. ${addr.city_district}`);
-
-                if (addr.city) parts.push(addr.city);
-                else if (addr.town) parts.push(addr.town);
-                else if (addr.county) parts.push(addr.county); // Kabupaten
-
-                const formattedAddress = parts.length > 0 ? parts.join(', ') : result.display_name;
-
-                // Confirm before overwriting if address already exists and is significant
-                if (!data.address || confirm(`Ganti alamat dengan lokasi terpilih di peta?\n\nLokasi Baru: ${formattedAddress}`)) {
-                    update({ address: formattedAddress });
-                }
-            }
-        } catch (error) {
-            console.error("Reverse geocoding error:", error);
-        }
     };
 
     return (
@@ -282,46 +230,18 @@ const Step1Identity = ({ data, update }: StepProps) => {
 
             <h3 className="text-lg font-bold mb-6 mt-10 flex items-center gap-2 text-black dark:text-white">
                 <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>location_on</span>
-                Lokasi Tempat Tinggal (Kota Kupang)
+                Lokasi Tempat Tinggal
             </h3>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-2 flex flex-col gap-4">
-                    <div className="flex flex-col">
-                        <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Alamat Lengkap<span className="text-red-500 ml-1">*</span></label>
-                        <textarea
-                            className="form-textarea w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-32 px-4 py-3 text-base resize-none placeholder-gray-400"
-                            placeholder="Masukkan alamat lengkap domisili Anda..."
-                            id="address"
-                            value={data.address}
-                            onChange={(e) => update({ address: e.target.value })}
-                        ></textarea>
-                        <button
-                            type="button"
-                            onClick={handleSearchAddress}
-                            className="mt-2 text-xs flex items-center gap-1 text-primary font-bold hover:underline"
-                        >
-                            <span className="material-symbols-outlined text-sm">search</span>
-                            Cari & Tandai di Peta
-                        </button>
-                    </div>
-                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-                        <p className="text-xs text-black dark:text-[#f8fcf9] flex items-start gap-2">
-                            <span className="material-symbols-outlined text-sm text-primary">info</span>
-                            Menandai lokasi akurat membantu gereja dalam koordinasi pelayanan wilayah dan bantuan.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="lg:col-span-3 flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Tandai Lokasi Peta</label>
-                    <div className="relative w-full h-[300px] rounded-xl overflow-hidden border-2 border-[#cfe7d7] dark:border-[#1d3324]">
-                        <MapPicker
-                            position={[data.latitude || -10.1772, data.longitude || 123.6070]}
-                            onLocationSelect={handleMapLocationSelect}
-                        />
-                    </div>
-                </div>
+            <div className="flex flex-col">
+                <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Alamat Lengkap<span className="text-red-500 ml-1">*</span></label>
+                <textarea
+                    className="form-textarea w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-32 px-4 py-3 text-base resize-none placeholder-gray-400"
+                    placeholder="Contoh: Jl. El Tari No. 1, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
+                    id="address"
+                    value={data.address}
+                    onChange={(e) => update({ address: e.target.value })}
+                ></textarea>
             </div>
         </>
     );

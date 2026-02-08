@@ -283,7 +283,7 @@ const AdminReports = () => {
 
     return (
         <AdminLayout title="Laporan & Statistik">
-            <div className="flex flex-col gap-6 animate-fade-in-up" ref={reportRef}>
+            <div className="flex flex-col gap-6" ref={reportRef}>
                 {/* Header Section */}
                 <div className="flex justify-between items-end bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div>

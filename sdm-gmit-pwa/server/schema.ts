@@ -62,12 +62,23 @@ export const congregants = mysqlTable("congregants", {
 
     // Professional
     educationLevel: varchar("education_level", { length: 50 }),
+    major: varchar("major", { length: 100 }),
     jobCategory: varchar("job_category", { length: 100 }),
+    jobTitle: varchar("job_title", { length: 100 }),
+    companyName: varchar("company_name", { length: 150 }),
+    yearsOfExperience: int("years_of_experience").default(0),
 
-    // Skills (Storing as simple JSON or string for now to match form)
+    // Skills
     skills: json("skills"), // string[]
 
-    willingnessToServe: boolean("willingness_to_serve").default(false),
+    // Commitment
+    willingnessToServe: varchar("willingness_to_serve", { length: 50 }), // Aktif, On-demand, Not-available
+    interestAreas: json("interest_areas"), // string[]
+    contributionTypes: json("contribution_types"), // string[]
+
+    // Geolocation
+    latitude: varchar("latitude", { length: 50 }),
+    longitude: varchar("longitude", { length: 50 }),
 
     status: varchar("status", { length: 20 }).default('PENDING'), // PENDING, VALIDATED
 

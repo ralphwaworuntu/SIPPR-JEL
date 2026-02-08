@@ -94,7 +94,14 @@ export const useSettings = () => {
     // 2. Profile Management
     const [profile, setProfileState] = useState<UserProfile>(() => {
         const saved = localStorage.getItem('app_profile');
-        return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
+        if (!saved) return DEFAULT_PROFILE;
+        try {
+            const parsed = JSON.parse(saved);
+            return parsed || DEFAULT_PROFILE;
+        } catch (e) {
+            console.error("Failed to parse app_profile from localStorage", e);
+            return DEFAULT_PROFILE;
+        }
     });
 
     const updateProfile = (newProfile: Partial<UserProfile>) => {
@@ -106,7 +113,14 @@ export const useSettings = () => {
     // 3. Notification Management
     const [notifications, setNotificationsState] = useState<Notifications>(() => {
         const saved = localStorage.getItem('app_notifications');
-        return saved ? JSON.parse(saved) : DEFAULT_NOTIFICATIONS;
+        if (!saved) return DEFAULT_NOTIFICATIONS;
+        try {
+            const parsed = JSON.parse(saved);
+            return parsed || DEFAULT_NOTIFICATIONS;
+        } catch (e) {
+            console.error("Failed to parse app_notifications from localStorage", e);
+            return DEFAULT_NOTIFICATIONS;
+        }
     });
 
     const updateNotifications = (newNotifs: Notifications) => {
@@ -117,7 +131,14 @@ export const useSettings = () => {
     // 4. Security Management
     const [security, setSecurityState] = useState<Security>(() => {
         const saved = localStorage.getItem('app_security');
-        return saved ? JSON.parse(saved) : DEFAULT_SECURITY;
+        if (!saved) return DEFAULT_SECURITY;
+        try {
+            const parsed = JSON.parse(saved);
+            return parsed || DEFAULT_SECURITY;
+        } catch (e) {
+            console.error("Failed to parse app_security from localStorage", e);
+            return DEFAULT_SECURITY;
+        }
     });
 
     const updateSecurity = (newSecurity: Security) => {
@@ -128,7 +149,14 @@ export const useSettings = () => {
     // 5. Appearance Management (NEW)
     const [appearance, setAppearanceState] = useState<AppearanceSettings>(() => {
         const saved = localStorage.getItem('app_appearance');
-        return saved ? JSON.parse(saved) : DEFAULT_APPEARANCE;
+        if (!saved) return DEFAULT_APPEARANCE;
+        try {
+            const parsed = JSON.parse(saved);
+            return parsed || DEFAULT_APPEARANCE;
+        } catch (e) {
+            console.error("Failed to parse app_appearance from localStorage", e);
+            return DEFAULT_APPEARANCE;
+        }
     });
 
     // Apply accent color to CSS variable
@@ -147,7 +175,13 @@ export const useSettings = () => {
     // 6. Broadcast History Management (NEW)
     const [broadcastHistory, setBroadcastHistoryState] = useState<BroadcastItem[]>(() => {
         const saved = localStorage.getItem('broadcast_history');
-        return saved ? JSON.parse(saved) : [];
+        if (!saved) return [];
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.error("Failed to parse broadcast_history from localStorage", e);
+            return [];
+        }
     });
 
     const addBroadcast = (item: Omit<BroadcastItem, 'id' | 'date'>) => {
