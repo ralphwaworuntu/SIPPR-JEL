@@ -30,22 +30,17 @@ export const StatCard = ({ title, value, subtitle, trend, trendUp = true, icon, 
             className="group relative bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in-up"
             style={{ animationDelay: `${delay * 100}ms` }}
         >
-            <div className={`absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity`}>
-                <span className="material-symbols-outlined text-8xl -rotate-12">{icon || 'analytics'}</span>
-            </div>
+
 
             <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
                     <div className="flex justify-between items-start mb-2">
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wide uppercase flex-1 truncate mr-2" title={title}>{title}</p>
-                        {trend && (
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border ${trendUp
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-600 border-rose-500/20'}`}>
-                                <span className="material-symbols-outlined text-[10px]">{trendUp ? 'trending_up' : 'trending_down'}</span>
-                                {trend}
-                            </span>
-                        )}
+                        <span className={`p-2 rounded-xl flex items-center justify-center ${trendUp
+                            ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+                            : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'}`}>
+                            <span className="material-symbols-outlined text-lg">{icon || 'analytics'}</span>
+                        </span>
                     </div>
                     <h3 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tight">{value}</h3>
                     <p className="text-xs font-medium text-slate-400">{subtitle}</p>

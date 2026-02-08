@@ -16,11 +16,7 @@ import { toast } from '../components/ui/Toast';
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { useMemberData, calculateAge } from '../hooks/useMemberData';
 import { useFamilyData } from '../hooks/useFamilyData';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 import { useRef, useMemo, useState } from 'react';
-import * as XLSX from 'xlsx';
 
 ChartJS.register(
     CategoryScale,
@@ -140,56 +136,6 @@ const AdminReports = () => {
             .slice(0, 10); // Show top 10 for report
     }, [members, families, selectedYear]);
 
-    const handleExportExcel = () => {
-        const wb = XLSX.utils.book_new();
-
-        // Sheet 1: Summary Statistics
-        const summaryData = [
-            ['Laporan Statistik Jemaat GMIT'],
-            ['Tahun', selectedYear],
-            ['Tanggal Cetak', new Date().toLocaleDateString('id-ID')],
-            [''],
-            ['Ringkasan Sektor'],
-            ['Sektor', 'Jumlah KK', 'Jumlah Anggota', 'Rata-rata Anggota/KK'],
-            ...sectorData.labels.map((s, i) => [
-                s,
-                sectorData.datasets[0].data[i],
-                sectorData.datasets[1].data[i],
-                (sectorData.datasets[1].data[i] / (sectorData.datasets[0].data[i] || 1)).toFixed(2)
-            ])
-        ];
-        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan");
-
-        // Sheet 2: Member Data (All)
-        const memberRows = members.map(m => ({
-            ID: m.id,
-            Nama: m.name,
-            Sektor: m.sector,
-            'Jenis Kelamin': m.gender,
-            'Tanggal Lahir': new Date(m.birthDate).toLocaleDateString('id-ID'),
-            Usia: calculateAge(m.birthDate),
-            Status: m.statusGerejawi
-        }));
-        const wsMembers = XLSX.utils.json_to_sheet(memberRows);
-        XLSX.utils.book_append_sheet(wb, wsMembers, "Data Anggota");
-
-        // Sheet 3: Family Data
-        const familyRows = families.map(f => ({
-            'No KK': f.id,
-            'Kepala Keluarga': f.head,
-            Sektor: f.sector,
-            'Jumlah Anggota': f.members,
-            Alamat: f.address,
-            Status: f.status
-        }));
-        const wsFamilies = XLSX.utils.json_to_sheet(familyRows);
-        XLSX.utils.book_append_sheet(wb, wsFamilies, "Data KK");
-
-        XLSX.writeFile(wb, `Data_Jemaat_GMIT_${selectedYear}.xlsx`);
-        toast.success("Data berhasil diexport ke Excel!");
-    };
-
     const handleSectorClick = (_event: any, elements: any[]) => {
         if (elements.length > 0) {
             const index = elements[0].index;
@@ -198,88 +144,7 @@ const AdminReports = () => {
         }
     };
 
-    const handleDownloadPDF = async () => {
-        if (!reportRef.current) return;
 
-        try {
-            toast.info("Sedang membuat PDF...");
-
-            // 1. Capture Dashboard Image
-            const canvas = await html2canvas(reportRef.current, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff'
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-            // Page 1: Visual Dashboard
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-            // Page 2: Detailed Data Tables
-            pdf.addPage();
-
-            // Header Page 2
-            pdf.setFontSize(16);
-            pdf.text(`Detail Laporan Statistik - Tahun ${selectedYear}`, 14, 20);
-            pdf.setFontSize(10);
-            pdf.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
-
-            // Table 1: Sector Summary
-            (pdf as any).autoTable({
-                startY: 35,
-                head: [['Sektor', 'Jumlah KK', 'Jumlah Anggota', 'Rata-rata/KK']],
-                body: sectorData.labels.map((sector, i) => [
-                    sector,
-                    sectorData.datasets[0].data[i],
-                    sectorData.datasets[1].data[i],
-                    (sectorData.datasets[1].data[i] / (sectorData.datasets[0].data[i] || 1)).toFixed(1)
-                ]),
-                theme: 'grid',
-                headStyles: { fillColor: [59, 130, 246] }
-            });
-
-            // Table 2: New Members List (Top 20 of selected year)
-            const yearMembers = members
-                .filter(m => new Date(m.createdAt).getFullYear() === selectedYear)
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-            // @ts-ignore
-            (pdf as any).autoTable({
-                // @ts-ignore
-                startY: (pdf as any).lastAutoTable.finalY + 15,
-                head: [['Tanggal', 'Nama', 'Sektor', 'Usia', 'Status']],
-                body: yearMembers.map(m => [
-                    new Date(m.createdAt).toLocaleDateString('id-ID'),
-                    m.name,
-                    m.sector,
-                    calculateAge(m.birthDate),
-                    m.statusGerejawi
-                ]),
-                theme: 'striped',
-                headStyles: { fillColor: [16, 185, 129] }
-            });
-
-            // Footer
-            const pageCount = pdf.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(8);
-                pdf.text('Sistem Database GMIT - Dokumen Rahasia', 14, pdf.internal.pageSize.getHeight() - 10);
-                pdf.text(`Halaman ${i} dari ${pageCount}`, pdf.internal.pageSize.getWidth() - 30, pdf.internal.pageSize.getHeight() - 10);
-            }
-
-            pdf.save(`Laporan_Lengkap_GMIT_${selectedYear}.pdf`);
-            toast.success("Laporan lengkap berhasil didownload!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Gagal membuat PDF");
-        }
-    };
 
     return (
         <AdminLayout title="Laporan & Statistik">
@@ -300,14 +165,7 @@ const AdminReports = () => {
                             <option value={2024}>Tahun 2024</option>
                             <option value={2025}>Tahun 2025</option>
                         </select>
-                        <button onClick={handleExportExcel} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-green-600 text-white font-bold text-sm hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20">
-                            <span className="material-symbols-outlined text-lg">table_view</span>
-                            Export Excel
-                        </button>
-                        <button onClick={handleDownloadPDF} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-primary text-slate-900 font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                            <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
-                            Download PDF
-                        </button>
+
                     </div>
                 </div>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { signIn } from '../lib/auth-client';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Loader2, Eye, EyeOff, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Shield, Loader2, Eye, EyeOff, Lock, Mail, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -137,9 +137,15 @@ const LoginPage = () => {
 
                 {/* Footer */}
                 <div className="mt-8 pt-6 border-t border-white/5 text-center">
-                    <p className="text-slate-500 text-xs">
+                    <p className="text-slate-500 text-xs mb-4">
                         Belum punya akun? <span className="text-slate-400 cursor-not-allowed">Hubungi Sekretariat</span>
                     </p>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="text-indigo-400 hover:text-indigo-300 text-sm font-bold transition-colors flex items-center justify-center gap-2 mx-auto hover:underline"
+                    >
+                        <ArrowLeft size={16} /> Kembali ke Beranda
+                    </button>
                 </div>
             </div>
         </div>

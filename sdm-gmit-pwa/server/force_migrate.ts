@@ -19,6 +19,10 @@ async function forceMigrate() {
 
         const commands = [
             "ALTER TABLE congregants MODIFY COLUMN willingness_to_serve VARCHAR(50)",
+            "ALTER TABLE congregants ADD COLUMN major VARCHAR(100) AFTER education_level",
+            "ALTER TABLE congregants ADD COLUMN job_title VARCHAR(100) AFTER job_category",
+            "ALTER TABLE congregants ADD COLUMN company_name VARCHAR(150) AFTER job_title",
+            "ALTER TABLE congregants ADD COLUMN years_of_experience INT DEFAULT 0 AFTER company_name",
             "ALTER TABLE congregants ADD COLUMN interest_areas JSON AFTER willingness_to_serve",
             "ALTER TABLE congregants ADD COLUMN contribution_types JSON AFTER interest_areas",
             "ALTER TABLE congregants ADD COLUMN latitude VARCHAR(50) AFTER contribution_types",

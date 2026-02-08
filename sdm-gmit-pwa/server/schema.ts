@@ -85,3 +85,12 @@ export const congregants = mysqlTable("congregants", {
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
 });
+
+export const notifications = mysqlTable("notifications", {
+    id: serial("id").primaryKey(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    type: varchar("type", { length: 20 }).default('info'), // info, warning, success
+    isRead: boolean("is_read").default(false),
+    createdAt: timestamp("created_at").defaultNow()
+});

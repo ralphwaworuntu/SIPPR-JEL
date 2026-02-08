@@ -6,16 +6,19 @@ import FormPage from './pages/FormPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SeedUser from './pages/SeedUser';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminMemberData from './pages/AdminMemberData';
-import AdminFamilyData from './pages/AdminFamilyData';
-import AdminReports from './pages/AdminReports';
-import AdminSettings from './pages/AdminSettings';
 import { Toaster } from './components/ui/Toast';
 import { OfflineBanner } from './components/ui/OfflineBanner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import { useSession } from './lib/auth-client';
 import { Navigate } from 'react-router-dom';
+
+// Lazy Load Admin Pages for Performance
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const AdminMemberData = React.lazy(() => import('./pages/AdminMemberData'));
+// AdminFamilyData removed locally
+
+const AdminReports = React.lazy(() => import('./pages/AdminReports'));
+const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -34,7 +37,7 @@ function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (isPending) return <PageLoader />;
   if (!session) return <Navigate to="/login" replace />;
 
-  return <>{children}</>;
+  return <React.Suspense fallback={<PageLoader />}>{children}</React.Suspense>;
 }
 
 // Inner component to handle routing logic
@@ -84,11 +87,7 @@ const AppContent = () => {
             <AdminMemberData />
           </ProtectedRoute>
         } />
-        <Route path="/admin/families" element={
-          <ProtectedRoute>
-            <AdminFamilyData />
-          </ProtectedRoute>
-        } />
+
         <Route path="/admin/reports" element={
           <ProtectedRoute>
             <AdminReports />

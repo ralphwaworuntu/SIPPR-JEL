@@ -5,7 +5,7 @@ import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
 import rateLimit from "express-rate-limit";
 import { auth } from "./auth";
 import { db } from "./db";
-import { congregants } from "./schema";
+import { congregants, notifications } from "./schema";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -382,6 +382,51 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                 res.status(500).json({ error: "Failed to import data" });
             }
         });
+});
+
+// 9. Get Notifications
+app.get("/api/notifications", async (req, res) => {
+    try {
+        let allNotifications = await db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(10);
+
+        // Seed if empty
+        if (allNotifications.length === 0) {
+            await db.insert(notifications).values([
+                { title: "Selamat Datang Admin", message: "Sistem Manajemen Jemaat siap digunakan.", type: "success", isRead: false },
+                { title: "Update Data Diperlukan", message: "Mohon lengkapi data profil jemaat baru.", type: "info", isRead: false },
+                { title: "Backup Data", message: "Jangan lupa melakukan backup data mingguan.", type: "warning", isRead: false }
+            ]);
+            allNotifications = await db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(10);
+        }
+
+        res.json(allNotifications);
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+});
+
+// 10. Mark Notification as Read
+app.put("/api/notifications/:id/read", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, parseInt(id)));
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error updating notification:", error);
+        res.status(500).json({ error: "Failed to update notification" });
+    }
+});
+
+// 11. Mark All Notifications as Read
+app.post("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+        await db.update(notifications).set({ isRead: true });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        res.status(500).json({ error: "Failed to mark all as read" });
+    }
 });
 
 app.listen(PORT, () => {

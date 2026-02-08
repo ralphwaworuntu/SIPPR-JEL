@@ -10,7 +10,7 @@ const SeedUser = () => {
         try {
             await signUp.email({
                 email: 'admin@gmitemaus.org',
-                password: 'admin',
+                password: 'admin123',
                 name: 'Admin User'
             }, {
                 onSuccess: () => {

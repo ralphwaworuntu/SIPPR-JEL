@@ -24,7 +24,7 @@ export const ClockWidget = () => {
     }
 
     return (
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20 flex flex-col justify-between h-full relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20 flex flex-col justify-center gap-4 h-full relative overflow-hidden group">
             {/* Background Decorations */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-2xl -ml-10 -mb-10"></div>
@@ -42,20 +42,7 @@ export const ClockWidget = () => {
                 </p>
             </div>
 
-            <div className="mt-6 flex gap-3 relative z-10">
-                <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 flex-1 border border-white/10">
-                    <span className="text-xs text-indigo-100 block mb-1">Minggu ke-</span>
-                    <span className="font-bold text-lg">
-                        {Math.ceil(date.getDate() / 7)}
-                    </span>
-                </div>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl p-3 flex-1 border border-white/10">
-                    <span className="text-xs text-indigo-100 block mb-1">Minggu Liturgi</span>
-                    <span className="font-bold text-lg">
-                        Epifania
-                    </span>
-                </div>
-            </div>
+
         </div>
     );
 };
