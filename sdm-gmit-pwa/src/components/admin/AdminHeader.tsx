@@ -36,7 +36,7 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
 
     // Refs for click outside handling
     const profileRef = useRef<HTMLDivElement>(null);
-    const notifRef = useRef<HTMLButtonElement>(null);
+    const notifRef = useRef<HTMLDivElement>(null);
 
     // Real-time Notifications
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -103,9 +103,8 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
                     <span className="material-symbols-outlined">settings</span>
                 </button>
 
-                <div className="relative">
+                <div ref={notifRef} className="relative">
                     <button
-                        ref={notifRef}
                         onClick={() => setIsNotifOpen(!isNotifOpen)}
                         className={`relative p-2 rounded-lg transition-colors ${isNotifOpen ? 'bg-slate-100 dark:bg-slate-800 text-primary' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                     >
@@ -162,7 +161,16 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
                                 )}
                             </div>
                             <div className="p-2 text-center border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                                <button className="text-xs font-bold text-slate-500 hover:text-primary transition-colors">Lihat Semua</button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsNotifOpen(false);
+                                        navigate('/admin/notifications');
+                                    }}
+                                    className="text-xs font-bold text-slate-500 hover:text-primary transition-colors"
+                                >
+                                    Lihat Semua
+                                </button>
                             </div>
                         </div>
                     )}
@@ -193,18 +201,35 @@ export const AdminHeader = ({ title, onMenuClick }: AdminHeaderProps) => {
                                 <p className="text-xs text-slate-500">{user?.email || 'admin@gmitemaus.org'}</p>
                             </div>
                             <div className="p-1">
-                                <button onClick={() => navigate('/admin/profile')} className="w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsProfileOpen(false);
+                                        navigate('/admin/profile');
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2"
+                                >
                                     <span className="material-symbols-outlined text-lg">person</span>
                                     Profil Saya
                                 </button>
-                                <button onClick={() => navigate('/admin/settings')} className="w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsProfileOpen(false);
+                                        navigate('/admin/settings');
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2"
+                                >
                                     <span className="material-symbols-outlined text-lg">settings</span>
                                     Pengaturan
                                 </button>
                             </div>
                             <div className="p-1 border-t border-slate-100 dark:border-slate-800">
                                 <button
-                                    onClick={handleLogout}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLogout();
+                                    }}
                                     className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg flex items-center gap-2 font-medium"
                                 >
                                     <span className="material-symbols-outlined text-lg">logout</span>

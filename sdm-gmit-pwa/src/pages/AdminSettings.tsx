@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { toast } from '../components/ui/Toast';
 
@@ -53,6 +54,7 @@ interface Session {
 }
 
 const AdminSettings = () => {
+    const navigate = useNavigate();
     const {
         profile, updateProfile,
         security, updateSecurity,
@@ -308,6 +310,15 @@ const AdminSettings = () => {
 
     return (
         <AdminLayout title="Pengaturan Sistem">
+            {/* Back Button */}
+            <button
+                onClick={() => navigate(-1)}
+                className="mb-6 flex items-center gap-2 text-slate-500 hover:text-primary transition-colors group"
+            >
+                <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                <span className="text-sm font-medium">Kembali ke Dashboard</span>
+            </button>
+
             <div className="flex flex-col lg:flex-row gap-8 animate-fade-in-up pb-8">
 
                 {/* 1. Sidebar Navigation */}

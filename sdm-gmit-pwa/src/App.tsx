@@ -19,6 +19,8 @@ const AdminMemberData = React.lazy(() => import('./pages/AdminMemberData'));
 
 const AdminReports = React.lazy(() => import('./pages/AdminReports'));
 const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
+const AdminNotifications = React.lazy(() => import('./pages/AdminNotifications'));
+const AdminProfile = React.lazy(() => import('./pages/AdminProfile'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -96,6 +98,16 @@ const AppContent = () => {
         <Route path="/admin/settings" element={
           <ProtectedRoute>
             <AdminSettings />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/notifications" element={
+          <ProtectedRoute>
+            <AdminNotifications />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/profile" element={
+          <ProtectedRoute>
+            <AdminProfile />
           </ProtectedRoute>
         } />
 

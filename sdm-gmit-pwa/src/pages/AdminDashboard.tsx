@@ -193,11 +193,11 @@ const AdminDashboard = () => {
         const genderLabels = Object.keys(stats.distributions.gender);
         const genderData = Object.values(stats.distributions.gender);
 
-        // Willingness
-        const willLabels = ["Bersedia", "Ragu-ragu"];
+        // Willingness - Note: DB stores "Aktif", "On-demand", "Not-available"
+        const willLabels = ["Aktif", "On-demand"];
         const willData = [
-            stats.distributions.willingness["Bersedia"] || 0,
-            stats.distributions.willingness["Ragu-ragu"] || 0
+            stats.distributions.willingness["Aktif"] || 0,
+            stats.distributions.willingness["On-demand"] || 0
         ];
 
         // Education

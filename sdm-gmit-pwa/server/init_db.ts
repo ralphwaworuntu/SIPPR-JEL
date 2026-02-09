@@ -50,6 +50,19 @@ async function initDb() {
     `;
     await connection.query(createTableQuery);
 
+    console.log("Creating notifications table...");
+    const createNotificationsQuery = `
+    CREATE TABLE IF NOT EXISTS notifications (
+        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        type VARCHAR(20) DEFAULT 'info',
+        is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    `;
+    await connection.query(createNotificationsQuery);
+
     console.log("Tables created successfully.");
     await connection.end();
 }

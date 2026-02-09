@@ -17,22 +17,57 @@ const LINGKUNGAN_COLORS: Record<string, string> = {
 };
 
 export const LingkunganChart = ({ members }: LingkunganChartProps) => {
+    // Helper to extract lingkungan number from various formats
+    const extractLingkunganNumber = (value: string): number | null => {
+        if (!value || value === 'Tidak Diketahui' || value === '-') return null;
+        // Try to extract number from strings like "5", "Lingkungan 3", "Lingkungan Lingkungan 1", etc.
+        const match = value.match(/(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            // Only return valid lingkungan numbers (1-7)
+            if (num >= 1 && num <= 7) return num;
+        }
+        return null;
+    };
+
     // Calculate distribution
     const distribution = useMemo(() => {
         const counts: Record<string, number> = {};
         let maxCount = 0;
 
         members.forEach(m => {
-            const ling = m.lingkungan || 'Tidak Diketahui';
-            counts[ling] = (counts[ling] || 0) + 1;
-            if (counts[ling] > maxCount) maxCount = counts[ling];
+            const rawLing = m.lingkungan || '';
+            const lingNum = extractLingkunganNumber(rawLing);
+            
+            // Normalize the key: use just the number if valid, otherwise categorize
+            let key: string;
+            if (lingNum !== null) {
+                key = String(lingNum);
+            } else if (rawLing === 'Luar Wilayah') {
+                key = 'Luar Wilayah';
+            } else if (!rawLing || rawLing === '-') {
+                key = 'Tidak Diketahui';
+            } else {
+                key = 'Lainnya';
+            }
+            
+            counts[key] = (counts[key] || 0) + 1;
+            if (counts[key] > maxCount) maxCount = counts[key];
         });
 
-        // Sort by lingkungan number
+        // Sort: numbers 1-7 first, then special categories
         const sorted = Object.entries(counts).sort((a, b) => {
-            const numA = parseInt(a[0]) || 99;
-            const numB = parseInt(b[0]) || 99;
-            return numA - numB;
+            const numA = parseInt(a[0]);
+            const numB = parseInt(b[0]);
+            
+            // Both are numbers
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            // Only A is number
+            if (!isNaN(numA)) return -1;
+            // Only B is number
+            if (!isNaN(numB)) return 1;
+            // Both are not numbers, alphabetically
+            return a[0].localeCompare(b[0]);
         });
 
         return { data: sorted, max: maxCount };
