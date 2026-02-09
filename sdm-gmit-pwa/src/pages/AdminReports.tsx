@@ -11,7 +11,7 @@ import {
     Filler
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
-import { toast } from '../components/ui/Toast';
+
 
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { useMemberData, calculateAge } from '../hooks/useMemberData';
@@ -34,22 +34,25 @@ const AdminReports = () => {
     const { members, stats: memberStats } = useMemberData();
     const { families } = useFamilyData();
     const reportRef = useRef<HTMLDivElement>(null);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState(2026);
 
     // Drill-down State
     const [drillDownSector, setDrillDownSector] = useState<string | null>(null);
     const sectorChartRef = useRef<any>(null);
 
-    // 1. Age Distribution Logic
+    // 1. Age Distribution Logic (Actually Sector/Kategorial Distribution)
     const ageData = useMemo(() => {
-        const categories = { 'Anak (0-12)': 0, 'Remaja (13-17)': 0, 'Pemuda (18-30)': 0, 'Dewasa (31-60)': 0, 'Lansia (60+)': 0 };
+        const categories = {
+            'Pemuda': 0,
+            'Kaum Bapak': 0,
+            'Kaum Perempuan': 0,
+            'Lansia': 0
+        };
         members.forEach(m => {
-            const age = calculateAge(m.birthDate);
-            if (age <= 12) categories['Anak (0-12)']++;
-            else if (age <= 17) categories['Remaja (13-17)']++;
-            else if (age <= 30) categories['Pemuda (18-30)']++;
-            else if (age <= 60) categories['Dewasa (31-60)']++;
-            else categories['Lansia (60+)']++;
+            const sector = m.sector;
+            if (Object.keys(categories).includes(sector)) {
+                categories[sector as keyof typeof categories]++;
+            }
         });
         return {
             labels: Object.keys(categories),
@@ -161,9 +164,7 @@ const AdminReports = () => {
                             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                             className="h-10 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm focus:ring-2 focus:ring-primary outline-none shadow-sm cursor-pointer"
                         >
-                            <option value={2023}>Tahun 2023</option>
-                            <option value={2024}>Tahun 2024</option>
-                            <option value={2025}>Tahun 2025</option>
+                            <option value={2026}>Tahun 2026</option>
                         </select>
 
                     </div>
@@ -174,7 +175,7 @@ const AdminReports = () => {
                     {/* Age Distribution Chart */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
                         <div className="mb-6 flex justify-between items-center">
-                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Distribusi Usia</h3>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Distribusi Kategorial</h3>
                         </div>
                         <div className="flex-1 relative min-h-[250px]">
                             <Bar
@@ -331,7 +332,7 @@ const AdminReports = () => {
                                             </div>
                                             <div>
                                                 <div className="font-bold text-sm text-slate-900 dark:text-white">{member.name}</div>
-                                                <div className="text-xs text-slate-500">{calculateAge(member.birthDate)} Tahun • {member.statusGerejawi}</div>
+                                                <div className="text-xs text-slate-500">{calculateAge(member.birthDate)} Tahun • {member.sector}</div>
                                             </div>
                                         </div>
                                     ))}
