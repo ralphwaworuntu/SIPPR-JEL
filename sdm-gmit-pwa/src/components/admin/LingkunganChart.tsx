@@ -38,19 +38,22 @@ export const LingkunganChart = ({ members }: LingkunganChartProps) => {
         members.forEach(m => {
             const rawLing = m.lingkungan || '';
             const lingNum = extractLingkunganNumber(rawLing);
-            
+
+            // Skip entries without valid lingkungan data
+            if (!rawLing || rawLing === '-' || rawLing === 'Tidak Diketahui') {
+                return; // Skip this member
+            }
+
             // Normalize the key: use just the number if valid, otherwise categorize
             let key: string;
             if (lingNum !== null) {
                 key = String(lingNum);
             } else if (rawLing === 'Luar Wilayah') {
                 key = 'Luar Wilayah';
-            } else if (!rawLing || rawLing === '-') {
-                key = 'Tidak Diketahui';
             } else {
                 key = 'Lainnya';
             }
-            
+
             counts[key] = (counts[key] || 0) + 1;
             if (counts[key] > maxCount) maxCount = counts[key];
         });
@@ -59,7 +62,7 @@ export const LingkunganChart = ({ members }: LingkunganChartProps) => {
         const sorted = Object.entries(counts).sort((a, b) => {
             const numA = parseInt(a[0]);
             const numB = parseInt(b[0]);
-            
+
             // Both are numbers
             if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
             // Only A is number
@@ -73,7 +76,11 @@ export const LingkunganChart = ({ members }: LingkunganChartProps) => {
         return { data: sorted, max: maxCount };
     }, [members]);
 
-    const total = members.length;
+    // Only count members with valid lingkungan data
+    const total = members.filter(m => {
+        const rawLing = m.lingkungan || '';
+        return rawLing && rawLing !== '-' && rawLing !== 'Tidak Diketahui';
+    }).length;
 
     return (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-full flex flex-col">
