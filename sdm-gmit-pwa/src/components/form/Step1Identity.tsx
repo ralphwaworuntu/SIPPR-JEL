@@ -85,7 +85,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Nama Lengkap<span className="text-red-500 ml-1">*</span></label>
                     <input
                         className={`form-input w-full rounded-lg text-black dark:text-[#f8fcf9] border transition-colors ${nameError ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500' : 'border-[#cfe7d7] dark:border-[#1d3324] focus:border-primary focus:ring-primary'} bg-background-light dark:bg-background-dark focus:ring-1 h-12 px-4 text-base placeholder-gray-400`}
-                        placeholder="Contoh: Yohanes Pembaptis"
+                        placeholder="Contoh: Heru Aldi Benu"
                         type="text"
                         id="fullName"
                         value={data.fullName}
@@ -150,14 +150,14 @@ const Step1Identity = ({ data, update }: StepProps) => {
 
                 {/* Phone Number */}
                 <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Nomor Telepon / WhatsApp<span className="text-red-500 ml-1">*</span></label>
+                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Nomor Telepon / WhatsApp Aktif<span className="text-red-500 ml-1">*</span></label>
                     <div className="flex">
                         <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-[#cfe7d7] dark:border-[#1d3324] bg-[#e7f3eb] dark:bg-[#1d3324] text-black dark:text-[#f8fcf9] text-sm font-medium">
                             +62
                         </span>
                         <input
                             className="form-input w-full rounded-r-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder-gray-400"
-                            placeholder="812 3456 7890"
+                            placeholder="81234567890"
                             type="tel"
                             id="phone"
                             value={data.phone}
@@ -187,7 +187,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         value={data.sector}
                         onChange={(e) => update({ sector: e.target.value })}
                     >
-                        <option value="">Pilih Sektor...</option>
+                        <option value="">Pilih Kategorial...</option>
                         <option value="Pemuda">Pemuda</option>
                         <option value="Kaum Perempuan">Kaum Perempuan</option>
                         <option value="Kaum Bapak">Kaum Bapak</option>
@@ -205,7 +205,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         onChange={(e) => update({ lingkungan: e.target.value })}
                     >
                         <option value="">Pilih Lingkungan...</option>
-                        {Array.from({ length: 7 }, (_, i) => i + 1).map(num => (
+                        {Array.from({ length: 8 }, (_, i) => i + 1).map(num => (
                             <option key={num} value={num.toString()}>{`Lingkungan ${num}`}</option>
                         ))}
                     </select>

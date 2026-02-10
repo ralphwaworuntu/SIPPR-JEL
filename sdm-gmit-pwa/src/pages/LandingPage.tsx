@@ -108,7 +108,7 @@ const LandingPage = () => {
                     {/* Center: Menu (Desktop) */}
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
-                            { name: 'Depan', href: '#' },
+                            { name: 'Beranda', href: '#' },
                             { name: 'Statistik', href: '#stats' },
                             { name: 'Tentang', href: '#tentang' },
                             { name: 'Fitur', href: '#fitur' },
@@ -131,7 +131,7 @@ const LandingPage = () => {
                             onClick={() => navigate('/login')}
                             className="hidden md:block px-6 py-2.5 text-sm font-semibold bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full hover:scale-105 transition-all shadow-lg"
                         >
-                            Masuk Admin
+                            Masuk
                         </button>
 
                         {/* Mobile Menu Button */}
@@ -155,7 +155,7 @@ const LandingPage = () => {
                     >
                         <nav className="flex flex-col p-4">
                             {[
-                                { name: 'Depan', href: '#' },
+                                { name: 'Beranda', href: '#' },
                                 { name: 'Statistik', href: '#stats' },
                                 { name: 'Tentang', href: '#tentang' },
                                 { name: 'Fitur', href: '#fitur' },
@@ -174,7 +174,7 @@ const LandingPage = () => {
                                 onClick={() => navigate('/login')}
                                 className="mt-4 w-full py-3 text-sm font-bold bg-indigo-600 text-white rounded-xl shadow-lg"
                             >
-                                Masuk Admin
+                                Masuk
                             </button>
                         </nav>
                     </div>
@@ -207,12 +207,12 @@ const LandingPage = () => {
                                 Latar Belakang Program
                             </span>
                             <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-6">
-                                Pendataan Profesional & Terintegrasi
+                                Pendataan & Pemetaan SDM Profesional GMIT JEL
                             </h2>
                             <div className="relative group">
                                 <p className={`text-slate-500 dark:text-slate-400 text-lg leading-relaxed text-justify transition-all duration-300 ${!isAboutExpanded ? 'line-clamp-3' : ''}`}>
-                                    Sistem Informasi ini dibangun untuk menjawab kebutuhan gereja, maka GMIT JEL melalui UPPMJ dan Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah “Bank Data SDM GMIT JEL”. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merupakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.
-                                </p>
+                                    Gereja selain sebagai persekutuan orang percaya juga merupakan wadah pengembangan potensi jemaat secara menyeluruh. Setiap anggota jemaat memiliki profesi, keahlian, dan talenta masing-masing yang apabila dikelola dengan baik maka akan menjadi kekuatan besar bagi terlaksananya pelayanan dan sebagai kesaksian gereja di tengah masyarakat. Jemaat memiliki kemampuan profesional, keterampilan teknis, dan minat pelayanan tertentu namun belum teridentifikasi secara sistematis sehingga belum tersinergi dengan optimal dalam kegiatan gereja karena belum adanya data terstruktur terkait Sumber Daya Manusia (SDM) jemaat. Ini merupakan sebagian kecil dari peyebab pelayanan gereja bergantung pada kelompok kecil yang terlibat aktif, sementara potensi besar lainnya belum tergali.
+                                    <p>Menjawab kebutuhan gereja di atas, maka GMIT JEL melalui UPPMJ & Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah <b>“Bank Data SDM GMIT JEL”</b>. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merpakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.</p>                               </p>
                                 {/* Fade Effect Overlay */}
                                 {!isAboutExpanded && (
                                     <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none"></div>
@@ -244,7 +244,7 @@ const LandingPage = () => {
                                 Fitur Unggulan Platform
                             </h2>
                             <p className="text-slate-500 dark:text-slate-400 text-lg">
-                                Dirancang dengan antarmuka modern dan fitur lengkap untuk kemudahan jemaat
+                                Dirancang dengan antarmuka modern dan fitur lengkap untuk kemudahan jemaat.
                             </p>
                         </div>
 
@@ -253,9 +253,9 @@ const LandingPage = () => {
                                 { title: "Keamanan Data", desc: "Enkripsi end-to-end untuk melindungi privasi data jemaat.", icon: "security", gradient: "from-rose-500 to-pink-600" },
                                 { title: "Akses Mudah", desc: "Dapat diakses kapan saja melalui Smartphone (Mobile Friendly).", icon: "devices", gradient: "from-amber-500 to-orange-600" },
                                 { title: "Update Real-time", desc: "Perubahan data langsung terupdate di sistem pusat database.", icon: "sync", gradient: "from-emerald-500 to-teal-600" },
-                                { title: "Pencarian Bakat", desc: "Fitur smart search untuk menemukan SDM sesuai kebutuhan pelayanan.", icon: "person_search", gradient: "from-blue-500 to-indigo-600" },
+                                { title: "Komunitas Profesional", desc: "Fitur smart search untuk menemukan SDM/komunitas profesional sesuai dengan kebutuhan pelayanan.", icon: "person_search", gradient: "from-blue-500 to-indigo-600" },
                                 { title: "Laporan Visual", desc: "Dashboard statistik visual untuk pemantauan pertumbuhan jemaat.", icon: "query_stats", gradient: "from-violet-500 to-purple-600" },
-                                { title: "Integrasi Pelayanan", desc: "Terhubung langsung dengan program kerja majelis jemaat.", icon: "hub", gradient: "from-cyan-500 to-blue-600" }
+                                { title: "Integrasi Pelayanan", desc: "Terhubung dengan program-program pelayanan yang ada di Jemaat Emaus Liliba.", icon: "hub", gradient: "from-cyan-500 to-blue-600" }
                             ].map((feature, i) => (
                                 <FeatureCard
                                     key={i}
@@ -283,10 +283,10 @@ const LandingPage = () => {
                         </div>
                         <div className="space-y-4">
                             {[
-                                { q: "Apakah data saya terjamin kerahasiaannya?", a: "Sangat terjamin. Sistem ini dikelola oleh tim khusus yang disumpah jabatan, dan data hanya digunakan untuk kepentingan internal pelayanan gereja." },
-                                { q: "Bagaimana jika saya tidak memiliki email?", a: "Anda dapat meminta bantuan keluarga atau admin sekretariat di gereja untuk membantu proses pendaftaran." },
-                                { q: "Apakah data ini wajib diisi oleh semua jemaat?", a: "Ya, sangat diharapkan partisipasi seluruh jemaat agar perencanaan pelayanan gereja dapat berjalan maksimal dan tepat sasaran." },
-                                { q: "Bisakah saya mengubah data setelah pendaftaran?", a: "Bisa. Anda akan diberikan akses akun untuk masuk dan memperbarui data profil Anda kapan saja jika ada perubahan." }
+                                { q: "Apakah data saya terjamin kerahasiaannya?", a: "Sangat terjamin. Sistem ini dikelola oleh UPPMJ & Satuan Pelayanan Profesional JEL dan data hanya digunakan untuk kepentingan internal pelayanan gereja." },
+                                { q: "Bagaimana jika saya tidak memiliki email?", a: "Sistem ini tidak mewajibkan jemaat untuk memiliki email. Namun, jika jemaat tidak memiliki email, dapat meminta bantuan keluarga atau admin sekretariat di gereja untuk membantu proses pendaftaran." },
+                                { q: "Apakah data ini wajib diisi oleh semua jemaat?", a: "Ya, sangat diharapkan partisipasi seluruh jemaat, khususnya pada jemaat yang berusia 17 tahun ke atas dan sudah bekerja, agar perencanaan pelayanan gereja dapat berjalan maksimal dan tepat sasaran." },
+                                { q: "Bisakah saya mengubah data setelah pendaftaran?", a: "Bisa, anda dapat memenita tolong pada admin untuk memperbarui data anda." }
                             ].map((faq, i) => (
                                 <Reveal key={i} delay={i * 50}>
                                     <details className="group bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 open:shadow-lg transition-all duration-300 overflow-hidden">

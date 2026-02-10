@@ -11,7 +11,7 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
         <div className="space-y-8 animate-fadeIn">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-black dark:text-white">
                 <span className="material-symbols-outlined text-primary">verified_user</span>
-                Validasi & Persetujuan
+                Validasi Data
             </h3>
 
             <div className="bg-[#e7f3eb] dark:bg-[#1d3324] border border-[#cfe7d7] dark:border-[#2a4532] rounded-xl p-6 flex flex-col md:flex-row gap-6 items-start">
@@ -23,7 +23,7 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
                     <p className="text-black dark:text-[#f8fcf9] leading-relaxed mb-4 text-sm">
                         Data yang Anda kirimkan melalui formulir ini akan disimpan dalam database GMIT Emaus Liliba.
                         Data ini bersifat <strong>RAHASIA</strong> dan hanya akan digunakan untuk keperluan pelayanan gereja, pemetaan potensi jemaat,
-                        dan program pemberdayaan ekonomi. Data tidak akan dibagikan kepada pihak ketiga tanpa persetujuan Anda.
+                        dan pembentuk komunitas profesional. Data tidak akan dibagikan kepada pihak ketiga tanpa persetujuan Anda.
                     </p>
                 </div>
             </div>
@@ -35,7 +35,7 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
                     {/* Identitas Diri */}
                     <div className="bg-[#e7f3eb] dark:bg-[#1d3324] px-4 py-2 border-b border-[#cfe7d7] dark:border-[#2a4532] font-bold text-black dark:text-white flex items-center gap-2">
                         <span className="material-symbols-outlined text-primary text-lg">person</span>
-                        Identitas Diri
+                        Identitas Pribadi
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
                         <div>
@@ -79,31 +79,31 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Jenjang Pendidikan</div>
+                            <div className="text-[#4c9a66] text-xs">Pendidikan Terakhir</div>
                             <div className="font-medium text-black dark:text-white">{data.educationLevel || '-'}</div>
                         </div>
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Jurusan</div>
+                            <div className="text-[#4c9a66] text-xs">Program Studi/ Jurusan</div>
                             <div className="font-medium text-black dark:text-white">{data.major || '-'}</div>
                         </div>
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Kategori Pekerjaan</div>
+                            <div className="text-[#4c9a66] text-xs">Kategori Bidang Pekerjaan</div>
                             <div className="font-medium text-black dark:text-white">{data.jobCategory || '-'}</div>
                         </div>
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Nama Profesi/Jabatan</div>
+                            <div className="text-[#4c9a66] text-xs">Jabatan/ Spesialisasi Spesifik</div>
                             <div className="font-medium text-black dark:text-white">{data.jobTitle || '-'}</div>
                         </div>
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Nama Instansi/Perusahaan</div>
+                            <div className="text-[#4c9a66] text-xs">Instansi/ Tempat Bekerja</div>
                             <div className="font-medium text-black dark:text-white">{data.companyName || '-'}</div>
                         </div>
                         <div>
-                            <div className="text-[#4c9a66] text-xs">Pengalaman Kerja (Tahun)</div>
+                            <div className="text-[#4c9a66] text-xs">Lama Bekerja (Tahun)</div>
                             <div className="font-medium text-black dark:text-white">{data.yearsOfExperience ? `${data.yearsOfExperience} Tahun` : '-'}</div>
                         </div>
                         <div className="md:col-span-2">
-                            <div className="text-[#4c9a66] text-xs">Keahlian Khusus</div>
+                            <div className="text-[#4c9a66] text-xs">Keahlian Teknis & Bakat</div>
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {data.skills && data.skills.length > 0 ? (
                                     data.skills.map((skill, index) => (
@@ -121,7 +121,7 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
                     {/* Komitmen Pelayanan */}
                     <div className="bg-[#e7f3eb] dark:bg-[#1d3324] px-4 py-2 border-y border-[#cfe7d7] dark:border-[#2a4532] font-bold text-black dark:text-white flex items-center gap-2">
                         <span className="material-symbols-outlined text-primary text-lg">volunteer_activism</span>
-                        Komitmen Pelayanan
+                        Komitmen Kolaborasi & Pelayanan Profesional
                     </div>
                     <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
                         <div className="md:col-span-2">
@@ -143,7 +143,7 @@ const Step4Consent: React.FC<StepProps> = ({ data, update }) => {
                             </div>
                         </div>
                         <div className="md:col-span-2">
-                            <div className="text-[#4c9a66] text-xs">Bentuk Kontribusi yang Diminati</div>
+                            <div className="text-[#4c9a66] text-xs">Bentuk Kontribusi yang Diberikan</div>
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {data.contributionTypes && data.contributionTypes.length > 0 ? (
                                     data.contributionTypes.map((type, index) => (

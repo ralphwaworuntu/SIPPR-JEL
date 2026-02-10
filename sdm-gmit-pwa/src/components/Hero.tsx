@@ -74,8 +74,7 @@ export const Hero = () => {
                             transition={{ delay: 0.7, duration: 0.8 }}
                             className="max-w-2xl text-slate-200 text-lg md:text-xl leading-relaxed font-light"
                         >
-                            Menuju Tata Kelola Pelayanan Gereja yang Lebih Profesional,
-                            Terukur, dan Berdampak bagi Jemaat.
+
                         </motion.p>
                     </div>
 

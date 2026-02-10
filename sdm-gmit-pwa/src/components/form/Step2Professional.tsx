@@ -37,7 +37,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Jenjang Pendidikan<span className="text-red-500 ml-1">*</span></label>
+                        <label className="text-sm font-bold text-black dark:text-white/90">Pendidikan Terakhir<span className="text-red-500 ml-1">*</span></label>
                         <select
                             className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
                             id="educationLevel"
@@ -55,10 +55,10 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         </select>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Jurusan / Bidang Studi</label>
+                        <label className="text-sm font-bold text-black dark:text-white/90">Program Studi/ Jurusan</label>
                         <input
                             className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                            placeholder="Contoh: Teknik Informatika, Akuntansi"
+                            placeholder="Contoh: Ilmu Komputer, Akuntansi, Manajemen Informatika"
                             type="text"
                             value={data.major}
                             onChange={(e) => update({ major: e.target.value })}
@@ -75,7 +75,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                 </h2>
                 <div className="grid grid-cols-1 gap-6">
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Kategori Pekerjaan (KBJI)<span className="text-red-500 ml-1">*</span></label>
+                        <label className="text-sm font-bold text-black dark:text-white/90">Kategori Bidang Pekerjaan<span className="text-red-500 ml-1">*</span></label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c9a66]">search</span>
                             <select
@@ -84,35 +84,49 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                 value={data.jobCategory}
                                 onChange={(e) => update({ jobCategory: e.target.value })}
                             >
-                                <option value="">Pilih atau Cari Kategori...</option>
+                                <option value="">Pilih Kategori...</option>
                                 {[
-                                    'Tenaga Profesional',
-                                    'Teknisi dan Asisten Tenaga Profesional',
-                                    'Tenaga Tata Usaha',
-                                    'Tenaga Usaha Jasa dan Penjualan',
-                                    'Pekerja Pertanian, Kehutanan dan Perikanan',
-                                    'Pekerja Pengolahan, Kerajinan',
-                                    'Operator dan Perakit Mesin',
-                                    'Pekerja Kasar',
-                                    'TNI / Polri',
-                                    'Wirausaha',
-                                    'Pelajar / Mahasiswa',
-                                    'Mengurus Rumah Tangga',
-                                    'Pensiunan',
-                                    'Belum/Tidak Bekerja'
+                                    'Bidang Kesehatan',
+                                    'Bidang Teknologi Informasi',
+                                    'Bidang Marketing',
+                                    'Bidang Penjualan',
+                                    'Bidang Hukum',
+                                    'Bidang Keuangan dan Perbankan',
+                                    'Bidang Pendidikan',
+                                    'Bidang Pertanian',
+                                    'Bidang Perikanan',
+                                    'Bidang Kehutanan',
+                                    'Bidang Perkebunan',
+                                    'Bidang Peternakan',
+                                    'Bidang Perindustrian',
+                                    'Bidang Perdagangan',
+                                    'Bidang Transportasi',
+                                    'Bidang Telekomunikasi',
+                                    'Bidang Pariwisata',
+                                    'Bidang Jasa',
+                                    'Bidang Lainnya',
                                 ].map(opt => (
                                     <option key={opt} value={opt}>{opt}</option>
                                 ))}
                             </select>
                         </div>
-                        <p className="text-xs text-[#4c9a66] italic">KBJI: Klasifikasi Baku Jenis Pekerjaan Indonesia</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-black dark:text-white/90">Jabatan/ Spesialisasi Spesifik</label>
+                        <input
+                            className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
+                            placeholder="Contoh: Senior Web Developer, Dokter Spesialis Anak, Akuntan Publik"
+                            type="text"
+                            value={data.jobTitle}
+                            onChange={(e) => update({ jobTitle: e.target.value })}
+                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold text-black dark:text-white/90">Instansi / Perusahaan</label>
+                            <label className="text-sm font-bold text-black dark:text-white/90">Instansi/ Tempat Bekerja</label>
                             <input
                                 className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                                placeholder="Nama tempat bekerja"
+                                placeholder="Contoh: RSUD Prof. Dr. W.Z. Johannes Kupang, SMA Negeri 1 Kupang"
                                 type="text"
                                 value={data.companyName}
                                 onChange={(e) => update({ companyName: e.target.value })}
@@ -129,16 +143,6 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(e) => update({ yearsOfExperience: parseInt(e.target.value) || 0 })}
                             />
                         </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Jabatan Spesifik</label>
-                        <input
-                            className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                            placeholder="Contoh: Senior Web Developer"
-                            type="text"
-                            value={data.jobTitle}
-                            onChange={(e) => update({ jobTitle: e.target.value })}
-                        />
                     </div>
                 </div>
             </div>

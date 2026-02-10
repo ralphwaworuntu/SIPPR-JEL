@@ -154,10 +154,10 @@ const FormPage = () => {
 
     const getStepDetails = (stepNum: number) => {
         switch (stepNum) {
-            case 1: return { title: "Identitas Diri", nextLabel: "Latar Belakang Pendidikan" };
-            case 2: return { title: "Profil Profesional", nextLabel: "Komitmen" };
-            case 3: return { title: "Komitmen Pelayanan", nextLabel: "Validasi" };
-            case 4: return { title: "Validasi Data", nextLabel: "Selesai" };
+            case 1: return { title: "Identitas Pribadi", nextLabel: "Profil Profesional" };
+            case 2: return { title: "Profil Profesional", nextLabel: "Komitmen Kolaborasi & Pelayanan Profesional" };
+            case 3: return { title: "Komitmen Kolaborasi & Pelayanan Profesional", nextLabel: "Persetujuan & Validasi Data" };
+            case 4: return { title: "Persetujuan & Validasi Data", nextLabel: "Selesai" };
             default: return { title: "", nextLabel: "" };
         }
     };

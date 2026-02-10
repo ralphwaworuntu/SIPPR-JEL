@@ -8,7 +8,7 @@ interface StepProps {
 
 const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
     const interestOptions = [
-        'Pendidikan / Mengajar',
+        'Pendidikan/ Mengajar',
         'Kesehatan',
         'Teknologi & Multimedia',
         'Musik & Liturgi',
@@ -21,10 +21,10 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
     ];
 
     const contributionOptions = [
-        'Tenaga Ahli / Konsultan',
-        'Mentor / Pelatih',
+        'Tenaga Ahli/ Konsultan',
+        'Mentor/ Pelatih',
         'Dukungan Teknis',
-        'Donatur / Finansial',
+        'Donatur/ Finansial',
         'Manajemen Proyek',
         'Relawan Lapangan'
     ];
@@ -57,7 +57,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                             className="w-5 h-5 text-primary focus:ring-primary accent-primary"
                         />
                         <div>
-                            <span className="block font-semibold text-black dark:text-white">Aktif / Rutin</span>
+                            <span className="block font-semibold text-black dark:text-white">Aktif/ Rutin</span>
                             <span className="text-sm text-[#4c9a66]">Bersedia terlibat dalam pelayanan rutin atau kepanitiaan tetap.</span>
                         </div>
                     </label>
@@ -80,8 +80,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
             </div>
 
             <div className="space-y-4">
-                <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bidang Minat Pelayanan</label>
-                <p className="text-sm text-[#4c9a66]">Pilih bidang di mana Anda berminat untuk berkontribusi.</p>
+                <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bidang Minat Pelayanan<span className="text-red-500 ml-1">*</span></label>
+                <p className="text-sm text-[#4c9a66]">Pilih bidang di mana anda berminat untuk berkontribusi.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {interestOptions.map(option => (
                         <label key={option} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${data.interestAreas.includes(option) ? 'border-primary bg-primary/5' : 'border-[#cfe7d7] hover:bg-[#e7f3eb] dark:border-[#1d3324] dark:hover:bg-[#1d3324]'}`}>
@@ -98,7 +98,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
             </div>
 
             <div className="space-y-4">
-                <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bentuk Kontribusi</label>
+                <label className="text-black dark:text-[#f8fcf9] text-base font-bold leading-normal block">Bentuk Kontribusi<span className="text-red-500 ml-1">*</span></label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {contributionOptions.map(option => (
                         <label key={option} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${data.contributionTypes.includes(option) ? 'border-primary bg-primary/5' : 'border-[#cfe7d7] hover:bg-[#e7f3eb] dark:border-[#1d3324] dark:hover:bg-[#1d3324]'}`}>

@@ -41,7 +41,7 @@ const SuccessStep = () => {
 
             <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Pendaftaran Berhasil!</h2>
             <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-lg">
-                Terima kasih telah melengkapi data diri Anda. Data Anda telah tersimpan aman dalam database jemaat.
+                Terima kasih telah melengkapi data diri Anda. Partisipasi Anda sangat berharga bagi pertumbuhan dan masa depan pelayanan Jemaat Emaus Liliba.
             </p>
 
             {/* Registration Card - Print Area */}
@@ -67,7 +67,7 @@ const SuccessStep = () => {
 
                     <div className="space-y-1">
                         <p className="text-sm text-slate-500 dark:text-slate-400">Langkah Selanjutnya:</p>
-                        <p className="text-sm font-medium text-slate-900 dark:text-slate-200">Admin akan memverifikasi data Anda dalam 1x24 jam.</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-slate-200">Admin akan memverifikasi data anda dalam 1x24 jam.</p>
                     </div>
                 </div>
             </div>
