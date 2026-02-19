@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Footer } from '../components/Footer';
 import { Reveal } from '../components/Reveal';
 import { Hero } from '../components/Hero';
-import { StatsCounter } from '../components/StatsCounter';
 import { FeatureCard } from '../components/FeatureCard';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
@@ -184,22 +183,41 @@ const LandingPage = () => {
             <main className="w-full">
                 {/* HERO SECTION */}
                 <Hero />
+                {/* TENTANG SECTION */}
+                <section id="visi-misi" className="pt-16 pb-24 w-full bg-white dark:bg-slate-950">
+                    <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
+                        <div className="text-center max-w-3xl mx-auto">
+                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-12">
+                                Visi Misi
+                            </h2>
 
-                {/* LIVE STATS SECTION */}
-                <section id="stats" className="relative py-12 -mt-10 mb-10 z-20">
-                    <div className="max-w-[1000px] mx-auto px-6">
-                        <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 p-8 md:p-12">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                                <StatsCounter value={500} suffix="+" label="Jemaat Terdata" />
-                                <StatsCounter value={15} suffix="+" label="Sektor Pelayanan" />
-                                <StatsCounter value={50} suffix="+" label="Profesi & Keahlian" />
-                                <StatsCounter value={100} suffix="%" label="Aman & Terjaga" />
+                            <div className="text-left max-w-2xl mx-auto mb-16 space-y-4">
+                                <ol className="list-decimal list-outside ml-4 space-y-3 text-slate-600 dark:text-slate-300 text-lg font-medium leading-relaxed">
+                                    <li className="pl-2">Mengembangkan persekutuan yang dinamis dan bermutu</li>
+                                    <li className="pl-2">Meningkatkan pemberitaan firman Tuhan yang inovatif dan progresif</li>
+                                    <li className="pl-2">Memberdayakan potensi jemaat untuk mengatasi masalah sosial, ketahanan ekonomi jemaat</li>
+                                    <li className="pl-2">Menyatakan inklusifitas jemaat dengan jemaat di luar Jemaat Kota Baru</li>
+                                    <li className="pl-2">Mengembangkan liturgi kontekstual dan konstruktif</li>
+                                    <li className="pl-2">Mengembangkan tata kelola pelayanan yang bermutu</li>
+                                </ol>
+                            </div>
+
+                            {/* Template Foto Pendeta */}
+                            <div className="relative group mx-auto w-64 h-64">
+                                <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-all duration-500"></div>
+                                <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl">
+                                    <img
+                                        src="https://placehold.co/400x400/e2e8f0/475569?text=Foto+Pendeta"
+                                        alt="Foto Pendeta"
+                                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* TENTANG SECTION */}
+                {/* TENTANG SECTION (Latar Belakang) */}
                 <section id="tentang" className="pt-16 pb-24 w-full bg-white dark:bg-slate-950">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center max-w-3xl mx-auto">

@@ -61,7 +61,7 @@ export const Hero = () => {
                             transition={{ delay: 0.5, duration: 0.8 }}
                             className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight drop-shadow-2xl bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-300"
                         >
-                            Bank Data SDM
+                            Bank Data
                             <br />
                             <span className="text-2xl md:text-4xl lg:text-5xl font-serif italic text-indigo-100 font-normal">
                                 Jemaat GMIT Emaus Liliba
@@ -90,16 +90,9 @@ export const Hero = () => {
                             className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 relative overflow-hidden group"
                         >
                             <span className="relative z-10 flex items-center gap-2">
-                                Isi Data Sekarang
-                                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                                Mulai
+                                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform"></span>
                             </span>
-                        </button>
-
-                        <button
-                            onClick={() => document.getElementById('tentang')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/20 transition-all duration-300 hover:-translate-y-1"
-                        >
-                            Pelajari Lebih Lanjut
                         </button>
                     </motion.div>
                 </div>
