@@ -385,7 +385,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                     onChange={() => {
                                                         const current = formData.interestAreas || [];
                                                         const updated = current.includes(interest)
-                                                            ? current.filter(i => i !== interest)
+                                                            ? current.filter((i: string) => i !== interest)
                                                             : [...current, interest];
                                                         setFormData(prev => ({ ...prev, interestAreas: updated }));
                                                     }}
@@ -410,7 +410,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                     onChange={() => {
                                                         const current = formData.contributionTypes || [];
                                                         const updated = current.includes(type)
-                                                            ? current.filter(t => t !== type)
+                                                            ? current.filter((t: string) => t !== type)
                                                             : [...current, type];
                                                         setFormData(prev => ({ ...prev, contributionTypes: updated }));
                                                     }}

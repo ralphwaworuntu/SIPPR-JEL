@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { FormData } from '../../types';
 import { checkDuplicateName } from '../../lib/validation';
+import FormInput from '../ui/FormInput';
+import FormSelect from '../ui/FormSelect';
 
 interface StepProps {
     data: FormData;
@@ -37,27 +39,12 @@ const Step1Identity = ({ data, update }: StepProps) => {
     };
 
     const formatPhoneNumber = (value: string) => {
-        // Remove non-numeric
         const cleaned = ('' + value).replace(/\D/g, '');
-        // 081234567890 -> 812-3456-7890 (since prefix +62 is fixed)
-        // or just let them type locally
-        // Simple formatter: 0812-3456-7890
-
-        // If starts with 0, strip it since we have separate +62
         let number = cleaned;
         if (number.startsWith('0')) number = number.substring(1);
         if (number.startsWith('62')) number = number.substring(2);
-
-        // Limit to reasonable length
         if (number.length > 15) number = number.substring(0, 15);
-
         return number;
-        // Advanced: grouping with dashes 812-3456-7890
-        // const match = number.match(/^(\d{1,3})(\d{0,4})(\d{0,4})$/);
-        // if (match) {
-        //    return [match[1], match[2], match[3]].filter(x => x).join('-');
-        // }
-        // return number;
     };
 
     const calculateAge = (dob: string) => {
@@ -72,9 +59,19 @@ const Step1Identity = ({ data, update }: StepProps) => {
         return `${age} Tahun`;
     };
 
+    const lingkunganOptions = Array.from({ length: 8 }, (_, i) => ({
+        value: (i + 1).toString(),
+        label: `Lingkungan ${i + 1}`
+    }));
+
+    const rayonOptions = Array.from({ length: 20 }, (_, i) => ({
+        value: (i + 1).toString(),
+        label: `Rayon ${i + 1}`
+    }));
+
     return (
-        <>
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-black dark:text-white">
+        <div className="space-y-8 animate-fadeIn">
+            <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
                 <span className="material-symbols-outlined text-primary">person</span>
                 Informasi Dasar
             </h3>
@@ -82,168 +79,111 @@ const Step1Identity = ({ data, update }: StepProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Full Name */}
                 <div className="flex flex-col relative">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Nama Lengkap<span className="text-red-500 ml-1">*</span></label>
-                    <input
-                        className={`form-input w-full rounded-lg text-black dark:text-[#f8fcf9] border transition-colors ${nameError ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500' : 'border-[#cfe7d7] dark:border-[#1d3324] focus:border-primary focus:ring-primary'} bg-background-light dark:bg-background-dark focus:ring-1 h-12 px-4 text-base placeholder-gray-400`}
-                        placeholder="Contoh: Heru Aldi Benu"
-                        type="text"
+                    <FormInput
+                        label="Nama Kepala Keluarga"
                         id="fullName"
                         value={data.fullName}
-                        onChange={(e) => {
-                            update({ fullName: e.target.value });
-                            if (nameError) setNameError(null); // Clear error on edit
+                        onChange={(val) => {
+                            update({ fullName: val });
+                            if (nameError) setNameError(null);
                         }}
                         onBlur={handleNameBlur}
+                        placeholder="Contoh: Heru Aldi Benu"
+                        required
+                        error={nameError}
                     />
                     {isValidating && (
                         <div className="absolute right-3 top-[3.2rem]">
                             <span className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full block"></span>
                         </div>
                     )}
-                    {nameError && (
-                        <div className="flex items-center gap-1 mt-1 text-amber-600 text-xs font-medium animate-fadeIn">
-                            <span className="material-symbols-outlined text-sm">warning</span>
-                            {nameError}
-                        </div>
-                    )}
                 </div>
 
                 {/* Gender */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Jenis Kelamin<span className="text-red-500 ml-1">*</span></label>
-                    <select
-                        className="form-select w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base"
-                        id="gender"
-                        value={data.gender}
-                        onChange={(e) => update({ gender: e.target.value as 'Laki-laki' | 'Perempuan' })}
-                    >
-                        <option value="">Pilih Jenis Kelamin</option>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </div>
+                <FormSelect
+                    label="Jenis Kelamin"
+                    id="gender"
+                    value={data.gender}
+                    onChange={(val) => update({ gender: val as 'Laki-laki' | 'Perempuan' })}
+                    options={['Laki-laki', 'Perempuan']}
+                    placeholder="Pilih Jenis Kelamin"
+                    required
+                />
 
-                {/* Date of Birth & Age */}
                 {/* Date of Birth */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Tanggal Lahir<span className="text-red-500 ml-1">*</span></label>
-                    <input
-                        className="form-input w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base"
-                        type="date"
-                        id="dateOfBirth"
-                        value={data.dateOfBirth}
-                        onChange={(e) => update({ dateOfBirth: e.target.value })}
-                    />
-                </div>
+                <FormInput
+                    label="Tanggal Lahir"
+                    id="dateOfBirth"
+                    value={data.dateOfBirth}
+                    onChange={(val) => update({ dateOfBirth: val })}
+                    type="date"
+                    required
+                />
 
                 {/* Age (Auto-calculated) */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Usia (Otomatis)</label>
-                    <input
-                        className="form-input w-full rounded-lg text-black/70 dark:text-white/70 border border-[#cfe7d7] dark:border-[#1d3324] bg-slate-100 dark:bg-slate-800 h-12 px-4 text-base cursor-not-allowed"
-                        type="text"
-                        value={calculateAge(data.dateOfBirth) || '-'}
-                        readOnly
-                        placeholder="-"
-                    />
-                </div>
+                <FormInput
+                    label="Usia (Otomatis)"
+                    id="age"
+                    value={calculateAge(data.dateOfBirth) || '-'}
+                    onChange={() => { }}
+                    readOnly
+                />
 
                 {/* Phone Number */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Nomor Telepon / WhatsApp Aktif<span className="text-red-500 ml-1">*</span></label>
-                    <div className="flex">
-                        <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-[#cfe7d7] dark:border-[#1d3324] bg-[#e7f3eb] dark:bg-[#1d3324] text-black dark:text-[#f8fcf9] text-sm font-medium">
-                            +62
-                        </span>
-                        <input
-                            className="form-input w-full rounded-r-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base placeholder-gray-400"
-                            placeholder="81234567890"
-                            type="tel"
-                            id="phone"
-                            value={data.phone}
-                            onChange={(e) => {
-                                const formatted = formatPhoneNumber(e.target.value);
-                                update({ phone: formatted });
-                            }}
-                        />
-                    </div>
-                </div>
+                <FormInput
+                    label="Nomor Telepon / WhatsApp Aktif"
+                    id="phone"
+                    value={data.phone}
+                    onChange={(val) => {
+                        const formatted = formatPhoneNumber(val);
+                        update({ phone: formatted });
+                    }}
+                    type="tel"
+                    placeholder="81234567890"
+                    prefix="+62"
+                    required
+                />
+
             </div>
 
-            <hr className="my-10 border-[#e7f3eb] dark:border-[#1d3324]" />
-
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-black dark:text-white">
-                <span className="material-symbols-outlined text-primary">groups</span>
-                Data Keanggotaan
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Sektor Kategorial */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Sektor Kategorial<span className="text-red-500 ml-1">*</span></label>
-                    <select
-                        className="form-select w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base"
-                        id="sector"
-                        value={data.sector}
-                        onChange={(e) => update({ sector: e.target.value })}
-                    >
-                        <option value="">Pilih Kategorial...</option>
-                        <option value="Pemuda">Pemuda</option>
-                        <option value="Kaum Perempuan">Kaum Perempuan</option>
-                        <option value="Kaum Bapak">Kaum Bapak</option>
-                        <option value="Lansia">Lansia</option>
-                    </select>
-                </div>
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Lingkungan */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Lingkungan<span className="text-red-500 ml-1">*</span></label>
-                    <select
-                        className="form-select w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base"
-                        id="lingkungan"
-                        value={data.lingkungan}
-                        onChange={(e) => update({ lingkungan: e.target.value })}
-                    >
-                        <option value="">Pilih Lingkungan...</option>
-                        {Array.from({ length: 8 }, (_, i) => i + 1).map(num => (
-                            <option key={num} value={num.toString()}>{`Lingkungan ${num}`}</option>
-                        ))}
-                    </select>
-                </div>
+                <FormSelect
+                    label="Lingkungan"
+                    id="lingkungan"
+                    value={data.lingkungan}
+                    onChange={(val) => update({ lingkungan: val })}
+                    options={lingkunganOptions}
+                    placeholder="Pilih Lingkungan..."
+                    required
+                />
 
                 {/* Rayon */}
-                <div className="flex flex-col">
-                    <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Rayon<span className="text-red-500 ml-1">*</span></label>
-                    <select
-                        className="form-select w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 text-base"
-                        id="rayon"
-                        value={data.rayon}
-                        onChange={(e) => update({ rayon: e.target.value })}
-                    >
-                        <option value="">Pilih Rayon...</option>
-                        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                            <option key={num} value={num.toString()}>{`Rayon ${num}`}</option>
-                        ))}
-                    </select>
-                </div>
+                <FormSelect
+                    label="Rayon"
+                    id="rayon"
+                    value={data.rayon}
+                    onChange={(val) => update({ rayon: val })}
+                    options={rayonOptions}
+                    placeholder="Pilih Rayon..."
+                    required
+                />
             </div>
 
-            <h3 className="text-lg font-bold mb-6 mt-10 flex items-center gap-2 text-black dark:text-white">
-                <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>location_on</span>
-                Lokasi Tempat Tinggal
-            </h3>
-
-            <div className="flex flex-col">
-                <label className="text-black dark:text-[#f8fcf9] text-sm font-bold leading-normal pb-2">Alamat Lengkap<span className="text-red-500 ml-1">*</span></label>
+            {/* Alamat Lengkap */}
+            <div className="flex flex-col group relative">
+                <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
+                    Alamat Lengkap (RT/RW/Kel/Kec/Kota)<span className="text-red-500">*</span>
+                </label>
                 <textarea
-                    className="form-textarea w-full rounded-lg text-black dark:text-[#f8fcf9] border border-[#cfe7d7] dark:border-[#1d3324] bg-background-light dark:bg-background-dark focus:border-primary focus:ring-1 focus:ring-primary h-32 px-4 py-3 text-base resize-none placeholder-gray-400"
-                    placeholder="Contoh: Jl. El Tari No. 1, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
+                    className="w-full rounded-xl text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] h-32 px-4 py-3 text-base resize-none placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300"
+                    placeholder="Contoh: Jl. El Tari No. 1, RT 001/RW 002, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
                     id="address"
                     value={data.address}
                     onChange={(e) => update({ address: e.target.value })}
                 ></textarea>
             </div>
-        </>
+        </div>
     );
 };
 

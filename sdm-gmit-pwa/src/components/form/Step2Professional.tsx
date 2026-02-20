@@ -1,204 +1,186 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { type FormData } from '../../types';
+import SectionHeader from '../ui/SectionHeader';
+import FormRadioGroup from '../ui/FormRadioGroup';
 
 interface StepProps {
     data: FormData;
     update: (data: Partial<FormData>) => void;
 }
 
+const selectClass = "w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-300 appearance-none text-sm";
+
+const textareaClass = "w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-300 text-sm resize-none min-h-[100px]";
+
+const CountSelect = ({ id, value, onChange, max = 20, startFrom = 0, placeholder = 'Pilih...' }: {
+    id: string; value: string; onChange: (val: string) => void; max?: number; startFrom?: number; placeholder?: string;
+}) => (
+    <div className="relative">
+        <select className={selectClass} id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+            <option value="">{placeholder}</option>
+            {[...Array(max - startFrom + 1)].map((_, i) => (
+                <option key={i + startFrom} value={String(i + startFrom)}>{i + startFrom}</option>
+            ))}
+        </select>
+        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+    </div>
+);
+
+// Generate year list from current year down to 2000
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from({ length: currentYear - 2000 + 1 }, (_, i) => String(currentYear - i));
+
 const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
-    const [skillInput, setSkillInput] = useState('');
+    const totalMembers = parseInt(data.familyMembers || '0');
+    const maleMembers = parseInt(data.familyMembersMale || '0');
+    const femaleMembers = parseInt(data.familyMembersFemale || '0');
 
-    const addSkill = () => {
-        if (skillInput.trim() && !data.skills.includes(skillInput.trim())) {
-            update({ skills: [...data.skills, skillInput.trim()] });
-            setSkillInput('');
-        }
-    };
+    const isFieldsFilled = data.familyMembers && data.familyMembersMale && data.familyMembersFemale;
+    const isFamilyCountValid = !isFieldsFilled || (maleMembers + femaleMembers === totalMembers);
 
-    const removeSkill = (skillToRemove: string) => {
-        update({ skills: data.skills.filter(skill => skill !== skillToRemove) });
-    };
+    const isSidiFieldsFilled = data.familyMembersSidi && data.familyMembersSidiMale && data.familyMembersSidiFemale;
+    const isSidiCountValid = !isSidiFieldsFilled || (parseInt(data.familyMembersSidiMale) + parseInt(data.familyMembersSidiFemale) === parseInt(data.familyMembersSidi));
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            addSkill();
-        }
-    };
+    const ValidationError = ({ message }: { message: string }) => (
+        <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg">
+            <span className="material-symbols-outlined text-sm shrink-0">warning</span>
+            {message}
+        </p>
+    );
 
     return (
         <div className="flex flex-col gap-8 animate-fadeIn">
-            {/* Education Section */}
-            <div>
-                <h2 className="text-black dark:text-white text-[20px] font-bold leading-tight tracking-[-0.015em] pb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">school</span>
-                    Pendidikan & Keahlian
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Pendidikan Terakhir<span className="text-red-500 ml-1">*</span></label>
-                        <select
-                            className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
-                            id="educationLevel"
-                            value={data.educationLevel}
-                            onChange={(e) => update({ educationLevel: e.target.value })}
-                        >
-                            <option value="">Pilih Jenjang</option>
-                            <option value="SD">SD</option>
-                            <option value="SMP">SMP</option>
-                            <option value="SMA">SMA / SMK</option>
-                            <option value="D3">Diploma (D3)</option>
-                            <option value="S1">Sarjana (S1 / D4)</option>
-                            <option value="S2">Magister (S2)</option>
-                            <option value="S3">Doktor (S3)</option>
-                        </select>
+            <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
+                <span className="material-symbols-outlined text-primary">family_star</span>
+                Informasi Keluarga
+            </h3>
+
+            {/* 1. Jumlah Anggota Keluarga */}
+            <div className="space-y-4">
+                <SectionHeader number={1} title="Jumlah Anggota Keluarga" />
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota</label>
+                        <CountSelect id="familyMembers" value={data.familyMembers} onChange={(val) => update({ familyMembers: val })} max={20} startFrom={1} />
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Program Studi/ Jurusan</label>
-                        <input
-                            className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                            placeholder="Contoh: Ilmu Komputer, Akuntansi, Manajemen Informatika"
-                            type="text"
-                            value={data.major}
-                            onChange={(e) => update({ major: e.target.value })}
-                        />
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
+                        <CountSelect id="familyMembersMale" value={data.familyMembersMale} onChange={(val) => update({ familyMembersMale: val })} placeholder="Jumlah..." />
                     </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
+                        <CountSelect id="familyMembersFemale" value={data.familyMembersFemale} onChange={(val) => update({ familyMembersFemale: val })} placeholder="Jumlah..." />
+                    </div>
+                </div>
+                {!isFamilyCountValid && (
+                    <ValidationError message="Total Laki-laki & Perempuan tidak sesuai dengan Jumlah Anggota Keluarga" />
+                )}
+            </div>
+
+            {/* 2. Di Luar Kupang */}
+            <div className="space-y-4">
+                <SectionHeader number={2} title="Jumlah Anggota Keluarga yang menetap di luar Kota Kupang" />
+                <div className="max-w-[200px]">
+                    <CountSelect id="familyMembersOutside" value={data.familyMembersOutside} onChange={(val) => update({ familyMembersOutside: val })} />
                 </div>
             </div>
 
-            {/* Work Section */}
-            <div>
-                <h2 className="text-black dark:text-white text-[20px] font-bold leading-tight tracking-[-0.015em] pb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">work</span>
-                    Pekerjaan Saat Ini
-                </h2>
-                <div className="grid grid-cols-1 gap-6">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Kategori Bidang Pekerjaan<span className="text-red-500 ml-1">*</span></label>
-                        <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#4c9a66]">search</span>
-                            <select
-                                className="w-full h-11 pl-10 pr-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
-                                id="jobCategory"
-                                value={data.jobCategory}
-                                onChange={(e) => update({ jobCategory: e.target.value })}
-                            >
-                                <option value="">Pilih Kategori...</option>
-                                {[
-                                    'Bidang Kesehatan',
-                                    'Bidang Teknologi Informasi',
-                                    'Bidang Marketing',
-                                    'Bidang Penjualan',
-                                    'Bidang Hukum',
-                                    'Bidang Keuangan dan Perbankan',
-                                    'Bidang Pendidikan',
-                                    'Bidang Pertanian',
-                                    'Bidang Perikanan',
-                                    'Bidang Kehutanan',
-                                    'Bidang Perkebunan',
-                                    'Bidang Peternakan',
-                                    'Bidang Perindustrian',
-                                    'Bidang Perdagangan',
-                                    'Bidang Transportasi',
-                                    'Bidang Telekomunikasi',
-                                    'Bidang Pariwisata',
-                                    'Bidang Jasa',
-                                    'Bidang Lainnya',
-                                ].map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                            </select>
-                        </div>
+            {/* 3. Sidi Members */}
+            <div className="space-y-4">
+                <SectionHeader number={3} title="Jumlah Anggota Sidi" />
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Sidi</label>
+                        <CountSelect id="familyMembersSidi" value={data.familyMembersSidi} onChange={(val) => update({ familyMembersSidi: val })} />
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Jabatan/ Spesialisasi Spesifik</label>
-                        <input
-                            className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                            placeholder="Contoh: Senior Web Developer, Dokter Spesialis Anak, Akuntan Publik"
-                            type="text"
-                            value={data.jobTitle}
-                            onChange={(e) => update({ jobTitle: e.target.value })}
-                        />
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
+                        <CountSelect id="familyMembersSidiMale" value={data.familyMembersSidiMale} onChange={(val) => update({ familyMembersSidiMale: val })} placeholder="Jumlah..." />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold text-black dark:text-white/90">Instansi/ Tempat Bekerja</label>
-                            <input
-                                className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                                placeholder="Contoh: RSUD Prof. Dr. W.Z. Johannes Kupang, SMA Negeri 1 Kupang"
-                                type="text"
-                                value={data.companyName}
-                                onChange={(e) => update({ companyName: e.target.value })}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold text-black dark:text-white/90">Lama Bekerja (Tahun)</label>
-                            <input
-                                className="w-full h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                                placeholder="0"
-                                type="number"
-                                min="0"
-                                value={data.yearsOfExperience}
-                                onChange={(e) => update({ yearsOfExperience: parseInt(e.target.value) || 0 })}
-                            />
-                        </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
+                        <CountSelect id="familyMembersSidiFemale" value={data.familyMembersSidiFemale} onChange={(val) => update({ familyMembersSidiFemale: val })} placeholder="Jumlah..." />
                     </div>
+                </div>
+                {!isSidiCountValid && (
+                    <ValidationError message="Total Sidi Laki-laki & Perempuan tidak sesuai dengan Total Sidi" />
+                )}
+            </div>
+
+            {/* 4. Not Baptized */}
+            <div className="space-y-4">
+                <SectionHeader number={4} title="Anggota Keluarga belum di Baptis" />
+                <div className="max-w-[200px]">
+                    <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => update({ familyMembersNonBaptized: val })} />
                 </div>
             </div>
 
-            {/* Skills Section */}
-            <div>
-                <h2 className="text-black dark:text-white text-[20px] font-bold leading-tight tracking-[-0.015em] pb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">psychology</span>
-                    Keahlian Teknis & Bakat
-                </h2>
-                <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-black dark:text-white/90">Tambah Keahlian</label>
-                        <div className="flex gap-2">
-                            <input
-                                className="flex-1 h-11 px-4 rounded-lg border border-[#e7f3eb] dark:border-white/10 bg-white dark:bg-[#1a2e20] text-black dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-gray-400"
-                                placeholder="Contoh: Desain Web, Paduan Suara, Editing Video"
-                                type="text"
-                                value={skillInput}
-                                onChange={(e) => setSkillInput(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                            />
-                            <button
-                                className="bg-primary hover:bg-primary/90 text-black font-bold px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm"
-                                type="button"
-                                onClick={addSkill}
-                            >
-                                <span className="material-symbols-outlined">add</span>
-                                Tambah
-                            </button>
-                        </div>
-                    </div>
-                    {/* Tag Cloud Container */}
-                    <div className="flex flex-wrap gap-2 p-4 min-h-[100px] border-2 border-dashed border-[#e7f3eb] dark:border-white/10 rounded-lg bg-background-light dark:bg-black/20">
-                        {data.skills.length === 0 && (
-                            <div className="w-full flex items-center justify-center text-gray-400 text-sm italic">
-                                *Ketik dan klik 'Tambah' atau tekan Enter
-                            </div>
-                        )}
-                        {data.skills.map((skill, index) => (
-                            <div key={index} className="bg-primary/20 text-black dark:text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 border border-primary/30 animate-fadeIn">
-                                {skill}
-                                <button
-                                    className="material-symbols-outlined text-xs hover:text-red-500 transition-colors cursor-pointer"
-                                    type="button"
-                                    onClick={() => removeSkill(skill)}
+            {/* 5. Not Sidi */}
+            <div className="space-y-4">
+                <SectionHeader number={5} title="Anggota Keluarga belum Sidi" />
+                <div className="max-w-[200px]">
+                    <CountSelect id="familyMembersNonSidi" value={data.familyMembersNonSidi} onChange={(val) => update({ familyMembersNonSidi: val })} />
+                </div>
+            </div>
+
+            {/* 6. Diakonia Recipient */}
+            <div className="space-y-4">
+                <SectionHeader number={6} title="Apakah penerima Diakonia dari GMIT JEL?" />
+                <FormRadioGroup
+                    name="diakonia_recipient"
+                    id="diakonia_recipient"
+                    options={['Ya', 'Tidak']}
+                    value={data.diakonia_recipient}
+                    onChange={(val) => {
+                        update({ diakonia_recipient: val as 'Ya' | 'Tidak' });
+                        // Reset follow-up fields when switching to "Tidak"
+                        if (val === 'Tidak') {
+                            update({ diakonia_recipient: 'Tidak', diakonia_year: '', diakonia_type: '' });
+                        }
+                    }}
+                    columns={2}
+                />
+            </div>
+
+            {/* 7. Diakonia Details (Conditional) */}
+            {data.diakonia_recipient === 'Ya' && (
+                <div className="space-y-4 animate-fadeIn">
+                    <SectionHeader number={7} title="Tahun berapa dan Diakonia apa saja?" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Year Select */}
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="diakonia_year" className="text-xs font-semibold text-slate-600 dark:text-slate-400">Tahun Penerimaan</label>
+                            <div className="relative">
+                                <select
+                                    id="diakonia_year"
+                                    className={selectClass}
+                                    value={data.diakonia_year}
+                                    onChange={(e) => update({ diakonia_year: e.target.value })}
                                 >
-                                    close
-                                </button>
+                                    <option value="">Pilih Tahun...</option>
+                                    {yearOptions.map((year) => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
                             </div>
-                        ))}
+                        </div>
+                    </div>
+                    {/* Diakonia Type Textarea */}
+                    <div className="flex flex-col gap-1.5">
+                        <label htmlFor="diakonia_type" className="text-xs font-semibold text-slate-600 dark:text-slate-400">Jenis Diakonia yang Diterima</label>
+                        <textarea
+                            id="diakonia_type"
+                            className={textareaClass}
+                            value={data.diakonia_type}
+                            onChange={(e) => update({ diakonia_type: e.target.value })}
+                            placeholder="Tuliskan jenis diakonia yang pernah diterima..."
+                            rows={3}
+                        />
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
-
 export default Step2Professional;

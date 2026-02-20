@@ -34,29 +34,32 @@ const SuccessStep = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center py-10 animate-scaleIn text-center">
-            <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-500/20">
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/20 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/20 border border-green-200 dark:border-green-800 animate-scaleIn">
                 <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-5xl">check_circle</span>
             </div>
 
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2">Pendaftaran Berhasil!</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-lg">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-2 animate-fade-in-up">Pendaftaran Berhasil!</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-lg mb-8 max-w-lg animate-fade-in-up delay-100">
                 Terima kasih telah melengkapi data diri Anda. Partisipasi Anda sangat berharga bagi pertumbuhan dan masa depan pelayanan Jemaat Emaus Liliba.
             </p>
 
             {/* Registration Card - Print Area */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl max-w-md w-full mb-10 text-left relative overflow-hidden print-area">
-                <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl max-w-md w-full mb-10 text-left relative overflow-hidden print-area animate-fade-in-up delay-200 group">
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 -translate-x-[150%] animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent skew-x-12 z-10 pointer-events-none group-hover:block" style={{ animationPlayState: 'paused' }}></div>
 
-                <div className="flex justify-between items-start mb-6">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-emerald-400"></div>
+
+                <div className="flex justify-between items-start mb-6 relative z-20">
                     <div>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Status Registrasi</p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg border border-green-200 dark:border-green-800/50 w-fit">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="font-bold text-green-600 dark:text-green-400">TERVERIFIKASI</span>
+                            <span className="font-bold text-green-700 dark:text-green-400 text-sm">TERVERIFIKASI</span>
                         </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-200 dark:text-slate-700 text-5xl absolute top-6 right-6">verified</span>
+                    <span className="material-symbols-outlined text-slate-200 dark:text-slate-700 text-5xl absolute -top-2 -right-2">verified</span>
                 </div>
 
                 <div className="space-y-4">
@@ -73,11 +76,11 @@ const SuccessStep = () => {
             </div>
 
             {/* Action Buttons - No Print */}
-            <div className="flex flex-col gap-3 w-full max-w-md mx-auto print:hidden">
+            <div className="flex flex-col gap-3 w-full max-w-md mx-auto print:hidden animate-fade-in-up delay-300">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                     <button
                         onClick={handlePrint}
-                        className="h-12 rounded-xl font-bold text-primary border-2 border-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 w-full"
+                        className="h-12 rounded-xl font-bold text-primary border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 w-full"
                     >
                         <span className="material-symbols-outlined">print</span>
                         Simpan Bukti
@@ -86,7 +89,7 @@ const SuccessStep = () => {
                         href="https://wa.me/6281234567890"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="h-12 rounded-xl font-bold text-white bg-[#25D366] hover:bg-[#128C7E] shadow-lg shadow-green-500/30 transition-all flex items-center justify-center gap-2 w-full"
+                        className="h-12 rounded-xl font-bold text-white bg-gradient-to-r from-[#25D366] to-[#1DA851] hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 w-full"
                     >
                         <span className="material-symbols-outlined">groups</span>
                         Gabung Grup WA
@@ -94,7 +97,7 @@ const SuccessStep = () => {
                 </div>
                 <button
                     onClick={() => navigate('/')}
-                    className="h-12 rounded-xl font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors w-full"
+                    className="h-12 rounded-xl font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors w-full mt-2"
                 >
                     Kembali ke Beranda
                 </button>

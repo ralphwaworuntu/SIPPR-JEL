@@ -1,0 +1,326 @@
+import React, { useRef, useEffect } from 'react';
+import { type FormData } from '../../types';
+import FormRadioGroup from '../ui/FormRadioGroup';
+import SectionHeader from '../ui/SectionHeader';
+
+interface StepProps {
+    data: FormData;
+    update: (data: Partial<FormData>) => void;
+}
+
+const Step6Health: React.FC<StepProps> = ({ data, update }) => {
+    // Refs for auto-focus on "Other" inputs
+    const chronicDiseaseOtherRef = useRef<HTMLInputElement>(null);
+    const disabilityPhysicalOtherRef = useRef<HTMLInputElement>(null);
+    const disabilityIntellectualOtherRef = useRef<HTMLInputElement>(null);
+    const disabilityMentalOtherRef = useRef<HTMLInputElement>(null);
+    const disabilitySensoryOtherRef = useRef<HTMLInputElement>(null);
+
+    // Auto-focus effects
+    useEffect(() => {
+        if (data.health_chronicDisease === 'Lainnya' && chronicDiseaseOtherRef.current) {
+            chronicDiseaseOtherRef.current.focus();
+        }
+    }, [data.health_chronicDisease]);
+
+    useEffect(() => {
+        if (data.health_disabilityPhysical === 'Lainnya' && disabilityPhysicalOtherRef.current) {
+            disabilityPhysicalOtherRef.current.focus();
+        }
+    }, [data.health_disabilityPhysical]);
+
+    useEffect(() => {
+        if (data.health_disabilityIntellectual === 'Lainnya' && disabilityIntellectualOtherRef.current) {
+            disabilityIntellectualOtherRef.current.focus();
+        }
+    }, [data.health_disabilityIntellectual]);
+
+    useEffect(() => {
+        if (data.health_disabilityMental === 'Lainnya' && disabilityMentalOtherRef.current) {
+            disabilityMentalOtherRef.current.focus();
+        }
+    }, [data.health_disabilityMental]);
+
+    useEffect(() => {
+        if (data.health_disabilitySensory === 'Lainnya' && disabilitySensoryOtherRef.current) {
+            disabilitySensoryOtherRef.current.focus();
+        }
+    }, [data.health_disabilitySensory]);
+
+    // Cleanup effects when main option changes
+    useEffect(() => {
+        if (data.health_chronicSick === 'Tidak') {
+            update({
+                health_chronicDisease: '',
+                health_chronicDiseaseOther: ''
+            });
+        }
+    }, [data.health_chronicSick]);
+
+    useEffect(() => {
+        if (data.health_hasDisability === 'Tidak') {
+            update({
+                health_disabilityPhysical: '',
+                health_disabilityPhysicalOther: '',
+                health_disabilityIntellectual: '',
+                health_disabilityIntellectualOther: '',
+                health_disabilityMental: '',
+                health_disabilityMentalOther: '',
+                health_disabilitySensory: '',
+                health_disabilitySensoryOther: '',
+                health_disabilityDouble: false
+            });
+        }
+    }, [data.health_hasDisability]);
+
+    const otherInputClass = "w-full mt-2 h-11 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-200 text-sm";
+
+    return (
+        <div className="space-y-8 animate-fadeIn">
+            <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
+                <span className="material-symbols-outlined text-primary">medical_services</span>
+                Kondisi Kesehatan & Sosial
+            </h3>
+
+            {/* 1. Sakit 30 Hari Terakhir */}
+            <div className="space-y-4">
+                <SectionHeader number={1} title="Apakah ada anggota keluarga yang mengalami sakit dalam 30 hari terakhir?" />
+                <FormRadioGroup
+                    name="health_sick30Days"
+                    options={['Ya, rawat inap', 'Ya, rawat jalan', 'Tidak ada']}
+                    value={data.health_sick30Days}
+                    onChange={(val) => update({ health_sick30Days: val })}
+                    columns={3}
+                />
+            </div>
+
+            {/* 2. Sakit Menahun */}
+            <div className="space-y-4">
+                <SectionHeader number={2} title="Apakah ada anggota keluarga sakit menahun?" />
+                <FormRadioGroup
+                    name="health_chronicSick"
+                    options={['Ya', 'Tidak']}
+                    value={data.health_chronicSick}
+                    onChange={(val) => update({ health_chronicSick: val })}
+                    columns={2}
+                />
+
+                {/* 3. Jenis Penyakit Menahun (Conditional) */}
+                {data.health_chronicSick === 'Ya' && (
+                    <div className="space-y-4 pl-4 border-l-2 border-primary/20 animate-fadeIn mt-4">
+                        <SectionHeader number={3} title="Apa jenis penyakit menahun?" />
+                        <FormRadioGroup
+                            name="health_chronicDisease"
+                            options={['Jantung', 'Hipertensi/Darah Tinggi', 'Diabetes Militus', 'Stroke', 'Penyakit Paru (TBC/Asma)', 'Kanker', 'Lainnya']}
+                            value={data.health_chronicDisease}
+                            onChange={(val) => update({ health_chronicDisease: val })}
+                            columns={3}
+                        />
+                        {data.health_chronicDisease === 'Lainnya' && (
+                            <div className="animate-fadeIn mt-2">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan penyakit lainnya:</label>
+                                <input
+                                    ref={chronicDiseaseOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Tuliskan jenis penyakit..."
+                                    value={data.health_chronicDiseaseOther || ''}
+                                    onChange={(e) => update({ health_chronicDiseaseOther: e.target.value })}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* 4. BPJS Kesehatan */}
+            <div className="space-y-4">
+                <SectionHeader number={4} title="Apakah memiliki BPJS Kesehatan?" />
+                <FormRadioGroup
+                    name="health_hasBPJS"
+                    options={['Ya', 'Tidak']}
+                    value={data.health_hasBPJS}
+                    onChange={(val) => update({ health_hasBPJS: val })}
+                    columns={2}
+                />
+            </div>
+
+            {/* 5. Pengobatan Teratur */}
+            <div className="space-y-4">
+                <SectionHeader number={5} title="Apakah mendapat pengobatan yang teratur dari Fasilitas Kesehatan?" />
+                <FormRadioGroup
+                    name="health_regularTreatment"
+                    options={['Ya', 'Tidak']}
+                    value={data.health_regularTreatment}
+                    onChange={(val) => update({ health_regularTreatment: val })}
+                    columns={2}
+                />
+            </div>
+
+            {/* 6. BPJS Ketenagakerjaan */}
+            <div className="space-y-4">
+                <SectionHeader number={6} title="Apakah memiliki BPJS Ketenagakerjaan?" />
+                <FormRadioGroup
+                    name="health_hasBPJSKetenagakerjaan"
+                    options={['Ya', 'Tidak']}
+                    value={data.health_hasBPJSKetenagakerjaan}
+                    onChange={(val) => update({ health_hasBPJSKetenagakerjaan: val })}
+                    columns={2}
+                />
+            </div>
+
+            {/* 7. Bansos */}
+            <div className="space-y-4">
+                <SectionHeader number={7} title="Apa jenis bantuan sosial yang diterima?" />
+                <FormRadioGroup
+                    name="health_socialAssistance"
+                    options={['PKH', 'BPNT', 'BLT', 'Tidak']}
+                    value={data.health_socialAssistance}
+                    onChange={(val) => update({ health_socialAssistance: val })}
+                    columns={4}
+                />
+            </div>
+
+            {/* 8. Disabilitas */}
+            <div className="space-y-6 bg-red-50/50 dark:bg-red-950/10 p-5 rounded-2xl border border-red-100 dark:border-red-900/20">
+                <div className="space-y-4">
+                    <SectionHeader number={8} title="Apakah ada anggota keluarga penyandang disabilitas?" />
+                    <FormRadioGroup
+                        name="health_hasDisability"
+                        options={['Ya', 'Tidak']}
+                        value={data.health_hasDisability}
+                        onChange={(val) => update({ health_hasDisability: val })}
+                        columns={2}
+                    />
+                </div>
+
+                {/* Conditional Disabilitas Questions 9-13 */}
+                {data.health_hasDisability === 'Ya' && (
+                    <div className="space-y-6 pl-0 md:pl-4 md:border-l-2 md:border-primary/20 animate-fadeIn pt-2">
+                        <div className="bg-amber-50 dark:bg-amber-900/20 p-3.5 rounded-xl text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                            <span className="material-symbols-outlined text-amber-600 text-lg shrink-0 mt-0.5">info</span>
+                            <p><strong>Perhatian:</strong> Mohon lengkapi detail jenis disabilitas di bawah ini. Pilih "Tidak Ada" jika kategori tersebut tidak berlaku.</p>
+                        </div>
+
+                        {/* 9. Disabilitas Fisik */}
+                        <div className="space-y-3">
+                            <SectionHeader number={9} title="Disabilitas Fisik" />
+                            <FormRadioGroup
+                                name="health_disabilityPhysical"
+                                options={['Lumpuh', 'Amputasi', 'Cerebral Palsy', 'Gangguan tulang/sendi', 'Pasca stroke', 'Tidak Ada', 'Lainnya']}
+                                value={data.health_disabilityPhysical}
+                                onChange={(val) => update({ health_disabilityPhysical: val })}
+                                columns={3}
+                            />
+                            {data.health_disabilityPhysical === 'Lainnya' && (
+                                <input
+                                    ref={disabilityPhysicalOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Sebutkan disabilitas fisik..."
+                                    value={data.health_disabilityPhysicalOther || ''}
+                                    onChange={(e) => update({ health_disabilityPhysicalOther: e.target.value })}
+                                />
+                            )}
+                        </div>
+
+                        {/* 10. Disabilitas Intelektual */}
+                        <div className="space-y-3">
+                            <SectionHeader number={10} title="Disabilitas Intelektual" />
+                            <FormRadioGroup
+                                name="health_disabilityIntellectual"
+                                options={['Down Syndrome', 'Tunagrahita Ringan', 'Tunagrahita Sedang', 'Tunagrahita Berat', 'Tidak Ada', 'Lainnya']}
+                                value={data.health_disabilityIntellectual}
+                                onChange={(val) => update({ health_disabilityIntellectual: val })}
+                                columns={3}
+                            />
+                            {data.health_disabilityIntellectual === 'Lainnya' && (
+                                <input
+                                    ref={disabilityIntellectualOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Sebutkan disabilitas intelektual..."
+                                    value={data.health_disabilityIntellectualOther || ''}
+                                    onChange={(e) => update({ health_disabilityIntellectualOther: e.target.value })}
+                                />
+                            )}
+                        </div>
+
+                        {/* 11. Disabilitas Mental */}
+                        <div className="space-y-3">
+                            <SectionHeader number={11} title="Disabilitas Mental" />
+                            <FormRadioGroup
+                                name="health_disabilityMental"
+                                options={['Skizofrenia', 'Bipolar', 'Depresi Berat', 'Gangguan Kecemasan Berat', 'Autisme', 'ADHD/GPPH', 'Tidak Ada', 'Lainnya']}
+                                value={data.health_disabilityMental}
+                                onChange={(val) => update({ health_disabilityMental: val })}
+                                columns={3}
+                            />
+                            {data.health_disabilityMental === 'Lainnya' && (
+                                <input
+                                    ref={disabilityMentalOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Sebutkan disabilitas mental..."
+                                    value={data.health_disabilityMentalOther || ''}
+                                    onChange={(e) => update({ health_disabilityMentalOther: e.target.value })}
+                                />
+                            )}
+                        </div>
+
+                        {/* 12. Disabilitas Sensorik */}
+                        <div className="space-y-3">
+                            <SectionHeader number={12} title="Disabilitas Sensorik" />
+                            <FormRadioGroup
+                                name="health_disabilitySensory"
+                                options={['Tunanetra', 'Tunarungu', 'Gangguan Wicara', 'Tunarungu-Wicara', 'Tidak Ada', 'Lainnya']}
+                                value={data.health_disabilitySensory}
+                                onChange={(val) => update({ health_disabilitySensory: val })}
+                                columns={3}
+                            />
+                            {data.health_disabilitySensory === 'Lainnya' && (
+                                <input
+                                    ref={disabilitySensoryOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Sebutkan disabilitas sensorik..."
+                                    value={data.health_disabilitySensoryOther || ''}
+                                    onChange={(e) => update({ health_disabilitySensoryOther: e.target.value })}
+                                />
+                            )}
+                        </div>
+
+                        {/* 13. Disabilitas Ganda */}
+                        <div className="space-y-3">
+                            <SectionHeader number={13} title="Disabilitas Ganda" />
+                            <label className={`cursor-pointer p-4 border-2 rounded-xl flex items-center gap-4 transition-all duration-200 ${data.health_disabilityDouble ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm shadow-primary/10' : 'border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${data.health_disabilityDouble
+                                    ? 'border-primary bg-primary'
+                                    : 'border-slate-300 dark:border-slate-600'
+                                    }`}>
+                                    {data.health_disabilityDouble && (
+                                        <span className="material-symbols-outlined text-white text-sm">check</span>
+                                    )}
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    checked={data.health_disabilityDouble || false}
+                                    onChange={(e) => update({ health_disabilityDouble: e.target.checked })}
+                                    className="sr-only"
+                                />
+                                <div>
+                                    <span className="font-semibold text-slate-900 dark:text-white block text-sm">Kombinasi lebih dari satu jenis disabilitas</span>
+                                    <span className="text-xs text-slate-500 dark:text-slate-400">Centang jika anggota keluarga memiliki lebih dari satu jenis kategori disabilitas di atas.</span>
+                                </div>
+                            </label>
+                        </div>
+
+                    </div>
+                )}
+            </div>
+
+        </div>
+    );
+};
+
+export default Step6Health;
