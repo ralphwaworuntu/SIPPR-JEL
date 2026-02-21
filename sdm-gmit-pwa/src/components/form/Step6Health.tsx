@@ -82,6 +82,11 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                 Kondisi Kesehatan & Sosial
             </h3>
 
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-sm text-blue-800 dark:text-blue-200 flex items-start gap-3 mb-2 animate-fadeIn border border-blue-100 dark:border-blue-800/50 shadow-sm shadow-blue-100/50 dark:shadow-none">
+                <span className="material-symbols-outlined text-blue-500 text-xl shrink-0 mt-0.5">shield_locked</span>
+                <p className="leading-relaxed">Data kondisi kesehatan dan disabilitas ini digunakan <strong>hanya untuk pemetaan kebutuhan pelayanan pastoral gereja</strong> (diakonia). Majelis Jemaat menjamin kerahasiaan informasi medis keluarga Anda.</p>
+            </div>
+
             {/* 1. Sakit 30 Hari Terakhir */}
             <div className="space-y-4">
                 <SectionHeader number={1} title="Apakah ada anggota keluarga yang mengalami sakit dalam 30 hari terakhir?" />

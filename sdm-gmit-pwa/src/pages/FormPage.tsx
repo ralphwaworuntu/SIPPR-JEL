@@ -20,7 +20,7 @@ const FormPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
-    const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'error' | 'success' }>({ message: '', visible: false, type: 'error' });
     const [showStep3Confirm, setShowStep3Confirm] = useState(false);
     const navigate = useNavigate();
 
@@ -44,13 +44,13 @@ const FormPage = () => {
         setFormData(prev => ({ ...prev, ...newData }));
     };
 
-    const showToast = useCallback((message: string) => {
-        setToast({ message, visible: true });
+    const showToast = useCallback((message: string, type: 'error' | 'success' = 'error') => {
+        setToast({ message, visible: true, type });
         setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 4000);
     }, []);
 
     const handleValidationError = (fieldId: string, message: string) => {
-        showToast(message);
+        showToast(message, 'error');
         setTimeout(() => {
             const element = document.getElementById(fieldId);
             if (element) {
@@ -342,6 +342,18 @@ const FormPage = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const getStepCompletionMessage = (completedStep: number): string => {
+        switch (completedStep) {
+            case 1: return "✅ Data identitas lengkap! Lanjut ke data keluarga...";
+            case 2: return "👨‍👩‍👧‍👦 Info keluarga tersimpan! Sekarang profesi...";
+            case 3: return "💼 Data profesi berhasil! Sudah setengah jalan 💪";
+            case 4: return "🎓 Pendidikan tercatat! Tinggal 2 langkah lagi...";
+            case 5: return "💰 Ekonomi selesai! Langkah terakhir sebelum kirim!";
+            case 6: return "🏥 Kesehatan lengkap! Periksa & kirim data Anda ✅";
+            default: return "";
+        }
+    };
+
     const nextStep = () => {
         if (validateStep(step)) {
             // Check Step 3 special multi-member condition
@@ -354,6 +366,7 @@ const FormPage = () => {
             }
 
             if (step < 7) {
+                showToast(getStepCompletionMessage(step), 'success');
                 setShowStep3Confirm(false); // Reset it just in case
                 setDirection(1);
                 setStep(prev => prev + 1);
@@ -391,6 +404,7 @@ const FormPage = () => {
             }, 100);
         } else {
             // Proceed to next step immediately
+            showToast(getStepCompletionMessage(3), 'success');
             setShowStep3Confirm(false);
             setDirection(1);
             setStep(4);
@@ -498,13 +512,13 @@ const FormPage = () => {
 
     const getEncouragement = (stepNum: number) => {
         switch (stepNum) {
-            case 1: return "Mari kita mulai! 🙏";
-            case 2: return "Sedikit lagi — data keluarga Anda.";
-            case 3: return "Bagus! Sekarang tentang profesi.";
-            case 4: return "Sudah setengah jalan! 💪";
-            case 5: return "Hampir selesai — sedikit lagi!";
-            case 6: return "Langkah terakhir sebelum validasi!";
-            case 7: return "Periksa data & kirim ✅";
+            case 1: return "Hanya 7 langkah singkat — dimulai dari data dasar 🙏";
+            case 2: return "Langkah 2 dari 7 — informasi anggota keluarga.";
+            case 3: return "Langkah 3 dari 7 — data profesi & pelayanan.";
+            case 4: return "Sudah 4 dari 7 langkah — luar biasa! 💪";
+            case 5: return "Langkah 5 dari 7 — data ekonomi keluarga 💰";
+            case 6: return "Langkah 6 dari 7 — informasi kesehatan keluarga.";
+            case 7: return "Terakhir! Periksa dengan teliti & kirim ✅";
             default: return "";
         }
     };
@@ -583,14 +597,25 @@ const FormPage = () => {
                             >
                                 <div
                                     onClick={() => setToast(prev => ({ ...prev, visible: false }))}
-                                    className="bg-red-50 dark:bg-red-950/90 border border-red-200 dark:border-red-800 rounded-2xl px-5 py-4 shadow-2xl shadow-red-500/20 flex items-start gap-3 cursor-pointer backdrop-blur-md"
+                                    className={toast.type === 'error'
+                                        ? "bg-red-50 dark:bg-red-950/90 border border-red-200 dark:border-red-800 rounded-2xl px-5 py-4 shadow-2xl shadow-red-500/20 flex items-start gap-3 cursor-pointer backdrop-blur-md"
+                                        : "bg-emerald-50 dark:bg-emerald-950/90 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-5 py-4 shadow-2xl shadow-emerald-500/20 flex items-start gap-3 cursor-pointer backdrop-blur-md"
+                                    }
                                 >
-                                    <span className="material-symbols-outlined text-red-500 text-xl mt-0.5 shrink-0">error</span>
+                                    <span className={`material-symbols-outlined text-xl mt-0.5 shrink-0 ${toast.type === 'error' ? 'text-red-500' : 'text-emerald-500'}`}>
+                                        {toast.type === 'error' ? 'error' : 'check_circle'}
+                                    </span>
                                     <div>
-                                        <p className="font-bold text-red-700 dark:text-red-300 text-sm">Data Belum Lengkap</p>
-                                        <p className="text-red-600 dark:text-red-400 text-sm mt-0.5">{toast.message}</p>
+                                        <p className={`font-bold text-sm ${toast.type === 'error' ? 'text-red-700 dark:text-red-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+                                            {toast.type === 'error' ? 'Data Belum Lengkap' : 'Berhasil'}
+                                        </p>
+                                        <p className={`text-sm mt-0.5 items-center flex gap-1 font-medium ${toast.type === 'error' ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                            {toast.message}
+                                        </p>
                                     </div>
-                                    <span className="material-symbols-outlined text-red-300 dark:text-red-700 text-base ml-auto shrink-0 mt-0.5">close</span>
+                                    <span className={`material-symbols-outlined text-base ml-auto shrink-0 mt-0.5 ${toast.type === 'error' ? 'text-red-300 dark:text-red-700' : 'text-emerald-300 dark:text-emerald-700'}`}>
+                                        close
+                                    </span>
                                 </div>
                             </motion.div>
                         )}

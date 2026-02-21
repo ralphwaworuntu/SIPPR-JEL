@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-
+import { apiClient } from '../lib/api-client';
 export interface Notification {
     id: number;
     title: string;
@@ -16,9 +15,7 @@ export const useNotifications = () => {
     const { data: notifications = [], isLoading } = useQuery({
         queryKey: ['notifications'],
         queryFn: async () => {
-            const response = await axios.get('http://localhost:3000/api/notifications', {
-                withCredentials: true
-            });
+            const response = await apiClient.get('/notifications');
             return response.data as Notification[];
         },
         refetchInterval: 10000, // Poll every 10 seconds
@@ -26,9 +23,7 @@ export const useNotifications = () => {
 
     const markAsRead = useMutation({
         mutationFn: async (id: number) => {
-            await axios.put(`http://localhost:3000/api/notifications/${id}/read`, {}, {
-                withCredentials: true
-            });
+            await apiClient.put(`/notifications/${id}/read`);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -37,9 +32,7 @@ export const useNotifications = () => {
 
     const markAllAsRead = useMutation({
         mutationFn: async () => {
-            await axios.post('http://localhost:3000/api/notifications/mark-all-read', {}, {
-                withCredentials: true
-            });
+            await apiClient.post('/notifications/mark-all-read');
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });

@@ -94,6 +94,11 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 Sumber Pendapatan Utama Keluarga
             </h3>
 
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-sm text-blue-800 dark:text-blue-200 flex items-start gap-3 mb-2 animate-fadeIn border border-blue-100 dark:border-blue-800/50 shadow-sm shadow-blue-100/50 dark:shadow-none">
+                <span className="material-symbols-outlined text-blue-500 text-xl shrink-0 mt-0.5">shield_locked</span>
+                <p className="leading-relaxed">Data pendapatan dan ekonomi keluarga <strong>bersifat konfidensial/rahasia</strong>. Data ini hanya akan dikelola oleh Majelis Jemaat untuk kepentingan pemetaan statistik dan pelayanan. Tidak akan dipublikasikan secara umum.</p>
+            </div>
+
             {/* 1. Pekerjaan Utama Kepala Keluarga */}
             <div className="space-y-4" id="headOccupation">
                 <SectionHeader number={1} title="Pekerjaan Utama Kepala Keluarga" />

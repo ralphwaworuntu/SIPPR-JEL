@@ -14,9 +14,9 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: "http://localhost:5173", // Vite frontend
+    origin: ["http://localhost:5173", "http://192.168.3.6:5173"], // Allow localhost and specific IP
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
@@ -94,7 +94,7 @@ const mapCongregantToMember = (c: any) => ({
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
 });
 
-import { eq, like, and, desc, sql } from "drizzle-orm";
+import { eq, like, and, desc } from "drizzle-orm";
 
 // 1. GET Members (with Search & Filter)
 app.get("/api/members", async (req, res) => {

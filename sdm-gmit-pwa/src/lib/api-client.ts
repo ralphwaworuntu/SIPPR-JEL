@@ -1,8 +1,8 @@
 
 import axios from 'axios';
 
-// Get base URL from environment or fallback to localhost
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Get base URL from environment or fallback to dynamic hostname
+const baseURL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
 
 export const apiClient = axios.create({
     baseURL,
