@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { LingkunganChart } from '../components/admin/LingkunganChart';
-import { StatCard } from '../components/dashboard/StatCard';
+
 import { RecentActivity } from '../components/dashboard/RecentActivity';
 
 
@@ -156,7 +156,7 @@ const DynamicChart = ({ initialMetric, customData }: DynamicChartProps) => {
 const AdminDashboard = () => {
     const { data: session } = useSession();
     const { profile } = useSettings();
-    const navigate = useNavigate();
+
     const user = session?.user;
 
     // Get Real Data (Split into stats and list for performance)
@@ -185,9 +185,6 @@ const AdminDashboard = () => {
     const chartsData = useMemo(() => {
         if (!stats) return null;
 
-        // Use upstream type definition or careful access if needed, but keeping stashed logic for structure
-        type DistributionType = Record<string, number>;
-        const distributions = stats.distributions; // Assuming stats structure matches what we expect from stashed logic
 
         // Gender
         const genderLabels = Object.keys(stats.distributions.gender);

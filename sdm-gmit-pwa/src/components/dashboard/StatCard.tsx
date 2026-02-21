@@ -20,7 +20,7 @@ const colorMap: Record<string, string> = {
     rose: 'bg-rose-500 text-rose-600',
 };
 
-export const StatCard = ({ title, value, subtitle, trend, trendUp = true, icon, color = 'primary', delay = 0 }: StatCardProps) => {
+export const StatCard = ({ title, value, subtitle, trendUp = true, icon, color = 'primary', delay = 0 }: StatCardProps) => {
     // Parse color for background opacity vs text
     const baseColorClass = colorMap[color] || colorMap.primary;
     const [bgColor] = baseColorClass.split(' ');

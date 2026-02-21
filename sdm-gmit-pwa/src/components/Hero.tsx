@@ -16,9 +16,8 @@ export const Hero = () => {
     const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
     const textY = useTransform(scrollYProgress, [0, 1], ["0%", "200%"]);
     const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-
     return (
-        <section ref={ref} className="relative w-full min-h-[90vh] flex flex-col overflow-hidden">
+        <section ref={ref} className="relative w-full min-h-[85vh] flex flex-col overflow-hidden">
             {/* Parallax Background */}
             <motion.div
                 style={{ y: backgroundY }}
@@ -67,16 +66,9 @@ export const Hero = () => {
                                 Jemaat GMIT Emaus Liliba
                             </span>
                         </motion.h1>
-
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7, duration: 0.8 }}
-                            className="max-w-2xl text-slate-200 text-lg md:text-xl leading-relaxed font-light"
-                        >
-
-                        </motion.p>
                     </div>
+
+
 
                     {/* CTA Buttons */}
                     <motion.div
@@ -103,7 +95,7 @@ export const Hero = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50 animate-bounce"
+                className="hidden md:flex absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-2 text-white/50 animate-bounce"
             >
                 <span className="text-xs font-medium uppercase tracking-widest">Scroll</span>
                 <span className="material-symbols-outlined">expand_more</span>

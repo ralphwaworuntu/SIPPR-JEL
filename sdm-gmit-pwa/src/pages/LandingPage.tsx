@@ -184,15 +184,18 @@ const LandingPage = () => {
                 {/* HERO SECTION */}
                 <Hero />
                 {/* TENTANG SECTION */}
-                <section id="visi-misi" className="pt-16 pb-24 w-full bg-white dark:bg-slate-950">
+                <section id="visi-misi" className="py-20 md:py-24 w-full bg-white dark:bg-slate-950">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
-                        <div className="text-center max-w-3xl mx-auto">
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-12">
+                        <div className="text-center mb-12 md:mb-16">
+                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
                                 Visi Misi
                             </h2>
+                        </div>
 
-                            <div className="text-left max-w-2xl mx-auto mb-16 space-y-4">
-                                <ol className="list-decimal list-outside ml-4 space-y-3 text-slate-600 dark:text-slate-300 text-lg font-medium leading-relaxed">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center max-w-5xl mx-auto">
+                            {/* Text List */}
+                            <div className="text-left order-2 md:order-1">
+                                <ol className="list-decimal list-outside ml-6 space-y-4 text-slate-600 dark:text-slate-300 text-lg font-medium leading-relaxed">
                                     <li className="pl-2">Mengembangkan persekutuan yang dinamis dan bermutu</li>
                                     <li className="pl-2">Meningkatkan pemberitaan firman Tuhan yang inovatif dan progresif</li>
                                     <li className="pl-2">Memberdayakan potensi jemaat untuk mengatasi masalah sosial, ketahanan ekonomi jemaat</li>
@@ -203,7 +206,7 @@ const LandingPage = () => {
                             </div>
 
                             {/* Template Foto Pendeta */}
-                            <div className="relative group mx-auto w-64 h-64">
+                            <div className="relative group mx-auto w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 order-1 md:order-2">
                                 <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-all duration-500"></div>
                                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl">
                                     <img
@@ -218,19 +221,20 @@ const LandingPage = () => {
                 </section>
 
                 {/* TENTANG SECTION (Latar Belakang) */}
-                <section id="tentang" className="pt-16 pb-24 w-full bg-white dark:bg-slate-950">
-                    <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
-                        <div className="text-center max-w-3xl mx-auto">
+                <section id="tentang" className="py-20 md:py-24 w-full bg-white dark:bg-slate-950">
+                    <div className="max-w-[1000px] mx-auto px-6 md:px-12 lg:px-20">
+                        <div className="text-center max-w-4xl mx-auto">
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-indigo-600 dark:text-indigo-400 mb-4 block">
                                 Latar Belakang Program
                             </span>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-6">
+                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-8">
                                 Pendataan & Pemetaan SDM Profesional GMIT JEL
                             </h2>
                             <div className="relative group">
-                                <p className={`text-slate-500 dark:text-slate-400 text-lg leading-relaxed text-justify transition-all duration-300 ${!isAboutExpanded ? 'line-clamp-3' : ''}`}>
-                                    Gereja selain sebagai persekutuan orang percaya juga merupakan wadah pengembangan potensi jemaat secara menyeluruh. Setiap anggota jemaat memiliki profesi, keahlian, dan talenta masing-masing yang apabila dikelola dengan baik maka akan menjadi kekuatan besar bagi terlaksananya pelayanan dan sebagai kesaksian gereja di tengah masyarakat. Jemaat memiliki kemampuan profesional, keterampilan teknis, dan minat pelayanan tertentu namun belum teridentifikasi secara sistematis sehingga belum tersinergi dengan optimal dalam kegiatan gereja karena belum adanya data terstruktur terkait Sumber Daya Manusia (SDM) jemaat. Ini merupakan sebagian kecil dari peyebab pelayanan gereja bergantung pada kelompok kecil yang terlibat aktif, sementara potensi besar lainnya belum tergali.
-                                    <p>Menjawab kebutuhan gereja di atas, maka GMIT JEL melalui UPPMJ & Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah <b>“Bank Data SDM GMIT JEL”</b>. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merpakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.</p>                               </p>
+                                <div className={`text-slate-500 dark:text-slate-400 text-base md:text-lg leading-relaxed text-left md:text-justify transition-all duration-300 ${!isAboutExpanded ? 'line-clamp-4 md:line-clamp-3' : ''}`}>
+                                    <p className="mb-4">Gereja selain sebagai persekutuan orang percaya juga merupakan wadah pengembangan potensi jemaat secara menyeluruh. Setiap anggota jemaat memiliki profesi, keahlian, dan talenta masing-masing yang apabila dikelola dengan baik maka akan menjadi kekuatan besar bagi terlaksananya pelayanan dan sebagai kesaksian gereja di tengah masyarakat. Jemaat memiliki kemampuan profesional, keterampilan teknis, dan minat pelayanan tertentu namun belum teridentifikasi secara sistematis sehingga belum tersinergi dengan optimal dalam kegiatan gereja karena belum adanya data terstruktur terkait Sumber Daya Manusia (SDM) jemaat. Ini merupakan sebagian kecil dari peyebab pelayanan gereja bergantung pada kelompok kecil yang terlibat aktif, sementara potensi besar lainnya belum tergali.</p>
+                                    <p>Menjawab kebutuhan gereja di atas, maka GMIT JEL melalui UPPMJ & Satuan Pelayanan Profesional menginisiasi program pendataan jemaat berdasarkan profesi dan keahlian, yang outputnya akan disusun dalam sebuah <b>“Bank Data SDM GMIT JEL”</b>. Tujuan umum program ini adalah untuk memetakan profesi dan kompetensi setiap anggota jemaat agar dapat dioptimalkan bagi pengembangan pelayanan gereja, pemberdayaan ekonomi jemaat, serta keterlibatan aktif dalam kegiatan sosial kemasyarakatan. Program ini bukan hanya sebuah kegiatan administratif belaka, namun merpakan langkah strategis menuju gereja yang memberdayakan, yang mana setiap anggota jemaat mengambil bagian dalam pelayanan sesuai panggilan dan kompetensinya dengan visi menjadi anggota tubuh Kristus yang bertumbuh dan berdampak.</p>
+                                </div>
                                 {/* Fade Effect Overlay */}
                                 {!isAboutExpanded && (
                                     <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none"></div>
@@ -238,7 +242,7 @@ const LandingPage = () => {
                             </div>
                             <button
                                 onClick={() => setIsAboutExpanded(!isAboutExpanded)}
-                                className="mt-8 px-6 py-2 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                                className="mt-8 md:mt-10 px-6 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group shadow-sm hover:shadow-md"
                             >
                                 <span className="flex items-center gap-2">
                                     {isAboutExpanded ? 'Tutup Ringkasan' : 'Baca Selengkapnya'}
@@ -252,21 +256,21 @@ const LandingPage = () => {
                 </section>
 
                 {/* FITUR KEUNGGULAN (Advanced Interactive Cards) */}
-                <section id="fitur" className="py-24 w-full bg-slate-50 dark:bg-slate-900">
+                <section id="fitur" className="py-20 md:py-24 w-full bg-slate-50 dark:bg-slate-900">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center max-w-3xl mx-auto mb-16">
                             <span className="inline-block px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 text-xs font-bold tracking-wider uppercase mb-4">
                                 Teknologi & Inovasi
                             </span>
-                            <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-4">
+                            <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-4">
                                 Fitur Unggulan Platform
                             </h2>
-                            <p className="text-slate-500 dark:text-slate-400 text-lg">
+                            <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg">
                                 Dirancang dengan antarmuka modern dan fitur lengkap untuk kemudahan jemaat.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-8">
                             {[
                                 { title: "Keamanan Data", desc: "Enkripsi end-to-end untuk melindungi privasi data jemaat.", icon: "security", gradient: "from-rose-500 to-pink-600" },
                                 { title: "Akses Mudah", desc: "Dapat diakses kapan saja melalui Smartphone (Mobile Friendly).", icon: "devices", gradient: "from-amber-500 to-orange-600" },
@@ -289,9 +293,9 @@ const LandingPage = () => {
                 </section>
 
                 {/* FAQ SECTION */}
-                <section id="faq" className="py-24 w-full bg-white dark:bg-slate-950">
-                    <div className="max-w-[900px] mx-auto px-6">
-                        <div className="text-center mb-16">
+                <section id="faq" className="py-20 md:py-24 w-full bg-white dark:bg-slate-950">
+                    <div className="max-w-[800px] mx-auto px-6">
+                        <div className="text-center mb-12 md:mb-16">
                             <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold tracking-wider uppercase mb-4">
                                 FAQ
                             </span>
@@ -304,15 +308,15 @@ const LandingPage = () => {
                                 { q: "Apakah data saya terjamin kerahasiaannya?", a: "Sangat terjamin. Sistem ini dikelola oleh UPPMJ & Satuan Pelayanan Profesional JEL dan data hanya digunakan untuk kepentingan internal pelayanan gereja." },
                                 { q: "Bagaimana jika saya tidak memiliki email?", a: "Sistem ini tidak mewajibkan jemaat untuk memiliki email. Namun, jika jemaat tidak memiliki email, dapat meminta bantuan keluarga atau admin sekretariat di gereja untuk membantu proses pendaftaran." },
                                 { q: "Apakah data ini wajib diisi oleh semua jemaat?", a: "Ya, sangat diharapkan partisipasi seluruh jemaat, khususnya pada jemaat yang berusia 17 tahun ke atas dan sudah bekerja, agar perencanaan pelayanan gereja dapat berjalan maksimal dan tepat sasaran." },
-                                { q: "Bisakah saya mengubah data setelah pendaftaran?", a: "Bisa, anda dapat memenita tolong pada admin untuk memperbarui data anda." }
+                                { q: "Bisakah saya mengubah data setelah pendaftaran?", a: "Bisa, anda dapat meminta tolong pada admin untuk memperbarui data anda." }
                             ].map((faq, i) => (
                                 <Reveal key={i} delay={i * 50}>
                                     <details className="group bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 open:shadow-lg transition-all duration-300 overflow-hidden">
-                                        <summary className="flex items-center justify-between p-6 cursor-pointer list-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                            <h3 className="text-base font-bold text-slate-900 dark:text-white pr-4">{faq.q}</h3>
+                                        <summary className="flex items-center justify-between p-5 md:p-6 cursor-pointer list-none hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            <h3 className="text-sm md:text-base font-bold text-slate-900 dark:text-white pr-4">{faq.q}</h3>
                                             <span className="material-symbols-outlined text-slate-400 flex-shrink-0 transform group-open:rotate-180 transition-transform">expand_more</span>
                                         </summary>
-                                        <div className="px-6 pb-6 text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-200 dark:border-slate-800">
+                                        <div className="px-5 md:px-6 pb-5 md:pb-6 text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-200 dark:border-slate-800">
                                             <div className="pt-4">{faq.a}</div>
                                         </div>
                                     </details>

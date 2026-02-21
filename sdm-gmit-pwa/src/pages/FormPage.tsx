@@ -70,7 +70,6 @@ const FormPage = () => {
                 if (!formData.gender) return handleValidationError('gender', "Mohon pilih Jenis Kelamin");
                 if (!formData.dateOfBirth) return handleValidationError('dateOfBirth', "Mohon isi Tanggal Lahir");
                 if (!formData.phone) return handleValidationError('phone', "Mohon isi Nomor Telepon");
-                if (!formData.sector) return handleValidationError('sector', "Mohon pilih Sektor Kategorial");
                 if (!formData.lingkungan) return handleValidationError('lingkungan', "Mohon pilih Lingkungan");
                 if (!formData.rayon) return handleValidationError('rayon', "Mohon pilih Rayon");
                 if (!formData.address) return handleValidationError('address', "Mohon isi Alamat Lengkap");
@@ -368,7 +367,28 @@ const FormPage = () => {
     const handleStep3Confirm = (addMore: boolean) => {
         if (addMore) {
             setShowStep3Confirm(false);
-            // Optional: scroll perfectly to the "Tambah Anggota" button if needed
+            const currentList = formData.professionalFamilyMembers || [];
+            updateFormData({
+                professionalFamilyMembers: [
+                    ...currentList,
+                    {
+                        name: '',
+                        skillType: '',
+                        skillLevel: '',
+                        workplace: '',
+                        position: '',
+                        yearsExperience: '',
+                        specificSkills: [],
+                        churchServiceInterest: '',
+                        serviceInterestArea: '',
+                        contributionForm: [],
+                        communityConsent: false
+                    }
+                ]
+            });
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 100);
         } else {
             // Proceed to next step immediately
             setShowStep3Confirm(false);
@@ -537,15 +557,15 @@ const FormPage = () => {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="mb-10 text-center"
+                            className="mb-6 md:mb-10 text-center"
                         >
                             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary">
                                 <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>edit_document</span>
                             </div>
-                            <h1 className="text-black dark:text-white text-3xl md:text-4xl font-black tracking-tight mb-3">
+                            <h1 className="text-black dark:text-white text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-3">
                                 Pemutakhiran Database <br />Jemaat GMIT Emaus Liliba 2026
                             </h1>
-                            <p className="text-black/80 dark:text-slate-400 text-lg font-medium max-w-2xl mx-auto">
+                            <p className="text-black/80 dark:text-slate-400 text-base md:text-lg font-medium max-w-2xl mx-auto">
                                 Hanya untuk kepentingan Statistik Jemaat GMIT Emaus Liliba
                             </p>
                         </motion.div>
@@ -606,14 +626,14 @@ const FormPage = () => {
                                     <div className="flex flex-col gap-3">
                                         <button
                                             onClick={() => handleStep3Confirm(true)}
-                                            className="w-full h-12 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25 flex items-center justify-center gap-2"
+                                            className="w-full h-12 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
                                         >
                                             <span className="material-symbols-outlined text-xl">person_add</span>
                                             Ada, Tambah Lagi
                                         </button>
                                         <button
                                             onClick={() => handleStep3Confirm(false)}
-                                            className="w-full h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                                            className="w-full h-12 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25"
                                         >
                                             Tidak Ada, Lanjutkan
                                         </button>
@@ -663,7 +683,7 @@ const FormPage = () => {
                                     return (
                                         <div key={s.key} className="flex flex-col items-center relative z-10" style={{ width: `${100 / 7}%` }}>
                                             {/* Dot */}
-                                            <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border-2 ${isCompleted
+                                            <div className={`w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 border-2 ${isCompleted
                                                 ? 'bg-primary border-primary text-white shadow-md shadow-primary/30'
                                                 : isCurrent
                                                     ? 'bg-white dark:bg-slate-900 border-primary text-primary shadow-lg shadow-primary/20 ring-4 ring-primary/10 relative z-10'
@@ -675,17 +695,17 @@ const FormPage = () => {
                                                 {isCompleted ? (
                                                     <span className="material-symbols-outlined text-sm">check</span>
                                                 ) : (
-                                                    <span className="material-symbols-outlined text-sm md:text-base">{s.icon}</span>
+                                                    <span className="material-symbols-outlined text-[10px] md:text-base">{s.icon}</span>
                                                 )}
                                             </div>
                                             {/* Label */}
-                                            <span className={`text-[9px] md:text-[11px] font-bold uppercase tracking-wider mt-1.5 text-center transition-colors duration-300 ${isCompleted ? 'text-primary' : isCurrent ? 'text-primary' : 'text-slate-400 dark:text-slate-600'
+                                            <span className={`hidden md:block text-[9px] md:text-[11px] font-bold uppercase tracking-wider mt-1.5 text-center transition-colors duration-300 ${isCompleted ? 'text-primary' : isCurrent ? 'text-primary' : 'text-slate-400 dark:text-slate-600'
                                                 }`}>
                                                 {s.label}
                                             </span>
                                             {/* Connector line (not on last item) */}
                                             {idx < stepConfig.length - 1 && (
-                                                <div className={`absolute top-4 md:top-[18px] left-[55%] w-full h-0.5 transition-colors duration-500 ${step > s.key ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
+                                                <div className={`hidden md:block absolute top-[18px] left-[55%] w-full h-0.5 transition-colors duration-500 ${step > s.key ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
                                                     }`} />
                                             )}
                                         </div>
@@ -702,7 +722,7 @@ const FormPage = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className={`bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-black/20 border border-slate-200 dark:border-slate-700 overflow-hidden relative ${isSuccess ? 'max-w-xl mx-auto' : ''}`}
                     >
-                        <div className="p-8 md:p-10 mb-20 md:mb-0">
+                        <div className="p-6 md:p-10 pb-28 md:pb-10">
                             {renderStep()}
                         </div>
 

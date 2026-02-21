@@ -211,7 +211,7 @@ const AdminMemberData = () => {
             member.sector,
             member.education,
             member.job,
-            member.statusGerejawi
+            member.statusGerejawi || '-'
         ]);
 
         autoTable(doc, {

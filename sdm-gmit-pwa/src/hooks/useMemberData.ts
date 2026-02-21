@@ -28,6 +28,7 @@ export interface Member {
     initials: string;
     gender: "Laki-laki" | "Perempuan";
     birthDate: string; // YYYY-MM-DD
+    statusGerejawi?: string;
     createdAt: string; // ISO Date String
 }
 
