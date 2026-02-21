@@ -7,6 +7,7 @@ import FormSelect from '../ui/FormSelect';
 interface StepProps {
     data: FormData;
     update: (data: Partial<FormData>) => void;
+    goToStep: (step: number, editing?: boolean) => void;
 }
 
 const Step1Identity = ({ data, update }: StepProps) => {
@@ -59,14 +60,27 @@ const Step1Identity = ({ data, update }: StepProps) => {
         return `${age} Tahun`;
     };
 
+    const lingkunganRayonMap: Record<string, number[]> = {
+        '1': [1, 2, 17],
+        '2': [12, 13, 16],
+        '3': [7, 14, 15],
+        '4': [3, 8, 9],
+        '5': [5, 10],
+        '6': [6, 20],
+        '7': [4, 18],
+        '8': [11, 19],
+    };
+
     const lingkunganOptions = Array.from({ length: 8 }, (_, i) => ({
         value: (i + 1).toString(),
         label: `Lingkungan ${i + 1}`
     }));
 
-    const rayonOptions = Array.from({ length: 20 }, (_, i) => ({
-        value: (i + 1).toString(),
-        label: `Rayon ${i + 1}`
+    const availableRayons = data.lingkungan ? lingkunganRayonMap[data.lingkungan] || [] : [];
+
+    const rayonOptions = availableRayons.map((r) => ({
+        value: r.toString(),
+        label: `Rayon ${r}`
     }));
 
     return (
@@ -122,7 +136,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
 
                 {/* Age (Auto-calculated) */}
                 <FormInput
-                    label="Usia (Otomatis)"
+                    label="Usia"
                     id="age"
                     value={calculateAge(data.dateOfBirth) || '-'}
                     onChange={() => { }}
@@ -130,19 +144,33 @@ const Step1Identity = ({ data, update }: StepProps) => {
                 />
 
                 {/* Phone Number */}
-                <FormInput
-                    label="Nomor Telepon / WhatsApp Aktif"
-                    id="phone"
-                    value={data.phone}
-                    onChange={(val) => {
-                        const formatted = formatPhoneNumber(val);
-                        update({ phone: formatted });
-                    }}
-                    type="tel"
-                    placeholder="81234567890"
-                    prefix="+62"
-                    required
-                />
+                <div className="flex flex-col">
+                    <FormInput
+                        label="Nomor Telepon / WhatsApp Aktif"
+                        id="phone"
+                        value={data.phone}
+                        onChange={(val) => {
+                            const formatted = formatPhoneNumber(val);
+                            update({ phone: formatted });
+                        }}
+                        type="tel"
+                        placeholder="81234567890"
+                        prefix="+62"
+                        required
+                    />
+                    {data.phone && data.phone.length > 0 && data.phone.length < 10 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">warning</span>
+                            <span className="text-xs font-medium">Nomor telepon minimal 10 digit ({data.phone.length}/10)</span>
+                        </div>
+                    )}
+                    {data.phone && data.phone.length >= 10 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">check_circle</span>
+                            <span className="text-xs font-medium">Nomor telepon valid (+62{data.phone})</span>
+                        </div>
+                    )}
+                </div>
 
             </div>
 
@@ -152,7 +180,11 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     label="Lingkungan"
                     id="lingkungan"
                     value={data.lingkungan}
-                    onChange={(val) => update({ lingkungan: val })}
+                    onChange={(val) => {
+                        if (val !== data.lingkungan) {
+                            update({ lingkungan: val, rayon: '' });
+                        }
+                    }}
                     options={lingkunganOptions}
                     placeholder="Pilih Lingkungan..."
                     required
@@ -165,23 +197,37 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     value={data.rayon}
                     onChange={(val) => update({ rayon: val })}
                     options={rayonOptions}
-                    placeholder="Pilih Rayon..."
+                    placeholder={data.lingkungan ? "Pilih Rayon..." : "Pilih Lingkungan dahulu..."}
                     required
                 />
             </div>
 
             {/* Alamat Lengkap */}
             <div className="flex flex-col group relative">
-                <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
-                    Alamat Lengkap (RT/RW/Kel/Kec/Kota)<span className="text-red-500">*</span>
-                </label>
+                <div className="flex flex-col md:flex-row md:items-end justify-between pb-2 gap-2">
+                    <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
+                        Alamat Lengkap<span className="text-red-500">*</span>
+                    </label>
+                </div>
                 <textarea
                     className="w-full rounded-xl text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] h-32 px-4 py-3 text-base resize-none placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300"
-                    placeholder="Contoh: Jl. El Tari No. 1, RT 001/RW 002, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
+                    placeholder="Contoh: Jl. El Tari No. 1, RT.001/RW.002, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
                     id="address"
                     value={data.address}
                     onChange={(e) => update({ address: e.target.value })}
                 ></textarea>
+                {data.address && data.address.trim().length > 0 && data.address.trim().length < 20 && (
+                    <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                        <span className="material-symbols-outlined text-base">warning</span>
+                        <span className="text-xs font-medium">Alamat terlalu singkat, minimal 20 karakter ({data.address.trim().length}/20)</span>
+                    </div>
+                )}
+                {data.address && data.address.trim().length >= 20 && (
+                    <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                        <span className="material-symbols-outlined text-base">check_circle</span>
+                        <span className="text-xs font-medium">Panjang alamat sudah memadai</span>
+                    </div>
+                )}
             </div>
         </div>
     );

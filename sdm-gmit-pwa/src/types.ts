@@ -2,6 +2,7 @@
 
 export interface ProfessionalFamilyMember {
     name: string;
+    hasProfessionalSkill: 'Ya' | 'Tidak' | '';
     skillType: string;
     skillLevel: '1' | '2' | '3' | '';
     workplace: string;
@@ -21,9 +22,6 @@ export interface FormData {
     dateOfBirth: string;
     phone: string;
     address: string;
-    latitude: number | null;
-    longitude: number | null;
-    sector: string;
     lingkungan: string;
     rayon: string;
     familyMembers: string; // To be deprecated or used as total
@@ -58,17 +56,23 @@ export interface FormData {
 
     // Step 4: Education
     education_schoolingStatus: 'Ya' | 'Tidak' | 'Tidak ada anak usia sekolah';
+    education_totalInSchool: number;
     education_inSchool_tk_paud: number;
     education_inSchool_sd: number;
     education_inSchool_smp: number;
     education_inSchool_sma: number;
+    education_inSchool_university: number; // Added
+    education_totalDropout: number; // Added
     education_dropout_tk_paud: number;
     education_dropout_sd: number;
     education_dropout_smp: number;
     education_dropout_sma: number;
+    education_dropout_university: number; // Added
+    education_totalUnemployed: number; // Added
     education_unemployed_sd: number;
     education_unemployed_smp: number;
     education_unemployed_sma: number;
+    education_unemployed_university: number; // Added
     education_working: number;
 
     // Step 5: Economics
@@ -104,21 +108,23 @@ export interface FormData {
     economics_businessPermitOther: string;
     economics_businessTurnover: string;
     economics_businessTurnoverValue: number;
-    economics_businessMarketing: string;
+    economics_businessMarketing: string[];
     economics_businessMarketingOther: string;
     economics_businessMarketArea: string;
-    economics_businessIssues: string;
+    economics_businessIssues: string[];
     economics_businessIssuesOther: string;
-    economics_businessNeeds: string;
+    economics_businessNeeds: string[];
     economics_businessNeedsOther: string;
     economics_businessSharing: 'Ya' | 'Tidak' | '';
-    economics_businessTraining: string;
+    economics_businessTraining: string[];
     economics_businessTrainingOther: string;
 
     // Step 5: Home & Asset Ownership
     economics_houseStatus: string;
     economics_houseType: string;
     economics_houseIMB: string;
+    economics_hasAssets: 'Ya' | 'Tidak ada' | '';
+    economics_totalAssets: number;
     economics_assets: string[];
     economics_asset_motor_qty: number;
     economics_asset_mobil_qty: number;
@@ -133,20 +139,20 @@ export interface FormData {
     // Step 6: Health
     health_sick30Days: string;
     health_chronicSick: string;
-    health_chronicDisease: string;
+    health_chronicDisease: string[];
     health_chronicDiseaseOther: string;
     health_hasBPJS: string;
     health_regularTreatment: string;
     health_hasBPJSKetenagakerjaan: string;
     health_socialAssistance: string;
     health_hasDisability: string;
-    health_disabilityPhysical: string;
+    health_disabilityPhysical: string[];
     health_disabilityPhysicalOther: string;
-    health_disabilityIntellectual: string;
+    health_disabilityIntellectual: string[];
     health_disabilityIntellectualOther: string;
-    health_disabilityMental: string;
+    health_disabilityMental: string[];
     health_disabilityMentalOther: string;
-    health_disabilitySensory: string;
+    health_disabilitySensory: string[];
     health_disabilitySensoryOther: string;
     health_disabilityDouble: boolean;
 
@@ -161,9 +167,6 @@ export const initialFormData: FormData = {
     dateOfBirth: '',
     phone: '',
     address: '',
-    latitude: -10.1772, // Default kupang
-    longitude: 123.6070,
-    sector: '',
     lingkungan: '',
     rayon: '',
     familyMembers: '',
@@ -188,17 +191,23 @@ export const initialFormData: FormData = {
 
     // Step 4: Education
     education_schoolingStatus: 'Tidak ada anak usia sekolah',
+    education_totalInSchool: 0,
     education_inSchool_tk_paud: 0,
     education_inSchool_sd: 0,
     education_inSchool_smp: 0,
     education_inSchool_sma: 0,
+    education_inSchool_university: 0,
+    education_totalDropout: 0,
     education_dropout_tk_paud: 0,
     education_dropout_sd: 0,
     education_dropout_smp: 0,
     education_dropout_sma: 0,
+    education_dropout_university: 0,
+    education_totalUnemployed: 0,
     education_unemployed_sd: 0,
     education_unemployed_smp: 0,
     education_unemployed_sma: 0,
+    education_unemployed_university: 0,
     education_working: 0,
 
     // Step 5: Economics
@@ -234,21 +243,23 @@ export const initialFormData: FormData = {
     economics_businessPermitOther: '',
     economics_businessTurnover: '',
     economics_businessTurnoverValue: 0,
-    economics_businessMarketing: '',
+    economics_businessMarketing: [],
     economics_businessMarketingOther: '',
     economics_businessMarketArea: '',
-    economics_businessIssues: '',
+    economics_businessIssues: [],
     economics_businessIssuesOther: '',
-    economics_businessNeeds: '',
+    economics_businessNeeds: [],
     economics_businessNeedsOther: '',
     economics_businessSharing: '',
-    economics_businessTraining: '',
+    economics_businessTraining: [],
     economics_businessTrainingOther: '',
 
     // Step 5: Home & Asset Ownership
     economics_houseStatus: '',
     economics_houseType: '',
     economics_houseIMB: '',
+    economics_hasAssets: '',
+    economics_totalAssets: 0,
     economics_assets: [],
     economics_asset_motor_qty: 0,
     economics_asset_mobil_qty: 0,
@@ -263,20 +274,20 @@ export const initialFormData: FormData = {
     // Step 6: Health
     health_sick30Days: '',
     health_chronicSick: '',
-    health_chronicDisease: '',
+    health_chronicDisease: [],
     health_chronicDiseaseOther: '',
     health_hasBPJS: '',
     health_regularTreatment: '',
     health_hasBPJSKetenagakerjaan: '',
     health_socialAssistance: '',
     health_hasDisability: '',
-    health_disabilityPhysical: '',
+    health_disabilityPhysical: [],
     health_disabilityPhysicalOther: '',
-    health_disabilityIntellectual: '',
+    health_disabilityIntellectual: [],
     health_disabilityIntellectualOther: '',
-    health_disabilityMental: '',
+    health_disabilityMental: [],
     health_disabilityMentalOther: '',
-    health_disabilitySensory: '',
+    health_disabilitySensory: [],
     health_disabilitySensoryOther: '',
     health_disabilityDouble: false,
 

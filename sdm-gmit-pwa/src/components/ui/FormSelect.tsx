@@ -6,7 +6,7 @@ interface FormSelectOption {
 }
 
 interface FormSelectProps {
-    label: string;
+    label?: string;
     id: string;
     value: string;
     onChange: (value: string) => void;
@@ -32,13 +32,15 @@ const FormSelect: React.FC<FormSelectProps> = ({
 
     return (
         <div className={`flex flex-col group relative ${className}`}>
-            <label
-                htmlFor={id}
-                className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300"
-            >
-                {label}
-                {required && <span className="text-red-500">*</span>}
-            </label>
+            {label && (
+                <label
+                    htmlFor={id}
+                    className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300"
+                >
+                    {label}
+                    {required && <span className="text-red-500">*</span>}
+                </label>
+            )}
             <div className="relative">
                 <select
                     className={`w-full rounded-xl text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] h-12 px-4 text-base appearance-none outline-none transition-all duration-300 ${!value ? 'text-slate-400 dark:text-slate-600' : ''

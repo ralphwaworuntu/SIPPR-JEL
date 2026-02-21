@@ -4,9 +4,10 @@ import { type FormData } from '../../types';
 interface StepProps {
     data: FormData;
     update: (data: Partial<FormData>) => void;
+    goToStep: (step: number, editing?: boolean) => void;
 }
 
-const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
+const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
     };
@@ -20,13 +21,24 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
     };
 
     // Card Component for consistent styling
-    const SummaryCard = ({ title, icon, color, children }: { title: string, icon: string, color: string, children: React.ReactNode }) => (
+    const SummaryCard = ({ title, icon, color, stepNumber, children }: { title: string, icon: string, color: string, stepNumber?: number, children: React.ReactNode }) => (
         <div className={`bg-white dark:bg-[#1a2e20] rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 overflow-hidden hover-lift transition-all duration-300 h-full flex flex-col`}>
-            <div className={`px-5 py-4 flex items-center gap-3 border-b border-slate-50 dark:border-white/5 ${color} bg-opacity-10 dark:bg-opacity-20 shrink-0`}>
-                <div className={`p-2 rounded-lg ${color} text-white shadow-sm`}>
-                    <span className="material-symbols-outlined text-[20px]">{icon}</span>
+            <div className={`px-5 py-4 flex items-center justify-between border-b border-slate-50 dark:border-white/5 ${color} bg-opacity-10 dark:bg-opacity-20 shrink-0`}>
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${color} text-white shadow-sm`}>
+                        <span className="material-symbols-outlined text-[20px]">{icon}</span>
+                    </div>
+                    <h4 className="font-bold text-gray-800 dark:text-white text-base tracking-wide">{title}</h4>
                 </div>
-                <h4 className="font-bold text-gray-800 dark:text-white text-base tracking-wide">{title}</h4>
+                {stepNumber && (
+                    <button
+                        onClick={() => goToStep(stepNumber, true)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/20 transition-all shadow-sm"
+                    >
+                        <span className="material-symbols-outlined text-sm">edit</span>
+                        Edit
+                    </button>
+                )}
             </div>
             <div className="p-5 text-sm flex-grow">
                 {children}
@@ -79,12 +91,11 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+            <div className="space-y-6">
                 {/* STEP 1: Identitas Diri */}
-                <div className="animate-fade-in-up delay-100 h-full">
-                    <SummaryCard title="Identitas Kepala Keluarga" icon="person" color="bg-blue-500">
-                        <div className="grid grid-cols-2 gap-y-5 gap-x-4">
+                <div className="animate-fade-in-up delay-100">
+                    <SummaryCard title="LANGKAH 1: Identitas Kepala Keluarga" icon="person" color="bg-blue-500" stepNumber={1}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
                             <LabelValue label="Nama Lengkap" value={data.fullName} fullWidth />
                             <LabelValue label="Jenis Kelamin" value={data.gender} />
                             <LabelValue label="Tanggal Lahir" value={data.dateOfBirth} />
@@ -98,28 +109,27 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
 
                 {/* STEP 2: Informasi Keluarga */}
-                <div className="animate-fade-in-up delay-100 h-full">
-                    <SummaryCard title="Statistik Keluarga" icon="groups" color="bg-indigo-500">
-                        <div className="grid grid-cols-3 gap-y-4 gap-x-2">
-                            <LabelValue label="Total Anggota" value={<span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{data.familyMembers || '0'}</span>} />
+                <div className="animate-fade-in-up delay-100">
+                    <SummaryCard title="LANGKAH 2: Statistik Keluarga" icon="groups" color="bg-indigo-500" stepNumber={2}>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
+                            <LabelValue label="Total Anggota" value={<span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{data.familyMembers || '0'}</span>} />
                             <LabelValue label="Laki-laki" value={data.familyMembersMale || '0'} />
                             <LabelValue label="Perempuan" value={data.familyMembersFemale || '0'} />
+                            <LabelValue label="Anggota Sidi" value={data.familyMembersSidi || '0'} />
 
                             <div className="col-span-full h-px bg-gray-100 dark:bg-white/5 my-1"></div>
 
-                            <LabelValue label="Anggota Sidi" value={data.familyMembersSidi || '0'} />
                             <LabelValue label="Sidi Laki-laki" value={data.familyMembersSidiMale || '0'} />
                             <LabelValue label="Sidi Perempuan" value={data.familyMembersSidiFemale || '0'} />
-
                             <LabelValue label="Belum Baptis" value={data.familyMembersNonBaptized || '0'} />
                             <LabelValue label="Di Luar Kupang" value={data.familyMembersOutside || '0'} />
                         </div>
                     </SummaryCard>
                 </div>
 
-                {/* STEP 3 & 4: Anggota Keluarga Profesional & Pelayanan - Full Width */}
-                <div className="col-span-full animate-fade-in-up delay-200 h-full">
-                    <SummaryCard title="Anggota Keluarga Profesional & Komitmen Pelayanan" icon="volunteer_activism" color="bg-rose-500">
+                {/* STEP 3: Anggota Keluarga Profesional & Pelayanan */}
+                <div className="animate-fade-in-up delay-200">
+                    <SummaryCard title="LANGKAH 3: Anggota Keluarga Profesional & Pelayanan" icon="volunteer_activism" color="bg-rose-500" stepNumber={3}>
                         <div className="mb-4">
                             <LabelValue label="Status Keluarga Memiliki Profesional" value={data.willingnessToServe} />
                         </div>
@@ -172,13 +182,16 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
 
                 {/* STEP 4: Pendidikan Anak */}
-                <div className="animate-fade-in-up delay-200 h-full">
-                    <SummaryCard title="Pendidikan Anak" icon="school" color="bg-orange-500">
-                        <div className="space-y-4">
-                            <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
+                <div className="animate-fade-in-up delay-200">
+                    <SummaryCard title="LANGKAH 4: Pendidikan Anak" icon="school" color="bg-orange-500" stepNumber={4}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
+                                <LabelValue label="Anak Bekerja" value={`${data.education_working} Orang`} />
+                            </div>
                             {(data.education_schoolingStatus === 'Ya' || data.education_schoolingStatus === 'Tidak') && (
                                 <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
-                                    <table className="w-full text-xs text-left">
+                                    <table className="w-full text-[11px] text-left">
                                         <thead className="bg-orange-50/50 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-semibold border-b border-orange-100 dark:border-white/5">
                                             <tr>
                                                 <th className="px-3 py-2">Jenjang</th>
@@ -205,107 +218,130 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                                     </table>
                                 </div>
                             )}
-                            <LabelValue label="Anak Bekerja" value={`${data.education_working} Orang`} />
                         </div>
                     </SummaryCard>
                 </div>
 
-                {/* STEP 5: Ekonomi */}
-                <div className="animate-fade-in-up delay-300 h-full">
-                    <SummaryCard title="Ekonomi & Aset" icon="paid" color="bg-emerald-500">
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-4">
-                            <LabelValue label="Pekerjaan (Lainnya)" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
-                            <LabelValue label="Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} />
-
-                            <div className="col-span-full space-y-2 bg-emerald-50/50 dark:bg-white/5 p-3 rounded-xl border border-emerald-100 dark:border-white/5">
-                                <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">Pengeluaran Bulanan</span>
-                                <div className="grid grid-cols-2 gap-2 text-xs">
-                                    <div className="flex justify-between"><span>Pangan:</span> <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_food)}</span></div>
-                                    <div className="flex justify-between"><span>Listrik/Air:</span> <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_utilities)}</span></div>
-                                    <div className="flex justify-between"><span>Pendidikan:</span> <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_education)}</span></div>
-                                    <div className="flex justify-between"><span>Lainnya:</span> <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_other)}</span></div>
+                {/* STEP 5: Ekonomi & Usaha */}
+                <div className="animate-fade-in-up delay-300">
+                    <SummaryCard title="LANGKAH 5: Ekonomi, Aset & Usaha" icon="paid" color="bg-emerald-500" stepNumber={5}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Ekonomi & Aset */}
+                            <div className="space-y-5">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <LabelValue label="Pekerjaan (Lainnya)" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
+                                    <LabelValue label="Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} />
+                                    <LabelValue label="Status Rumah" value={`${data.economics_houseStatus} (${data.economics_houseType})`} />
+                                    <LabelValue label="Sumber Air" value={data.economics_waterSource} />
                                 </div>
-                            </div>
 
-                            <LabelValue label="Status Rumah" value={`${data.economics_houseStatus} (${data.economics_houseType})`} />
-                            <LabelValue label="Sumber Air" value={data.economics_waterSource} />
-
-                            <div className="col-span-full">
-                                <span className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500 block mb-1">Aset</span>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {data.economics_assets && data.economics_assets.length > 0 && !data.economics_assets.includes('Tidak ada') ? (
-                                        data.economics_assets.map(asset => {
-                                            let qty = 0;
-                                            if (asset === 'Motor') qty = data.economics_asset_motor_qty;
-                                            if (asset === 'Mobil') qty = data.economics_asset_mobil_qty;
-                                            if (asset === 'Kulkas') qty = data.economics_asset_kulkas_qty;
-                                            if (asset === 'Laptop/Komputer') qty = data.economics_asset_laptop_qty;
-                                            if (asset === 'Televisi') qty = data.economics_asset_tv_qty;
-                                            return (
-                                                <span key={asset} className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded text-[11px] font-medium border border-emerald-100 dark:border-emerald-800">
-                                                    {asset} {qty > 0 && <b>({qty})</b>}
-                                                </span>
-                                            );
-                                        })
-                                    ) : '-'}
-                                </div>
-                            </div>
-                        </div>
-                    </SummaryCard>
-                </div>
-
-                {/* STEP 5: Usaha (Kondisional) */}
-                {data.economics_hasBusiness === 'Ya' && (
-                    <div className="animate-fade-in-up delay-300 h-full">
-                        <SummaryCard title="Detail Usaha" icon="store" color="bg-cyan-500">
-                            <div className="grid grid-cols-2 gap-y-4 gap-x-4">
-                                <LabelValue label="Nama Usaha" value={data.economics_businessName} fullWidth />
-                                <LabelValue label="Jenis" value={data.economics_businessType === 'Lainnya' ? data.economics_businessTypeOther : data.economics_businessType} />
-                                <LabelValue label="Lama Usaha" value={data.economics_businessDuration} />
-                                <LabelValue label="Lokasi" value={data.economics_businessLocation} />
-                                <LabelValue label="Karyawan" value={data.economics_businessEmployeeCount} />
-                                <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} fullWidth />
-                                <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
-
-                                <div className="col-span-full mt-2 pt-2 border-t border-dashed border-cyan-100 dark:border-white/10 space-y-3">
-                                    <LabelValue label="Pemasaran" value={`${data.economics_businessMarketing} (${data.economics_businessMarketArea})`} fullWidth />
-                                    <LabelValue label="Kendala Utama" value={data.economics_businessIssues} fullWidth />
-                                    <LabelValue label="Kebutuhan Dukungan" value={data.economics_businessNeeds} fullWidth />
-                                </div>
-                            </div>
-                        </SummaryCard>
-                    </div>
-                )}
-
-                {/* STEP 6: Kesehatan */}
-                <div className="animate-fade-in-up delay-300 h-full">
-                    <SummaryCard title="Kesehatan & Sosial" icon="medical_services" color="bg-red-500">
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-4">
-                            <LabelValue label="Sakit (30 Hari)" value={data.health_sick30Days} />
-                            <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' ? (data.health_chronicDisease === 'Lainnya' ? data.health_chronicDiseaseOther : data.health_chronicDisease) : 'Tidak'} />
-                            <LabelValue label="BPJS Kesehatan" value={data.health_hasBPJS} />
-                            <LabelValue label="BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan} />
-                            <LabelValue label="Bantuan Sosial" value={data.health_socialAssistance} />
-                            <LabelValue label="Disabilitas" value={data.health_hasDisability} />
-
-                            {data.health_hasDisability === 'Ya' && (
-                                <div className="col-span-full bg-red-50 dark:bg-red-900/10 p-3 rounded-lg border border-red-100 dark:border-white/5">
-                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-red-600 dark:text-red-400 block mb-2">Detail Disabilitas</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {[
-                                            { l: 'Fisik', v: data.health_disabilityPhysical },
-                                            { l: 'Intelektual', v: data.health_disabilityIntellectual },
-                                            { l: 'Mental', v: data.health_disabilityMental },
-                                            { l: 'Sensorik', v: data.health_disabilitySensory }
-                                        ].filter(x => x.v && x.v !== 'Tidak Ada').map((x, i) => (
-                                            <span key={i} className="px-2 py-0.5 bg-white dark:bg-black/20 text-red-600 dark:text-red-300 text-xs rounded border border-red-100 dark:border-red-900/30">
-                                                {x.l}: {x.v}
-                                            </span>
-                                        ))}
-                                        {data.health_disabilityDouble && <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded font-bold">Ganda</span>}
+                                <div className="space-y-2 bg-emerald-50/50 dark:bg-white/5 p-4 rounded-xl border border-emerald-100 dark:border-white/5">
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">Pengeluaran Bulanan</span>
+                                    <div className="grid grid-cols-2 gap-3 text-xs">
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Pangan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_food)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Listrik/Air:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_utilities)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Pendidikan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_education)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Lainnya:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_other)}</span></div>
                                     </div>
                                 </div>
-                            )}
+
+                                <div>
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500 block mb-2">Daftar Aset</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {data.economics_assets && data.economics_assets.length > 0 && !data.economics_assets.includes('Tidak ada') ? (
+                                            data.economics_assets.map(asset => {
+                                                let qty = 0;
+                                                if (asset === 'Motor') qty = data.economics_asset_motor_qty;
+                                                if (asset === 'Mobil') qty = data.economics_asset_mobil_qty;
+                                                if (asset === 'Kulkas') qty = data.economics_asset_kulkas_qty;
+                                                if (asset === 'Laptop/Komputer') qty = data.economics_asset_laptop_qty;
+                                                if (asset === 'Televisi') qty = data.economics_asset_tv_qty;
+                                                return (
+                                                    <span key={asset} className="px-3 py-1 bg-white dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-bold border border-emerald-100 dark:border-emerald-800 shadow-sm">
+                                                        {asset} {qty > 0 && <span className="ml-1 opacity-70">({qty})</span>}
+                                                    </span>
+                                                );
+                                            })
+                                        ) : <span className="text-xs italic text-gray-400">Tidak ada aset</span>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Detail Usaha */}
+                            <div className="border-l-0 md:border-l border-emerald-100 dark:border-white/5 pl-0 md:pl-8">
+                                <LabelValue label="Kepemilikan Usaha" value={data.economics_hasBusiness} />
+                                {data.economics_hasBusiness === 'Ya' ? (
+                                    <div className="grid grid-cols-1 gap-y-4 mt-4 bg-white dark:bg-black/20 p-4 rounded-xl border border-emerald-50 dark:border-white/5">
+                                        <LabelValue label="Nama Usaha" value={data.economics_businessName} />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <LabelValue label="Jenis" value={data.economics_businessType === 'Lainnya' ? data.economics_businessTypeOther : data.economics_businessType} />
+                                            <LabelValue label="Lama Usaha" value={data.economics_businessDuration} />
+                                            <LabelValue label="Lokasi" value={data.economics_businessLocation} />
+                                            <LabelValue label="Karyawan" value={data.economics_businessEmployeeCount} />
+                                        </div>
+                                        <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} />
+                                        <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
+                                        <div className="pt-2 border-t border-dashed border-emerald-100 dark:border-white/10 space-y-3">
+                                            <LabelValue label="Pemasaran" value={`${data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
+                                            <LabelValue label="Kendala Utama" value={data.economics_businessIssues} />
+                                            <LabelValue label="Kebutuhan Dukungan" value={data.economics_businessNeeds} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-xs text-gray-400 italic">
+                                        Keluarga tidak memiliki unit usaha.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </SummaryCard>
+                </div>
+
+                {/* STEP 6: Kesehatan */}
+                <div className="animate-fade-in-up delay-300">
+                    <SummaryCard title="LANGKAH 6: Kesehatan & Sosial" icon="medical_services" color="bg-red-500" stepNumber={6}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                <LabelValue label="Sakit (30 Hari)" value={data.health_sick30Days} />
+                                <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' ? (data.health_chronicDisease.map(d => d === 'Lainnya' ? `Lainnya (${data.health_chronicDiseaseOther})` : d).join(', ')) : 'Tidak'} />
+                                <LabelValue label="BPJS Kesehatan" value={data.health_hasBPJS} />
+                                <LabelValue label="BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan} />
+                                <LabelValue label="Bantuan Sosial" value={data.health_socialAssistance} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <LabelValue label="Anggota Disabilitas" value={data.health_hasDisability} />
+                                {data.health_hasDisability === 'Ya' && (
+                                    <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl border border-red-100 dark:border-white/5 shadow-inner">
+                                        <span className="text-[11px] uppercase tracking-wider font-semibold text-red-600 dark:text-red-400 block mb-3">Rincian Kategori Disabilitas</span>
+                                        <div className="flex flex-col gap-3">
+                                            {[
+                                                { l: 'Fisik', v: data.health_disabilityPhysical, other: data.health_disabilityPhysicalOther },
+                                                { l: 'Intelektual', v: data.health_disabilityIntellectual, other: data.health_disabilityIntellectualOther },
+                                                { l: 'Mental', v: data.health_disabilityMental, other: data.health_disabilityMentalOther },
+                                                { l: 'Sensorik', v: data.health_disabilitySensory, other: data.health_disabilitySensoryOther }
+                                            ].filter(x => x.v && x.v.length > 0).map((x, i) => (
+                                                <div key={i} className="flex flex-col gap-1">
+                                                    <span className="text-[10px] font-bold text-red-800 dark:text-red-200 uppercase">{x.l}</span>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {x.v.map(item => (
+                                                            <span key={item} className="px-2 py-0.5 bg-white dark:bg-red-950/40 text-red-600 dark:text-red-300 text-[11px] rounded-lg border border-red-100 dark:border-red-900/30 font-medium">
+                                                                {item === 'Lainnya' ? `${item} (${x.other})` : item}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {data.health_disabilityDouble && (
+                                                <div className="mt-2 pt-2 border-t border-red-100 dark:border-red-900/30 flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-red-500 text-sm">warning</span>
+                                                    <span className="text-[11px] font-black text-red-700 dark:text-red-300 uppercase italic">Teridentifikasi Disabilitas Ganda</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </SummaryCard>
                 </div>
@@ -323,7 +359,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                                 checked={data.agreedToPrivacy}
                                 onChange={(e) => update({ agreedToPrivacy: e.target.checked })}
                             />
-                            <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold animate-scaleIn">check</span>
+                            <span className="absolute text-slate-900 dark:text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold animate-scaleIn">check</span>
                         </div>
                         <span className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                             Saya menyatakan bahwa seluruh data yang saya isi adalah <b>BENAR</b> dan sesuai dengan kondisi sebenarnya.
@@ -342,7 +378,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                                 checked={data.dataValidated}
                                 onChange={(e) => update({ dataValidated: e.target.checked })}
                             />
-                            <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold">check</span>
+                            <span className="absolute text-slate-900 dark:text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold">check</span>
                         </div>
                         <span className="text-gray-900 dark:text-white font-bold text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                             Saya telah memeriksa kembali seluruh data (Validasi Final)

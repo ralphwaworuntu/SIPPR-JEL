@@ -20,8 +20,9 @@ const FormPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+    const [isEditing, setIsEditing] = useState(false); // Track if we are editing from Step 7
     const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'error' | 'success' }>({ message: '', visible: false, type: 'error' });
-    const [showStep3Confirm, setShowStep3Confirm] = useState(false);
+
     const navigate = useNavigate();
 
     // Auto-save hook
@@ -124,7 +125,9 @@ const FormPage = () => {
                         if (!member.position) return handleValidationError(`willingnessToServe`, `Mohon isi Jabatan Anggota ke-${i + 1}`);
                         if (!member.yearsExperience) return handleValidationError(`willingnessToServe`, `Mohon pilih Lama Bekerja Anggota ke-${i + 1}`);
 
-                        if (formData.willingnessToServe === 'Ya') {
+                        if (!member.hasProfessionalSkill) return handleValidationError(`willingnessToServe`, `Mohon pilih apakah Anggota ke-${i + 1} memiliki Keahlian Profesional`);
+
+                        if (member.hasProfessionalSkill === 'Ya') {
                             if (!member.skillType) return handleValidationError(`willingnessToServe`, `Mohon pilih Jenis Keahlian Anggota ke-${i + 1}`);
                             if (!member.skillLevel) return handleValidationError(`willingnessToServe`, `Mohon pilih Tingkat Keahlian Anggota ke-${i + 1}`);
                         }
@@ -237,21 +240,21 @@ const FormPage = () => {
                     if (!formData.economics_businessTurnover) return handleValidationError('businessTurnover', "Mohon pilih Omzet Per Bulan");
                     if (formData.economics_businessTurnover === '> 10 juta' && (!formData.economics_businessTurnoverValue || formData.economics_businessTurnoverValue <= 0)) return handleValidationError('businessTurnover', "Mohon isi nilai omzet (harus > 0)");
 
-                    if (!formData.economics_businessMarketing) return handleValidationError('businessMarketing', "Mohon pilih Cara Pemasaran Utama");
-                    if (formData.economics_businessMarketing === 'Lainnya' && !formData.economics_businessMarketingOther) return handleValidationError('businessMarketing', "Mohon lengkapi Cara Pemasaran lainnya");
+                    if (!formData.economics_businessMarketing || formData.economics_businessMarketing.length === 0) return handleValidationError('businessMarketing', "Mohon pilih Cara Pemasaran Utama");
+                    if (formData.economics_businessMarketing.includes('Lainnya') && !formData.economics_businessMarketingOther) return handleValidationError('businessMarketing', "Mohon lengkapi Cara Pemasaran lainnya");
 
                     if (!formData.economics_businessMarketArea) return handleValidationError('businessMarketArea', "Mohon pilih Wilayah Pemasaran");
 
-                    if (!formData.economics_businessIssues) return handleValidationError('businessIssues', "Mohon pilih Tantangan Utama");
-                    if (formData.economics_businessIssues === 'Lainnya' && !formData.economics_businessIssuesOther) return handleValidationError('businessIssues', "Mohon lengkapi Tantangan Utama lainnya");
+                    if (!formData.economics_businessIssues || formData.economics_businessIssues.length === 0) return handleValidationError('businessIssues', "Mohon pilih Tantangan Utama");
+                    if (formData.economics_businessIssues.includes('Lainnya') && !formData.economics_businessIssuesOther) return handleValidationError('businessIssues', "Mohon lengkapi Tantangan Utama lainnya");
 
-                    if (!formData.economics_businessNeeds) return handleValidationError('businessNeeds', "Mohon pilih Dukungan yang Dibutuhkan");
-                    if (formData.economics_businessNeeds === 'Lainnya' && !formData.economics_businessNeedsOther) return handleValidationError('businessNeeds', "Mohon lengkapi Dukungan lainnya");
+                    if (!formData.economics_businessNeeds || formData.economics_businessNeeds.length === 0) return handleValidationError('businessNeeds', "Mohon pilih Dukungan yang Dibutuhkan");
+                    if (formData.economics_businessNeeds.includes('Lainnya') && !formData.economics_businessNeedsOther) return handleValidationError('businessNeeds', "Mohon lengkapi Dukungan lainnya");
 
                     if (!formData.economics_businessSharing) return handleValidationError('businessSharing', "Mohon pilih Kesediaan Berbagi Ilmu");
 
-                    if (!formData.economics_businessTraining) return handleValidationError('businessTraining', "Mohon pilih Minat Pelatihan");
-                    if (formData.economics_businessTraining === 'Lainnya' && !formData.economics_businessTrainingOther) return handleValidationError('businessTraining', "Mohon lengkapi Minat Pelatihan lainnya");
+                    if (!formData.economics_businessTraining || formData.economics_businessTraining.length === 0) return handleValidationError('businessTraining', "Mohon pilih Minat Pelatihan");
+                    if (formData.economics_businessTraining.includes('Lainnya') && !formData.economics_businessTrainingOther) return handleValidationError('businessTraining', "Mohon lengkapi Minat Pelatihan lainnya");
                 }
 
                 // Validate Home & Assets
@@ -292,8 +295,8 @@ const FormPage = () => {
                 if (!formData.health_chronicSick) return handleValidationError('health_chronicSick', "Mohon pilih status Sakit Menahun");
 
                 if (formData.health_chronicSick === 'Ya') {
-                    if (!formData.health_chronicDisease) return handleValidationError('health_chronicDisease', "Mohon pilih Jenis Penyakit Menahun");
-                    if (formData.health_chronicDisease === 'Lainnya' && !formData.health_chronicDiseaseOther) return handleValidationError('health_chronicDisease', "Mohon lengkapi Jenis Penyakit Menahun lainnya");
+                    if (!formData.health_chronicDisease || formData.health_chronicDisease.length === 0) return handleValidationError('health_chronicDisease', "Mohon pilih Jenis Penyakit Menahun");
+                    if (formData.health_chronicDisease.includes('Lainnya') && !formData.health_chronicDiseaseOther) return handleValidationError('health_chronicDisease', "Mohon lengkapi Jenis Penyakit Menahun lainnya");
                 }
 
                 if (!formData.health_hasBPJS) return handleValidationError('health_hasBPJS', "Mohon pilih Status BPJS Kesehatan");
@@ -304,27 +307,35 @@ const FormPage = () => {
                 if (!formData.health_hasDisability) return handleValidationError('health_hasDisability', "Mohon pilih Status Penyandang Disabilitas");
 
                 if (formData.health_hasDisability === 'Ya') {
-                    if (!formData.health_disabilityPhysical) return handleValidationError('health_disabilityPhysical', "Mohon pilih Disabilitas Fisik (pilih 'Tidak Ada' jika tidak sesuai)");
-                    if (formData.health_disabilityPhysical === 'Lainnya' && !formData.health_disabilityPhysicalOther) return handleValidationError('health_disabilityPhysical', "Mohon lengkapi Disabilitas Fisik lainnya");
+                    const hasPhysical = (formData.health_disabilityPhysical?.length ?? 0) > 0;
+                    const hasIntellectual = (formData.health_disabilityIntellectual?.length ?? 0) > 0;
+                    const hasMental = (formData.health_disabilityMental?.length ?? 0) > 0;
+                    const hasSensory = (formData.health_disabilitySensory?.length ?? 0) > 0;
 
-                    if (!formData.health_disabilityIntellectual) return handleValidationError('health_disabilityIntellectual', "Mohon pilih Disabilitas Intelektual (pilih 'Tidak Ada' jika tidak sesuai)");
-                    if (formData.health_disabilityIntellectual === 'Lainnya' && !formData.health_disabilityIntellectualOther) return handleValidationError('health_disabilityIntellectual', "Mohon lengkapi Disabilitas Intelektual lainnya");
+                    const totalKategoriDipilih = (hasPhysical ? 1 : 0) + (hasIntellectual ? 1 : 0) + (hasMental ? 1 : 0) + (hasSensory ? 1 : 0);
 
-                    if (!formData.health_disabilityMental) return handleValidationError('health_disabilityMental', "Mohon pilih Disabilitas Mental (pilih 'Tidak Ada' jika tidak sesuai)");
-                    if (formData.health_disabilityMental === 'Lainnya' && !formData.health_disabilityMentalOther) return handleValidationError('health_disabilityMental', "Mohon lengkapi Disabilitas Mental lainnya");
+                    // 1. Validasi minimal ada data yang diisi
+                    if (totalKategoriDipilih === 0) {
+                        return handleValidationError('health_hasDisability', "Mohon lengkapi detail kategori disabilitas yang dipilih.");
+                    }
 
-                    if (!formData.health_disabilitySensory) return handleValidationError('health_disabilitySensory', "Mohon pilih Disabilitas Sensorik (pilih 'Tidak Ada' jika tidak sesuai)");
-                    if (formData.health_disabilitySensory === 'Lainnya' && !formData.health_disabilitySensoryOther) return handleValidationError('health_disabilitySensory', "Mohon lengkapi Disabilitas Sensorik lainnya");
+                    // 2. Jika Ganda dicentang, minimal harus 2 kategori
+                    if (formData.health_disabilityDouble && totalKategoriDipilih < 2) {
+                        return handleValidationError('health_hasDisability', "Anda mencentang Disabilitas Ganda, mohon pilih minimal dua kategori disabilitas.");
+                    }
 
-                    // Validate that if "Ya" was chosen, at least ONE specific disability is NOT "Tidak Ada", OR "Disabilitas Ganda" is checked?
-                    // The prompt implies filling all of them. But logical check: if user says "Ya" to disability, but marks "Tidak Ada" for ALL specific categories, that's a contradiction.
-                    if (
-                        formData.health_disabilityPhysical === 'Tidak Ada' &&
-                        formData.health_disabilityIntellectual === 'Tidak Ada' &&
-                        formData.health_disabilityMental === 'Tidak Ada' &&
-                        formData.health_disabilitySensory === 'Tidak Ada'
-                    ) {
-                        return handleValidationError('health_hasDisability', "Anda memilih 'Ya' untuk disabilitas, mohon pilih setidaknya satu jenis disabilitas yang sesuai pada pertanyaan 9-12.");
+                    // 3. Validasi isian "Lainnya" hanya pada kategori yang memang dipilih
+                    if (hasPhysical && formData.health_disabilityPhysical.includes('Lainnya') && !formData.health_disabilityPhysicalOther) {
+                        return handleValidationError('health_disabilityPhysical', "Mohon lengkapi keterangan Disabilitas Fisik lainnya");
+                    }
+                    if (hasIntellectual && formData.health_disabilityIntellectual.includes('Lainnya') && !formData.health_disabilityIntellectualOther) {
+                        return handleValidationError('health_disabilityIntellectual', "Mohon lengkapi keterangan Disabilitas Intelektual lainnya");
+                    }
+                    if (hasMental && formData.health_disabilityMental.includes('Lainnya') && !formData.health_disabilityMentalOther) {
+                        return handleValidationError('health_disabilityMental', "Mohon lengkapi keterangan Disabilitas Mental lainnya");
+                    }
+                    if (hasSensory && formData.health_disabilitySensory.includes('Lainnya') && !formData.health_disabilitySensoryOther) {
+                        return handleValidationError('health_disabilitySensory', "Mohon lengkapi keterangan Disabilitas Sensorik lainnya");
                     }
                 }
 
@@ -356,20 +367,20 @@ const FormPage = () => {
 
     const nextStep = () => {
         if (validateStep(step)) {
-            // Check Step 3 special multi-member condition
-            if (step === 3 && (formData.willingnessToServe === 'Ya' || formData.willingnessToServe === 'Tidak')) {
-                const numMembers = formData.professionalFamilyMembers?.length || 0;
-                if (numMembers >= 1 && !showStep3Confirm) {
-                    setShowStep3Confirm(true);
-                    return; // Pause progression to show the dialog
-                }
-            }
-
+            // Proceed to next step if valid
             if (step < 7) {
                 showToast(getStepCompletionMessage(step), 'success');
-                setShowStep3Confirm(false); // Reset it just in case
+
                 setDirection(1);
-                setStep(prev => prev + 1);
+
+                if (isEditing) {
+                    setStep(7);
+                    setIsEditing(false);
+                    showToast("Kembali ke Validasi Data", 'success');
+                } else {
+                    setStep(prev => prev + 1);
+                }
+
                 scrollToTop();
             } else {
                 handleSubmit();
@@ -377,40 +388,14 @@ const FormPage = () => {
         }
     };
 
-    const handleStep3Confirm = (addMore: boolean) => {
-        if (addMore) {
-            setShowStep3Confirm(false);
-            const currentList = formData.professionalFamilyMembers || [];
-            updateFormData({
-                professionalFamilyMembers: [
-                    ...currentList,
-                    {
-                        name: '',
-                        skillType: '',
-                        skillLevel: '',
-                        workplace: '',
-                        position: '',
-                        yearsExperience: '',
-                        specificSkills: [],
-                        churchServiceInterest: '',
-                        serviceInterestArea: '',
-                        contributionForm: [],
-                        communityConsent: false
-                    }
-                ]
-            });
-            setTimeout(() => {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }, 100);
-        } else {
-            // Proceed to next step immediately
-            showToast(getStepCompletionMessage(3), 'success');
-            setShowStep3Confirm(false);
-            setDirection(1);
-            setStep(4);
-            scrollToTop();
-        }
+    const goToStep = (targetStep: number, editing: boolean = false) => {
+        setDirection(targetStep > step ? 1 : -1);
+        setIsEditing(editing);
+        setStep(targetStep);
+        scrollToTop();
     };
+
+
 
     const handleSubmit = async () => {
         if (!validateStep(7)) return;
@@ -457,14 +442,14 @@ const FormPage = () => {
 
         const stepContent = (() => {
             switch (step) {
-                case 1: return <Step1Identity data={formData} update={updateFormData} />;
-                case 2: return <Step2Professional data={formData} update={updateFormData} />;
-                case 3: return <Step3Commitment data={formData} update={updateFormData} />;
-                case 4: return <Step4Education data={formData} update={updateFormData} />;
-                case 5: return <Step5Economics data={formData} update={updateFormData} />;
-                case 6: return <Step6Health data={formData} update={updateFormData} />;
-                case 7: return <Step7Consent data={formData} update={updateFormData} />;
-                default: return <Step1Identity data={formData} update={updateFormData} />;
+                case 1: return <Step1Identity data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 2: return <Step2Professional data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 3: return <Step3Commitment data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 4: return <Step4Education data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 5: return <Step5Economics data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 6: return <Step6Health data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 7: return <Step7Consent data={formData} update={updateFormData} goToStep={goToStep} />;
+                default: return <Step1Identity data={formData} update={updateFormData} goToStep={goToStep} />;
             }
         })();
 
@@ -621,52 +606,7 @@ const FormPage = () => {
                         )}
                     </AnimatePresence>
 
-                    {/* Multi-Member Warning Dialog (Step 3) */}
-                    <AnimatePresence>
-                        {showStep3Confirm && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-                            >
-                                <motion.div
-                                    initial={{ scale: 0.95, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0.95, opacity: 0 }}
-                                    className="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-700"
-                                >
-                                    <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                                        <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">info</span>
-                                    </div>
 
-                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-3">
-                                        Tambah Anggota Lain?
-                                    </h3>
-
-                                    <p className="text-slate-600 dark:text-slate-400 text-center mb-8">
-                                        Anda baru mengisi <strong className="text-primary">{formData.professionalFamilyMembers?.length || 0}</strong> anggota keluarga. Anda dapat menginput <strong>lebih dari 1 orang</strong> di form ini. Apakah masih ada anggota keluarga lain yang ingin ditambahkan?
-                                    </p>
-
-                                    <div className="flex flex-col gap-3">
-                                        <button
-                                            onClick={() => handleStep3Confirm(true)}
-                                            className="w-full h-12 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
-                                        >
-                                            <span className="material-symbols-outlined text-xl">person_add</span>
-                                            Ada, Tambah Lagi
-                                        </button>
-                                        <button
-                                            onClick={() => handleStep3Confirm(false)}
-                                            className="w-full h-12 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25"
-                                        >
-                                            Tidak Ada, Lanjutkan
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
 
                     {/* Progress Bar - Enhanced Step Dots - Hide on Success */}
                     {!isSuccess && (
@@ -748,13 +688,13 @@ const FormPage = () => {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className={`bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-black/20 border border-slate-200 dark:border-slate-700 overflow-hidden relative ${isSuccess ? 'max-w-xl mx-auto' : ''}`}
                         >
-                            <div className="p-6 md:p-10 pb-20 md:pb-6">
+                            <div className="p-6 md:p-10">
                                 {renderStep()}
                             </div>
 
                             {/* Footer / Navigation - Default on desktop, Sticky at bottom on mobile */}
                             {!isSuccess && (
-                                <div className="fixed bottom-0 left-0 w-full md:relative md:w-auto bg-white/95 md:bg-slate-50/50 dark:bg-slate-900/95 dark:md:bg-slate-900/50 p-4 md:p-8 flex justify-between items-center border-t border-slate-100 dark:border-slate-800 backdrop-blur-xl z-50">
+                                <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 md:p-8 flex justify-between items-center border-t border-slate-100 dark:border-slate-800">
                                     <button
                                         onClick={prevStep}
                                         disabled={step === 1}
@@ -767,11 +707,11 @@ const FormPage = () => {
                                     <button
                                         onClick={nextStep}
                                         disabled={isSubmitting}
-                                        className={`group bg-primary hover:bg-primary/90 text-black px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:ring-4 focus:ring-primary/30 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+                                        className={`group bg-primary hover:bg-primary/90 text-slate-900 dark:text-white px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:ring-4 focus:ring-primary/30 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
+                                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-900 dark:border-white"></span>
                                                 Mengirim...
                                             </>
                                         ) : (
