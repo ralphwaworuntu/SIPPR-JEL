@@ -21,14 +21,14 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
 
     // Card Component for consistent styling
     const SummaryCard = ({ title, icon, color, children }: { title: string, icon: string, color: string, children: React.ReactNode }) => (
-        <div className={`bg-white dark:bg-[#1a2e20] rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 overflow-hidden hover-lift transition-all duration-300`}>
-            <div className={`px-5 py-4 flex items-center gap-3 border-b border-slate-50 dark:border-white/5 ${color} bg-opacity-10 dark:bg-opacity-20`}>
+        <div className={`bg-white dark:bg-[#1a2e20] rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 overflow-hidden hover-lift transition-all duration-300 h-full flex flex-col`}>
+            <div className={`px-5 py-4 flex items-center gap-3 border-b border-slate-50 dark:border-white/5 ${color} bg-opacity-10 dark:bg-opacity-20 shrink-0`}>
                 <div className={`p-2 rounded-lg ${color} text-white shadow-sm`}>
                     <span className="material-symbols-outlined text-[20px]">{icon}</span>
                 </div>
                 <h4 className="font-bold text-gray-800 dark:text-white text-base tracking-wide">{title}</h4>
             </div>
-            <div className="p-5 text-sm">
+            <div className="p-5 text-sm flex-grow">
                 {children}
             </div>
         </div>
@@ -45,9 +45,9 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
     };
 
     return (
-        <div className="space-y-8 animate-fadeIn max-w-5xl mx-auto pb-10">
+        <div className="space-y-6 animate-fadeIn max-w-5xl mx-auto pb-6">
             {/* Header Section */}
-            <div className="text-center space-y-2 mb-8 animate-fade-in-up">
+            <div className="text-center space-y-2 mb-6 animate-fade-in-up">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4 shadow-sm border border-emerald-200 dark:border-emerald-800 animate-scaleIn">
                     <span className="material-symbols-outlined text-3xl">verified_user</span>
                 </div>
@@ -82,7 +82,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 {/* STEP 1: Identitas Diri */}
-                <div className="animate-fade-in-up delay-100">
+                <div className="animate-fade-in-up delay-100 h-full">
                     <SummaryCard title="Identitas Kepala Keluarga" icon="person" color="bg-blue-500">
                         <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                             <LabelValue label="Nama Lengkap" value={data.fullName} fullWidth />
@@ -98,7 +98,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
 
                 {/* STEP 2: Informasi Keluarga */}
-                <div className="animate-fade-in-up delay-100">
+                <div className="animate-fade-in-up delay-100 h-full">
                     <SummaryCard title="Statistik Keluarga" icon="groups" color="bg-indigo-500">
                         <div className="grid grid-cols-3 gap-y-4 gap-x-2">
                             <LabelValue label="Total Anggota" value={<span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{data.familyMembers || '0'}</span>} />
@@ -118,14 +118,14 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
 
                 {/* STEP 3 & 4: Anggota Keluarga Profesional & Pelayanan - Full Width */}
-                <div className="col-span-full animate-fade-in-up delay-200">
+                <div className="col-span-full animate-fade-in-up delay-200 h-full">
                     <SummaryCard title="Anggota Keluarga Profesional & Komitmen Pelayanan" icon="volunteer_activism" color="bg-rose-500">
                         <div className="mb-4">
                             <LabelValue label="Status Keluarga Memiliki Profesional" value={data.willingnessToServe} />
                         </div>
 
                         {data.professionalFamilyMembers && data.professionalFamilyMembers.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className={`grid grid-cols-1 ${data.professionalFamilyMembers.length >= 2 ? 'md:grid-cols-2' : ''} gap-4`}>
                                 {data.professionalFamilyMembers.map((member, idx) => (
                                     <div key={idx} className="bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 p-4 hover:border-rose-200 dark:hover:border-rose-800 transition-colors">
                                         <div className="flex justify-between items-start mb-2">
@@ -172,7 +172,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
 
                 {/* STEP 4: Pendidikan Anak */}
-                <div className="animate-fade-in-up delay-200">
+                <div className="animate-fade-in-up delay-200 h-full">
                     <SummaryCard title="Pendidikan Anak" icon="school" color="bg-orange-500">
                         <div className="space-y-4">
                             <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
@@ -210,11 +210,8 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                     </SummaryCard>
                 </div>
 
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* STEP 5: Ekonomi */}
-                <div className="animate-fade-in-up delay-300">
+                <div className="animate-fade-in-up delay-300 h-full">
                     <SummaryCard title="Ekonomi & Aset" icon="paid" color="bg-emerald-500">
                         <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                             <LabelValue label="Pekerjaan (Lainnya)" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
@@ -259,7 +256,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
 
                 {/* STEP 5: Usaha (Kondisional) */}
                 {data.economics_hasBusiness === 'Ya' && (
-                    <div className="animate-fade-in-up delay-300">
+                    <div className="animate-fade-in-up delay-300 h-full">
                         <SummaryCard title="Detail Usaha" icon="store" color="bg-cyan-500">
                             <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                                 <LabelValue label="Nama Usaha" value={data.economics_businessName} fullWidth />
@@ -281,7 +278,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 )}
 
                 {/* STEP 6: Kesehatan */}
-                <div className="animate-fade-in-up delay-300">
+                <div className="animate-fade-in-up delay-300 h-full">
                     <SummaryCard title="Kesehatan & Sosial" icon="medical_services" color="bg-red-500">
                         <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                             <LabelValue label="Sakit (30 Hari)" value={data.health_sick30Days} />
@@ -314,8 +311,8 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
             </div>
 
-            {/* ACTION SECTION - Sticky Bottom or distinct */}
-            <div className="sticky bottom-4 z-30">
+            {/* ACTION SECTION - Distinct from previous sections but naturally flows */}
+            <div className="z-30 pt-2">
                 <div className="bg-white/90 dark:bg-[#1a2e20]/95 backdrop-blur-md border border-emerald-200 dark:border-emerald-800 p-5 rounded-2xl shadow-2xl flex flex-col gap-4 max-w-3xl mx-auto ring-4 ring-emerald-500/10 transform transition-all animate-slide-in-up">
                     <label className="flex items-start gap-4 cursor-pointer group">
                         <div className="relative flex items-center mt-1">
@@ -354,7 +351,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update }) => {
                 </div>
             </div>
 
-            <div className="h-20"></div> {/* Spacer for sticky footer */}
+            <div className="h-4"></div> {/* Small spacer for final layout */}
         </div>
     );
 

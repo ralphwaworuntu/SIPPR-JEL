@@ -183,8 +183,7 @@ const LandingPage = () => {
             <main className="w-full">
                 {/* HERO SECTION */}
                 <Hero />
-                {/* TENTANG SECTION */}
-                <section id="visi-misi" className="py-20 md:py-24 w-full bg-white dark:bg-slate-950">
+                <section id="visi-misi" className="py-16 md:py-20 w-full bg-white dark:bg-slate-950">
                     <div className="max-w-[1240px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center mb-12 md:mb-16">
                             <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
@@ -206,7 +205,7 @@ const LandingPage = () => {
                             </div>
 
                             {/* Template Foto Pendeta */}
-                            <div className="relative group mx-auto w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 order-1 md:order-2">
+                            <div className="relative group mx-auto w-64 h-64 md:w-64 md:h-64 lg:w-80 lg:h-80 order-1 md:order-2">
                                 <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/30 transition-all duration-500"></div>
                                 <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl">
                                     <img
@@ -221,7 +220,7 @@ const LandingPage = () => {
                 </section>
 
                 {/* TENTANG SECTION (Latar Belakang) */}
-                <section id="tentang" className="py-20 md:py-24 w-full bg-white dark:bg-slate-950">
+                <section id="tentang" className="py-16 md:py-20 w-full bg-white dark:bg-slate-950">
                     <div className="max-w-[1000px] mx-auto px-6 md:px-12 lg:px-20">
                         <div className="text-center max-w-4xl mx-auto">
                             <span className="text-xs font-bold tracking-[0.2em] uppercase text-indigo-600 dark:text-indigo-400 mb-4 block">
@@ -329,19 +328,21 @@ const LandingPage = () => {
             </main>
 
             {/* Back To Top */}
-            {showBackToTop && (
-                <button
-                    onClick={scrollToTop}
-                    className="fixed bottom-8 right-8 p-3 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 transition-all z-50 animate-bounce"
-                    aria-label="Back to top"
-                >
-                    <ChevronUp className="w-6 h-6" />
-                </button>
-            )}
+            {
+                showBackToTop && (
+                    <button
+                        onClick={scrollToTop}
+                        className="fixed bottom-8 right-8 p-3 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 transition-all z-50 animate-bounce"
+                        aria-label="Back to top"
+                    >
+                        <ChevronUp className="w-6 h-6" />
+                    </button>
+                )
+            }
 
             {/* Footer */}
             <Footer />
-        </div>
+        </div >
     );
 };
 

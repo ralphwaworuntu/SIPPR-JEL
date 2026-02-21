@@ -550,14 +550,14 @@ const FormPage = () => {
                     </div>
                 </header>
 
-                <main className="max-w-[1000px] mx-auto px-4 py-12 w-full flex-grow">
+                <main className="max-w-[1000px] mx-auto px-4 py-8 md:py-10 w-full flex-grow">
                     {/* Header Section - Hide on Success */}
                     {!isSuccess && (
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="mb-6 md:mb-10 text-center"
+                            className="mb-4 md:mb-6 text-center max-w-4xl mx-auto"
                         >
                             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary">
                                 <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>edit_document</span>
@@ -649,7 +649,7 @@ const FormPage = () => {
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.1 }}
-                            className="flex flex-col gap-5 p-6 mb-8 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700"
+                            className="flex flex-col gap-5 p-6 mb-5 md:mb-8 bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 max-w-4xl mx-auto"
                         >
                             {/* Title Row */}
                             <div className="flex justify-between items-center">
@@ -661,7 +661,7 @@ const FormPage = () => {
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 hidden md:block">{getEncouragement(step)}</p>
                                 </div>
                                 <div className="text-right flex flex-col items-end">
-                                    <span className="text-3xl font-black text-primary/20 dark:text-primary/10 leading-none">{progressPercentage}%</span>
+                                    <span className="text-2xl font-black text-primary/20 dark:text-primary/10 leading-none">{progressPercentage}%</span>
                                 </div>
                             </div>
 
@@ -705,7 +705,7 @@ const FormPage = () => {
                                             </span>
                                             {/* Connector line (not on last item) */}
                                             {idx < stepConfig.length - 1 && (
-                                                <div className={`hidden md:block absolute top-[18px] left-[55%] w-full h-0.5 transition-colors duration-500 ${step > s.key ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
+                                                <div className={`hidden md:block absolute top-[18px] left-[55%] w-full h-[3px] transition-colors duration-500 ${step > s.key ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
                                                     }`} />
                                             )}
                                         </div>
@@ -716,48 +716,50 @@ const FormPage = () => {
                     )}
 
                     {/* Form Card - Updated Theme */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className={`bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-black/20 border border-slate-200 dark:border-slate-700 overflow-hidden relative ${isSuccess ? 'max-w-xl mx-auto' : ''}`}
-                    >
-                        <div className="p-6 md:p-10 pb-28 md:pb-10">
-                            {renderStep()}
-                        </div>
-
-                        {/* Footer / Navigation - Default on desktop, Sticky at bottom on mobile */}
-                        {!isSuccess && (
-                            <div className="fixed bottom-0 left-0 w-full md:relative md:w-auto bg-white/95 md:bg-slate-50/50 dark:bg-slate-900/95 dark:md:bg-slate-900/50 p-4 md:p-8 flex justify-between items-center border-t border-slate-100 dark:border-slate-800 backdrop-blur-xl z-50">
-                                <button
-                                    onClick={prevStep}
-                                    disabled={step === 1}
-                                    className={`flex items-center gap-2 text-black/60 dark:text-white/60 hover:text-primary font-bold text-sm transition-colors py-2 px-3 md:px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-primary/20 ${step === 1 ? 'opacity-0 pointer-events-none' : ''}`}
-                                >
-                                    <span className="material-symbols-outlined">arrow_back</span>
-                                    <span className="hidden sm:inline">Sebelumnya</span>
-                                </button>
-
-                                <button
-                                    onClick={nextStep}
-                                    disabled={isSubmitting}
-                                    className={`group bg-primary hover:bg-primary/90 text-black px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:ring-4 focus:ring-primary/30 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
-                                >
-                                    {isSubmitting ? (
-                                        <>
-                                            <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
-                                            Mengirim...
-                                        </>
-                                    ) : (
-                                        <>
-                                            {step === 7 ? 'Kirim Data' : 'Lanjutkan'}
-                                            <span className="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
-                                        </>
-                                    )}
-                                </button>
+                    <div className="w-full max-w-4xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className={`bg-white dark:bg-slate-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-black/20 border border-slate-200 dark:border-slate-700 overflow-hidden relative ${isSuccess ? 'max-w-xl mx-auto' : ''}`}
+                        >
+                            <div className="p-6 md:p-10 pb-20 md:pb-6">
+                                {renderStep()}
                             </div>
-                        )}
-                    </motion.div>
+
+                            {/* Footer / Navigation - Default on desktop, Sticky at bottom on mobile */}
+                            {!isSuccess && (
+                                <div className="fixed bottom-0 left-0 w-full md:relative md:w-auto bg-white/95 md:bg-slate-50/50 dark:bg-slate-900/95 dark:md:bg-slate-900/50 p-4 md:p-8 flex justify-between items-center border-t border-slate-100 dark:border-slate-800 backdrop-blur-xl z-50">
+                                    <button
+                                        onClick={prevStep}
+                                        disabled={step === 1}
+                                        className={`flex items-center gap-2 text-black/60 dark:text-white/60 hover:text-primary font-bold text-sm transition-colors py-2 px-3 md:px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-primary/20 ${step === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+                                    >
+                                        <span className="material-symbols-outlined">arrow_back</span>
+                                        <span className="hidden sm:inline">Sebelumnya</span>
+                                    </button>
+
+                                    <button
+                                        onClick={nextStep}
+                                        disabled={isSubmitting}
+                                        className={`group bg-primary hover:bg-primary/90 text-black px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:ring-4 focus:ring-primary/30 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
+                                                Mengirim...
+                                            </>
+                                        ) : (
+                                            <>
+                                                {step === 7 ? 'Kirim Data' : 'Lanjutkan'}
+                                                <span className="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </div>
 
 
                 </main>
