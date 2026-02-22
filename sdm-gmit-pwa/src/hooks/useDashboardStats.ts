@@ -7,6 +7,7 @@ export interface DashboardStats {
     activeSkills: number;
     growth: number;
     professionalCount: number;
+    professionalFamilyCount: number;
     volunteerCount: number;
     distributions: {
         sector: Record<string, number>;

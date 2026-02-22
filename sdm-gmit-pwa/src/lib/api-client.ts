@@ -1,5 +1,5 @@
-
 import axios from 'axios';
+import { signOut } from './auth-client';
 
 // Get base URL from environment or fallback to dynamic hostname
 const baseURL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000/api`;
@@ -18,6 +18,10 @@ apiClient.interceptors.response.use(
     (error) => {
         // Optional: Global error logging or toast
         console.error("API Error:", error);
+        if (error.response?.status === 401) {
+            signOut({ fetchOptions: { onSuccess: () => { window.location.href = '/login'; } } }).catch(() => { window.location.href = '/login'; });
+            window.location.href = '/login';
+        }
         return Promise.reject(error);
     }
 );

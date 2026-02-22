@@ -118,12 +118,10 @@ const FormPage = () => {
 
                 return true;
             case 3:
-
-                if (!formData.willingnessToServe) return handleValidationError('willingnessToServe', "Mohon pilih Kesediaan Melayani");
-
                 if (formData.professionalFamilyMembers && formData.professionalFamilyMembers.length > 0) {
-                    for (let i = 0; i < formData.professionalFamilyMembers.length; i++) {
-                        const member = formData.professionalFamilyMembers[i];
+                    const filledMembers = formData.professionalFamilyMembers.filter(m => m.name.trim() !== '' || m.workplace !== '' || m.position !== '');
+                    for (let i = 0; i < filledMembers.length; i++) {
+                        const member = filledMembers[i];
                         if (!member.name) return handleValidationError(`willingnessToServe`, `Mohon isi Nama Anggota Keluarga ke-${i + 1}`);
                         if (!member.workplace) return handleValidationError(`willingnessToServe`, `Mohon isi Tempat Kerja Anggota ke-${i + 1}`);
                         if (!member.position) return handleValidationError(`willingnessToServe`, `Mohon isi Jabatan Anggota ke-${i + 1}`);
@@ -238,11 +236,8 @@ const FormPage = () => {
                     if (!formData.economics_businessCapitalSource) return handleValidationError('businessCapitalSource', "Mohon pilih Sumber Modal");
                     if (formData.economics_businessCapitalSource === 'Lainnya' && !formData.economics_businessCapitalSourceOther) return handleValidationError('businessCapitalSource', "Mohon lengkapi Sumber Modal lainnya");
 
-                    if (!formData.economics_businessPermit) return handleValidationError('businessPermit', "Mohon pilih Izin Usaha");
-                    if (formData.economics_businessPermit === 'Lainnya' && !formData.economics_businessPermitOther) return handleValidationError('businessPermit', "Mohon lengkapi Izin Usaha lainnya");
-
-                    if (!formData.economics_businessTurnover) return handleValidationError('businessTurnover', "Mohon pilih Omzet Per Bulan");
-                    if (formData.economics_businessTurnover === '> 10 juta' && (!formData.economics_businessTurnoverValue || formData.economics_businessTurnoverValue <= 0)) return handleValidationError('businessTurnover', "Mohon isi nilai omzet (harus > 0)");
+                    if (!formData.economics_businessPermit || formData.economics_businessPermit.length === 0) return handleValidationError('businessPermit', "Mohon pilih Izin Usaha");
+                    if (formData.economics_businessPermit.includes('Lainnya') && !formData.economics_businessPermitOther) return handleValidationError('businessPermit', "Mohon lengkapi Izin Usaha lainnya");
 
                     if (!formData.economics_businessMarketing || formData.economics_businessMarketing.length === 0) return handleValidationError('businessMarketing', "Mohon pilih Cara Pemasaran Utama");
                     if (formData.economics_businessMarketing.includes('Lainnya') && !formData.economics_businessMarketingOther) return handleValidationError('businessMarketing', "Mohon lengkapi Cara Pemasaran lainnya");

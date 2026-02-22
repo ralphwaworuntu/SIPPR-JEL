@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import type { Member } from "../../hooks/useMemberData";
 
 interface RecentActivityProps {
@@ -5,6 +6,7 @@ interface RecentActivityProps {
 }
 
 export const RecentActivity = ({ recentMembers }: RecentActivityProps) => {
+    const navigate = useNavigate();
     return (
         <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-800 shadow-sm p-6 h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
@@ -12,7 +14,7 @@ export const RecentActivity = ({ recentMembers }: RecentActivityProps) => {
                     <h3 className="font-bold text-lg text-slate-900 dark:text-white">Member Terbaru</h3>
                     <p className="text-xs text-slate-500">Jemaat yang baru ditambahkan/terdaftar</p>
                 </div>
-                <button className="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
+                <button onClick={() => navigate('/admin/members')} className="text-xs font-bold text-primary hover:underline">Lihat Semua</button>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">

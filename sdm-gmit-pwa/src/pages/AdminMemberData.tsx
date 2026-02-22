@@ -9,7 +9,7 @@ import { AdminLayout } from '../components/layouts/AdminLayout';
 import { Modal } from '../components/ui/Modal';
 import { AddMemberForm } from '../components/admin/forms/AddMemberForm';
 import { MemberDetailModal } from '../components/admin/details/MemberDetailModal';
-import { useMemberData, calculateAge, type Member } from '../hooks/useMemberData';
+import { useMemberData, calculateAge, calculateCompleteness, type Member } from '../hooks/useMemberData';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { TableSkeleton } from '../components/skeletons/TableSkeleton';
 
@@ -43,6 +43,7 @@ const AdminMemberData = () => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+    const [tableTab, setTableTab] = useState<'Identitas' | 'Profesional' | 'Komitmen' | 'Pendidikan' | 'Ekonomi' | 'Kesehatan'>('Identitas');
     const [bulkEditField, setBulkEditField] = useState<keyof Member | ''>('');
     const [bulkEditValue, setBulkEditValue] = useState('');
 
@@ -182,45 +183,72 @@ const AdminMemberData = () => {
 
     // Export Logic
     const handleExportCSV = () => {
-        const headers = ["Nama,ID,Sektor,Pendidikan,Pekerjaan,Keahlian,Gender,Umur,Status"];
-        const rows = filteredMembers.map(m =>
-            `"${m.name}","${m.id}","${m.sector}","${m.education}","${m.job}","${Array.isArray(m.skills) ? m.skills.join(';') : ''}","${m.gender}","${calculateAge(m.birthDate)}","${m.statusGerejawi}"`
-        );
-        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
-        const encodedUri = encodeURI(csvContent);
+        const headers = [
+            "Nama", "ID", "Sektor", "Lingkungan", "Rayon", "Gender", "Tanggal Lahir", "Umur", "No HP", "Alamat", "No KK", "NIK",
+            "Pendidikan", "Jurusan", "Kategori Pekerjaan", "Jabatan", "Instansi", "Lama Kerja", "Keahlian",
+            "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi",
+            "Anggota Keluarga", "Laki-laki", "Perempuan", "Luar Kota", "Sidi", "Sidi L", "Sidi P", "Belum Baptis", "Belum Sidi",
+            "Penerima Diakonia", "Tahun Diakonia", "Jenis Diakonia",
+            "Anak Bersekolah", "Bekerja",
+            "Pekerjaan KK", "Pekerjaan Pasangan", "Pendapatan", "Punya Usaha", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air",
+            "Sakit 30 Hari", "Penyakit Kronis", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas",
+            "Status"
+        ];
+        const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        const arrStr = (v: any) => Array.isArray(v) ? v.join('; ') : '';
+        const rows = filteredMembers.map(m => [
+            esc(m.name), esc(m.id), esc(m.sector), esc(m.lingkungan), esc(m.rayon), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.phone), esc(m.address), esc(m.kkNumber), esc(m.nik),
+            esc(m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
+            esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
+            m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonBaptized || 0, m.familyMembersNonSidi || 0,
+            esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
+            esc(m.education_schoolingStatus), m.education_working || 0,
+            esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource),
+            esc(m.health_sick30Days), esc(m.health_chronicSick), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability),
+            esc(m.statusGerejawi)
+        ].join(','));
+        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows].join("\n");
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "data_jemaat_export.csv");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", `data_jemaat_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        toast.success(`CSV berhasil diexport (${filteredMembers.length} data)`);
     };
 
     const handleExportPDF = () => {
-        const doc = new jsPDF();
+        const doc = new jsPDF({ orientation: 'landscape' });
 
         doc.setFontSize(18);
         doc.text("Laporan Data Jemaat", 14, 22);
         doc.setFontSize(11);
-        doc.text(`Total Data: ${filteredMembers.length} | Tanggal: ${new Date().toLocaleDateString()}`, 14, 30);
+        doc.text(`Total Data: ${filteredMembers.length} | Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
 
-        const tableColumn = ["ID", "Nama", "Sektor", "Pendidikan", "Pekerjaan", "Status"];
-        const tableRows = filteredMembers.map(member => [
-            member.id,
-            member.name,
-            member.sector,
-            member.education,
-            member.job,
-            member.statusGerejawi || '-'
+        const tableColumn = ["No", "Nama", "Sektor", "L/R", "Pendidikan", "Pekerjaan", "Gender", "Umur", "Keluarga", "BPJS", "Status"];
+        const tableRows = filteredMembers.map((m, i) => [
+            i + 1,
+            m.name,
+            m.sector,
+            `L${m.lingkungan}/R${m.rayon}`,
+            m.education,
+            m.jobCategory || m.job,
+            m.gender === 'Laki-laki' ? 'L' : 'P',
+            calculateAge(m.birthDate),
+            m.familyMembers || 0,
+            m.health_hasBPJS || '-',
+            m.statusGerejawi || '-'
         ]);
 
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
             startY: 40,
+            styles: { fontSize: 7 },
+            headStyles: { fillColor: [30, 41, 59] },
         });
 
-        doc.save("laporan_jemaat.pdf");
+        doc.save(`laporan_jemaat_${new Date().toISOString().split('T')[0]}.pdf`);
         toast.success("PDF berhasil didownload");
     };
 
@@ -403,6 +431,19 @@ const AdminMemberData = () => {
                 )}
             </div>
 
+            {/* Table View Tabs */}
+            <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
+                {['Identitas', 'Profesional', 'Komitmen', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setTableTab(tab as any)}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${tableTab === tab ? 'bg-primary text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                    >
+                        Data {tab}
+                    </button>
+                ))}
+            </div>
+
             {/* List View */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-1 flex flex-col">
                 {isLoading ? (
@@ -422,29 +463,39 @@ const AdminMemberData = () => {
                                                 className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
                                             />
                                         </th>
-                                        {[
-                                            { label: "Nama Lengkap", key: "name", width: "min-w-[200px]" },
-                                            { label: "Sektor Kat.", key: "sector", width: "min-w-[150px]" },
-                                            { label: "Umur", key: "birthDate", width: "w-20" },
-                                            { label: "Pendidikan", key: "education", width: "min-w-[150px]" },
-                                            { label: "Pekerjaan", key: "job", width: "min-w-[150px]" },
-                                            { label: "Rayon", key: "rayon", width: "min-w-[100px]" },
-                                        ].map((col) => (
-                                            <th
-                                                key={col.key}
-                                                onClick={() => handleSort(col.key as keyof Member)}
-                                                className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    {col.label}
-                                                    {sortConfig.key === col.key && (
-                                                        <span className="material-symbols-outlined text-sm font-bold">
-                                                            {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </th>
-                                        ))}
+                                        {(() => {
+                                            const baseCols = [
+                                                { label: "Nama Lengkap", key: "name", width: "min-w-[250px]" },
+                                                { label: "Sektor", key: "sector", width: "min-w-[100px]" }
+                                            ];
+                                            let cols: any[] = [];
+                                            switch (tableTab) {
+                                                case 'Identitas': cols = [...baseCols, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }, { label: "Umur", key: "birthDate", width: "w-20" }, { label: "Jml Keluarga", key: "familyMembers", width: "w-24" }]; break;
+                                                case 'Profesional': cols = [...baseCols, { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[100px]" }, { label: "Pendidikan", key: "education", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "job", width: "min-w-[150px]" }, { label: "Instansi", key: "companyName", width: "min-w-[150px]" }]; break;
+                                                case 'Komitmen': cols = [...baseCols, { label: "Kesediaan", key: "willingnessToServe", width: "min-w-[150px]" }, { label: "Minat", key: "interestAreas", width: "min-w-[200px]" }, { label: "Bentuk Kontribusi", key: "contributionTypes", width: "min-w-[200px]" }]; break;
+                                                case 'Pendidikan': cols = [...baseCols, { label: "Anak Sekolah?", key: "education_schoolingStatus", width: "min-w-[120px]" }, { label: "Sedang Sekolah", key: "education_inSchool_sd", width: "min-w-[120px]" }, { label: "Putus Sekolah", key: "education_dropout_sd", width: "min-w-[120px]" }, { label: "Sdh Bekerja", key: "education_working", width: "w-24" }]; break;
+                                                case 'Ekonomi': cols = [...baseCols, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha", key: "economics_hasBusiness", width: "min-w-[150px]" }, { label: "Rumah", key: "economics_houseStatus", width: "min-w-[150px]" }]; break;
+                                                case 'Kesehatan': cols = [...baseCols, { label: "Penyakit Kronis", key: "health_chronicSick", width: "min-w-[120px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "BPJS", key: "health_hasBPJS", width: "min-w-[120px]" }, { label: "Bantuan Sosial", key: "health_socialAssistance", width: "min-w-[150px]" }]; break;
+                                                default: cols = baseCols;
+                                            }
+                                            cols.push({ label: "Kualitas", key: "name", width: "w-20" }); // Fake key
+                                            return cols.map((col: any) => (
+                                                <th
+                                                    key={col.label}
+                                                    onClick={() => handleSort(col.key as keyof Member)}
+                                                    className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
+                                                >
+                                                    <div className="flex items-center gap-1">
+                                                        {col.label}
+                                                        {sortConfig.key === col.key && (
+                                                            <span className="material-symbols-outlined text-sm font-bold">
+                                                                {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </th>
+                                            ));
+                                        })()}
                                         <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
                                     </tr>
                                 </thead>
@@ -485,11 +536,61 @@ const AdminMemberData = () => {
                                                 <td className="px-6 py-4">
                                                     <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">{member.sector}</span>
                                                 </td>
-                                                <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{calculateAge(member.birthDate)} Thn</td>
-                                                <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-sm font-medium">{member.education}</td>
-                                                <td className="px-6 py-4 text-slate-900 dark:text-white text-sm font-medium">{member.job}</td>
+                                                {tableTab === 'Identitas' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.nik || '-'}</td>
+                                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.kkNumber || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.address || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{calculateAge(member.birthDate)} Thn</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembers || 0}</td>
+                                                    </>
+                                                )}
+                                                {tableTab === 'Profesional' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded text-xs font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400'}`}>{member.diakonia_recipient || '-'}</span></td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobCategory || member.job || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.companyName || '-'}</td>
+                                                    </>
+                                                )}
+                                                {tableTab === 'Komitmen' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.willingnessToServe || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.interestAreas || []).join(', ') || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.contributionTypes || []).join(', ') || '-'}</td>
+                                                    </>
+                                                )}
+                                                {tableTab === 'Pendidikan' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_schoolingStatus || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_inSchool_tk_paud || 0) + (member.education_inSchool_sd || 0) + (member.education_inSchool_smp || 0) + (member.education_inSchool_sma || 0) + (member.education_inSchool_university || 0)) || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_dropout_tk_paud || 0) + (member.education_dropout_sd || 0) + (member.education_dropout_smp || 0) + (member.education_dropout_sma || 0)) || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_working || '-'}</td>
+                                                    </>
+                                                )}
+                                                {tableTab === 'Ekonomi' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_incomeRange || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Ya' : 'Tidak'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
+                                                    </>
+                                                )}
+                                                {tableTab === 'Kesehatan' && (
+                                                    <>
+                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded text-xs font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'Ya' : '-'}</span></td>
+                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded text-xs font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'Ya' : '-'}</span></td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJS || '-'}</td>
+                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{member.health_socialAssistance || '-'}</td>
+                                                    </>
+                                                )}
                                                 <td className="px-6 py-4">
-                                                    <span className="text-slate-600 dark:text-slate-400 text-xs font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">R{member.rayon}L{member.lingkungan}</span>
+                                                    {(() => {
+                                                        const c = calculateCompleteness(member);
+                                                        const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                                                            : c.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
+                                                                : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+                                                        return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
+                                                    })()}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

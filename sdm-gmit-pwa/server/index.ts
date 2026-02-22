@@ -65,6 +65,17 @@ app.get("/", (req, res) => {
 
 // API Routes
 
+const safeParseJSON = (data: any, fallback: any = []) => {
+    if (!data) return fallback;
+    if (typeof data !== 'string') return data;
+    try {
+        return JSON.parse(data);
+    } catch {
+        if (data.trim() !== '') return [data];
+        return fallback;
+    }
+};
+
 // Helper to map DB congregant to Frontend Member
 const mapCongregantToMember = (c: any) => ({
     id: c.id.toString(),
@@ -84,67 +95,401 @@ const mapCongregantToMember = (c: any) => ({
     jobTitle: c.jobTitle || "-",
     companyName: c.companyName || "-",
     yearsOfExperience: c.yearsOfExperience || 0,
-    skills: typeof c.skills === 'string' ? JSON.parse(c.skills) : (c.skills || []),
+    skills: safeParseJSON(c.skills),
     willingnessToServe: c.willingnessToServe || "Not-available",
-    interestAreas: typeof c.interestAreas === 'string' ? JSON.parse(c.interestAreas) : (c.interestAreas || []),
-    contributionTypes: typeof c.contributionTypes === 'string' ? JSON.parse(c.contributionTypes) : (c.contributionTypes || []),
+    interestAreas: safeParseJSON(c.interestAreas),
+    contributionTypes: safeParseJSON(c.contributionTypes),
     initials: (c.fullName || "X").substring(0, 2).toUpperCase(),
     gender: c.gender || "Laki-laki",
     birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+
+    // Step 1: Identity extras
+    kkNumber: c.kkNumber || "",
+    nik: c.nik || "",
+    familyMembers: c.familyMembers || 0,
+    familyMembersMale: c.familyMembersMale || 0,
+    familyMembersFemale: c.familyMembersFemale || 0,
+    familyMembersOutside: c.familyMembersOutside || 0,
+    familyMembersSidi: c.familyMembersSidi || 0,
+    familyMembersSidiMale: c.familyMembersSidiMale || 0,
+    familyMembersSidiFemale: c.familyMembersSidiFemale || 0,
+    familyMembersNonBaptized: c.familyMembersNonBaptized || 0,
+    familyMembersNonSidi: c.familyMembersNonSidi || 0,
+
+    // Step 2: Diakonia
+    diakonia_recipient: c.diakoniaRecipient || "",
+    diakonia_year: c.diakoniaYear || "",
+    diakonia_type: c.diakoniaType || "",
+
+    // Step 3: Professional Family Members
+    professionalFamilyMembers: safeParseJSON(c.professionalFamilyMembers),
+
+    // Step 4: Education (Children)
+    education_schoolingStatus: c.educationSchoolingStatus || "",
+    education_inSchool_tk_paud: c.educationInSchoolTkPaud || 0,
+    education_inSchool_sd: c.educationInSchoolSd || 0,
+    education_inSchool_smp: c.educationInSchoolSmp || 0,
+    education_inSchool_sma: c.educationInSchoolSma || 0,
+    education_inSchool_university: c.educationInSchoolUniversity || 0,
+    education_dropout_tk_paud: c.educationDropoutTkPaud || 0,
+    education_dropout_sd: c.educationDropoutSd || 0,
+    education_dropout_smp: c.educationDropoutSmp || 0,
+    education_dropout_sma: c.educationDropoutSma || 0,
+    education_dropout_university: c.educationDropoutUniversity || 0,
+    education_unemployed_sd: c.educationUnemployedSd || 0,
+    education_unemployed_smp: c.educationUnemployedSmp || 0,
+    education_unemployed_sma: c.educationUnemployedSma || 0,
+    education_unemployed_university: c.educationUnemployedUniversity || 0,
+    education_working: c.educationWorking || 0,
+
+    // Step 5: Economics
+    economics_headOccupation: c.economicsHeadOccupation || "",
+    economics_headOccupationOther: c.economicsHeadOccupationOther || "",
+    economics_spouseOccupation: c.economicsSpouseOccupation || "",
+    economics_spouseOccupationOther: c.economicsSpouseOccupationOther || "",
+    economics_incomeRange: c.economicsIncomeRange || "",
+    economics_incomeRangeDetailed: c.economicsIncomeRangeDetailed || "",
+    economics_expense_food: c.economicsExpenseFood || 0,
+    economics_expense_utilities: c.economicsExpenseUtilities || 0,
+    economics_expense_education: c.economicsExpenseEducation || 0,
+    economics_expense_other: c.economicsExpenseOther || 0,
+    economics_hasBusiness: c.economicsHasBusiness || "",
+    economics_businessName: c.economicsBusinessName || "",
+    economics_businessType: c.economicsBusinessType || "",
+    economics_businessTypeOther: c.economicsBusinessTypeOther || "",
+    economics_businessDuration: c.economicsBusinessDuration || "",
+    economics_businessDurationYears: c.economicsBusinessDurationYears || 0,
+    economics_businessStatus: c.economicsBusinessStatus || "",
+    economics_businessStatusOther: c.economicsBusinessStatusOther || "",
+    economics_businessLocation: c.economicsBusinessLocation || "",
+    economics_businessLocationOther: c.economicsBusinessLocationOther || "",
+    economics_businessEmployeeCount: c.economicsBusinessEmployeeCount || "",
+    economics_businessCapital: c.economicsBusinessCapital || 0,
+    economics_businessCapitalSource: c.economicsBusinessCapitalSource || "",
+    economics_businessCapitalSourceOther: c.economicsBusinessCapitalSourceOther || "",
+    economics_businessPermit: safeParseJSON(c.economicsBusinessPermit),
+    economics_businessPermitOther: c.economicsBusinessPermitOther || "",
+    economics_businessTurnover: c.economicsBusinessTurnover || "",
+    economics_businessTurnoverValue: c.economicsBusinessTurnoverValue || 0,
+    economics_businessMarketing: safeParseJSON(c.economicsBusinessMarketing),
+    economics_businessMarketingOther: c.economicsBusinessMarketingOther || "",
+    economics_businessMarketArea: c.economicsBusinessMarketArea || "",
+    economics_businessIssues: safeParseJSON(c.economicsBusinessIssues),
+    economics_businessIssuesOther: c.economicsBusinessIssuesOther || "",
+    economics_businessNeeds: safeParseJSON(c.economicsBusinessNeeds),
+    economics_businessNeedsOther: c.economicsBusinessNeedsOther || "",
+    economics_businessSharing: c.economicsBusinessSharing || "",
+    economics_businessTraining: safeParseJSON(c.economicsBusinessTraining),
+    economics_businessTrainingOther: c.economicsBusinessTrainingOther || "",
+    economics_houseStatus: c.economicsHouseStatus || "",
+    economics_houseType: c.economicsHouseType || "",
+    economics_houseIMB: c.economicsHouseIMB || "",
+    economics_hasAssets: c.economicsHasAssets || "",
+    economics_totalAssets: c.economicsTotalAssets || 0,
+    economics_assets: safeParseJSON(c.economicsAssets),
+    economics_asset_motor_qty: c.economicsAssetMotorQty || 0,
+    economics_asset_mobil_qty: c.economicsAssetMobilQty || 0,
+    economics_asset_kulkas_qty: c.economicsAssetKulkasQty || 0,
+    economics_asset_laptop_qty: c.economicsAssetLaptopQty || 0,
+    economics_asset_tv_qty: c.economicsAssetTvQty || 0,
+    economics_asset_internet_qty: c.economicsAssetInternetQty || 0,
+    economics_asset_lahan_qty: c.economicsAssetLahanQty || 0,
+    economics_landStatus: c.economicsLandStatus || "",
+    economics_waterSource: c.economicsWaterSource || "",
+    economics_electricity_capacities: safeParseJSON(c.economicsElectricityCapacities),
+    economics_electricity_450_qty: c.economicsElectricity450Qty || 0,
+    economics_electricity_900_qty: c.economicsElectricity900Qty || 0,
+    economics_electricity_1200_qty: c.economicsElectricity1200Qty || 0,
+    economics_electricity_2200_qty: c.economicsElectricity2200Qty || 0,
+    economics_electricity_5000_qty: c.economicsElectricity5000Qty || 0,
+    economics_electricity_total_cost: c.economicsElectricityTotalCost || 0,
+
+    // Step 6: Health
+    health_sick30Days: c.healthSick30Days || "",
+    health_chronicSick: c.healthChronicSick || "",
+    health_chronicDisease: safeParseJSON(c.healthChronicDisease),
+    health_chronicDiseaseOther: c.healthChronicDiseaseOther || "",
+    health_hasBPJS: c.healthHasBPJS || "",
+    health_regularTreatment: c.healthRegularTreatment || "",
+    health_hasBPJSKetenagakerjaan: c.healthHasBPJSKetenagakerjaan || "",
+    health_socialAssistance: c.healthSocialAssistance || "",
+    health_hasDisability: c.healthHasDisability || "",
+    health_disabilityPhysical: safeParseJSON(c.healthDisabilityPhysical),
+    health_disabilityPhysicalOther: c.healthDisabilityPhysicalOther || "",
+    health_disabilityIntellectual: safeParseJSON(c.healthDisabilityIntellectual),
+    health_disabilityIntellectualOther: c.healthDisabilityIntellectualOther || "",
+    health_disabilityMental: safeParseJSON(c.healthDisabilityMental),
+    health_disabilityMentalOther: c.healthDisabilityMentalOther || "",
+    health_disabilitySensory: safeParseJSON(c.healthDisabilitySensory),
+    health_disabilitySensoryOther: c.healthDisabilitySensoryOther || "",
+    health_disabilityDouble: c.healthDisabilityDouble || false,
 });
 
-import { eq, like, and, desc } from "drizzle-orm";
+import { eq, like, and, desc, count } from "drizzle-orm";
 
-// 1. GET Members (with Search & Filter)
+// 1. GET Members (with Search, Filter & optional Pagination)
 app.get("/api/members", async (req, res) => {
     try {
-        const { search, sector, gender, education } = req.query;
+        const { search, sector, gender, education, page, limit: limitParam } = req.query;
 
         const filters = [];
         if (search) filters.push(like(congregants.fullName, `%${search}%`));
         if (sector && sector !== "Semua") filters.push(eq(congregants.sector, String(sector)));
         if (gender && gender !== "Semua") filters.push(eq(congregants.gender, String(gender)));
 
-        const result = await db.select()
-            .from(congregants)
-            .where(and(...filters))
-            .orderBy(desc(congregants.createdAt));
+        // If page param is provided, paginate. Otherwise return all.
+        if (page) {
+            const pageNum = Math.max(1, parseInt(String(page)) || 1);
+            const limitNum = Math.min(100, Math.max(1, parseInt(String(limitParam)) || 20));
+            const offset = (pageNum - 1) * limitNum;
 
-        res.json(result.map(mapCongregantToMember));
+            const [result, [totalRow]] = await Promise.all([
+                db.select().from(congregants)
+                    .where(and(...filters))
+                    .orderBy(desc(congregants.createdAt))
+                    .limit(limitNum)
+                    .offset(offset),
+                db.select({ total: count() }).from(congregants).where(and(...filters))
+            ]);
+
+            res.json({
+                data: result.map(mapCongregantToMember),
+                pagination: { page: pageNum, limit: limitNum, total: totalRow.total, totalPages: Math.ceil(totalRow.total / limitNum) }
+            });
+        } else {
+            const result = await db.select()
+                .from(congregants)
+                .where(and(...filters))
+                .orderBy(desc(congregants.createdAt));
+
+            res.json(result.map(mapCongregantToMember));
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to fetch members" });
     }
 });
 
+// GET Professional Family Members Endpoint
+app.get("/api/family-members", async (req, res) => {
+    try {
+        const result = await db.select({
+            id: congregants.id,
+            name: congregants.fullName,
+            sector: congregants.sector,
+            professionalFamilyMembers: congregants.professionalFamilyMembers,
+            kkNumber: congregants.kkNumber
+        })
+            .from(congregants)
+            .orderBy(desc(congregants.createdAt));
+
+        const familyMembers: any[] = [];
+
+        result.forEach(member => {
+            if (member.professionalFamilyMembers) {
+                try {
+                    const parsed = typeof member.professionalFamilyMembers === 'string'
+                        ? JSON.parse(member.professionalFamilyMembers)
+                        : member.professionalFamilyMembers;
+
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        parsed.forEach((pfm: any) => {
+                            if (pfm.hasProfessionalSkill === 'Ya') {
+                                familyMembers.push({
+                                    ...pfm,
+                                    mainMemberId: member.id,
+                                    mainMemberName: member.name,
+                                    mainMemberSector: member.sector,
+                                    mainMemberKkNumber: member.kkNumber,
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error parsing professionalFamilyMembers for member", member.id);
+                }
+            }
+        });
+
+        res.json(familyMembers);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch professional family members" });
+    }
+});
+
+// Helper: Build congregant values from request body (shared by admin & public routes)
+const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
+    const jsonStringify = (val: any) => val ? JSON.stringify(val) : JSON.stringify([]);
+    const safeInt = (val: any) => {
+        const n = parseInt(val);
+        return isNaN(n) ? 0 : n;
+    };
+
+    return {
+        fullName: data.name || data.fullName,
+        gender: data.gender,
+        dateOfBirth: (data.birthDate || data.dateOfBirth) ? new Date(data.birthDate || data.dateOfBirth) : null,
+        phone: data.phone,
+        address: data.address,
+        sector: data.sector,
+        lingkungan: data.lingkungan,
+        rayon: data.rayon,
+
+        // Step 1: Identity extras
+        kkNumber: data.kkNumber || null,
+        nik: data.nik || null,
+        familyMembers: safeInt(data.familyMembers),
+        familyMembersMale: safeInt(data.familyMembersMale),
+        familyMembersFemale: safeInt(data.familyMembersFemale),
+        familyMembersOutside: safeInt(data.familyMembersOutside),
+        familyMembersSidi: safeInt(data.familyMembersSidi),
+        familyMembersSidiMale: safeInt(data.familyMembersSidiMale),
+        familyMembersSidiFemale: safeInt(data.familyMembersSidiFemale),
+        familyMembersNonBaptized: safeInt(data.familyMembersNonBaptized),
+        familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
+
+        // Step 2: Diakonia
+        diakoniaRecipient: data.diakonia_recipient || null,
+        diakoniaYear: data.diakonia_year || null,
+        diakoniaType: data.diakonia_type || null,
+
+        // Professional
+        educationLevel: data.education || data.educationLevel,
+        major: data.major,
+        jobCategory: data.jobCategory,
+        jobTitle: data.jobTitle,
+        companyName: data.companyName,
+        yearsOfExperience: safeInt(data.yearsOfExperience),
+        skills: jsonStringify(data.skills),
+
+        // Commitment
+        willingnessToServe: data.willingnessToServe,
+        interestAreas: jsonStringify(data.interestAreas),
+        contributionTypes: jsonStringify(data.contributionTypes),
+
+        // Step 3: Professional Family Members
+        professionalFamilyMembers: jsonStringify(data.professionalFamilyMembers),
+
+        // Step 4: Education (Children)
+        educationSchoolingStatus: data.education_schoolingStatus || null,
+        educationInSchoolTkPaud: safeInt(data.education_inSchool_tk_paud),
+        educationInSchoolSd: safeInt(data.education_inSchool_sd),
+        educationInSchoolSmp: safeInt(data.education_inSchool_smp),
+        educationInSchoolSma: safeInt(data.education_inSchool_sma),
+        educationInSchoolUniversity: safeInt(data.education_inSchool_university),
+        educationDropoutTkPaud: safeInt(data.education_dropout_tk_paud),
+        educationDropoutSd: safeInt(data.education_dropout_sd),
+        educationDropoutSmp: safeInt(data.education_dropout_smp),
+        educationDropoutSma: safeInt(data.education_dropout_sma),
+        educationDropoutUniversity: safeInt(data.education_dropout_university),
+        educationUnemployedSd: safeInt(data.education_unemployed_sd),
+        educationUnemployedSmp: safeInt(data.education_unemployed_smp),
+        educationUnemployedSma: safeInt(data.education_unemployed_sma),
+        educationUnemployedUniversity: safeInt(data.education_unemployed_university),
+        educationWorking: safeInt(data.education_working),
+
+        // Step 5: Economics — Occupation & Income
+        economicsHeadOccupation: data.economics_headOccupation || null,
+        economicsHeadOccupationOther: data.economics_headOccupationOther || null,
+        economicsSpouseOccupation: data.economics_spouseOccupation || null,
+        economicsSpouseOccupationOther: data.economics_spouseOccupationOther || null,
+        economicsIncomeRange: data.economics_incomeRange || null,
+        economicsIncomeRangeDetailed: data.economics_incomeRangeDetailed || null,
+
+        // Step 5: Household Expenses
+        economicsExpenseFood: safeInt(data.economics_expense_food),
+        economicsExpenseUtilities: safeInt(data.economics_expense_utilities),
+        economicsExpenseEducation: safeInt(data.economics_expense_education),
+        economicsExpenseOther: safeInt(data.economics_expense_other),
+
+        // Step 5: Business Ownership
+        economicsHasBusiness: data.economics_hasBusiness || null,
+        economicsBusinessName: data.economics_businessName || null,
+        economicsBusinessType: data.economics_businessType || null,
+        economicsBusinessTypeOther: data.economics_businessTypeOther || null,
+        economicsBusinessDuration: data.economics_businessDuration || null,
+        economicsBusinessDurationYears: safeInt(data.economics_businessDurationYears),
+        economicsBusinessStatus: data.economics_businessStatus || null,
+        economicsBusinessStatusOther: data.economics_businessStatusOther || null,
+        economicsBusinessLocation: data.economics_businessLocation || null,
+        economicsBusinessLocationOther: data.economics_businessLocationOther || null,
+        economicsBusinessEmployeeCount: data.economics_businessEmployeeCount || null,
+        economicsBusinessCapital: safeInt(data.economics_businessCapital),
+        economicsBusinessCapitalSource: data.economics_businessCapitalSource || null,
+        economicsBusinessCapitalSourceOther: data.economics_businessCapitalSourceOther || null,
+        economicsBusinessPermit: jsonStringify(data.economics_businessPermit),
+        economicsBusinessPermitOther: data.economics_businessPermitOther || null,
+        economicsBusinessTurnover: data.economics_businessTurnover || null,
+        economicsBusinessTurnoverValue: safeInt(data.economics_businessTurnoverValue),
+        economicsBusinessMarketing: jsonStringify(data.economics_businessMarketing),
+        economicsBusinessMarketingOther: data.economics_businessMarketingOther || null,
+        economicsBusinessMarketArea: data.economics_businessMarketArea || null,
+        economicsBusinessIssues: jsonStringify(data.economics_businessIssues),
+        economicsBusinessIssuesOther: data.economics_businessIssuesOther || null,
+        economicsBusinessNeeds: jsonStringify(data.economics_businessNeeds),
+        economicsBusinessNeedsOther: data.economics_businessNeedsOther || null,
+        economicsBusinessSharing: data.economics_businessSharing || null,
+        economicsBusinessTraining: jsonStringify(data.economics_businessTraining),
+        economicsBusinessTrainingOther: data.economics_businessTrainingOther || null,
+
+        // Step 5: Home & Assets
+        economicsHouseStatus: data.economics_houseStatus || null,
+        economicsHouseType: data.economics_houseType || null,
+        economicsHouseIMB: data.economics_houseIMB || null,
+        economicsHasAssets: data.economics_hasAssets || null,
+        economicsTotalAssets: safeInt(data.economics_totalAssets),
+        economicsAssets: jsonStringify(data.economics_assets),
+        economicsAssetMotorQty: safeInt(data.economics_asset_motor_qty),
+        economicsAssetMobilQty: safeInt(data.economics_asset_mobil_qty),
+        economicsAssetKulkasQty: safeInt(data.economics_asset_kulkas_qty),
+        economicsAssetLaptopQty: safeInt(data.economics_asset_laptop_qty),
+        economicsAssetTvQty: safeInt(data.economics_asset_tv_qty),
+        economicsAssetInternetQty: safeInt(data.economics_asset_internet_qty),
+        economicsAssetLahanQty: safeInt(data.economics_asset_lahan_qty),
+        economicsLandStatus: data.economics_landStatus || null,
+        economicsWaterSource: data.economics_waterSource || null,
+        economicsElectricityCapacities: jsonStringify(data.economics_electricity_capacities),
+        economicsElectricity450Qty: safeInt(data.economics_electricity_450_qty),
+        economicsElectricity900Qty: safeInt(data.economics_electricity_900_qty),
+        economicsElectricity1200Qty: safeInt(data.economics_electricity_1200_qty),
+        economicsElectricity2200Qty: safeInt(data.economics_electricity_2200_qty),
+        economicsElectricity5000Qty: safeInt(data.economics_electricity_5000_qty),
+        economicsElectricityTotalCost: safeInt(data.economics_electricity_total_cost),
+
+        // Step 6: Health
+        healthSick30Days: data.health_sick30Days || null,
+        healthChronicSick: data.health_chronicSick || null,
+        healthChronicDisease: jsonStringify(data.health_chronicDisease),
+        healthChronicDiseaseOther: data.health_chronicDiseaseOther || null,
+        healthHasBPJS: data.health_hasBPJS || null,
+        healthRegularTreatment: data.health_regularTreatment || null,
+        healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan || null,
+        healthSocialAssistance: data.health_socialAssistance || null,
+        healthHasDisability: data.health_hasDisability || null,
+        healthDisabilityPhysical: jsonStringify(data.health_disabilityPhysical),
+        healthDisabilityPhysicalOther: data.health_disabilityPhysicalOther || null,
+        healthDisabilityIntellectual: jsonStringify(data.health_disabilityIntellectual),
+        healthDisabilityIntellectualOther: data.health_disabilityIntellectualOther || null,
+        healthDisabilityMental: jsonStringify(data.health_disabilityMental),
+        healthDisabilityMentalOther: data.health_disabilityMentalOther || null,
+        healthDisabilitySensory: jsonStringify(data.health_disabilitySensory),
+        healthDisabilitySensoryOther: data.health_disabilitySensoryOther || null,
+        healthDisabilityDouble: data.health_disabilityDouble || false,
+
+        // Geo
+        latitude: data.latitude?.toString(),
+        longitude: data.longitude?.toString(),
+        status: isAdmin ? 'VALIDATED' : 'PENDING'
+    };
+};
+
 // 2. POST Member (Admin)
 app.post("/api/members", async (req, res) => {
     try {
         const data = req.body;
-        await db.insert(congregants).values({
-            fullName: data.name,
-            gender: data.gender,
-            dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
-            phone: data.phone,
-            address: data.address,
-            sector: data.sector,
-            lingkungan: data.lingkungan,
-            rayon: data.rayon,
-            educationLevel: data.education,
-            major: data.major,
-            jobCategory: data.jobCategory,
-            jobTitle: data.jobTitle,
-            companyName: data.companyName,
-            yearsOfExperience: data.yearsOfExperience,
-            skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
-            willingnessToServe: data.willingnessToServe,
-            interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
-            contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
-            latitude: data.latitude?.toString(),
-            longitude: data.longitude?.toString(),
-            status: 'VALIDATED' // Auto validate for admin
-        });
+        await db.insert(congregants).values(buildCongregantValues(data, true));
         res.status(201).json({ success: true });
     } catch (error) {
         console.error(error);
@@ -158,29 +503,7 @@ app.post("/api/congregants", async (req, res) => {
         const data = req.body;
         console.log("New Registration Attempt:", data.fullName);
 
-        await db.insert(congregants).values({
-            fullName: data.fullName,
-            gender: data.gender,
-            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-            phone: data.phone,
-            address: data.address,
-            sector: data.sector,
-            lingkungan: data.lingkungan,
-            rayon: data.rayon,
-            educationLevel: data.educationLevel,
-            major: data.major,
-            jobCategory: data.jobCategory,
-            jobTitle: data.jobTitle,
-            companyName: data.companyName,
-            yearsOfExperience: data.yearsOfExperience || 0,
-            skills: data.skills ? JSON.stringify(data.skills) : JSON.stringify([]),
-            willingnessToServe: data.willingnessToServe,
-            interestAreas: data.interestAreas ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
-            contributionTypes: data.contributionTypes ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
-            latitude: data.latitude?.toString(),
-            longitude: data.longitude?.toString(),
-            status: 'PENDING'
-        });
+        await db.insert(congregants).values(buildCongregantValues(data, false));
 
         console.log("Registration Successful:", data.fullName);
         res.status(201).json({ success: true, message: "Pendaftaran berhasil" });
@@ -196,30 +519,10 @@ app.put("/api/members/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const data = req.body;
+        const { status, ...updateValues } = buildCongregantValues(data, true);
 
         await db.update(congregants)
-            .set({
-                fullName: data.name,
-                gender: data.gender,
-                dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
-                phone: data.phone,
-                address: data.address,
-                sector: data.sector,
-                lingkungan: data.lingkungan,
-                rayon: data.rayon,
-                educationLevel: data.education,
-                major: data.major,
-                jobCategory: data.jobCategory,
-                jobTitle: data.jobTitle,
-                companyName: data.companyName,
-                yearsOfExperience: data.yearsOfExperience,
-                skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
-                willingnessToServe: data.willingnessToServe,
-                interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
-                contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
-                latitude: data.latitude?.toString(),
-                longitude: data.longitude?.toString(),
-            })
+            .set(updateValues)
             .where(eq(congregants.id, Number(id)));
 
         res.json({ success: true });
@@ -318,12 +621,27 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
         const professionalCount = professionalRes[0]?.count || 0;
 
+        // 8. Professional Family Members Count
+        const profFamilyRes = await db.select({ pfm: congregants.professionalFamilyMembers }).from(congregants);
+        let professionalFamilyCount = 0;
+        profFamilyRes.forEach(row => {
+            try {
+                const pfm = typeof row.pfm === 'string' ? JSON.parse(row.pfm) : row.pfm;
+                if (Array.isArray(pfm)) {
+                    professionalFamilyCount += pfm.length;
+                }
+            } catch (e) {
+                // Ignore parsing errors
+            }
+        });
+
         res.json({
             total,
             sectorDominant: dominant,
             activeSkills,
             growth: 12, // Placeholder for now, requires historical tracking
             professionalCount,
+            professionalFamilyCount,
             volunteerCount,
             distributions: {
                 sector: sectorCounts,
@@ -427,6 +745,12 @@ app.post("/api/notifications/mark-all-read", async (req, res) => {
         console.error("Error marking all notifications as read:", error);
         res.status(500).json({ error: "Failed to mark all as read" });
     }
+});
+
+// Centralized Error Handler
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('Unhandled error:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {

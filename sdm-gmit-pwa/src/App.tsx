@@ -15,7 +15,7 @@ import { Navigate } from 'react-router-dom';
 // Lazy Load Admin Pages for Performance
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 const AdminMemberData = React.lazy(() => import('./pages/AdminMemberData'));
-// AdminFamilyData removed locally
+const AdminFamilyData = React.lazy(() => import('./pages/AdminFamilyData'));
 
 const AdminReports = React.lazy(() => import('./pages/AdminReports'));
 const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
@@ -87,6 +87,11 @@ const AppContent = () => {
         <Route path="/admin/members" element={
           <ProtectedRoute>
             <AdminMemberData />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/family" element={
+          <ProtectedRoute>
+            <AdminFamilyData />
           </ProtectedRoute>
         } />
 
