@@ -344,17 +344,17 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
 
                                                 {member.skillType !== undefined && ![
                                                     '',
-                                                    'Kesehatan & Medis',
-                                                    'Pendidikan & Pelatihan',
-                                                    'Teknologi, IT & Digital',
-                                                    'Teknik, Sipil & Konstruksi',
-                                                    'Hukum, Advokasi & Keamanan',
-                                                    'Keuangan, Akuntansi & Perbankan',
-                                                    'Seni, Musik & Kreatif',
-                                                    'Kewirausahaan & Bisnis',
-                                                    'Pelayanan Jasa & Perdagangan',
-                                                    'Administrasi & Pemerintahan',
-                                                    'Agrikultur & Alam'
+                                                    'Kesehatan (Dokter, Perawat, Bidan, Apoteker, Ahli Gizi, Psikolog)',
+                                                    'Teknologi & Digital(IT Support, Programmer, Desain Grafis, Editor Video, Admin Sosial Media)',
+                                                    'Pendidikan (Guru, Dosen, Pelatih, Tutor)',
+                                                    'Teknik & Konstruksi (Arsitek, Sipil, Tukang Bangunan, Listrik, AC, Plumbing)',
+                                                    'Hukum (Advokat, Notaris, Staf Legal, Konsultan Hukum)',
+                                                    'Keuangan & Perbankan (Akuntan, Auditor, Teller, Analis Keuangan, Pajak)',
+                                                    'Seni, Musik & Kreatif (Seniman, Musisi, Desainer, Penulis)',
+                                                    'Kewirausahaan & Bisnis (Pengusaha, Pedagang, Investor)',
+                                                    'Pelayanan Jasa & Perdagangan (Pelayan, Pedagang, Pramuniaga)',
+                                                    'Administrasi & Pemerintahan (Pegawai Negeri, Staf Administrasi)',
+                                                    'Agrikultur & Alam (Petani, Peternak, Nelayan, Perkebunan, Kehutanan)'
                                                 ].includes(member.skillType) && (
                                                         <div className="mt-2 animate-fadeIn">
                                                             <input
@@ -373,7 +373,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                             </div>
 
                                             <div className="flex flex-col gap-2">
-                                                <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Tingkat Keahlian (Skala 1-3)<span className="text-red-500 ml-1">*</span></label>
+                                                <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Tingkat Keahlian<span className="text-red-500 ml-1">*</span></label>
                                                 <div className="relative">
                                                     <select
                                                         className={`${inputClass} appearance-none pr-10`}
@@ -385,9 +385,9 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                         }}
                                                     >
                                                         <option value="">Pilih Tingkat Keahlian...</option>
-                                                        <option value="1">1 - Tingkat Dasar</option>
-                                                        <option value="2">2 - Tingkat Menengah</option>
-                                                        <option value="3">3 - Tingkat Mahir</option>
+                                                        <option value="1">Dasar - Memahami teori/dasar, perlu bimbingan untuk praktik.</option>
+                                                        <option value="2">Menengah - Mampu mengerjakan secara mandiri dengan hasil yang baik.</option>
+                                                        <option value="3">Mahir - Sangat ahli, profesional di bidangnya, atau mampu mengajar dan melatih orang lain.</option>
                                                     </select>
                                                     <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                                                 </div>

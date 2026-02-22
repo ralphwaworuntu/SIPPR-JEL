@@ -193,39 +193,42 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                 {/* STEP 4: Pendidikan Anak */}
                 <div className="animate-fade-in-up delay-200">
                     <SummaryCard title="Pendidikan Anak" icon="school" color="bg-orange-500" stepNumber={4}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
                                 <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
                                 <LabelValue label="Anak Bekerja" value={`${data.education_working} Orang`} />
                             </div>
+
                             {(data.education_schoolingStatus === 'Ya' || data.education_schoolingStatus === 'Tidak') && (
-                                <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
-                                    <table className="w-full text-[11px] text-left">
-                                        <thead className="bg-orange-50/50 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-semibold border-b border-orange-100 dark:border-white/5">
-                                            <tr>
-                                                <th className="px-3 py-2">Jenjang</th>
-                                                <th className="px-3 py-2 text-center">Sekolah</th>
-                                                <th className="px-3 py-2 text-center">Putus</th>
-                                                <th className="px-3 py-2 text-center">Tdk Kul/Kerja</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                                            {[
-                                                { lbl: 'TK/PAUD', sch: data.education_inSchool_tk_paud, drop: data.education_dropout_tk_paud, unem: '-' },
-                                                { lbl: 'SD', sch: data.education_inSchool_sd, drop: data.education_dropout_sd, unem: data.education_unemployed_sd },
-                                                { lbl: 'SMP', sch: data.education_inSchool_smp, drop: data.education_dropout_smp, unem: data.education_unemployed_smp },
-                                                { lbl: 'SMA/K', sch: data.education_inSchool_sma, drop: data.education_dropout_sma, unem: data.education_unemployed_sma },
-                                                { lbl: 'PT/Univ', sch: data.education_inSchool_university, drop: data.education_dropout_university, unem: data.education_unemployed_university },
-                                            ].map((row, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="px-3 py-2 font-medium">{row.lbl}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.sch || '-'}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.drop || '-'}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.unem || '-'}</td>
+                                <div className="overflow-x-auto -mx-1 px-1">
+                                    <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 min-w-[320px]">
+                                        <table className="w-full text-xs text-left">
+                                            <thead className="bg-orange-50/50 dark:bg-white/5 text-gray-600 dark:text-gray-300 font-bold border-b border-orange-100 dark:border-white/5">
+                                                <tr>
+                                                    <th className="px-4 py-3">Jenjang Pendidikan</th>
+                                                    <th className="px-3 py-3 text-center">Sekolah</th>
+                                                    <th className="px-3 py-3 text-center">Putus</th>
+                                                    <th className="px-3 py-3 text-center">Tdk Kul/Kerja</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                                {[
+                                                    { lbl: 'TK / PAUD', sch: data.education_inSchool_tk_paud, drop: data.education_dropout_tk_paud, unem: '-' },
+                                                    { lbl: 'SD / Sederajat', sch: data.education_inSchool_sd, drop: data.education_dropout_sd, unem: data.education_unemployed_sd },
+                                                    { lbl: 'SMP / Sederajat', sch: data.education_inSchool_smp, drop: data.education_dropout_smp, unem: data.education_unemployed_smp },
+                                                    { lbl: 'SMA / SMK / MA', sch: data.education_inSchool_sma, drop: data.education_dropout_sma, unem: data.education_unemployed_sma },
+                                                    { lbl: 'PT / Universitas', sch: data.education_inSchool_university, drop: data.education_dropout_university, unem: data.education_unemployed_university },
+                                                ].map((row, idx) => (
+                                                    <tr key={idx} className="hover:bg-orange-50/30 dark:hover:bg-white/5 transition-colors">
+                                                        <td className="px-4 py-2.5 font-semibold text-gray-700 dark:text-gray-200">{row.lbl}</td>
+                                                        <td className="px-3 py-2.5 text-center text-gray-600 dark:text-gray-300 font-medium">{row.sch || '-'}</td>
+                                                        <td className="px-3 py-2.5 text-center text-gray-600 dark:text-gray-300 font-medium">{row.drop || '-'}</td>
+                                                        <td className="px-3 py-2.5 text-center text-gray-600 dark:text-gray-300 font-medium">{row.unem || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -239,31 +242,76 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             {/* Ekonomi & Aset */}
                             <div className="space-y-5">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <LabelValue label="Pekerjaan (Lainnya)" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
+                                    <LabelValue label="Pekerjaan Utama Kepala Keluarga" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
                                     <LabelValue label="Pekerjaan Istri" value={data.economics_spouseOccupation === 'Lainnya' ? data.economics_spouseOccupationOther : (data.economics_spouseOccupation || '-')} />
-                                    <LabelValue label="Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} />
+                                    <LabelValue label="Range Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} fullWidth={true} />
+
+                                    <div className="col-span-full h-px bg-slate-100 dark:bg-white/10 my-1"></div>
+
                                     <LabelValue label="Status Rumah" value={`${data.economics_houseStatus} (${data.economics_houseType})`} />
                                     <LabelValue label="Status Tanah" value={data.economics_landStatus} />
                                     <LabelValue label="Sumber Air" value={data.economics_waterSource} />
-                                    <LabelValue
-                                        label="Daya Listrik"
-                                        value={data.economics_electricity_capacities.map(cap => {
-                                            const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof typeof data;
-                                            const qty = data[key] as number;
-                                            return `${cap} (${qty} bh)`;
-                                        }).join(', ')}
-                                    />
                                     <LabelValue label="Biaya Listrik" value={formatCurrency(data.economics_electricity_total_cost)} />
+
+                                    <div className="col-span-full">
+                                        <LabelValue
+                                            label="Daya Listrik Terpasang"
+                                            fullWidth={true}
+                                            value={data.economics_electricity_capacities && data.economics_electricity_capacities.length > 0 ? data.economics_electricity_capacities.map(cap => {
+                                                const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof typeof data;
+                                                const qty = data[key] as number;
+                                                return `${cap} (${qty} unit)`;
+                                            }).join(', ') : '-'}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2 bg-emerald-50/50 dark:bg-white/5 p-4 rounded-xl border border-emerald-100 dark:border-white/5">
                                     <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-600 dark:text-emerald-400">Pengeluaran Bulanan</span>
                                     <div className="grid grid-cols-2 gap-3 text-xs">
-                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Pangan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_food)}</span></div>
-                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Listrik/Air:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_utilities)}</span></div>
-                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Pendidikan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_education)}</span></div>
-                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Lainnya:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_other)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Konsumsi Pangan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_food)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Konsumsi Dasar Non-Pangan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_utilities)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Pendidikan & Kesehatan:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_education)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1"><span>Kebutuhan Lainnya:</span> <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(data.economics_expense_other)}</span></div>
+                                        <div className="flex justify-between border-b border-emerald-100/50 dark:border-white/5 pb-1 col-span-full mt-1 pt-1 border-t-2">
+                                            <span>Total Pengeluaran Bulanan:</span>
+                                            <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                {formatCurrency(
+                                                    (data.economics_expense_food || 0) +
+                                                    (data.economics_expense_utilities || 0) +
+                                                    (data.economics_expense_education || 0) +
+                                                    (data.economics_expense_other || 0)
+                                                )}
+                                            </span>
+                                        </div>
                                     </div>
+                                </div>
+
+                                {/* Detail Usaha */}
+                                <div className="border-l-0 md:border-l border-emerald-100 dark:border-white/5 pl-0 md:pl-8">
+                                    <LabelValue label="Kepemilikan Usaha" value={data.economics_hasBusiness} />
+                                    {data.economics_hasBusiness === 'Ya' ? (
+                                        <div className="grid grid-cols-1 gap-y-4 mt-4 bg-white dark:bg-black/20 p-4 rounded-xl border border-emerald-50 dark:border-white/5">
+                                            <LabelValue label="Nama Usaha" value={data.economics_businessName} />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <LabelValue label="Jenis" value={data.economics_businessType === 'Lainnya' ? data.economics_businessTypeOther : data.economics_businessType} />
+                                                <LabelValue label="Lama Usaha" value={data.economics_businessDuration} />
+                                                <LabelValue label="Lokasi" value={data.economics_businessLocation} />
+                                                <LabelValue label="Karyawan" value={data.economics_businessEmployeeCount} />
+                                            </div>
+                                            <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} />
+                                            <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
+                                            <div className="pt-2 border-t border-dashed border-emerald-100 dark:border-white/10 space-y-3">
+                                                <LabelValue label="Pemasaran" value={`${Array.isArray(data.economics_businessMarketing) ? data.economics_businessMarketing.join(', ') : data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
+                                                <LabelValue label="Kendala Utama" value={Array.isArray(data.economics_businessIssues) ? data.economics_businessIssues.join(', ') : data.economics_businessIssues} />
+                                                <LabelValue label="Kebutuhan Dukungan" value={Array.isArray(data.economics_businessNeeds) ? data.economics_businessNeeds.join(', ') : data.economics_businessNeeds} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-xs text-gray-400 dark:text-gray-500 italic">
+                                            Keluarga tidak memiliki unit usaha.
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>
@@ -288,33 +336,6 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                         ) : <span className="text-xs italic text-gray-400">Tidak ada aset</span>}
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Detail Usaha */}
-                            <div className="border-l-0 md:border-l border-emerald-100 dark:border-white/5 pl-0 md:pl-8">
-                                <LabelValue label="Kepemilikan Usaha" value={data.economics_hasBusiness} />
-                                {data.economics_hasBusiness === 'Ya' ? (
-                                    <div className="grid grid-cols-1 gap-y-4 mt-4 bg-white dark:bg-black/20 p-4 rounded-xl border border-emerald-50 dark:border-white/5">
-                                        <LabelValue label="Nama Usaha" value={data.economics_businessName} />
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <LabelValue label="Jenis" value={data.economics_businessType === 'Lainnya' ? data.economics_businessTypeOther : data.economics_businessType} />
-                                            <LabelValue label="Lama Usaha" value={data.economics_businessDuration} />
-                                            <LabelValue label="Lokasi" value={data.economics_businessLocation} />
-                                            <LabelValue label="Karyawan" value={data.economics_businessEmployeeCount} />
-                                        </div>
-                                        <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} />
-                                        <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
-                                        <div className="pt-2 border-t border-dashed border-emerald-100 dark:border-white/10 space-y-3">
-                                            <LabelValue label="Pemasaran" value={`${Array.isArray(data.economics_businessMarketing) ? data.economics_businessMarketing.join(', ') : data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
-                                            <LabelValue label="Kendala Utama" value={Array.isArray(data.economics_businessIssues) ? data.economics_businessIssues.join(', ') : data.economics_businessIssues} />
-                                            <LabelValue label="Kebutuhan Dukungan" value={Array.isArray(data.economics_businessNeeds) ? data.economics_businessNeeds.join(', ') : data.economics_businessNeeds} />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-xs text-gray-400 dark:text-gray-500 italic">
-                                        Keluarga tidak memiliki unit usaha.
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </SummaryCard>

@@ -106,7 +106,7 @@ export interface FormData {
     economics_businessCapital: number;
     economics_businessCapitalSource: string;
     economics_businessCapitalSourceOther: string;
-    economics_businessPermit: string;
+    economics_businessPermit: string[];
     economics_businessPermitOther: string;
     economics_businessTurnover: string;
     economics_businessTurnoverValue: number;
@@ -250,7 +250,7 @@ export const initialFormData: FormData = {
     economics_businessCapital: 0,
     economics_businessCapitalSource: '',
     economics_businessCapitalSourceOther: '',
-    economics_businessPermit: '',
+    economics_businessPermit: [],
     economics_businessPermitOther: '',
     economics_businessTurnover: '',
     economics_businessTurnoverValue: 0,

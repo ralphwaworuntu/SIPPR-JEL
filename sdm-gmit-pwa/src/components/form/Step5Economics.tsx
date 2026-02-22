@@ -92,12 +92,68 @@ const otherInputClass = "w-full mt-2 h-11 px-4 rounded-xl border-2 border-slate-
 const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     const headOtherRef = useRef<HTMLInputElement>(null);
     const spouseOtherRef = useRef<HTMLInputElement>(null);
+    const businessTypeOtherRef = useRef<HTMLInputElement>(null);
+    const businessStatusOtherRef = useRef<HTMLInputElement>(null);
+    const businessLocationOtherRef = useRef<HTMLInputElement>(null);
+    const businessCapitalSourceOtherRef = useRef<HTMLInputElement>(null);
+    const businessPermitOtherRef = useRef<HTMLInputElement>(null);
+    const businessMarketingOtherRef = useRef<HTMLInputElement>(null);
+    const businessIssuesOtherRef = useRef<HTMLInputElement>(null);
+    const businessTrainingOtherRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (data.economics_headOccupation === 'Lainnya' && headOtherRef.current) {
             headOtherRef.current.focus();
         }
     }, [data.economics_headOccupation]);
+
+    useEffect(() => {
+        if (data.economics_businessType === 'Lainnya' && businessTypeOtherRef.current) {
+            businessTypeOtherRef.current.focus();
+        }
+    }, [data.economics_businessType]);
+
+    useEffect(() => {
+        if (data.economics_businessStatus === 'Lainnya' && businessStatusOtherRef.current) {
+            businessStatusOtherRef.current.focus();
+        }
+    }, [data.economics_businessStatus]);
+
+    useEffect(() => {
+        if (data.economics_businessLocation === 'Lainnya' && businessLocationOtherRef.current) {
+            businessLocationOtherRef.current.focus();
+        }
+    }, [data.economics_businessLocation]);
+
+    useEffect(() => {
+        if (data.economics_businessCapitalSource === 'Lainnya' && businessCapitalSourceOtherRef.current) {
+            businessCapitalSourceOtherRef.current.focus();
+        }
+    }, [data.economics_businessCapitalSource]);
+
+    useEffect(() => {
+        if (data.economics_businessPermit.includes('Lainnya') && businessPermitOtherRef.current) {
+            businessPermitOtherRef.current.focus();
+        }
+    }, [data.economics_businessPermit]);
+
+    useEffect(() => {
+        if (data.economics_businessMarketing.includes('Lainnya') && businessMarketingOtherRef.current) {
+            businessMarketingOtherRef.current.focus();
+        }
+    }, [data.economics_businessMarketing]);
+
+    useEffect(() => {
+        if (data.economics_businessIssues.includes('Lainnya') && businessIssuesOtherRef.current) {
+            businessIssuesOtherRef.current.focus();
+        }
+    }, [data.economics_businessIssues]);
+
+    useEffect(() => {
+        if (data.economics_businessTraining.includes('Lainnya') && businessTrainingOtherRef.current) {
+            businessTrainingOtherRef.current.focus();
+        }
+    }, [data.economics_businessTraining]);
 
     useEffect(() => {
         if (data.economics_spouseOccupation === 'Lainnya' && spouseOtherRef.current) {
@@ -233,7 +289,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Pendidikan dan Kesehatan <span className="text-xs font-normal text-slate-500">(SPP, Obat, dsb)</span><span className="text-red-500">*</span>
+                            Pendidikan & Kesehatan <span className="text-xs font-normal text-slate-500">(SPP, Obat, dsb)</span><span className="text-red-500">*</span>
                         </label>
                         <FormatRupiah value={data.economics_expense_education} onChange={(val) => update({ economics_expense_education: val })} required={true} />
                     </div>
@@ -315,7 +371,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             required={true}
                         />
                         {data.economics_businessType === 'Lainnya' && (
-                            <input type="text" className={otherInputClass} placeholder="Sebutkan jenis usaha..." value={data.economics_businessTypeOther} onChange={(e) => update({ economics_businessTypeOther: e.target.value })} />
+                            <div className="mt-2 animate-fadeIn">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Jenis Usaha Lainnya:</label>
+                                <input
+                                    ref={businessTypeOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Tuliskan jenis usaha..."
+                                    value={data.economics_businessTypeOther}
+                                    onChange={(e) => update({ economics_businessTypeOther: e.target.value })}
+                                />
+                            </div>
                         )}
 
                         {/* Lama Usaha */}
@@ -356,7 +422,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             required={true}
                         />
                         {data.economics_businessStatus === 'Lainnya' && (
-                            <input type="text" className={otherInputClass} placeholder="Sebutkan status usaha..." value={data.economics_businessStatusOther} onChange={(e) => update({ economics_businessStatusOther: e.target.value })} />
+                            <div className="mt-2 animate-fadeIn">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Status Lainnya:</label>
+                                <input
+                                    ref={businessStatusOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Tuliskan status usaha..."
+                                    value={data.economics_businessStatusOther}
+                                    onChange={(e) => update({ economics_businessStatusOther: e.target.value })}
+                                />
+                            </div>
                         )}
 
                         {/* Lokasi Usaha */}
@@ -370,7 +446,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             required={true}
                         />
                         {data.economics_businessLocation === 'Lainnya' && (
-                            <input type="text" className={otherInputClass} placeholder="Sebutkan lokasi usaha..." value={data.economics_businessLocationOther} onChange={(e) => update({ economics_businessLocationOther: e.target.value })} />
+                            <div className="mt-2 animate-fadeIn">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Lokasi Lainnya:</label>
+                                <input
+                                    ref={businessLocationOtherRef}
+                                    type="text"
+                                    className={otherInputClass}
+                                    placeholder="Tuliskan lokasi usaha..."
+                                    value={data.economics_businessLocationOther}
+                                    onChange={(e) => update({ economics_businessLocationOther: e.target.value })}
+                                />
+                            </div>
                         )}
 
                         {/* Tenaga Kerja */}
@@ -404,21 +490,46 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 required={true}
                             />
                             {data.economics_businessCapitalSource === 'Lainnya' && (
-                                <input type="text" className={otherInputClass} placeholder="Sebutkan sumber modal..." value={data.economics_businessCapitalSourceOther} onChange={(e) => update({ economics_businessCapitalSourceOther: e.target.value })} />
+                                <div className="mt-2 animate-fadeIn">
+                                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Sumber Lainnya:</label>
+                                    <input
+                                        ref={businessCapitalSourceOtherRef}
+                                        type="text"
+                                        id="businessCapitalSourceOther"
+                                        className={otherInputClass}
+                                        placeholder="Tuliskan sumber modal..."
+                                        value={data.economics_businessCapitalSourceOther}
+                                        onChange={(e) => update({ economics_businessCapitalSourceOther: e.target.value })}
+                                    />
+                                </div>
                             )}
                         </div>
 
                         {/* Izin Usaha */}
                         <div className="space-y-2">
-                            <FormSelect
-                                label="Apakah memiliki Izin Usaha (NIB/PIRT/dsb)?"
+                            <FormMultiSelect
+                                label="Apakah memiliki Izin Usaha?"
                                 id="businessPermit"
-                                options={['Sudah memiliki', 'Sedang dalam proses', 'Belum memiliki', 'Lainnya']}
+                                options={['Tidak ada', 'SKU', 'NIB', 'SIUP', 'SITU', 'SIUI', 'Lainnya']}
                                 value={data.economics_businessPermit}
                                 onChange={(val) => update({ economics_businessPermit: val })}
                                 placeholder="Pilih Status Izin..."
                                 required={true}
                             />
+                            {data.economics_businessPermit.includes('Lainnya') && (
+                                <div className="animate-fadeIn mt-2">
+                                    <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Jenis Izin Lainnya:</label>
+                                    <input
+                                        ref={businessPermitOtherRef}
+                                        type="text"
+                                        id="businessPermitOther"
+                                        className={otherInputClass}
+                                        placeholder="Tuliskan jenis izin usaha..."
+                                        value={data.economics_businessPermitOther}
+                                        onChange={(e) => update({ economics_businessPermitOther: e.target.value })}
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Cara Pemasaran */}
@@ -433,7 +544,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     required={true}
                                 />
                                 {data.economics_businessMarketing.includes('Lainnya') && (
-                                    <input type="text" className={otherInputClass} placeholder="Sebutkan media pemasaran..." value={data.economics_businessMarketingOther} onChange={(e) => update({ economics_businessMarketingOther: e.target.value })} />
+                                    <div className="mt-2 animate-fadeIn">
+                                        <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Media Lainnya:</label>
+                                        <input
+                                            ref={businessMarketingOtherRef}
+                                            type="text"
+                                            className={otherInputClass}
+                                            placeholder="Sebutkan media pemasaran..."
+                                            value={data.economics_businessMarketingOther}
+                                            onChange={(e) => update({ economics_businessMarketingOther: e.target.value })}
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -460,7 +581,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     required={true}
                                 />
                                 {data.economics_businessIssues.includes('Lainnya') && (
-                                    <input type="text" className={otherInputClass} placeholder="Sebutkan tantangan..." value={data.economics_businessIssuesOther} onChange={(e) => update({ economics_businessIssuesOther: e.target.value })} />
+                                    <div className="mt-2 animate-fadeIn">
+                                        <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Tantangan Lainnya:</label>
+                                        <input
+                                            ref={businessIssuesOtherRef}
+                                            type="text"
+                                            className={otherInputClass}
+                                            placeholder="Sebutkan tantangan..."
+                                            value={data.economics_businessIssuesOther}
+                                            onChange={(e) => update({ economics_businessIssuesOther: e.target.value })}
+                                        />
+                                    </div>
                                 )}
                             </div>
 
@@ -499,7 +630,17 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     required={true}
                                 />
                                 {data.economics_businessTraining.includes('Lainnya') && (
-                                    <input type="text" className={otherInputClass} placeholder="Sebutkan minat pelatihan..." value={data.economics_businessTrainingOther} onChange={(e) => update({ economics_businessTrainingOther: e.target.value })} />
+                                    <div className="mt-2 animate-fadeIn">
+                                        <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Minat Lainnya:</label>
+                                        <input
+                                            ref={businessTrainingOtherRef}
+                                            type="text"
+                                            className={otherInputClass}
+                                            placeholder="Sebutkan minat pelatihan..."
+                                            value={data.economics_businessTrainingOther}
+                                            onChange={(e) => update({ economics_businessTrainingOther: e.target.value })}
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>
