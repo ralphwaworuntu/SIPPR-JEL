@@ -67,6 +67,10 @@ const FormPage = () => {
     const validateStep = (currentStep: number): boolean => {
         switch (currentStep) {
             case 1:
+                if (!formData.kkNumber) return handleValidationError('kkNumber', "Mohon isi Nomor Kartu Keluarga");
+                if (formData.kkNumber.length !== 16) return handleValidationError('kkNumber', "Nomor KK harus 16 digit");
+                if (!formData.nik) return handleValidationError('nik', "Mohon isi NIK");
+                if (formData.nik.length !== 16) return handleValidationError('nik', "NIK harus 16 digit");
                 if (!formData.fullName) return handleValidationError('fullName', "Mohon isi Nama Lengkap");
                 if (!formData.gender) return handleValidationError('gender', "Mohon pilih Jenis Kelamin");
                 if (!formData.dateOfBirth) return handleValidationError('dateOfBirth', "Mohon isi Tanggal Lahir");
@@ -289,6 +293,22 @@ const FormPage = () => {
                 if (!formData.economics_landStatus) return handleValidationError('landStatus', "Mohon pilih Status Kepemilikan Tanah");
                 if (!formData.economics_waterSource) return handleValidationError('waterSource', "Mohon pilih Sumber Air Minum Utama");
 
+                if (formData.economics_electricity_capacities.length === 0) {
+                    return handleValidationError('electricity_capacities', "Mohon pilih minimal satu Daya Listrik Terpasang");
+                }
+
+                // Check if all selected capacities have a quantity > 0
+                for (const cap of formData.economics_electricity_capacities) {
+                    const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof FormData;
+                    if (!(formData[key] as number > 0)) {
+                        return handleValidationError('electricity_capacities', `Mohon isi jumlah untuk daya ${cap}`);
+                    }
+                }
+
+                if (formData.economics_electricity_total_cost === undefined || formData.economics_electricity_total_cost < 0) {
+                    return handleValidationError('electricity_capacities', "Mohon isi Total Biaya Listrik Bulanan (minimal 0)");
+                }
+
                 return true;
             case 6:
                 if (!formData.health_sick30Days) return handleValidationError('health_sick30Days', "Mohon pilih status Sakit 30 Hari Terakhir");
@@ -350,7 +370,9 @@ const FormPage = () => {
     };
 
     const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
     };
 
     const getStepCompletionMessage = (completedStep: number): string => {
@@ -698,20 +720,23 @@ const FormPage = () => {
                                     <button
                                         onClick={prevStep}
                                         disabled={step === 1}
-                                        className={`flex items-center gap-2 text-black/60 dark:text-white/60 hover:text-primary font-bold text-sm transition-colors py-2 px-3 md:px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-2 focus:ring-primary/20 ${step === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+                                        className={`flex items-center gap-2 font-bold text-sm transition-all py-2.5 px-5 md:px-6 h-12 rounded-xl shadow-lg focus:ring-4 hover:-translate-y-0.5 active:translate-y-0 ${step === 1 ? 'opacity-0 pointer-events-none' : 'bg-red-600 hover:bg-red-700 text-white shadow-red-600/25 hover:shadow-xl hover:shadow-red-600/40 focus:ring-red-500/30'}`}
                                     >
-                                        <span className="material-symbols-outlined">arrow_back</span>
+                                        <span className="material-symbols-outlined text-lg">arrow_back</span>
                                         <span className="hidden sm:inline">Sebelumnya</span>
                                     </button>
 
                                     <button
                                         onClick={nextStep}
                                         disabled={isSubmitting}
-                                        className={`group bg-primary hover:bg-primary/90 text-slate-900 dark:text-white px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:ring-4 focus:ring-primary/30 ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
+                                        className={`group px-6 md:px-8 h-12 rounded-xl font-bold text-sm md:text-base shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 focus:ring-4 ${step === 7
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/40 focus:ring-emerald-500/30'
+                                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25 hover:shadow-xl hover:shadow-indigo-600/40 focus:ring-indigo-500/30'
+                                            } ${isSubmitting ? 'opacity-70 cursor-wait' : ''}`}
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-900 dark:border-white"></span>
+                                                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
                                                 Mengirim...
                                             </>
                                         ) : (

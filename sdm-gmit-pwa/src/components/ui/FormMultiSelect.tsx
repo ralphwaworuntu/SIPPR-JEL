@@ -92,22 +92,22 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
                                         key={opt.value}
                                         type="button"
                                         onClick={() => toggleOption(opt.value)}
-                                        className={`w-full flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 group/item ${isSelected
-                                            ? 'bg-primary/10 dark:bg-primary/20 text-slate-900 dark:text-white shadow-sm'
-                                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary'
+                                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group/item ${isSelected
+                                            ? 'bg-primary/10 dark:bg-primary/20'
+                                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/80'
                                             }`}
                                     >
-                                        <div className={`w-5.5 h-5.5 rounded-lg border-2 flex items-center justify-center transition-all duration-300 shrink-0 ${isSelected
-                                            ? 'bg-primary border-primary shadow-sm shadow-primary/30 rotate-0'
-                                            : 'border-slate-300 dark:border-slate-600 group-hover/item:border-primary/50 bg-white dark:bg-slate-900 -rotate-3'
+                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 shrink-0 ${isSelected
+                                            ? 'bg-indigo-600 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500'
+                                            : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900 group-hover/item:border-indigo-400'
                                             }`}>
                                             {isSelected && (
-                                                <span className="material-symbols-outlined text-slate-900 dark:text-slate-900 text-[18px] font-black animate-scaleIn">
-                                                    check_circle
+                                                <span className="material-symbols-outlined text-white text-[14px] font-bold animate-scale-in">
+                                                    check
                                                 </span>
                                             )}
                                         </div>
-                                        <span className={`text-sm font-bold transition-colors text-left flex-1 ${isSelected ? 'text-slate-900 dark:text-white' : ''
+                                        <span className={`text-sm font-semibold transition-colors text-left flex-1 ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'
                                             }`}>
                                             {opt.label}
                                         </span>
@@ -123,7 +123,7 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
             {safeValue.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2.5 transition-all duration-300">
                     {safeValue.map(val => (
-                        <span key={val} className="inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2.5 py-1.5 rounded-xl text-[11px] font-bold border border-slate-200 dark:border-slate-700 shadow-sm animate-scaleIn">
+                        <span key={val} className="inline-flex items-center gap-1.5 bg-primary/10 dark:bg-primary/20 text-primary px-3 py-1.5 rounded-lg text-xs font-bold border border-primary/20 shadow-sm animate-scale-in">
                             {val}
                             <button
                                 type="button"

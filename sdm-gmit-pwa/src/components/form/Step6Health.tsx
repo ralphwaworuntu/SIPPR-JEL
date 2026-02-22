@@ -214,13 +214,13 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                         {/* 13. Disabilitas Ganda */}
                         <div className="space-y-3">
                             <SectionHeader title="Disabilitas Ganda" />
-                            <label className={`cursor-pointer p-4 border-2 rounded-xl flex items-center gap-4 transition-all duration-200 ${data.health_disabilityDouble ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm shadow-primary/10' : 'border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
+                            <label className={`cursor-pointer p-4 border-2 rounded-xl flex items-center gap-4 transition-all duration-200 ${data.health_disabilityDouble ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
                                 <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${data.health_disabilityDouble
-                                    ? 'border-primary bg-primary'
-                                    : 'border-slate-300 dark:border-slate-600'
+                                    ? 'border-indigo-600 bg-indigo-600 dark:border-indigo-500 dark:bg-indigo-500'
+                                    : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900'
                                     }`}>
                                     {data.health_disabilityDouble && (
-                                        <span className="material-symbols-outlined text-slate-900 dark:text-white text-sm">check</span>
+                                        <span className="material-symbols-outlined text-white text-sm font-bold">check</span>
                                     )}
                                 </div>
                                 <input

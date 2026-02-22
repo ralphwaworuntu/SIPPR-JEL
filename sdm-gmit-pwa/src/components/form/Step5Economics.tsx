@@ -74,7 +74,7 @@ function FormatRupiah({ value, onChange, required = false }: { value: number, on
     };
     return (
         <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">Rp</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500 dark:text-slate-400">Rp</span>
             <input
                 type="text"
                 className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-200 text-base font-semibold"
@@ -591,7 +591,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     {data.economics_hasAssets === 'Ya' && (
                         <div className="space-y-6 animate-fadeIn">
                             <div className="flex flex-col gap-1.5 max-w-[200px]">
-                                <label className="text-xs font-semibold text-slate-500">Total Jumlah Unit Aset</label>
+                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Jumlah Unit Aset</label>
                                 <CountSelect
                                     id="totalAssets"
                                     value={data.economics_totalAssets}
@@ -638,7 +638,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                                             <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{asset.label}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2 shrink-0">
-                                                            <span className="text-xs font-semibold text-slate-400">Jml:</span>
+                                                            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Jml:</span>
                                                             <div className="w-20">
                                                                 <CountSelect
                                                                     id={asset.key}
@@ -723,6 +723,62 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         placeholder="Pilih Sumber Air..."
                         required={true}
                     />
+
+                    {/* Daya Listrik (Multi-select with Quantities) */}
+                    <div className="space-y-6">
+                        <FormMultiSelect
+                            label="Daya listrik terpasang (Bisa pilih > 1)"
+                            id="electricity_capacities"
+                            options={['450 KVA', '900 KVA', '1.200 KVA', '2.200 KVA', '5.000 KVA']}
+                            value={data.economics_electricity_capacities}
+                            onChange={(val) => {
+                                update({ economics_electricity_capacities: val });
+                                // Reset quantities for unselected options
+                                const options = ['450 KVA', '900 KVA', '1.200 KVA', '2.200 KVA', '5.000 KVA'];
+                                const updates: any = {};
+                                options.forEach(opt => {
+                                    if (!val.includes(opt)) {
+                                        const key = `economics_electricity_${opt.replace(/\D/g, '')}_qty`;
+                                        updates[key] = 0;
+                                    }
+                                });
+                                update(updates);
+                            }}
+                            placeholder="Pilih Daya Listrik..."
+                            required={true}
+                        />
+
+                        {data.economics_electricity_capacities.length > 0 && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
+                                {data.economics_electricity_capacities.map((cap) => {
+                                    const fieldKey = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof FormData;
+                                    return (
+                                        <div key={cap} className="p-4 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl bg-white dark:bg-slate-800/30 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                                                    <span className="material-symbols-outlined text-primary text-xl">bolt</span>
+                                                </div>
+                                                <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{cap}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Jumlah:</span>
+                                                <div className="w-20">
+                                                    <CountSelect
+                                                        id={fieldKey}
+                                                        value={data[fieldKey] as number || 0}
+                                                        onChange={(num) => update({ [fieldKey]: num })}
+                                                        max={10}
+                                                        startFrom={1}
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
             </div>

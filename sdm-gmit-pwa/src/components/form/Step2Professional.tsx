@@ -53,8 +53,15 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
         }
     }, [data.familyMembers, data.familyMembersSidi, data.familyMembersNonSidi, totalMembers, totalSidi, update]);
 
+    const SuccessMessage = ({ message }: { message: string }) => (
+        <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit animate-fadeIn">
+            <span className="material-symbols-outlined text-sm shrink-0">check_circle</span>
+            {message}
+        </p>
+    );
+
     const ValidationError = ({ message }: { message: string }) => (
-        <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg">
+        <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg max-w-fit animate-fadeIn">
             <span className="material-symbols-outlined text-sm shrink-0">warning</span>
             {message}
         </p>
@@ -70,53 +77,126 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
             {/* 1. Jumlah Anggota Keluarga */}
             <div className="space-y-4">
                 <SectionHeader title="Jumlah Anggota Keluarga" />
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota</label>
-                        <CountSelect id="familyMembers" value={data.familyMembers} onChange={(val) => update({ familyMembers: val })} max={20} startFrom={1} />
+                <div className="flex flex-col gap-4">
+                    <div className="max-w-[200px] flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota Keluarga</label>
+                        <CountSelect
+                            id="familyMembers"
+                            value={data.familyMembers}
+                            onChange={(val) => update({
+                                familyMembers: val,
+                                familyMembersMale: '',
+                                familyMembersFemale: '',
+                                familyMembersOutside: '',
+                                familyMembersSidi: '',
+                                familyMembersSidiMale: '',
+                                familyMembersSidiFemale: '',
+                                familyMembersNonBaptized: '',
+                                familyMembersNonSidi: ''
+                            })}
+                            max={20}
+                            startFrom={1}
+                            placeholder="Pilih Total..."
+                        />
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
-                        <CountSelect id="familyMembersMale" value={data.familyMembersMale} onChange={(val) => update({ familyMembersMale: val })} max={totalMembers || 20} placeholder="Jumlah..." />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
-                        <CountSelect id="familyMembersFemale" value={data.familyMembersFemale} onChange={(val) => update({ familyMembersFemale: val })} max={totalMembers || 20} placeholder="Jumlah..." />
-                    </div>
+
+                    {totalMembers > 0 && (
+                        <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
+                                    <CountSelect
+                                        id="familyMembersMale"
+                                        value={data.familyMembersMale}
+                                        onChange={(val) => update({ familyMembersMale: val })}
+                                        max={Math.max(0, totalMembers - femaleMembers)}
+                                        placeholder="Jumlah..."
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
+                                    <CountSelect
+                                        id="familyMembersFemale"
+                                        value={data.familyMembersFemale}
+                                        onChange={(val) => update({ familyMembersFemale: val })}
+                                        max={Math.max(0, totalMembers - maleMembers)}
+                                        placeholder="Jumlah..."
+                                    />
+                                </div>
+                            </div>
+
+                            {!isFamilyCountValid && isFieldsFilled && (
+                                <ValidationError message="Total Laki-laki & Perempuan tidak sesuai dengan Jumlah Anggota Keluarga" />
+                            )}
+                            {isFamilyCountValid && isFieldsFilled && totalMembers > 0 && (
+                                <SuccessMessage message="Distribusi data sudah sesuai dengan total anggota." />
+                            )}
+                        </div>
+                    )}
                 </div>
-                {!isFamilyCountValid && (
-                    <ValidationError message="Total Laki-laki & Perempuan tidak sesuai dengan Jumlah Anggota Keluarga" />
-                )}
             </div>
 
             {/* 2. Di Luar Kupang */}
             <div className="space-y-4">
                 <SectionHeader title="Jumlah Anggota Keluarga yang menetap di luar Kota Kupang" />
                 <div className="max-w-[200px]">
-                    <CountSelect id="familyMembersOutside" value={data.familyMembersOutside} onChange={(val) => update({ familyMembersOutside: val })} max={totalMembers || 20} />
+                    <CountSelect id="familyMembersOutside" value={data.familyMembersOutside} onChange={(val) => update({ familyMembersOutside: val })} max={totalMembers} placeholder="Jumlah..." />
                 </div>
             </div>
 
             {/* 3. Sidi Members */}
             <div className="space-y-4">
                 <SectionHeader title="Jumlah Anggota Sidi" />
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Sidi</label>
-                        <CountSelect id="familyMembersSidi" value={data.familyMembersSidi} onChange={(val) => update({ familyMembersSidi: val })} max={totalMembers || 20} />
+                <div className="flex flex-col gap-4">
+                    <div className="max-w-[200px] flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota Sidi</label>
+                        <CountSelect
+                            id="familyMembersSidi"
+                            value={data.familyMembersSidi}
+                            onChange={(val) => update({
+                                familyMembersSidi: val,
+                                familyMembersSidiMale: '',
+                                familyMembersSidiFemale: ''
+                            })}
+                            max={totalMembers}
+                            placeholder="Pilih Total..."
+                        />
                     </div>
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
-                        <CountSelect id="familyMembersSidiMale" value={data.familyMembersSidiMale} onChange={(val) => update({ familyMembersSidiMale: val })} max={parseInt(data.familyMembersSidi || '0') || totalMembers || 20} placeholder="Jumlah..." />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
-                        <CountSelect id="familyMembersSidiFemale" value={data.familyMembersSidiFemale} onChange={(val) => update({ familyMembersSidiFemale: val })} max={parseInt(data.familyMembersSidi || '0') || totalMembers || 20} placeholder="Jumlah..." />
-                    </div>
+
+                    {totalSidi > 0 && (
+                        <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Sidi Laki-laki</label>
+                                    <CountSelect
+                                        id="familyMembersSidiMale"
+                                        value={data.familyMembersSidiMale}
+                                        onChange={(val) => update({ familyMembersSidiMale: val })}
+                                        max={Math.max(0, totalSidi - parseInt(data.familyMembersSidiFemale || '0'))}
+                                        placeholder="Jumlah..."
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Sidi Perempuan</label>
+                                    <CountSelect
+                                        id="familyMembersSidiFemale"
+                                        value={data.familyMembersSidiFemale}
+                                        onChange={(val) => update({ familyMembersSidiFemale: val })}
+                                        max={Math.max(0, totalSidi - parseInt(data.familyMembersSidiMale || '0'))}
+                                        placeholder="Jumlah..."
+                                    />
+                                </div>
+                            </div>
+
+                            {!isSidiCountValid && isSidiFieldsFilled && (
+                                <ValidationError message="Total Sidi Laki-laki & Perempuan tidak sesuai dengan Total Sidi" />
+                            )}
+                            {isSidiCountValid && isSidiFieldsFilled && totalSidi > 0 && (
+                                <SuccessMessage message="Distribusi data sudah sesuai dengan total anggota sidi." />
+                            )}
+                        </div>
+                    )}
                 </div>
-                {!isSidiCountValid && (
-                    <ValidationError message="Total Sidi Laki-laki & Perempuan tidak sesuai dengan Total Sidi" />
-                )}
             </div>
 
             {/* 4. Not Baptized */}

@@ -17,6 +17,8 @@ export interface ProfessionalFamilyMember {
 
 export interface FormData {
     // Step 1: Identity
+    kkNumber: string;
+    nik: string;
     fullName: string;
     gender: 'Laki-laki' | 'Perempuan' | '';
     dateOfBirth: string;
@@ -135,6 +137,13 @@ export interface FormData {
     economics_asset_lahan_qty: number;
     economics_landStatus: string;
     economics_waterSource: string;
+    economics_electricity_capacities: string[];
+    economics_electricity_450_qty: number;
+    economics_electricity_900_qty: number;
+    economics_electricity_1200_qty: number;
+    economics_electricity_2200_qty: number;
+    economics_electricity_5000_qty: number;
+    economics_electricity_total_cost: number;
 
     // Step 6: Health
     health_sick30Days: string;
@@ -162,6 +171,8 @@ export interface FormData {
 }
 
 export const initialFormData: FormData = {
+    kkNumber: '',
+    nik: '',
     fullName: '',
     gender: '',
     dateOfBirth: '',
@@ -270,6 +281,13 @@ export const initialFormData: FormData = {
     economics_asset_lahan_qty: 0,
     economics_landStatus: '',
     economics_waterSource: '',
+    economics_electricity_capacities: [],
+    economics_electricity_450_qty: 0,
+    economics_electricity_900_qty: 0,
+    economics_electricity_1200_qty: 0,
+    economics_electricity_2200_qty: 0,
+    economics_electricity_5000_qty: 0,
+    economics_electricity_total_cost: 0,
 
     // Step 6: Health
     health_sick30Days: '',

@@ -49,11 +49,11 @@ const FormRadioGroup: React.FC<FormRadioGroupProps> = ({
                         >
                             {/* Custom Radio Circle */}
                             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${isSelected
-                                ? 'border-primary bg-primary'
-                                : 'border-slate-300 dark:border-slate-600 group-hover:border-primary/50'
+                                ? 'border-indigo-600 bg-indigo-600 dark:border-indigo-500 dark:bg-indigo-500'
+                                : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 group-hover:border-indigo-400'
                                 }`}>
                                 {isSelected && (
-                                    <div className="w-2 h-2 rounded-full bg-slate-900 dark:bg-white animate-scaleIn" />
+                                    <div className="w-2 h-2 rounded-full bg-white animate-scale-in" />
                                 )}
                             </div>
                             <span className={`text-sm font-semibold transition-colors flex-grow ${isSelected
@@ -63,7 +63,7 @@ const FormRadioGroup: React.FC<FormRadioGroupProps> = ({
                                 {option}
                             </span>
                             {isSelected && (
-                                <span className="material-symbols-outlined text-slate-900 dark:text-white text-xl animate-scaleIn">
+                                <span className="material-symbols-outlined text-slate-900 dark:text-white text-xl animate-scale-in">
                                     check_circle
                                 </span>
                             )}

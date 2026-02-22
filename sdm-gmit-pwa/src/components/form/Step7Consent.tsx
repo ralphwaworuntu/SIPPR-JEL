@@ -12,6 +12,13 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
     };
 
+    const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-';
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    };
+
     const calculateAge = (dob: string) => {
         if (!dob) return '-';
         const birthDate = new Date(dob);
@@ -60,7 +67,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
         <div className="space-y-6 animate-fadeIn max-w-5xl mx-auto pb-6">
             {/* Header Section */}
             <div className="text-center space-y-2 mb-6 animate-fade-in-up">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4 shadow-sm border border-emerald-200 dark:border-emerald-800 animate-scaleIn">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4 shadow-sm border border-emerald-200 dark:border-emerald-800 animate-scale-in">
                     <span className="material-symbols-outlined text-3xl">verified_user</span>
                 </div>
                 <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">Validasi Data</h2>
@@ -94,13 +101,18 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
             <div className="space-y-6">
                 {/* STEP 1: Identitas Diri */}
                 <div className="animate-fade-in-up delay-100">
-                    <SummaryCard title="LANGKAH 1: Identitas Kepala Keluarga" icon="person" color="bg-blue-500" stepNumber={1}>
+                    <SummaryCard title="Data Umum Keluarga" icon="person" color="bg-blue-500" stepNumber={1}>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
-                            <LabelValue label="Nama Lengkap" value={data.fullName} fullWidth />
+                            <LabelValue label="Nomor Kartu Keluarga" value={data.kkNumber} />
+                            <LabelValue label="NIK" value={data.nik} />
+                            <LabelValue label="Nama Lengkap Kepala Keluarga" value={data.fullName} fullWidth />
                             <LabelValue label="Jenis Kelamin" value={data.gender} />
-                            <LabelValue label="Tanggal Lahir" value={data.dateOfBirth} />
+                            <LabelValue label="Tanggal Lahir" value={formatDate(data.dateOfBirth)} />
                             <LabelValue label="Usia" value={`${calculateAge(data.dateOfBirth)} Tahun`} />
-                            <LabelValue label="No. Telepon / WA" value={data.phone} />
+
+                            <div className="col-span-full h-px bg-blue-100 dark:bg-white/5 my-1"></div>
+
+                            <LabelValue label="Nomor Telepon/ WhatsApp Aktif" value={data.phone ? `+62${data.phone}` : '-'} />
                             <LabelValue label="Lingkungan" value={data.lingkungan} />
                             <LabelValue label="Rayon" value={data.rayon} />
                             <LabelValue label="Alamat Lengkap" value={data.address} fullWidth />
@@ -110,71 +122,68 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
 
                 {/* STEP 2: Informasi Keluarga */}
                 <div className="animate-fade-in-up delay-100">
-                    <SummaryCard title="LANGKAH 2: Statistik Keluarga" icon="groups" color="bg-indigo-500" stepNumber={2}>
+                    <SummaryCard title="Statistik & Pelayanan Keluarga" icon="groups" color="bg-indigo-500" stepNumber={2}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                            <LabelValue label="Total Anggota" value={<span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{data.familyMembers || '0'}</span>} />
+                            <LabelValue label="Jumlah Anggota Keluarga" value={<span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{data.familyMembers || '0'}</span>} />
                             <LabelValue label="Laki-laki" value={data.familyMembersMale || '0'} />
                             <LabelValue label="Perempuan" value={data.familyMembersFemale || '0'} />
-                            <LabelValue label="Anggota Sidi" value={data.familyMembersSidi || '0'} />
+                            <LabelValue label="Di Luar Kupang" value={data.familyMembersOutside || '0'} />
 
                             <div className="col-span-full h-px bg-gray-100 dark:bg-white/5 my-1"></div>
 
-                            <LabelValue label="Sidi Laki-laki" value={data.familyMembersSidiMale || '0'} />
-                            <LabelValue label="Sidi Perempuan" value={data.familyMembersSidiFemale || '0'} />
+                            <LabelValue label="Jumlah Anggota Sidi" value={data.familyMembersSidi || '0'} />
+                            <LabelValue label="Laki-laki" value={data.familyMembersSidiMale || '0'} />
+                            <LabelValue label="Perempuan" value={data.familyMembersSidiFemale || '0'} />
+                            <LabelValue label="Belum Sidi" value={data.familyMembersNonSidi || '0'} />
                             <LabelValue label="Belum Baptis" value={data.familyMembersNonBaptized || '0'} />
-                            <LabelValue label="Di Luar Kupang" value={data.familyMembersOutside || '0'} />
+
+                            {data.diakonia_recipient === 'Ya' && (
+                                <div className="col-span-full bg-indigo-50/50 dark:bg-white/5 p-4 rounded-xl border border-indigo-100 dark:border-white/5 mt-2">
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400 block mb-2">Penerima Diakonia</span>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <LabelValue label="Tahun Penerimaan" value={data.diakonia_year} />
+                                        <LabelValue label="Jenis Diakonia" value={data.diakonia_type} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </SummaryCard>
                 </div>
 
                 {/* STEP 3: Anggota Keluarga Profesional & Pelayanan */}
-                <div className="animate-fade-in-up delay-200">
-                    <SummaryCard title="LANGKAH 3: Anggota Keluarga Profesional & Pelayanan" icon="volunteer_activism" color="bg-rose-500" stepNumber={3}>
-                        <div className="mb-4">
-                            <LabelValue label="Status Keluarga Memiliki Profesional" value={data.willingnessToServe} />
-                        </div>
-
+                <div className="animate-fade-in-up delay-100">
+                    <SummaryCard title="Keahlian & Kompetensi Profesional" icon="volunteer_activism" color="bg-rose-500" stepNumber={3}>
                         {data.professionalFamilyMembers && data.professionalFamilyMembers.length > 0 ? (
-                            <div className={`grid grid-cols-1 ${data.professionalFamilyMembers.length >= 2 ? 'md:grid-cols-2' : ''} gap-4`}>
+                            <div className="space-y-4">
                                 {data.professionalFamilyMembers.map((member, idx) => (
-                                    <div key={idx} className="bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 p-4 hover:border-rose-200 dark:hover:border-rose-800 transition-colors">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <h5 className="font-bold text-gray-900 dark:text-white text-sm">{member.name}</h5>
-                                                <p className="text-xs text-gray-500">{member.workplace} • {member.position}</p>
+                                    <div key={idx} className="bg-rose-50/50 dark:bg-white/5 p-4 rounded-xl border border-rose-100 dark:border-white/5 mt-2">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
+                                            <div className="col-span-full mb-1">
+                                                <span className="text-[11px] uppercase tracking-wider font-semibold text-rose-600 dark:text-rose-400 block mb-1">Anggota Profesional {idx + 1}</span>
+                                                <div className="h-0.5 w-12 bg-rose-200 dark:bg-rose-800 rounded-full"></div>
                                             </div>
-                                            {member.skillType && (
-                                                <span className="px-2 py-0.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-[10px] font-bold uppercase rounded tracking-wide border border-rose-100 dark:border-rose-900">
-                                                    {member.skillType}
-                                                </span>
-                                            )}
-                                        </div>
 
-                                        {member.specificSkills && member.specificSkills.length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mb-3">
-                                                {member.specificSkills.map((s, i) => (
-                                                    <span key={i} className="text-[10px] px-1.5 py-0.5 bg-white dark:bg-black/20 text-gray-600 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700">
-                                                        {s}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
+                                            <LabelValue label="Nama Lengkap" value={<span className="font-bold text-rose-700 dark:text-rose-300">{member.name}</span>} fullWidth />
+                                            <LabelValue label="Tempat Kerja/ Instansi" value={member.workplace} />
+                                            <LabelValue label="Jabatan Saat Ini" value={member.position} />
+                                            <LabelValue label="Lama Bekerja" value={member.yearsExperience} />
+                                            <LabelValue label="Keahlian Spesifik" value={member.specificSkills?.join(', ') || '-'} />
 
-                                        <div className="border-t border-dashed border-gray-200 dark:border-gray-700 pt-2 mt-2 space-y-2">
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <LabelValue label="Minat Pelayanan" value={member.churchServiceInterest} />
-                                                <LabelValue label="Bidang" value={member.serviceInterestArea} />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <LabelValue label="Kontribusi" value={member.contributionForm?.join(', ')} />
-                                                <LabelValue label="Komunitas" value={member.communityConsent ? '✅ Setuju' : '❌ Tidak'} />
-                                            </div>
+                                            <div className="col-span-full h-px bg-rose-100 dark:bg-white/5 my-1"></div>
+
+                                            <LabelValue label="Jenis Keahlian Utama" value={member.skillType} />
+                                            <LabelValue label="Tingkat Keahlian" value={member.skillLevel} />
+                                            <LabelValue label="Kesediaan Melayani" value={member.churchServiceInterest} />
+                                            <LabelValue label="Bidang Minat Pelayanan" value={member.serviceInterestArea} />
+                                            <LabelValue label="Bentuk Kontribusi" value={member.contributionForm?.join(', ')} />
+                                            <LabelValue label="Gabung Komunitas" value={member.communityConsent ? '✅ Ya' : '❌ Tidak'} />
+
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-sm text-gray-500 italic">
+                            <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-sm text-gray-500 dark:text-gray-400 italic">
                                 Tidak ada detail anggota keluarga profesional yang ditambahkan.
                             </div>
                         )}
@@ -183,7 +192,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
 
                 {/* STEP 4: Pendidikan Anak */}
                 <div className="animate-fade-in-up delay-200">
-                    <SummaryCard title="LANGKAH 4: Pendidikan Anak" icon="school" color="bg-orange-500" stepNumber={4}>
+                    <SummaryCard title="Pendidikan Anak" icon="school" color="bg-orange-500" stepNumber={4}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
                                 <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
@@ -206,12 +215,13 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                                 { lbl: 'SD', sch: data.education_inSchool_sd, drop: data.education_dropout_sd, unem: data.education_unemployed_sd },
                                                 { lbl: 'SMP', sch: data.education_inSchool_smp, drop: data.education_dropout_smp, unem: data.education_unemployed_smp },
                                                 { lbl: 'SMA/K', sch: data.education_inSchool_sma, drop: data.education_dropout_sma, unem: data.education_unemployed_sma },
+                                                { lbl: 'PT/Univ', sch: data.education_inSchool_university, drop: data.education_dropout_university, unem: data.education_unemployed_university },
                                             ].map((row, idx) => (
                                                 <tr key={idx}>
                                                     <td className="px-3 py-2 font-medium">{row.lbl}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500">{row.sch || '-'}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500">{row.drop || '-'}</td>
-                                                    <td className="px-3 py-2 text-center text-gray-500">{row.unem || '-'}</td>
+                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.sch || '-'}</td>
+                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.drop || '-'}</td>
+                                                    <td className="px-3 py-2 text-center text-gray-500 dark:text-gray-400">{row.unem || '-'}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -224,15 +234,26 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
 
                 {/* STEP 5: Ekonomi & Usaha */}
                 <div className="animate-fade-in-up delay-300">
-                    <SummaryCard title="LANGKAH 5: Ekonomi, Aset & Usaha" icon="paid" color="bg-emerald-500" stepNumber={5}>
+                    <SummaryCard title="Ekonomi, Aset & Usaha" icon="paid" color="bg-emerald-500" stepNumber={5}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Ekonomi & Aset */}
                             <div className="space-y-5">
                                 <div className="grid grid-cols-2 gap-4">
                                     <LabelValue label="Pekerjaan (Lainnya)" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
+                                    <LabelValue label="Pekerjaan Istri" value={data.economics_spouseOccupation === 'Lainnya' ? data.economics_spouseOccupationOther : (data.economics_spouseOccupation || '-')} />
                                     <LabelValue label="Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} />
                                     <LabelValue label="Status Rumah" value={`${data.economics_houseStatus} (${data.economics_houseType})`} />
+                                    <LabelValue label="Status Tanah" value={data.economics_landStatus} />
                                     <LabelValue label="Sumber Air" value={data.economics_waterSource} />
+                                    <LabelValue
+                                        label="Daya Listrik"
+                                        value={data.economics_electricity_capacities.map(cap => {
+                                            const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof typeof data;
+                                            const qty = data[key] as number;
+                                            return `${cap} (${qty} bh)`;
+                                        }).join(', ')}
+                                    />
+                                    <LabelValue label="Biaya Listrik" value={formatCurrency(data.economics_electricity_total_cost)} />
                                 </div>
 
                                 <div className="space-y-2 bg-emerald-50/50 dark:bg-white/5 p-4 rounded-xl border border-emerald-100 dark:border-white/5">
@@ -256,6 +277,8 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                                 if (asset === 'Kulkas') qty = data.economics_asset_kulkas_qty;
                                                 if (asset === 'Laptop/Komputer') qty = data.economics_asset_laptop_qty;
                                                 if (asset === 'Televisi') qty = data.economics_asset_tv_qty;
+                                                if (asset === 'Internet/Indihome') qty = data.economics_asset_internet_qty;
+                                                if (asset === 'Lahan Pertanian') qty = data.economics_asset_lahan_qty;
                                                 return (
                                                     <span key={asset} className="px-3 py-1 bg-white dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-bold border border-emerald-100 dark:border-emerald-800 shadow-sm">
                                                         {asset} {qty > 0 && <span className="ml-1 opacity-70">({qty})</span>}
@@ -282,13 +305,13 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                         <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} />
                                         <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
                                         <div className="pt-2 border-t border-dashed border-emerald-100 dark:border-white/10 space-y-3">
-                                            <LabelValue label="Pemasaran" value={`${data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
-                                            <LabelValue label="Kendala Utama" value={data.economics_businessIssues} />
-                                            <LabelValue label="Kebutuhan Dukungan" value={data.economics_businessNeeds} />
+                                            <LabelValue label="Pemasaran" value={`${Array.isArray(data.economics_businessMarketing) ? data.economics_businessMarketing.join(', ') : data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
+                                            <LabelValue label="Kendala Utama" value={Array.isArray(data.economics_businessIssues) ? data.economics_businessIssues.join(', ') : data.economics_businessIssues} />
+                                            <LabelValue label="Kebutuhan Dukungan" value={Array.isArray(data.economics_businessNeeds) ? data.economics_businessNeeds.join(', ') : data.economics_businessNeeds} />
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-xs text-gray-400 italic">
+                                    <div className="mt-4 p-4 bg-gray-50 dark:bg-white/5 rounded-xl text-center text-xs text-gray-400 dark:text-gray-500 italic">
                                         Keluarga tidak memiliki unit usaha.
                                     </div>
                                 )}
@@ -299,7 +322,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
 
                 {/* STEP 6: Kesehatan */}
                 <div className="animate-fade-in-up delay-300">
-                    <SummaryCard title="LANGKAH 6: Kesehatan & Sosial" icon="medical_services" color="bg-red-500" stepNumber={6}>
+                    <SummaryCard title="Kesehatan & Sosial" icon="medical_services" color="bg-red-500" stepNumber={6}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                                 <LabelValue label="Sakit (30 Hari)" value={data.health_sick30Days} />
@@ -355,11 +378,11 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <input
                                 type="checkbox"
                                 id="agreedToPrivacy"
-                                className="peer appearance-none w-6 h-6 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 checked:bg-emerald-500 checked:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all cursor-pointer hover:border-emerald-400"
+                                className="peer appearance-none w-6 h-6 border-2 border-slate-400 dark:border-slate-500 rounded-lg bg-white dark:bg-slate-800 checked:bg-emerald-600 checked:border-emerald-600 focus:ring-4 focus:ring-emerald-500/20 transition-all cursor-pointer hover:border-emerald-400"
                                 checked={data.agreedToPrivacy}
                                 onChange={(e) => update({ agreedToPrivacy: e.target.checked })}
                             />
-                            <span className="absolute text-slate-900 dark:text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold animate-scaleIn">check</span>
+                            <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold animate-scale-in">check</span>
                         </div>
                         <span className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                             Saya menyatakan bahwa seluruh data yang saya isi adalah <b>BENAR</b> dan sesuai dengan kondisi sebenarnya.
@@ -374,11 +397,11 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <input
                                 type="checkbox"
                                 id="dataValidated"
-                                className="peer appearance-none w-6 h-6 border-2 border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 checked:bg-emerald-500 checked:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all cursor-pointer hover:border-emerald-400"
+                                className="peer appearance-none w-6 h-6 border-2 border-slate-400 dark:border-slate-500 rounded-lg bg-white dark:bg-slate-800 checked:bg-emerald-600 checked:border-emerald-600 focus:ring-4 focus:ring-emerald-500/20 transition-all cursor-pointer hover:border-emerald-400"
                                 checked={data.dataValidated}
                                 onChange={(e) => update({ dataValidated: e.target.checked })}
                             />
-                            <span className="absolute text-slate-900 dark:text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold">check</span>
+                            <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-base font-bold">check</span>
                         </div>
                         <span className="text-gray-900 dark:text-white font-bold text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                             Saya telah memeriksa kembali seluruh data (Validasi Final)

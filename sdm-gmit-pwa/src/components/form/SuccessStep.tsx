@@ -35,7 +35,7 @@ const SuccessStep = () => {
 
     return (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/20 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/20 border border-green-200 dark:border-green-800 animate-scaleIn">
+            <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/20 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-green-500/20 border border-green-200 dark:border-green-800 animate-scale-in">
                 <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-5xl">check_circle</span>
             </div>
 

@@ -40,12 +40,24 @@ const Step1Identity = ({ data, update }: StepProps) => {
     };
 
     const formatPhoneNumber = (value: string) => {
-        const cleaned = ('' + value).replace(/\D/g, '');
-        let number = cleaned;
-        if (number.startsWith('0')) number = number.substring(1);
-        if (number.startsWith('62')) number = number.substring(2);
-        if (number.length > 15) number = number.substring(0, 15);
-        return number;
+        let cleaned = value.replace(/\D/g, '');
+
+        // Remove leading 62 if present
+        if (cleaned.startsWith('62')) {
+            cleaned = cleaned.substring(2);
+        }
+
+        // Remove any leading 0s (loop to handle multiple if typed)
+        while (cleaned.startsWith('0')) {
+            cleaned = cleaned.substring(1);
+        }
+
+        if (cleaned.length > 15) cleaned = cleaned.substring(0, 15);
+        return cleaned;
+    };
+
+    const format16DigitNumber = (value: string) => {
+        return value.replace(/\D/g, '').substring(0, 16);
     };
 
     const calculateAge = (dob: string) => {
@@ -91,6 +103,62 @@ const Step1Identity = ({ data, update }: StepProps) => {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* No Kartu Keluarga */}
+                <div className="flex flex-col">
+                    <FormInput
+                        label="Nomor Kartu Keluarga"
+                        id="kkNumber"
+                        value={data.kkNumber}
+                        onChange={(val) => {
+                            const formatted = format16DigitNumber(val);
+                            update({ kkNumber: formatted });
+                        }}
+                        type="tel"
+                        placeholder="16 Digit Nomor KK"
+                        required
+                    />
+                    {data.kkNumber && data.kkNumber.length > 0 && data.kkNumber.length < 16 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">warning</span>
+                            <span className="text-xs font-medium">Nomor KK harus 16 digit ({data.kkNumber.length}/16)</span>
+                        </div>
+                    )}
+                    {data.kkNumber && data.kkNumber.length === 16 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">check_circle</span>
+                            <span className="text-xs font-medium">Nomor KK valid</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* NIK */}
+                <div className="flex flex-col">
+                    <FormInput
+                        label="NIK"
+                        id="nik"
+                        value={data.nik}
+                        onChange={(val) => {
+                            const formatted = format16DigitNumber(val);
+                            update({ nik: formatted });
+                        }}
+                        type="tel"
+                        placeholder="16 Digit NIK"
+                        required
+                    />
+                    {data.nik && data.nik.length > 0 && data.nik.length < 16 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">warning</span>
+                            <span className="text-xs font-medium">NIK harus 16 digit ({data.nik.length}/16)</span>
+                        </div>
+                    )}
+                    {data.nik && data.nik.length === 16 && (
+                        <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                            <span className="material-symbols-outlined text-base">check_circle</span>
+                            <span className="text-xs font-medium">NIK valid</span>
+                        </div>
+                    )}
+                </div>
+
                 {/* Full Name */}
                 <div className="flex flex-col relative">
                     <FormInput
