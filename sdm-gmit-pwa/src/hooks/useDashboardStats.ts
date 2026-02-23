@@ -3,6 +3,8 @@ import { apiClient } from '../lib/api-client';
 
 export interface DashboardStats {
     total: number;
+    totalSouls: number;
+    totalSidi: number;
     sectorDominant: string;
     activeSkills: number;
     growth: number;
@@ -14,6 +16,8 @@ export interface DashboardStats {
         gender: Record<string, number>;
         education: Record<string, number>;
         willingness: Record<string, number>;
+        lingkungan: Record<string, number>;
+        rayon: Record<string, number>;
     };
 }
 

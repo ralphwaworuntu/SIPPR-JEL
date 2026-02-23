@@ -503,8 +503,8 @@ const FormPage = () => {
     };
 
     const stepConfig = [
-        { key: 1, title: "DATA UMUM KELUARGA", icon: "person", label: "Identitas" },
-        { key: 2, title: "INFORMASI ANGGOTA KELUARGA", icon: "groups", label: "Keluarga" },
+        { key: 1, title: "DATA UMUM", icon: "person", label: "Identitas" },
+        { key: 2, title: "INFORMASI KELUARGA", icon: "groups", label: "Keluarga" },
         { key: 3, title: "PROFESI & PELAYANAN", icon: "volunteer_activism", label: "Pelayanan" },
         { key: 4, title: "PENDIDIKAN", icon: "school", label: "Pendidikan" },
         { key: 5, title: "EKONOMI & ASET", icon: "paid", label: "Ekonomi" },

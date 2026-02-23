@@ -14,14 +14,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow all local network origins and localhost
-        if (!origin || origin.startsWith("http://localhost") || origin.match(/^http:\/\/192\.168\./)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: ["http://localhost:5173", "http://192.168.3.6:5173"], // Allow localhost and specific IP
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -555,19 +548,11 @@ app.delete("/api/members/:id", async (req, res) => {
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
         // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes] = await Promise.all([
-            // 1. Total Households (Records)
+        const [totalRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes] = await Promise.all([
+            // 1. Total Count
             db.select({ count: sql<number>`count(*)` }).from(congregants),
 
-            // 1b. Total Souls (Aggregated Family Members)
-            db.select({
-                totalSouls: sql<number>`SUM(family_members)`,
-                totalMale: sql<number>`SUM(family_members_male)`,
-                totalFemale: sql<number>`SUM(family_members_female)`,
-                totalSidi: sql<number>`SUM(family_members_sidi)`
-            }).from(congregants),
-
-            // 2. Gender of Head
+            // 2. Gender Distribution
             db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
 
             // 3. Sector Distribution
@@ -578,42 +563,21 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
             // 5. Education Distribution
             db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.educationLevel),
+
             // 6. Skills (Get all skills to parse and sum)
             db.select({ skills: congregants.skills }).from(congregants),
 
             // 7. Professional Count (Filter out non-working categories)
             db.select({ count: sql<number>`count(*)` })
                 .from(congregants)
-                .where(notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-'])),
-
-            // 8. Lingkungan Distribution
-            db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.lingkungan),
-
-            // 9. Rayon Distribution
-            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon)
+                .where(notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-']))
         ]);
 
         const total = totalRes[0]?.count || 0;
-        const soulsData = soulsRes[0] || { totalSouls: 0, totalMale: 0, totalFemale: 0, totalSidi: 0 };
-        const totalSouls = Number(soulsData.totalSouls) || total; // Fallback to records count if SUM is 0
 
-        // Process Gender (Overall souls if possible, else heads)
-        const genderCounts: Record<string, number> = {
-            "Laki-laki": Number(soulsData.totalMale) || 0,
-            "Perempuan": Number(soulsData.totalFemale) || 0
-        };
-        // If no family data, fallback to gender of heads
-        if (genderCounts["Laki-laki"] === 0 && genderCounts["Perempuan"] === 0) {
-            genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
-        }
-
-        // Process Lingkungan
-        const lingkunganCounts: Record<string, number> = {};
-        lingkunganRes.forEach(l => { if (l.lingkungan) lingkunganCounts[l.lingkungan] = l.count; });
-
-        // Process Rayon
-        const rayonCounts: Record<string, number> = {};
-        rayonRes.forEach(r => { if (r.rayon) rayonCounts[r.rayon] = r.count; });
+        // Process Gender
+        const genderCounts: Record<string, number> = {};
+        genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
 
         // Process Sector
         const sectorCounts: Record<string, number> = {};
@@ -673,11 +637,9 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
         res.json({
             total,
-            totalSouls,
-            totalSidi: Number(soulsData.totalSidi) || 0,
             sectorDominant: dominant,
             activeSkills,
-            growth: 0,
+            growth: 12, // Placeholder for now, requires historical tracking
             professionalCount,
             professionalFamilyCount,
             volunteerCount,
@@ -685,9 +647,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
                 sector: sectorCounts,
                 gender: genderCounts,
                 education: educationCounts,
-                willingness: willingnessCounts,
-                lingkungan: lingkunganCounts,
-                rayon: rayonCounts
+                willingness: willingnessCounts
             }
         });
     } catch (error) {

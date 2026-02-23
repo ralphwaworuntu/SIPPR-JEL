@@ -1,4 +1,4 @@
-import { notInArray, sql } from "drizzle-orm";
+import { eq, notInArray, sql } from "drizzle-orm";
 import express from "express";
 import cors from "cors";
 import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
@@ -47,14 +47,15 @@ const requireAuth = async (req: express.Request, res: express.Response, next: ex
         });
 
         if (!session) {
+            console.log("Auth failed: No session found for request to", req.path);
             res.status(401).json({ error: "Unauthorized" });
             return;
         }
 
         next();
-    } catch (error) {
-        console.error("Auth Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+    } catch (error: any) {
+        console.error("Auth Middleware Error:", error);
+        res.status(500).json({ error: "Internal Server Error during auth", details: error.message });
     }
 };
 
@@ -72,6 +73,7 @@ app.get("/", (req, res) => {
 
 // API Routes
 
+<<<<<<< Updated upstream
 const safeParseJSON = (data: any, fallback: any = []) => {
     if (!data) return fallback;
     if (typeof data !== 'string') return data;
@@ -79,6 +81,16 @@ const safeParseJSON = (data: any, fallback: any = []) => {
         return JSON.parse(data);
     } catch {
         if (data.trim() !== '') return [data];
+=======
+// Helper for safe JSON parsing
+const safeParse = (val: any, fallback: any = {}) => {
+    if (!val) return fallback;
+    if (typeof val !== 'string') return val;
+    try {
+        return JSON.parse(val);
+    } catch (e) {
+        console.warn("JSON Parse Error for value:", val);
+>>>>>>> Stashed changes
         return fallback;
     }
 };
@@ -94,6 +106,27 @@ const mapCongregantToMember = (c: any) => ({
     latitude: c.latitude || null,
     longitude: c.longitude || null,
     phone: c.phone || "-",
+    kkNumber: c.kkNumber || "-",
+    nik: c.nik || "-",
+    gender: c.gender || "Laki-laki",
+    birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
+
+    // Family Profile
+    familyMembersMale: c.familyMembersMale || 0,
+    familyMembersFemale: c.familyMembersFemale || 0,
+    familyMembersOutside: c.familyMembersOutside || 0,
+    familyMembersSidi: c.familyMembersSidi || 0,
+    familyMembersSidiMale: c.familyMembersSidiMale || 0,
+    familyMembersSidiFemale: c.familyMembersSidiFemale || 0,
+    familyMembersNonBaptized: c.familyMembersNonBaptized || 0,
+    familyMembersNonSidi: c.familyMembersNonSidi || 0,
+
+    // Diakonia
+    diakonia_recipient: c.diakoniaRecipient || "Tidak",
+    diakonia_year: c.diakoniaYear || "",
+    diakonia_type: c.diakoniaType || "",
+
+    // Professional
     education: c.educationLevel || "-",
     educationLevel: c.educationLevel || "-",
     major: c.major || "-",
@@ -102,13 +135,59 @@ const mapCongregantToMember = (c: any) => ({
     jobTitle: c.jobTitle || "-",
     companyName: c.companyName || "-",
     yearsOfExperience: c.yearsOfExperience || 0,
+<<<<<<< Updated upstream
     skills: safeParseJSON(c.skills),
     willingnessToServe: c.willingnessToServe || "Not-available",
     interestAreas: safeParseJSON(c.interestAreas),
     contributionTypes: safeParseJSON(c.contributionTypes),
+=======
+    skills: safeParse(c.skills, []),
+
+    // Education Detail
+    education_schoolingStatus: c.educationSchoolingStatus || "Tidak ada anak usia sekolah",
+    education_in_school: safeParse(c.educationInSchool),
+    education_dropout: safeParse(c.educationDropout),
+    education_unemployed: safeParse(c.educationUnemployed),
+    education_working: c.educationWorking || 0,
+
+    // Economics
+    economics_headOccupation: c.economicsHeadOccupation || "",
+    economics_spouseOccupation: c.economicsSpouseOccupation || "",
+    economics_incomeRange: c.economicsIncomeRange || "",
+    economics_incomeRangeDetailed: c.economicsIncomeRangeDetailed || "",
+    economics_expense: safeParse(c.economicsExpense),
+
+    // Business
+    economics_hasBusiness: c.economicsHasBusiness || "Tidak",
+    economics_business_data: safeParse(c.economicsBusinessData),
+
+    // Asset & Home
+    economics_houseStatus: c.economicsHouseStatus || "",
+    economics_houseType: c.economicsHouseType || "",
+    economics_houseIMB: c.economicsHouseIMB || "",
+    economics_assets: safeParse(c.economicsAssets),
+    economics_landStatus: c.economicsLandStatus || "",
+    economics_waterSource: c.economicsWaterSource || "",
+    economics_electricity: safeParse(c.economicsElectricityDetail),
+
+    // Health
+    health_sick30Days: c.healthSick30Days || "Tidak",
+    health_chronicSick: c.healthChronicSick || "Tidak",
+    health_chronic_disease: safeParse(c.healthChronicDisease),
+    health_hasBPJS: c.healthHasBPJS || "Tidak",
+    health_regularTreatment: c.healthRegularTreatment || "Tidak",
+    health_hasBPJSKetenagakerjaan: c.healthHasBPJSKetenagakerjaan || "Tidak",
+    health_socialAssistance: c.healthSocialAssistance || "Tidak",
+    health_disability_detail: safeParse(c.healthDisabilityDetail),
+
+    // Commitment
+    willingnessToServe: c.willingnessToServe || "Not-available",
+    interestAreas: safeParse(c.interestAreas, []),
+    contributionTypes: safeParse(c.contributionTypes, []),
+    professionalFamilyMembers: safeParse(c.professionalFamilyMembers, []),
+
+>>>>>>> Stashed changes
     initials: (c.fullName || "X").substring(0, 2).toUpperCase(),
-    gender: c.gender || "Laki-laki",
-    birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
 
     // Step 1: Identity extras
@@ -251,6 +330,7 @@ app.get("/api/members", async (req, res) => {
             const limitNum = Math.min(100, Math.max(1, parseInt(String(limitParam)) || 20));
             const offset = (pageNum - 1) * limitNum;
 
+<<<<<<< Updated upstream
             const [result, [totalRow]] = await Promise.all([
                 db.select().from(congregants)
                     .where(and(...filters))
@@ -275,6 +355,12 @@ app.get("/api/members", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Failed to fetch members" });
+=======
+        res.json(result.map(mapCongregantToMember));
+    } catch (error: any) {
+        console.error("Fetch Members Error:", error);
+        res.status(500).json({ error: "Failed to fetch members", details: error.message });
+>>>>>>> Stashed changes
     }
 });
 
@@ -496,7 +582,91 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
 app.post("/api/members", async (req, res) => {
     try {
         const data = req.body;
+<<<<<<< Updated upstream
         await db.insert(congregants).values(buildCongregantValues(data, true));
+=======
+        await db.insert(congregants).values({
+            fullName: data.name || data.fullName,
+            gender: data.gender,
+            dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
+            phone: data.phone,
+            address: data.address,
+            kkNumber: data.kkNumber,
+            nik: data.nik,
+            sector: data.sector,
+            lingkungan: data.lingkungan,
+            rayon: data.rayon,
+
+            // Family Profile
+            familyMembersMale: Number(data.familyMembersMale) || 0,
+            familyMembersFemale: Number(data.familyMembersFemale) || 0,
+            familyMembersOutside: Number(data.familyMembersOutside) || 0,
+            familyMembersSidi: Number(data.familyMembersSidi) || 0,
+            familyMembersSidiMale: Number(data.familyMembersSidiMale) || 0,
+            familyMembersSidiFemale: Number(data.familyMembersSidiFemale) || 0,
+            familyMembersNonBaptized: Number(data.familyMembersNonBaptized) || 0,
+            familyMembersNonSidi: Number(data.familyMembersNonSidi) || 0,
+
+            // Diakonia
+            diakoniaRecipient: data.diakonia_recipient,
+            diakoniaYear: data.diakonia_year,
+            diakoniaType: data.diakonia_type,
+
+            educationLevel: data.educationLevel,
+            major: data.major,
+            jobCategory: data.jobCategory,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            yearsOfExperience: Number(data.yearsOfExperience) || 0,
+
+            // Education Detail
+            educationSchoolingStatus: data.education_schoolingStatus,
+            educationInSchool: JSON.stringify(data.education_in_school || {}),
+            educationDropout: JSON.stringify(data.education_dropout || {}),
+            educationUnemployed: JSON.stringify(data.education_unemployed || {}),
+            educationWorking: Number(data.education_working) || 0,
+
+            // Economics
+            economicsHeadOccupation: data.economics_headOccupation,
+            economicsSpouseOccupation: data.economics_spouseOccupation,
+            economicsIncomeRange: data.economics_incomeRange,
+            economicsIncomeRangeDetailed: data.economics_incomeRangeDetailed,
+            economicsExpense: JSON.stringify(data.economics_expense || {}),
+
+            // Business
+            economicsHasBusiness: data.economics_hasBusiness,
+            economicsBusinessData: JSON.stringify(data.economics_business_data || {}),
+
+            // Asset & Home
+            economicsHouseStatus: data.economics_houseStatus,
+            economicsHouseType: data.economics_houseType,
+            economicsHouseIMB: data.economics_houseIMB,
+            economicsAssets: JSON.stringify(data.economics_assets || {}),
+            economicsLandStatus: data.economics_landStatus,
+            economicsWaterSource: data.economics_waterSource,
+            economicsElectricityDetail: JSON.stringify(data.economics_electricity || {}),
+
+            // Health
+            healthSick30Days: data.health_sick30Days,
+            healthChronicSick: data.health_chronicSick,
+            healthChronicDisease: JSON.stringify(data.health_chronic_disease || {}),
+            healthHasBPJS: data.health_hasBPJS,
+            healthRegularTreatment: data.health_regularTreatment,
+            healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan,
+            healthSocialAssistance: data.health_socialAssistance,
+            healthDisabilityDetail: JSON.stringify(data.health_disability_detail || {}),
+
+            skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
+            willingnessToServe: data.willingnessToServe,
+            interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+            contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+            professionalFamilyMembers: Array.isArray(data.professionalFamilyMembers) ? JSON.stringify(data.professionalFamilyMembers) : JSON.stringify([]),
+
+            latitude: data.latitude?.toString(),
+            longitude: data.longitude?.toString(),
+            status: 'VALIDATED' // Auto validate for admin
+        });
+>>>>>>> Stashed changes
         res.status(201).json({ success: true });
     } catch (error) {
         console.error(error);
@@ -510,7 +680,91 @@ app.post("/api/congregants", async (req, res) => {
         const data = req.body;
         console.log("New Registration Attempt:", data.fullName);
 
+<<<<<<< Updated upstream
         await db.insert(congregants).values(buildCongregantValues(data, false));
+=======
+        await db.insert(congregants).values({
+            fullName: data.fullName,
+            gender: data.gender,
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+            phone: data.phone,
+            address: data.address,
+            kkNumber: data.kkNumber,
+            nik: data.nik,
+            sector: data.sector,
+            lingkungan: data.lingkungan,
+            rayon: data.rayon,
+
+            // Family Profile
+            familyMembersMale: Number(data.familyMembersMale) || 0,
+            familyMembersFemale: Number(data.familyMembersFemale) || 0,
+            familyMembersOutside: Number(data.familyMembersOutside) || 0,
+            familyMembersSidi: Number(data.familyMembersSidi) || 0,
+            familyMembersSidiMale: Number(data.familyMembersSidiMale) || 0,
+            familyMembersSidiFemale: Number(data.familyMembersSidiFemale) || 0,
+            familyMembersNonBaptized: Number(data.familyMembersNonBaptized) || 0,
+            familyMembersNonSidi: Number(data.familyMembersNonSidi) || 0,
+
+            // Diakonia
+            diakoniaRecipient: data.diakonia_recipient,
+            diakoniaYear: data.diakonia_year,
+            diakoniaType: data.diakonia_type,
+
+            educationLevel: data.educationLevel,
+            major: data.major,
+            jobCategory: data.jobCategory,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            yearsOfExperience: Number(data.yearsOfExperience) || 0,
+
+            // Education Detail
+            educationSchoolingStatus: data.education_schoolingStatus,
+            educationInSchool: JSON.stringify(data.education_inSchool || {}),
+            educationDropout: JSON.stringify(data.education_dropout || {}),
+            educationUnemployed: JSON.stringify(data.education_unemployed || {}),
+            educationWorking: Number(data.education_working) || 0,
+
+            // Economics
+            economicsHeadOccupation: data.economics_headOccupation,
+            economicsSpouseOccupation: data.economics_spouseOccupation,
+            economicsIncomeRange: data.economics_incomeRange,
+            economicsIncomeRangeDetailed: data.economics_incomeRangeDetailed,
+            economicsExpense: JSON.stringify(data.economics_expense || {}),
+
+            // Business
+            economicsHasBusiness: data.economics_hasBusiness,
+            economicsBusinessData: JSON.stringify(data.economics_business_data || {}),
+
+            // Asset & Home
+            economicsHouseStatus: data.economics_houseStatus,
+            economicsHouseType: data.economics_houseType,
+            economicsHouseIMB: data.economics_houseIMB,
+            economicsAssets: JSON.stringify(data.economics_assets || {}),
+            economicsLandStatus: data.economics_landStatus,
+            economicsWaterSource: data.economics_waterSource,
+            economicsElectricityDetail: JSON.stringify(data.economics_electricity || {}),
+
+            // Health
+            healthSick30Days: data.health_sick30Days,
+            healthChronicSick: data.health_chronicSick,
+            healthChronicDisease: JSON.stringify(data.health_chronic_disease || {}),
+            healthHasBPJS: data.health_hasBPJS,
+            healthRegularTreatment: data.health_regularTreatment,
+            healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan,
+            healthSocialAssistance: data.health_socialAssistance,
+            healthDisabilityDetail: JSON.stringify(data.health_disability_detail || {}),
+
+            skills: data.skills ? JSON.stringify(data.skills) : JSON.stringify([]),
+            willingnessToServe: data.willingnessToServe,
+            interestAreas: data.interestAreas ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+            contributionTypes: data.contributionTypes ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+            professionalFamilyMembers: data.professionalFamilyMembers ? JSON.stringify(data.professionalFamilyMembers) : JSON.stringify([]),
+
+            latitude: data.latitude?.toString(),
+            longitude: data.longitude?.toString(),
+            status: 'PENDING'
+        });
+>>>>>>> Stashed changes
 
         console.log("Registration Successful:", data.fullName);
         res.status(201).json({ success: true, message: "Pendaftaran berhasil" });
@@ -529,7 +783,90 @@ app.put("/api/members/:id", async (req, res) => {
         const { status, ...updateValues } = buildCongregantValues(data, true);
 
         await db.update(congregants)
+<<<<<<< Updated upstream
             .set(updateValues)
+=======
+            .set({
+                fullName: data.name || data.fullName,
+                gender: data.gender,
+                dateOfBirth: data.birthDate ? new Date(data.birthDate) : null,
+                phone: data.phone,
+                address: data.address,
+                kkNumber: data.kkNumber,
+                nik: data.nik,
+                sector: data.sector,
+                lingkungan: data.lingkungan,
+                rayon: data.rayon,
+
+                // Family Profile
+                familyMembersMale: Number(data.familyMembersMale) || 0,
+                familyMembersFemale: Number(data.familyMembersFemale) || 0,
+                familyMembersOutside: Number(data.familyMembersOutside) || 0,
+                familyMembersSidi: Number(data.familyMembersSidi) || 0,
+                familyMembersSidiMale: Number(data.familyMembersSidiMale) || 0,
+                familyMembersSidiFemale: Number(data.familyMembersSidiFemale) || 0,
+                familyMembersNonBaptized: Number(data.familyMembersNonBaptized) || 0,
+                familyMembersNonSidi: Number(data.familyMembersNonSidi) || 0,
+
+                // Diakonia
+                diakoniaRecipient: data.diakonia_recipient,
+                diakoniaYear: data.diakonia_year,
+                diakoniaType: data.diakonia_type,
+
+                educationLevel: data.educationLevel,
+                major: data.major,
+                jobCategory: data.jobCategory,
+                jobTitle: data.jobTitle,
+                companyName: data.companyName,
+                yearsOfExperience: Number(data.yearsOfExperience) || 0,
+
+                // Education Detail
+                educationSchoolingStatus: data.education_schoolingStatus,
+                educationInSchool: JSON.stringify(data.education_in_school || {}),
+                educationDropout: JSON.stringify(data.education_dropout || {}),
+                educationUnemployed: JSON.stringify(data.education_unemployed || {}),
+                educationWorking: Number(data.education_working) || 0,
+
+                // Economics
+                economicsHeadOccupation: data.economics_headOccupation,
+                economicsSpouseOccupation: data.economics_spouseOccupation,
+                economicsIncomeRange: data.economics_incomeRange,
+                economicsIncomeRangeDetailed: data.economics_incomeRangeDetailed,
+                economicsExpense: JSON.stringify(data.economics_expense || {}),
+
+                // Business
+                economicsHasBusiness: data.economics_hasBusiness,
+                economicsBusinessData: JSON.stringify(data.economics_business_data || {}),
+
+                // Asset & Home
+                economicsHouseStatus: data.economics_houseStatus,
+                economicsHouseType: data.economics_houseType,
+                economicsHouseIMB: data.economics_houseIMB,
+                economicsAssets: JSON.stringify(data.economics_assets || {}),
+                economicsLandStatus: data.economics_landStatus,
+                economicsWaterSource: data.economics_waterSource,
+                economicsElectricityDetail: JSON.stringify(data.economics_electricity || {}),
+
+                // Health
+                healthSick30Days: data.health_sick30Days,
+                healthChronicSick: data.health_chronicSick,
+                healthChronicDisease: JSON.stringify(data.health_chronic_disease || {}),
+                healthHasBPJS: data.health_hasBPJS,
+                healthRegularTreatment: data.health_regularTreatment,
+                healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan,
+                healthSocialAssistance: data.health_socialAssistance,
+                healthDisabilityDetail: JSON.stringify(data.health_disability_detail || {}),
+
+                skills: Array.isArray(data.skills) ? JSON.stringify(data.skills) : JSON.stringify([]),
+                willingnessToServe: data.willingnessToServe,
+                interestAreas: Array.isArray(data.interestAreas) ? JSON.stringify(data.interestAreas) : JSON.stringify([]),
+                contributionTypes: Array.isArray(data.contributionTypes) ? JSON.stringify(data.contributionTypes) : JSON.stringify([]),
+                professionalFamilyMembers: Array.isArray(data.professionalFamilyMembers) ? JSON.stringify(data.professionalFamilyMembers) : JSON.stringify([]),
+
+                latitude: data.latitude?.toString(),
+                longitude: data.longitude?.toString(),
+            })
+>>>>>>> Stashed changes
             .where(eq(congregants.id, Number(id)));
 
         res.json({ success: true });
@@ -555,19 +892,15 @@ app.delete("/api/members/:id", async (req, res) => {
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
         // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes] = await Promise.all([
-            // 1. Total Households (Records)
+        const [
+            totalRes, genderRes, sectorRes, willingnessRes,
+            educationRes, skillsRes, professionalRes,
+            diakoniaRes, businessRes, disabilityRes
+        ] = await Promise.all([
+            // 1. Total Count
             db.select({ count: sql<number>`count(*)` }).from(congregants),
 
-            // 1b. Total Souls (Aggregated Family Members)
-            db.select({
-                totalSouls: sql<number>`SUM(family_members)`,
-                totalMale: sql<number>`SUM(family_members_male)`,
-                totalFemale: sql<number>`SUM(family_members_female)`,
-                totalSidi: sql<number>`SUM(family_members_sidi)`
-            }).from(congregants),
-
-            // 2. Gender of Head
+            // 2. Gender Distribution
             db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
 
             // 3. Sector Distribution
@@ -578,6 +911,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
             // 5. Education Distribution
             db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.educationLevel),
+
             // 6. Skills (Get all skills to parse and sum)
             db.select({ skills: congregants.skills }).from(congregants),
 
@@ -586,34 +920,21 @@ app.get("/api/dashboard/stats", async (req, res) => {
                 .from(congregants)
                 .where(notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-'])),
 
-            // 8. Lingkungan Distribution
-            db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.lingkungan),
+            // 8. Diakonia Recipients
+            db.select({ count: sql<number>`count(*)` }).from(congregants).where(eq(congregants.diakoniaRecipient, 'Ya')),
 
-            // 9. Rayon Distribution
-            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon)
+            // 9. Business Owners
+            db.select({ count: sql<number>`count(*)` }).from(congregants).where(eq(congregants.economicsHasBusiness, 'Ya')),
+
+            // 10. Disability Count (using string match in JSON)
+            db.select({ count: sql<number>`count(*)` }).from(congregants).where(sql`JSON_UNQUOTE(JSON_EXTRACT(health_disability_detail, '$.hasDisability')) = 'Ya'`)
         ]);
 
         const total = totalRes[0]?.count || 0;
-        const soulsData = soulsRes[0] || { totalSouls: 0, totalMale: 0, totalFemale: 0, totalSidi: 0 };
-        const totalSouls = Number(soulsData.totalSouls) || total; // Fallback to records count if SUM is 0
 
-        // Process Gender (Overall souls if possible, else heads)
-        const genderCounts: Record<string, number> = {
-            "Laki-laki": Number(soulsData.totalMale) || 0,
-            "Perempuan": Number(soulsData.totalFemale) || 0
-        };
-        // If no family data, fallback to gender of heads
-        if (genderCounts["Laki-laki"] === 0 && genderCounts["Perempuan"] === 0) {
-            genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
-        }
-
-        // Process Lingkungan
-        const lingkunganCounts: Record<string, number> = {};
-        lingkunganRes.forEach(l => { if (l.lingkungan) lingkunganCounts[l.lingkungan] = l.count; });
-
-        // Process Rayon
-        const rayonCounts: Record<string, number> = {};
-        rayonRes.forEach(r => { if (r.rayon) rayonCounts[r.rayon] = r.count; });
+        // Process Gender
+        const genderCounts: Record<string, number> = {};
+        genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
 
         // Process Sector
         const sectorCounts: Record<string, number> = {};
@@ -656,6 +977,9 @@ app.get("/api/dashboard/stats", async (req, res) => {
         });
 
         const professionalCount = professionalRes[0]?.count || 0;
+        const diakoniaRecipientCount = diakoniaRes[0]?.count || 0;
+        const businessOwnerCount = businessRes[0]?.count || 0;
+        const disabilityCount = disabilityRes[0]?.count || 0;
 
         // 8. Professional Family Members Count
         const profFamilyRes = await db.select({ pfm: congregants.professionalFamilyMembers }).from(congregants);
@@ -673,26 +997,31 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
         res.json({
             total,
-            totalSouls,
-            totalSidi: Number(soulsData.totalSidi) || 0,
             sectorDominant: dominant,
             activeSkills,
-            growth: 0,
+            growth: 12, // Placeholder for now, requires historical tracking
             professionalCount,
             professionalFamilyCount,
             volunteerCount,
+            diakoniaRecipientCount,
+            businessOwnerCount,
+            disabilityCount,
             distributions: {
                 sector: sectorCounts,
                 gender: genderCounts,
                 education: educationCounts,
-                willingness: willingnessCounts,
-                lingkungan: lingkunganCounts,
-                rayon: rayonCounts
+                willingness: willingnessCounts
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Dashboard Stats Error:", error);
-        res.status(500).json({ error: "Failed to fetch stats" });
+        // Log more details if it's a DB error
+        if (error.sql) {
+            console.error("SQL Error Message:", error.message);
+            console.error("SQL Code:", error.code);
+            console.error("SQL State:", error.sqlState);
+        }
+        res.status(500).json({ error: "Failed to fetch stats", details: error.message });
     }
 });
 
