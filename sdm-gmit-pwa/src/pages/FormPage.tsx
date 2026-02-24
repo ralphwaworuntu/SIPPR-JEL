@@ -514,7 +514,7 @@ const FormPage = () => {
 
     const getEncouragement = (stepNum: number) => {
         switch (stepNum) {
-            case 1: return "Hanya 7 langkah singkat — dimulai dari data dasar 🙏";
+            case 1: return "Terdapat 7 langkah pengisian data — dimulai dari data umum 🙏";
             case 2: return "Langkah 2 dari 7 — informasi anggota keluarga.";
             case 3: return "Langkah 3 dari 7 — data profesi & pelayanan.";
             case 4: return "Sudah 4 dari 7 langkah — luar biasa! 💪";

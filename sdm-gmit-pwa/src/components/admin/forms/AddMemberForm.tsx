@@ -15,11 +15,11 @@ interface AddMemberFormProps {
 const TOTAL_STEPS = 6;
 
 const STEP_TITLES: Record<number, string> = {
-    1: 'Identitas & Keluarga',
-    2: 'Diakonia & Profesional',
-    3: 'Komitmen & Keluarga Profesional',
-    4: 'Pendidikan Anak',
-    5: 'Ekonomi & Aset',
+    1: 'Data Umum',
+    2: 'Informasi Keluarga',
+    3: 'Profesi & Pelayanan',
+    4: 'Pendidikan',
+    5: 'Ekonomi & Aset Keluarga',
     6: 'Kesehatan',
 };
 
@@ -133,9 +133,49 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         longitude: initialData?.longitude || 123.6070,
     });
 
+    const calculateAge = (dob: string) => {
+        if (!dob) return '';
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return `${age} Tahun`;
+    };
+
+    const lingkunganRayonMap: Record<string, number[]> = {
+        '1': [1, 2, 17],
+        '2': [12, 13, 16],
+        '3': [7, 14, 15],
+        '4': [3, 8, 9],
+        '5': [5, 10],
+        '6': [6, 20],
+        '7': [4, 18],
+        '8': [11, 19],
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        let formattedValue = value;
+        if (name === 'kkNumber' || name === 'nik') {
+            formattedValue = value.replace(/\D/g, '').substring(0, 16);
+        } else if (name === 'phone') {
+            let cleaned = value.replace(/\D/g, '');
+            if (cleaned.startsWith('62')) cleaned = cleaned.substring(2);
+            while (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+            formattedValue = cleaned.substring(0, 15);
+        }
+
+        // Reset rayon if lingkungan changes
+        if (name === 'lingkungan') {
+            setFormData(prev => ({ ...prev, lingkungan: formattedValue, rayon: '' }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: formattedValue }));
+        }
+
         if (errors[name]) {
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -161,15 +201,17 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         let isValid = true;
 
         if (currentStep === 1) {
-            if (!formData.fullName) { newErrors.fullName = "Nama wajib diisi"; isValid = false; }
+            if (!formData.kkNumber) { newErrors.kkNumber = "Nomor Kartu Keluarga wajib diisi"; isValid = false; }
+            if (!formData.nik) { newErrors.nik = "NIK wajib diisi"; isValid = false; }
+            if (!formData.fullName) { newErrors.fullName = "Nama Lengkap Kartu Keluarga wajib diisi"; isValid = false; }
             if (!formData.gender) { newErrors.gender = "Jenis kelamin wajib dipilih"; isValid = false; }
             if (!formData.dateOfBirth) { newErrors.dateOfBirth = "Tanggal lahir wajib diisi"; isValid = false; }
-            if (!formData.phone) { newErrors.phone = "No HP wajib diisi"; isValid = false; }
-            if (!formData.address) { newErrors.address = "Alamat wajib diisi"; isValid = false; }
-            if (!formData.sector) { newErrors.sector = "Sektor Kategorial wajib dipilih"; isValid = false; }
+            if (!formData.phone) { newErrors.phone = "Nomor Telepon/ WhatsApp Aktif wajib diisi"; isValid = false; }
             if (!formData.lingkungan) { newErrors.lingkungan = "Lingkungan wajib dipilih"; isValid = false; }
             if (!formData.rayon) { newErrors.rayon = "Rayon wajib dipilih"; isValid = false; }
-        } else if (currentStep === 2) {
+            if (!formData.address) { newErrors.address = "Alamat Lengkap wajib diisi"; isValid = false; }
+
+        } else if (currentStep === 3) {
             if (!formData.educationLevel) { newErrors.educationLevel = "Pendidikan wajib dipilih"; isValid = false; }
             if (!formData.jobCategory) { newErrors.jobCategory = "Kategori pekerjaan wajib dipilih"; isValid = false; }
         }
@@ -189,8 +231,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             sector: formData.sector,
             lingkungan: formData.lingkungan,
             rayon: formData.rayon,
-            education: formData.educationLevel,
-            major: formData.major,
             job: formData.jobCategory,
             jobCategory: formData.jobCategory,
             jobTitle: formData.jobTitle,
@@ -200,12 +240,11 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             willingnessToServe: formData.willingnessToServe,
             interestAreas: formData.interestAreas,
             contributionTypes: formData.contributionTypes,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
             initials: formData.fullName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase(),
             // Step 1 extras
             kkNumber: formData.kkNumber,
             nik: formData.nik,
+            // Step 2
             familyMembers: formData.familyMembers,
             familyMembersMale: formData.familyMembersMale,
             familyMembersFemale: formData.familyMembersFemale,
@@ -214,11 +253,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             familyMembersSidiMale: formData.familyMembersSidiMale,
             familyMembersSidiFemale: formData.familyMembersSidiFemale,
             familyMembersNonBaptized: formData.familyMembersNonBaptized,
-            familyMembersNonSidi: formData.familyMembersNonSidi,
-            // Step 2
+            familyMembersNonSidi: Math.max(0, formData.familyMembers - formData.familyMembersSidi),
             diakonia_recipient: formData.diakonia_recipient,
             diakonia_year: formData.diakonia_year,
             diakonia_type: formData.diakonia_type,
+            // Step 3
+            education: formData.educationLevel,
+            major: formData.major,
             // Step 4
             education_schoolingStatus: formData.education_schoolingStatus,
             education_inSchool_tk_paud: formData.education_inSchool_tk_paud,
@@ -336,80 +377,162 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 {/* Step 1: Identity & Family */}
                 {step === 1 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                        <div className="col-span-2 flex flex-col">
+                            <FormLabel required>Nomor Kartu Keluarga</FormLabel>
+                            <input name="kkNumber" value={formData.kkNumber} onChange={handleChange} className={inputClass(!!errors.kkNumber)} maxLength={16} placeholder="16 Digit Nomor Kartu Keluarga" />
+                            {formData.kkNumber && formData.kkNumber.length > 0 && formData.kkNumber.length < 16 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">warning</span>
+                                    <span className="text-xs font-medium">Nomor KK harus 16 digit ({formData.kkNumber.length}/16)</span>
+                                </div>
+                            )}
+                            {formData.kkNumber && formData.kkNumber.length === 16 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">check_circle</span>
+                                    <span className="text-xs font-medium">Nomor KK valid</span>
+                                </div>
+                            )}
+                            <ErrorMsg msg={errors.kkNumber} />
+                        </div>
+                        <div className="col-span-2 flex flex-col">
+                            <FormLabel required>NIK</FormLabel>
+                            <input name="nik" value={formData.nik} onChange={handleChange} className={inputClass(!!errors.nik)} maxLength={16} placeholder="16 Digit NIK" />
+                            {formData.nik && formData.nik.length > 0 && formData.nik.length < 16 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">warning</span>
+                                    <span className="text-xs font-medium">NIK harus 16 digit ({formData.nik.length}/16)</span>
+                                </div>
+                            )}
+                            {formData.nik && formData.nik.length === 16 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">check_circle</span>
+                                    <span className="text-xs font-medium">NIK valid</span>
+                                </div>
+                            )}
+                            <ErrorMsg msg={errors.nik} />
+                        </div>
                         <div className="col-span-2">
-                            <FormLabel required>Nama Lengkap</FormLabel>
-                            <input name="fullName" value={formData.fullName} onChange={handleChange} className={inputClass(!!errors.fullName)} placeholder="Contoh: John Doe" />
+                            <FormLabel required>Nama Lengkap Kepala Keluarga</FormLabel>
+                            <input name="fullName" value={formData.fullName} onChange={handleChange} className={inputClass(!!errors.fullName)} placeholder="Contoh: Heru Aldi Benu" />
                             <ErrorMsg msg={errors.fullName} />
                         </div>
-                        {selectInput('gender', 'Jenis Kelamin', ['Laki-laki', 'Perempuan'], true)}
-                        <div>
+                        <div className="col-span-2">
+                            {selectInput('gender', 'Jenis Kelamin', ['Laki-laki', 'Perempuan'], true)}
+                        </div>
+                        <div className="col-span-2">
                             <FormLabel required>Tanggal Lahir</FormLabel>
                             <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass(!!errors.dateOfBirth)} />
                             <ErrorMsg msg={errors.dateOfBirth} />
                         </div>
-                        <div>
-                            <FormLabel required>No HP</FormLabel>
-                            <input name="phone" value={formData.phone} onChange={handleChange} className={inputClass(!!errors.phone)} placeholder="08xxxxxxxxxx" />
+                        <div className="col-span-2">
+                            <FormLabel required>Usia</FormLabel>
+                            <input value={calculateAge(formData.dateOfBirth) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
+                        </div>
+                        <div className="col-span-2 flex flex-col">
+                            <FormLabel required>Nomor Telepon/ WhatsApp Aktif</FormLabel>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium text-sm">+62</span>
+                                <input name="phone" value={formData.phone} onChange={handleChange} className={`${inputClass(!!errors.phone)} pl-12`} placeholder="81234567890" />
+                            </div>
+                            {formData.phone && formData.phone.length > 0 && formData.phone.length < 10 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">warning</span>
+                                    <span className="text-xs font-medium">Nomor telepon minimal 10 digit ({formData.phone.length}/10)</span>
+                                </div>
+                            )}
+                            {formData.phone && formData.phone.length >= 10 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">check_circle</span>
+                                    <span className="text-xs font-medium">Nomor telepon valid (+62 {formData.phone})</span>
+                                </div>
+                            )}
                             <ErrorMsg msg={errors.phone} />
                         </div>
                         <div className="col-span-2">
-                            <FormLabel required>Alamat</FormLabel>
-                            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} className={inputClass(!!errors.address)} placeholder="Alamat lengkap..." />
-                            <ErrorMsg msg={errors.address} />
-                        </div>
-                        {selectInput('sector', 'Sektor Kategorial', ['Pemuda', 'Perempuan', 'Anak', 'Lansia', 'Dewasa'], true)}
-                        <div>
                             <FormLabel required>Lingkungan</FormLabel>
-                            <input name="lingkungan" value={formData.lingkungan} onChange={handleChange} className={inputClass(!!errors.lingkungan)} placeholder="Nomor lingkungan" />
+                            <select name="lingkungan" value={formData.lingkungan} onChange={handleChange} className={selectClass(!!errors.lingkungan)}>
+                                <option value="">Pilih Lingkungan...</option>
+                                {Array.from({ length: 8 }, (_, i) => (
+                                    <option key={i + 1} value={(i + 1).toString()}>Lingkungan {i + 1}</option>
+                                ))}
+                            </select>
                             <ErrorMsg msg={errors.lingkungan} />
                         </div>
-                        <div>
+                        <div className="col-span-2">
                             <FormLabel required>Rayon</FormLabel>
-                            <input name="rayon" value={formData.rayon} onChange={handleChange} className={inputClass(!!errors.rayon)} placeholder="Nomor rayon" />
+                            <select name="rayon" value={formData.rayon} onChange={handleChange} className={selectClass(!!errors.rayon)} disabled={!formData.lingkungan}>
+                                <option value="">{formData.lingkungan ? "Pilih Rayon..." : "Pilih Lingkungan dahulu..."}</option>
+                                {(formData.lingkungan ? lingkunganRayonMap[formData.lingkungan] : []).map(r => (
+                                    <option key={r} value={r.toString()}>Rayon {r}</option>
+                                ))}
+                            </select>
                             <ErrorMsg msg={errors.rayon} />
                         </div>
-
-                        <SectionDivider title="Kependudukan" />
-                        <div>
-                            <FormLabel>No. KK</FormLabel>
-                            <input name="kkNumber" value={formData.kkNumber} onChange={handleChange} className={inputClass()} maxLength={16} placeholder="16 digit" />
+                        <div className="col-span-2 flex flex-col">
+                            <FormLabel required>Alamat</FormLabel>
+                            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} className={inputClass(!!errors.address)} placeholder="Alamat lengkap..." />
+                            {formData.address && formData.address.trim().length > 0 && formData.address.trim().length < 20 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">warning</span>
+                                    <span className="text-xs font-medium">Alamat terlalu singkat, minimal 20 karakter ({formData.address.trim().length}/20)</span>
+                                </div>
+                            )}
+                            {formData.address && formData.address.trim().length >= 20 && (
+                                <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                                    <span className="material-symbols-outlined text-base">check_circle</span>
+                                    <span className="text-xs font-medium">Panjang alamat sudah memadai</span>
+                                </div>
+                            )}
+                            <ErrorMsg msg={errors.address} />
                         </div>
-                        <div>
-                            <FormLabel>NIK</FormLabel>
-                            <input name="nik" value={formData.nik} onChange={handleChange} className={inputClass()} maxLength={16} placeholder="16 digit" />
-                        </div>
-
-                        <SectionDivider title="Anggota Keluarga" />
-                        {numInput('familyMembers', 'Total Anggota')}
-                        {numInput('familyMembersMale', 'Laki-laki')}
-                        {numInput('familyMembersFemale', 'Perempuan')}
-                        {numInput('familyMembersOutside', 'Di Luar Kota')}
-                        {numInput('familyMembersSidi', 'Sudah Sidi')}
-                        {numInput('familyMembersSidiMale', 'Sidi (L)')}
-                        {numInput('familyMembersSidiFemale', 'Sidi (P)')}
-                        {numInput('familyMembersNonBaptized', 'Belum Baptis')}
-                        {numInput('familyMembersNonSidi', 'Belum Sidi')}
                     </div>
                 )}
-
-                {/* Step 2: Diakonia & Professional */}
+                {/* Step 2: Informasi Keluarga */}
                 {step === 2 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <SectionDivider title="Diakonia" />
+                        <SectionDivider title="Jumlah Anggota Keluarga" />
+                        {numInput('familyMembers', 'Total Anggota Keluarga')}
+                        {numInput('familyMembersMale', 'Laki-laki')}
+                        {numInput('familyMembersFemale', 'Perempuan')}
+                        {numInput('familyMembersOutside', 'Menetap di Luar Kupang')}
+
+                        <SectionDivider title="Jumlah Anggota Sidi & Baptis" />
+                        {numInput('familyMembersSidi', 'Total Anggota Sidi')}
+                        {numInput('familyMembersSidiMale', 'Sidi (Laki-laki)')}
+                        {numInput('familyMembersSidiFemale', 'Sidi (Perempuan)')}
+                        {numInput('familyMembersNonBaptized', 'Belum Dibaptis')}
+                        <div className="col-span-1 md:col-span-2">
+                            <FormLabel>Belum Sidi (Otomatis)</FormLabel>
+                            <div className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
+                                {Math.max(0, parseInt(formData.familyMembers as any || '0') - parseInt(formData.familyMembersSidi as any || '0'))} Orang
+                            </div>
+                        </div>
+
+                        <SectionDivider title="Penerima Diakonia GMIT JEL" />
                         {selectInput('diakonia_recipient', 'Penerima Diakonia', ['Ya', 'Tidak'])}
                         {formData.diakonia_recipient === 'Ya' && (
                             <>
                                 <div>
-                                    <FormLabel>Tahun</FormLabel>
-                                    <input name="diakonia_year" value={formData.diakonia_year} onChange={handleChange} className={inputClass()} placeholder="2024" />
+                                    <FormLabel>Tahun Penerimaan</FormLabel>
+                                    <select name="diakonia_year" value={formData.diakonia_year} onChange={handleChange} className={selectClass(false)}>
+                                        <option value="">Pilih Tahun...</option>
+                                        {Array.from({ length: new Date().getFullYear() - 2000 + 1 }, (_, i) => String(new Date().getFullYear() - i)).map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="col-span-2">
-                                    <FormLabel>Jenis Diakonia</FormLabel>
-                                    <input name="diakonia_type" value={formData.diakonia_type} onChange={handleChange} className={inputClass()} placeholder="Pangan, Dana, dll" />
+                                    <FormLabel>Jenis Diakonia yang Diterima</FormLabel>
+                                    <textarea name="diakonia_type" value={formData.diakonia_type} onChange={handleChange} rows={2} className={inputClass()} placeholder="Pangan, Dana, dll" />
                                 </div>
                             </>
                         )}
+                    </div>
+                )}
 
+                {/* Step 3: Profesi & Pelayanan */}
+                {step === 3 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
                         <SectionDivider title="Profil Profesional" />
                         {selectInput('educationLevel', 'Pendidikan Terakhir', ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3'], true)}
                         <div>
@@ -439,12 +562,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 ))}
                             </div>
                         </div>
-                    </div>
-                )}
 
-                {/* Step 3: Commitment */}
-                {step === 3 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                        <SectionDivider title="Komitmen Pelayanan" />
                         {selectInput('willingnessToServe', 'Kesediaan Melayani', ['Active', 'On-demand', 'Not-available'])}
                         <div className="col-span-2">
                             <FormLabel>Minat Pelayanan</FormLabel>

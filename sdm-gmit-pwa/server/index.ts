@@ -744,16 +744,16 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
 
                 // Enhanced mapping for all fields
                 const insertData = results.map(row => ({
-                    fullName: row["Nama Lengkap"] || row["Nama"] || row["Name"] || "Tanpa Nama",
-                    gender: row["Gender"] || "Laki-laki",
+                    kkNumber: row["Nomor Kartu Keluarga"] || null,
+                    nik: row["NIK"] || null,
+                    fullName: row["Nama Lengkap Kepala Keluarga"] || row["Nama"] || row["Name"] || "Tanpa Nama",
+                    gender: row["Jenis Kelamin"] || "Laki-laki",
                     dateOfBirth: row["Tanggal Lahir"] ? new Date(row["Tanggal Lahir"]) : null,
-                    phone: row["No HP"] || null,
-                    address: row["Alamat"] || null,
-                    sector: row["Sektor"] || "Efata",
+                    age: row["Usia"] || null,
+                    phone: row["Nomor Telepon/ WhatsApp Aktif"] || null,
                     lingkungan: row["Lingkungan"] || "-",
                     rayon: row["Rayon"] || "-",
-                    kkNumber: row["No KK"] || null,
-                    nik: row["NIK"] || null,
+                    address: row["Alamat Lengkap"] || null,
 
                     // Family
                     familyMembers: safeInt(row["Total Anggota Keluarga"]),

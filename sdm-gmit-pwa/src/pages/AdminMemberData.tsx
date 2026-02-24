@@ -184,7 +184,7 @@ const AdminMemberData = () => {
     // Export Logic
     const handleExportCSV = () => {
         const headers = [
-            // Step 1: Identitas & Keluarga
+            // Step 1: Data Umum
             "Nama Lengkap", "ID Sistem", "Sektor", "Lingkungan", "Rayon", "Gender", "Tanggal Lahir", "Umur", "No HP", "Alamat", "No KK", "NIK",
             "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Sidi Laki-laki", "Sidi Perempuan", "Belum Baptis", "Belum Sidi",
 

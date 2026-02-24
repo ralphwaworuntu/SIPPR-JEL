@@ -4,23 +4,15 @@ Berikut adalah daftar lengkap semua data (field) yang dikumpulkan melalui Form P
 
 ## Step 1: Identitas (Identity)
 - `kkNumber`: Nomor Kartu Keluarga
-- `nik`: NIK (Nomor Induk Kependudukan)
-- `fullName`: Nama Lengkap
-- `gender`: Jenis Kelamin (Laki-laki / Perempuan)
+- `nik`: NIK
+- `fullName`: Nama Lengkap Kepala Keluarga
+- `gender`: Jenis Kelamin
 - `dateOfBirth`: Tanggal Lahir
-- `phone`: Nomor Telepon / WA
-- `address`: Alamat Lengkap
+- `age`: Usia
+- `phone`: Nomor Telepon/ WhatsApp Aktif
 - `lingkungan`: Lingkungan
 - `rayon`: Rayon
-- `familyMembers`: Jumlah Anggota Keluarga Total
-- `familyMembersMale`: Jumlah Laki-laki
-- `familyMembersFemale`: Jumlah Perempuan
-- `familyMembersOutside`: Jumlah Anggota Keluarga di Luar Kota
-- `familyMembersSidi`: Jumlah Anggota Sidi
-- `familyMembersSidiMale`: Jumlah Sidi Laki-laki
-- `familyMembersSidiFemale`: Jumlah Sidi Perempuan
-- `familyMembersNonBaptized`: Jumlah Belum Baptis
-- `familyMembersNonSidi`: Jumlah Sudah Baptis Belum Sidi
+- `address`: Alamat Lengkap
 
 ## Step 2: Diakonia & Pekerjaan (Diakonia & Professional)
 - `diakonia_recipient`: Penerima Diakonia (Ya / Tidak)
