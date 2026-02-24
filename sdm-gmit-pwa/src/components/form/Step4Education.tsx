@@ -9,7 +9,6 @@ interface StepProps {
     goToStep: (step: number, editing?: boolean) => void;
 }
 
-const numInputClass = "w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-200 text-base";
 const selectClass = "w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-300 appearance-none text-sm";
 
 const CountSelect = ({ id, value, onChange, max = 20, startFrom = 0, placeholder = 'Pilih...' }: {
@@ -290,17 +289,12 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
                 <SectionHeader title="Jumlah anak sudah bekerja:" />
                 <div className="flex flex-col gap-2 max-w-[200px]">
                     <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Orang</label>
-                    <input
-                        type="text"
-                        inputMode="numeric"
+                    <CountSelect
                         id="education_working"
-                        className={numInputClass}
-                        value={data.education_working || ''}
-                        onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            update({ education_working: val ? parseInt(val) : 0 });
-                        }}
-                        onFocus={(e) => e.target.select()}
+                        value={data.education_working || 0}
+                        onChange={(val) => update({ education_working: val })}
+                        max={15}
+                        placeholder="Pilih Total..."
                     />
                 </div>
             </div>

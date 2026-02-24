@@ -40,10 +40,27 @@ const SectionDivider = ({ title }: { title: string }) => (
     </div>
 );
 
+const CountSelect = ({ id, value, onChange, max = 20, startFrom = 0, placeholder = 'Pilih...' }: {
+    id: string; value: number; onChange: (val: number) => void; max?: number; startFrom?: number; placeholder?: string;
+}) => (
+    <div className="relative">
+        <select className={selectClass()} id={id} value={value} onChange={(e) => onChange(parseInt(e.target.value) || 0)}>
+            <option value="0">{placeholder}</option>
+            {[...Array(Math.max(0, max - startFrom + 1))].map((_, i) => (
+                <option key={i + startFrom} value={i + startFrom}>{i + startFrom}</option>
+            ))}
+        </select>
+        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+    </div>
+);
+
+
 export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberFormProps) => {
     const { addMutation, updateMutation } = useMemberData();
     const [step, setStep] = useState(1);
     const [errors, setErrors] = useState<ValidationErrors>({});
+    const [skillInputs, setSkillInputs] = useState<Record<number, string>>({});
+    const [editingIndex, setEditingIndex] = useState<number | null>(0);
 
     const isLoading = addMutation.isPending || updateMutation.isPending;
 
@@ -85,19 +102,36 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         willingnessToServe: initialData?.willingnessToServe || '',
         interestAreas: Array.isArray(initialData?.interestAreas) ? initialData.interestAreas : [],
         contributionTypes: Array.isArray(initialData?.contributionTypes) ? initialData.contributionTypes : [],
+        professionalFamilyMembers: Array.isArray(initialData?.professionalFamilyMembers) ? initialData.professionalFamilyMembers : [{
+            name: '',
+            hasProfessionalSkill: '',
+            skillType: '',
+            skillLevel: '',
+            workplace: '',
+            position: '',
+            yearsExperience: '',
+            specificSkills: [],
+            churchServiceInterest: '',
+            serviceInterestArea: '',
+            contributionForm: [],
+            communityConsent: false
+        }],
 
         // Step 4: Education (Children)
         education_schoolingStatus: initialData?.education_schoolingStatus || '',
+        education_totalInSchool: initialData?.education_totalInSchool || 0,
         education_inSchool_tk_paud: initialData?.education_inSchool_tk_paud || 0,
         education_inSchool_sd: initialData?.education_inSchool_sd || 0,
         education_inSchool_smp: initialData?.education_inSchool_smp || 0,
         education_inSchool_sma: initialData?.education_inSchool_sma || 0,
         education_inSchool_university: initialData?.education_inSchool_university || 0,
+        education_totalDropout: initialData?.education_totalDropout || 0,
         education_dropout_tk_paud: initialData?.education_dropout_tk_paud || 0,
         education_dropout_sd: initialData?.education_dropout_sd || 0,
         education_dropout_smp: initialData?.education_dropout_smp || 0,
         education_dropout_sma: initialData?.education_dropout_sma || 0,
         education_dropout_university: initialData?.education_dropout_university || 0,
+        education_totalUnemployed: initialData?.education_totalUnemployed || 0,
         education_unemployed_sd: initialData?.education_unemployed_sd || 0,
         education_unemployed_smp: initialData?.education_unemployed_smp || 0,
         education_unemployed_sma: initialData?.education_unemployed_sma || 0,
@@ -186,15 +220,35 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
     };
 
     const handleNumberChange = (name: string, value: string) => {
-        setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
-    };
-
-    const toggleArrayItem = (field: string, item: string) => {
         setFormData(prev => {
-            const arr = (prev as any)[field] || [];
-            return { ...prev, [field]: arr.includes(item) ? arr.filter((i: string) => i !== item) : [...arr, item] };
+            const val = parseInt(value) || 0;
+            if (name === 'familyMembers') {
+                return {
+                    ...prev,
+                    familyMembers: val,
+                    familyMembersMale: 0,
+                    familyMembersFemale: 0,
+                    familyMembersOutside: 0,
+                    familyMembersSidi: 0,
+                    familyMembersSidiMale: 0,
+                    familyMembersSidiFemale: 0,
+                    familyMembersNonBaptized: 0,
+                    familyMembersNonSidi: 0
+                };
+            }
+            if (name === 'familyMembersSidi') {
+                return {
+                    ...prev,
+                    familyMembersSidi: val,
+                    familyMembersSidiMale: 0,
+                    familyMembersSidiFemale: 0
+                };
+            }
+            return { ...prev, [name]: val };
         });
     };
+
+
 
     const validateStep = (currentStep: number): boolean => {
         const newErrors: ValidationErrors = {};
@@ -211,9 +265,95 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             if (!formData.rayon) { newErrors.rayon = "Rayon wajib dipilih"; isValid = false; }
             if (!formData.address) { newErrors.address = "Alamat Lengkap wajib diisi"; isValid = false; }
 
+        } else if (currentStep === 2) {
+            const totalMembers = Number(formData.familyMembers) || 0;
+            const maleMembers = Number(formData.familyMembersMale) || 0;
+            const femaleMembers = Number(formData.familyMembersFemale) || 0;
+            if (totalMembers > 0 && maleMembers + femaleMembers !== totalMembers) {
+                isValid = false;
+            }
+
+            const totalSidi = Number(formData.familyMembersSidi) || 0;
+            const maleSidi = Number(formData.familyMembersSidiMale) || 0;
+            const femaleSidi = Number(formData.familyMembersSidiFemale) || 0;
+            if (totalSidi > 0 && maleSidi + femaleSidi !== totalSidi) {
+                isValid = false;
+            }
+
+            if (!isValid) toast.error("Total pembagian laki-laki dan perempuan tidak sesuai dengan total yang diinput!");
         } else if (currentStep === 3) {
-            if (!formData.educationLevel) { newErrors.educationLevel = "Pendidikan wajib dipilih"; isValid = false; }
-            if (!formData.jobCategory) { newErrors.jobCategory = "Kategori pekerjaan wajib dipilih"; isValid = false; }
+            const members = formData.professionalFamilyMembers || [];
+            let step3Error = "";
+            if (members.length === 0) {
+                step3Error = "Mohon isi minimal 1 anggota keluarga profesional";
+                isValid = false;
+            } else if (editingIndex !== null) {
+                step3Error = "Mohon klik 'Simpan Anggota Ini' terlebih dahulu sebelum melanjutkan.";
+                isValid = false;
+            } else {
+                for (let i = 0; i < members.length; i++) {
+                    const member = members[i];
+                    if (!member.name) { step3Error = `Mohon isi Nama Anggota Keluarga ke-${i + 1}`; isValid = false; break; }
+                    if (!member.workplace) { step3Error = `Mohon isi Tempat Kerja/Instansi Anggota ke-${i + 1}`; isValid = false; break; }
+                    if (!member.position) { step3Error = `Mohon isi Jabatan Anggota ke-${i + 1}`; isValid = false; break; }
+                    if (!member.yearsExperience) { step3Error = `Mohon pilih Lama Bekerja Anggota ke-${i + 1}`; isValid = false; break; }
+                    if (!member.hasProfessionalSkill) { step3Error = `Mohon pilih apakah Anggota ke-${i + 1} memiliki Keahlian Profesional`; isValid = false; break; }
+
+                    if (member.hasProfessionalSkill === 'Ya') {
+                        if (!member.skillType) { step3Error = `Mohon pilih Jenis Keahlian Anggota ke-${i + 1}`; isValid = false; break; }
+                        if (!member.skillLevel) { step3Error = `Mohon pilih Tingkat Keahlian Anggota ke-${i + 1}`; isValid = false; break; }
+                    }
+
+                    if (!member.churchServiceInterest) { step3Error = `Mohon pilih Kesediaan Terlibat Pelayanan Anggota ke-${i + 1}`; isValid = false; break; }
+
+                    if (member.churchServiceInterest && member.churchServiceInterest !== 'Belum bersedia') {
+                        if (!member.serviceInterestArea) { step3Error = `Mohon pilih Bidang Minat Pelayanan Anggota ke-${i + 1}`; isValid = false; break; }
+                        if (!member.contributionForm || member.contributionForm.length === 0) { step3Error = `Mohon pilih Bentuk Kontribusi Anggota ke-${i + 1}`; isValid = false; break; }
+                    }
+                }
+            }
+            if (step3Error) {
+                toast.error(step3Error);
+                setErrors(newErrors);
+                return false;
+            }
+        } else if (currentStep === 4) {
+            if (!formData.education_schoolingStatus) {
+                toast.error("Mohon pilih status anak usia sekolah (7-18 tahun)");
+                isValid = false;
+            } else if (formData.education_schoolingStatus === 'Ya') {
+                const totalInSchool =
+                    (formData.education_inSchool_tk_paud || 0) +
+                    (formData.education_inSchool_sd || 0) +
+                    (formData.education_inSchool_smp || 0) +
+                    (formData.education_inSchool_sma || 0);
+
+                if (totalInSchool === 0) {
+                    toast.error("Anda memilih 'Ya', mohon isi jumlah anak yang bersekolah (minimal 1)");
+                    isValid = false;
+                }
+            }
+        } else if (currentStep === 5) {
+            if (!formData.economics_headOccupation) { toast.error("Mohon pilih Pekerjaan Utama Kepala Keluarga"); isValid = false; }
+            else if (!formData.economics_spouseOccupation) { toast.error("Mohon pilih Pekerjaan Utama Istri"); isValid = false; }
+            else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga Per Bulan"); isValid = false; }
+            else if (
+                (formData.economics_expense_food < 0) ||
+                (formData.economics_expense_utilities < 0) ||
+                (formData.economics_expense_education < 0) ||
+                (formData.economics_expense_other < 0)
+            ) {
+                toast.error("Pengeluaran tidak boleh negatif"); isValid = false;
+            }
+            else if (!formData.economics_hasBusiness) { toast.error("Mohon pilih Punya Usaha?"); isValid = false; }
+            else if (formData.economics_hasBusiness === 'Ya') {
+                if (!formData.economics_businessName) { toast.error("Mohon isi Nama Usaha"); isValid = false; }
+                else if (!formData.economics_businessType) { toast.error("Mohon isi Jenis Usaha"); isValid = false; }
+            }
+            else if (!formData.economics_houseStatus) { toast.error("Mohon pilih Status Rumah"); isValid = false; }
+            else if (!formData.economics_houseType) { toast.error("Mohon pilih Jenis Rumah"); isValid = false; }
+            else if (!formData.economics_hasAssets) { toast.error("Mohon pilih Punya Aset?"); isValid = false; }
+            else if (!formData.economics_waterSource) { toast.error("Mohon pilih Sumber Air"); isValid = false; }
         }
 
         setErrors(newErrors);
@@ -343,6 +483,21 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         <div>
             <FormLabel>{label}</FormLabel>
             <input type="number" min="0" name={name} value={(formData as any)[name]} onChange={e => handleNumberChange(name, e.target.value)} className={inputClass()} />
+        </div>
+    );
+
+    // Reusable count select helper
+    const countSelectInput = (name: string, label: string, max: number = 20) => (
+        <div>
+            <FormLabel>{label}</FormLabel>
+            <div className="relative">
+                <select name={name} value={(formData as any)[name]} onChange={e => handleNumberChange(name, e.target.value)} className={selectClass()}>
+                    {[...Array(max + 1)].map((_, i) => (
+                        <option key={i} value={i}>{i}</option>
+                    ))}
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+            </div>
         </div>
     );
 
@@ -487,137 +642,839 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                         </div>
                     </div>
                 )}
+
                 {/* Step 2: Informasi Keluarga */}
-                {step === 2 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <SectionDivider title="Jumlah Anggota Keluarga" />
-                        {numInput('familyMembers', 'Total Anggota Keluarga')}
-                        {numInput('familyMembersMale', 'Laki-laki')}
-                        {numInput('familyMembersFemale', 'Perempuan')}
-                        {numInput('familyMembersOutside', 'Menetap di Luar Kupang')}
+                {step === 2 && (() => {
+                    const totalMembers = Number(formData.familyMembers) || 0;
+                    const maleMembers = Number(formData.familyMembersMale) || 0;
+                    const femaleMembers = Number(formData.familyMembersFemale) || 0;
+                    const isFamilyCountValid = maleMembers + femaleMembers === totalMembers;
+                    const showFamilyValidation = totalMembers > 0;
 
-                        <SectionDivider title="Jumlah Anggota Sidi & Baptis" />
-                        {numInput('familyMembersSidi', 'Total Anggota Sidi')}
-                        {numInput('familyMembersSidiMale', 'Sidi (Laki-laki)')}
-                        {numInput('familyMembersSidiFemale', 'Sidi (Perempuan)')}
-                        {numInput('familyMembersNonBaptized', 'Belum Dibaptis')}
-                        <div className="col-span-1 md:col-span-2">
-                            <FormLabel>Belum Sidi (Otomatis)</FormLabel>
-                            <div className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
-                                {Math.max(0, parseInt(formData.familyMembers as any || '0') - parseInt(formData.familyMembersSidi as any || '0'))} Orang
+                    const totalSidi = Number(formData.familyMembersSidi) || 0;
+                    const maleSidi = Number(formData.familyMembersSidiMale) || 0;
+                    const femaleSidi = Number(formData.familyMembersSidiFemale) || 0;
+                    const isSidiCountValid = maleSidi + femaleSidi === totalSidi;
+                    const showSidiValidation = totalSidi > 0;
+
+                    return (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+                            <SectionDivider title="Jumlah Anggota Keluarga" />
+                            <div className="col-span-1 md:col-span-2">
+                                {countSelectInput('familyMembers', 'Total Anggota Keluarga')}
                             </div>
+
+                            {totalMembers > 0 && (
+                                <>
+                                    {countSelectInput('familyMembersMale', 'Laki-laki', Math.max(0, totalMembers - femaleMembers))}
+                                    {countSelectInput('familyMembersFemale', 'Perempuan', Math.max(0, totalMembers - maleMembers))}
+                                    {countSelectInput('familyMembersOutside', 'Menetap di Luar Kupang', totalMembers)}
+
+                                    {showFamilyValidation && (
+                                        <div className="col-span-1 md:col-span-2">
+                                            {!isFamilyCountValid ? (
+                                                <div className="flex items-center gap-1.5 text-red-500 animate-fadeIn bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg mt-1 w-full text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">warning</span>
+                                                    Total Laki-laki ({maleMembers}) & Perempuan ({femaleMembers}) tidak sesuai dengan Total Anggota Keluarga ({totalMembers})
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg mt-1 w-full text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                    Distribusi data gender sesuai dengan total anggota.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            <SectionDivider title="Jumlah Anggota Sidi & Baptis" />
+                            <div className="col-span-1 md:col-span-2">
+                                {countSelectInput('familyMembersSidi', 'Total Anggota Sidi', totalMembers)}
+                            </div>
+
+                            {totalSidi > 0 && (
+                                <>
+                                    {countSelectInput('familyMembersSidiMale', 'Sidi (Laki-laki)', Math.max(0, totalSidi - femaleSidi))}
+                                    {countSelectInput('familyMembersSidiFemale', 'Sidi (Perempuan)', Math.max(0, totalSidi - maleSidi))}
+                                    {countSelectInput('familyMembersNonBaptized', 'Belum Dibaptis', totalMembers)}
+
+                                    {showSidiValidation && (
+                                        <div className="col-span-1 md:col-span-2">
+                                            {!isSidiCountValid ? (
+                                                <div className="flex items-center gap-1.5 text-red-500 animate-fadeIn bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg mt-1 w-full text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">warning</span>
+                                                    Total Sidi Laki-laki ({maleSidi}) & Perempuan ({femaleSidi}) tidak sesuai dengan Total Sidi ({totalSidi})
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg mt-1 w-full text-xs font-medium">
+                                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                                    Distribusi data gender sidi sesuai dengan total sidi.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            <div className="col-span-1 md:col-span-2">
+                                <FormLabel>Belum Sidi (Otomatis)</FormLabel>
+                                <div className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
+                                    {Math.max(0, totalMembers - totalSidi)} Orang
+                                </div>
+                            </div>
+
+                            <SectionDivider title="Penerima Diakonia GMIT JEL" />
+                            {selectInput('diakonia_recipient', 'Penerima Diakonia', ['Ya', 'Tidak'], true)}
+                            {formData.diakonia_recipient === 'Ya' && (
+                                <>
+                                    <div>
+                                        <FormLabel required>Tahun Penerimaan</FormLabel>
+                                        <select name="diakonia_year" value={formData.diakonia_year} onChange={handleChange} className={selectClass(!!errors.diakonia_year)}>
+                                            <option value="">Pilih Tahun...</option>
+                                            {Array.from({ length: new Date().getFullYear() - 2000 + 1 }, (_, i) => String(new Date().getFullYear() - i)).map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                        <ErrorMsg msg={errors.diakonia_year} />
+                                    </div>
+                                    <div className="col-span-2">
+                                        <FormLabel required>Jenis Diakonia yang Diterima</FormLabel>
+                                        <textarea name="diakonia_type" value={formData.diakonia_type} onChange={handleChange} rows={2} className={inputClass(!!errors.diakonia_type)} placeholder="Pangan, Dana, dll" />
+                                        <ErrorMsg msg={errors.diakonia_type} />
+                                    </div>
+                                </>
+                            )}
                         </div>
-
-                        <SectionDivider title="Penerima Diakonia GMIT JEL" />
-                        {selectInput('diakonia_recipient', 'Penerima Diakonia', ['Ya', 'Tidak'])}
-                        {formData.diakonia_recipient === 'Ya' && (
-                            <>
-                                <div>
-                                    <FormLabel>Tahun Penerimaan</FormLabel>
-                                    <select name="diakonia_year" value={formData.diakonia_year} onChange={handleChange} className={selectClass(false)}>
-                                        <option value="">Pilih Tahun...</option>
-                                        {Array.from({ length: new Date().getFullYear() - 2000 + 1 }, (_, i) => String(new Date().getFullYear() - i)).map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="col-span-2">
-                                    <FormLabel>Jenis Diakonia yang Diterima</FormLabel>
-                                    <textarea name="diakonia_type" value={formData.diakonia_type} onChange={handleChange} rows={2} className={inputClass()} placeholder="Pangan, Dana, dll" />
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
-
+                    );
+                })()}
                 {/* Step 3: Profesi & Pelayanan */}
                 {step === 3 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <SectionDivider title="Profil Profesional" />
-                        {selectInput('educationLevel', 'Pendidikan Terakhir', ['SD', 'SMP', 'SMA', 'D3', 'S1', 'S2', 'S3'], true)}
-                        <div>
-                            <FormLabel>Jurusan</FormLabel>
-                            <input name="major" value={formData.major} onChange={handleChange} className={inputClass()} placeholder="Contoh: Teknik Informatika" />
-                        </div>
-                        {selectInput('jobCategory', 'Kategori Pekerjaan', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'Pensiunan', 'Pelajar/Mahasiswa', 'Tidak Bekerja', 'Lainnya'], true)}
-                        <div>
-                            <FormLabel>Jabatan</FormLabel>
-                            <input name="jobTitle" value={formData.jobTitle} onChange={handleChange} className={inputClass()} placeholder="Contoh: Manager" />
-                        </div>
-                        <div>
-                            <FormLabel>Nama Instansi</FormLabel>
-                            <input name="companyName" value={formData.companyName} onChange={handleChange} className={inputClass()} />
-                        </div>
-                        {numInput('yearsOfExperience', 'Lama Kerja (Tahun)')}
+                    <div className="space-y-6 animate-fade-in">
+                        <SectionDivider title="Data Anggota Keluarga Profesional" />
 
-                        <SectionDivider title="Keahlian" />
-                        <div className="col-span-2">
-                            <FormLabel>Keahlian (Skills)</FormLabel>
-                            <div className="flex flex-wrap gap-2">
-                                {['Mengajar', 'Musik', 'Teknologi', 'Administrasi', 'Kepemimpinan', 'Komunikasi', 'Pertanian', 'Kesehatan', 'Hukum', 'Keuangan'].map(s => (
-                                    <button key={s} type="button" onClick={() => toggleArrayItem('skills', s)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${formData.skills.includes(s) ? 'bg-primary text-white border-primary' : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}>
-                                        {s}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        {(formData.professionalFamilyMembers || []).map((member: any, index: number) => {
+                            if (editingIndex !== index) {
+                                return (
+                                    <div key={index} className="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 hover:shadow-md hover:border-blue-600/30 animate-fade-in mt-4">
+                                        <div className="flex flex-col gap-1 flex-1">
+                                            <h4 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-blue-600 text-xl">person</span>
+                                                {member.name || 'Anggota Tanpa Nama'}
+                                            </h4>
+                                            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                                {(member.workplace || member.position) ? (
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-[16px]">work</span>
+                                                        {member.position}{member.position && member.workplace ? ' di ' : ''}{member.workplace}
+                                                    </span>
+                                                ) : (
+                                                    <span className="italic">Data pekerjaan belum lengkap</span>
+                                                )}
+                                                {member.skillType && (
+                                                    <>
+                                                        <span className="hidden md:inline">•</span>
+                                                        <span className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 px-2 py-0.5 rounded-lg text-xs font-semibold">
+                                                            {member.skillType}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 md:w-auto w-full justify-end border-t md:border-t-0 border-slate-100 dark:border-slate-700 pt-3 md:pt-0 mt-3 md:mt-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingIndex(index)}
+                                                className="text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-slate-50 dark:bg-slate-800/50 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 transition-colors"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">edit</span>
+                                                Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newList = [...formData.professionalFamilyMembers];
+                                                    newList.splice(index, 1);
+                                                    setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                    if (editingIndex === index) setEditingIndex(null);
+                                                    else if (editingIndex !== null && editingIndex > index) setEditingIndex(editingIndex - 1);
+                                                }}
+                                                className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 transition-colors"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            }
 
-                        <SectionDivider title="Komitmen Pelayanan" />
-                        {selectInput('willingnessToServe', 'Kesediaan Melayani', ['Active', 'On-demand', 'Not-available'])}
-                        <div className="col-span-2">
-                            <FormLabel>Minat Pelayanan</FormLabel>
-                            <div className="flex flex-wrap gap-2">
-                                {['Ibadah', 'Diakonia', 'Persekutuan', 'Kesaksian', 'Pendidikan', 'Musik/Worship', 'Multimedia', 'Anak/Remaja'].map(area => (
-                                    <button key={area} type="button" onClick={() => toggleArrayItem('interestAreas', area)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${formData.interestAreas.includes(area) ? 'bg-primary text-white border-primary' : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}>
-                                        {area}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="col-span-2">
-                            <FormLabel>Bentuk Kontribusi</FormLabel>
-                            <div className="flex flex-wrap gap-2">
-                                {['Waktu', 'Keahlian', 'Dana', 'Fasilitas', 'Tenaga'].map(ct => (
-                                    <button key={ct} type="button" onClick={() => toggleArrayItem('contributionTypes', ct)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${formData.contributionTypes.includes(ct) ? 'bg-primary text-white border-primary' : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}>
-                                        {ct}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                            return (
+                                <div key={index} className="p-5 border-2 border-slate-200 dark:border-slate-700/60 rounded-2xl bg-white dark:bg-slate-800/80 shadow-sm relative mt-4">
+                                    <div className="space-y-6">
+                                        {/* Identity & Work Section */}
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col gap-2">
+                                                <FormLabel required>Nama Anggota Keluarga</FormLabel>
+                                                <input
+                                                    className={inputClass()}
+                                                    placeholder="Nama Lengkap"
+                                                    type="text"
+                                                    value={member.name}
+                                                    onChange={(e) => {
+                                                        const newList = [...formData.professionalFamilyMembers];
+                                                        newList[index].name = e.target.value;
+                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div className="flex flex-col gap-2">
+                                                    <FormLabel required>Tempat Kerja / Instansi</FormLabel>
+                                                    <input
+                                                        className={inputClass()}
+                                                        placeholder="Nama Instansi/Perusahaan"
+                                                        type="text"
+                                                        value={member.workplace || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            newList[index].workplace = e.target.value;
+                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <FormLabel required>Jabatan Saat Ini</FormLabel>
+                                                    <input
+                                                        className={inputClass()}
+                                                        placeholder="Contoh: Staff, Manager"
+                                                        type="text"
+                                                        value={member.position || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            newList[index].position = e.target.value;
+                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <FormLabel required>Lama Bekerja</FormLabel>
+                                                    <select
+                                                        className={selectClass()}
+                                                        value={member.yearsExperience || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            newList[index].yearsExperience = e.target.value;
+                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                        }}
+                                                    >
+                                                        <option value="">Pilih Lama Bekerja...</option>
+                                                        <option value="< 1 Tahun">Kurang dari 1 Tahun</option>
+                                                        <option value="1-3 Tahun">1 - 3 Tahun</option>
+                                                        <option value="3-5 Tahun">3 - 5 Tahun</option>
+                                                        <option value="5-10 Tahun">5 - 10 Tahun</option>
+                                                        <option value="> 10 Tahun">Lebih dari 10 Tahun</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-2">
+                                                <FormLabel>Keahlian Spesifik <span className="text-xs font-normal text-slate-500 dark:text-slate-400 opacity-80">(Bisa lebih dari satu)</span></FormLabel>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        className={`flex-1 ${inputClass()}`}
+                                                        placeholder="Ketik keahlian lalu tekan Enter atau Tambah"
+                                                        type="text"
+                                                        value={skillInputs[index] || ''}
+                                                        onChange={(e) => setSkillInputs({ ...skillInputs, [index]: e.target.value })}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                const input = skillInputs[index]?.trim();
+                                                                if (!input) return;
+                                                                const newList = [...formData.professionalFamilyMembers];
+                                                                const currentSkills = newList[index].specificSkills || [];
+                                                                if (!currentSkills.includes(input)) {
+                                                                    newList[index].specificSkills = [...currentSkills, input];
+                                                                    setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                }
+                                                                setSkillInputs({ ...skillInputs, [index]: '' });
+                                                            }
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const input = skillInputs[index]?.trim();
+                                                            if (!input) return;
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            const currentSkills = newList[index].specificSkills || [];
+                                                            if (!currentSkills.includes(input)) {
+                                                                newList[index].specificSkills = [...currentSkills, input];
+                                                                setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                            }
+                                                            setSkillInputs({ ...skillInputs, [index]: '' });
+                                                        }}
+                                                        className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 rounded-xl font-bold transition-all duration-200 text-sm shrink-0 flex items-center gap-2 border-2 border-emerald-600/20 shadow-sm focus:ring-2 focus:ring-emerald-500/50"
+                                                    >
+                                                        <span className="material-symbols-outlined text-lg">add</span>
+                                                        Tambah
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-1">
+                                                    {(member.specificSkills || []).map((skill: string, skIndex: number) => (
+                                                        <span key={skIndex} className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 border border-blue-600/20 xl:px-3 md:px-2 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2">
+                                                            {skill}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const newList = [...formData.professionalFamilyMembers];
+                                                                    newList[index].specificSkills = newList[index].specificSkills.filter((s: string) => s !== skill);
+                                                                    setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                }}
+                                                                className="hover:text-red-500 transition-colors bg-white/50 dark:bg-black/20 rounded-full w-4 h-4 flex items-center justify-center outline-none"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[12px] font-bold">close</span>
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                    {(member.specificSkills || []).length === 0 && (
+                                                        <span className="text-sm text-slate-400 dark:text-slate-500 italic">Belum ada keahlian spesifik ditambahkan.</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Has Professional Skill */}
+                                        <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                            <FormLabel required>Apakah anggota ini memiliki Keahlian Profesional?</FormLabel>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {['Ya', 'Tidak'].map((opt) => (
+                                                    <label key={opt} className={`cursor-pointer p-3.5 border-2 rounded-xl flex items-center gap-3 transition-all duration-200 select-none ${member.hasProfessionalSkill === opt ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10 shadow-sm shadow-blue-500/10' : 'border-slate-200 dark:border-slate-700 hover:border-blue-500/40'}`}>
+                                                        <input
+                                                            type="radio"
+                                                            value={opt}
+                                                            checked={member.hasProfessionalSkill === opt}
+                                                            onChange={() => {
+                                                                const newList = [...formData.professionalFamilyMembers];
+                                                                newList[index].hasProfessionalSkill = opt;
+                                                                if (opt === 'Tidak') {
+                                                                    newList[index].skillType = '';
+                                                                    newList[index].skillLevel = '';
+                                                                }
+                                                                setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                            }}
+                                                            className="hidden"
+                                                        />
+                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${member.hasProfessionalSkill === opt ? 'border-blue-600 bg-blue-600' : 'border-slate-400'}`}>
+                                                            {member.hasProfessionalSkill === opt && <div className="w-2 h-2 rounded-full bg-white" />}
+                                                        </div>
+                                                        <span className="font-bold text-sm tracking-wide">{opt}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Professional Detail Fields (If Yes) */}
+                                        {member.hasProfessionalSkill === 'Ya' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-700 animate-fade-in">
+                                                <div className="flex flex-col gap-2">
+                                                    <FormLabel required>Jenis Keahlian Utama</FormLabel>
+                                                    <select
+                                                        className={selectClass()}
+                                                        value={member.skillType || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            newList[index].skillType = e.target.value;
+                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                        }}
+                                                    >
+                                                        <option value="">Pilih Jenis Keahlian...</option>
+                                                        <option value="Kesehatan & Medis">Kesehatan & Medis</option>
+                                                        <option value="Pendidikan & Pelatihan">Pendidikan & Pelatihan</option>
+                                                        <option value="Teknologi, IT & Digital">Teknologi, IT & Digital</option>
+                                                        <option value="Teknik, Sipil & Konstruksi">Teknik, Sipil & Konstruksi</option>
+                                                        <option value="Hukum, Advokasi & Keamanan">Hukum, Advokasi & Keamanan</option>
+                                                        <option value="Keuangan, Akuntansi & Perbankan">Keuangan, Akuntansi & Perbankan</option>
+                                                        <option value="Seni, Musik & Kreatif">Seni, Musik & Kreatif</option>
+                                                        <option value="Kewirausahaan & Bisnis">Kewirausahaan & Bisnis</option>
+                                                        <option value="Pelayanan Jasa & Perdagangan">Pelayanan Jasa & Perdagangan</option>
+                                                        <option value="Administrasi & Pemerintahan">Administrasi & Pemerintahan</option>
+                                                        <option value="Agrikultur & Alam">Agrikultur & Alam</option>
+                                                    </select>
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <FormLabel required>Tingkat Keahlian</FormLabel>
+                                                    <select
+                                                        className={selectClass()}
+                                                        value={member.skillLevel || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...formData.professionalFamilyMembers];
+                                                            newList[index].skillLevel = e.target.value;
+                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                        }}
+                                                    >
+                                                        <option value="">Pilih Tingkat Keahlian...</option>
+                                                        <option value="1">Dasar</option>
+                                                        <option value="2">Menengah</option>
+                                                        <option value="3">Mahir</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Service Interest */}
+                                        <div className="grid grid-cols-1 gap-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+                                            <div className="flex flex-col gap-3">
+                                                <FormLabel required>Bersedia terlibat pelayanan?</FormLabel>
+                                                <div className="flex flex-col gap-2">
+                                                    {['Ya, bersedia aktif', 'Ya, bila dibutuhkan'].map((opt) => (
+                                                        <label key={opt} className={`cursor-pointer p-3 border-2 rounded-xl flex items-center gap-3 transition-all duration-200 select-none ${member.churchServiceInterest === opt ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-700 hover:border-blue-500/40'}`}>
+                                                            <input
+                                                                type="radio"
+                                                                value={opt}
+                                                                checked={member.churchServiceInterest === opt}
+                                                                onChange={() => {
+                                                                    const newList = [...formData.professionalFamilyMembers];
+                                                                    newList[index].churchServiceInterest = opt;
+                                                                    setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                }}
+                                                                className="hidden"
+                                                            />
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${member.churchServiceInterest === opt ? 'border-blue-600 bg-blue-600' : 'border-slate-400'}`}>
+                                                                {member.churchServiceInterest === opt && <div className="w-2 h-2 rounded-full bg-white" />}
+                                                            </div>
+                                                            <span className="font-bold text-sm tracking-wide">{opt}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {member.churchServiceInterest && member.churchServiceInterest !== 'Belum bersedia' && (
+                                                <>
+                                                    <div className="flex flex-col gap-3 animate-fade-in">
+                                                        <FormLabel required>Bidang Minat Pelayanan</FormLabel>
+                                                        <div className="flex flex-col gap-2">
+                                                            {['Sesuai Profesi', 'Lintas Profesi'].map((opt) => (
+                                                                <label key={opt} className={`cursor-pointer p-3 border-2 rounded-xl flex items-center gap-3 transition-all duration-200 select-none ${member.serviceInterestArea === opt ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-700 hover:border-blue-500/40'}`}>
+                                                                    <input
+                                                                        type="radio"
+                                                                        value={opt}
+                                                                        checked={member.serviceInterestArea === opt}
+                                                                        onChange={() => {
+                                                                            const newList = [...formData.professionalFamilyMembers];
+                                                                            newList[index].serviceInterestArea = opt;
+                                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                        }}
+                                                                        className="hidden"
+                                                                    />
+                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${member.serviceInterestArea === opt ? 'border-blue-600 bg-blue-600' : 'border-slate-400'}`}>
+                                                                        {member.serviceInterestArea === opt && <div className="w-2 h-2 rounded-full bg-white" />}
+                                                                    </div>
+                                                                    <span className="font-bold text-sm tracking-wide">{opt}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2 relative z-10 animate-fade-in">
+                                                        <FormLabel required>Bentuk Kontribusi <span className="text-xs font-normal text-slate-500 dark:text-slate-400 opacity-80">(Bisa pilih lebih dari satu)</span></FormLabel>
+                                                        <details className="group">
+                                                            <summary className={`${selectClass()} flex items-center justify-between cursor-pointer select-none list-none group-open:border-blue-600 group-open:ring-2 group-open:ring-blue-600/20 transition-all duration-300`}>
+                                                                <span className={`block truncate ${(!member.contributionForm || member.contributionForm.length === 0) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white font-semibold'}`}>
+                                                                    {(!member.contributionForm || member.contributionForm.length === 0) ? 'Pilih Bentuk Kontribusi...' : member.contributionForm.join(', ')}
+                                                                </span>
+                                                                <span className="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+                                                            </summary>
+                                                            <div className="absolute left-0 right-0 mt-2 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-20 max-h-[250px] overflow-y-auto animate-fade-in">
+                                                                <div className="p-2 flex flex-col gap-1">
+                                                                    {['Tenaga', 'Pikiran', 'Dana', 'Waktu'].map((opt) => {
+                                                                        const isChecked = member.contributionForm?.includes(opt) || false;
+                                                                        return (
+                                                                            <label key={opt} className={`cursor-pointer p-3 rounded-lg flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all ${isChecked ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                                                                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${isChecked ? 'bg-blue-600 border-blue-600' : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900'}`}>
+                                                                                    {isChecked && <span className="material-symbols-outlined text-white text-[14px] font-bold">check</span>}
+                                                                                </div>
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={isChecked}
+                                                                                    onChange={(e) => {
+                                                                                        const newList = [...formData.professionalFamilyMembers];
+                                                                                        const currentForms = newList[index].contributionForm || [];
+                                                                                        newList[index].contributionForm = e.target.checked ? [...currentForms, opt] : currentForms.filter((item: string) => item !== opt);
+                                                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                                    }}
+                                                                                    className="sr-only"
+                                                                                />
+                                                                                <span className="font-semibold text-sm">{opt}</span>
+                                                                            </label>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        </details>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {/* Community Consent */}
+                                        <div className="pt-6 border-t border-dashed border-slate-200 dark:border-slate-700">
+                                            <label className={`cursor-pointer flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${member.communityConsent ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/10 shadow-lg shadow-blue-600/5' : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 hover:border-blue-500/30 group/consent'}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={member.communityConsent || false}
+                                                    onChange={(e) => {
+                                                        const newList = [...formData.professionalFamilyMembers];
+                                                        newList[index].communityConsent = e.target.checked;
+                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                    }}
+                                                    className="sr-only"
+                                                />
+                                                <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all duration-300 ${member.communityConsent ? 'bg-blue-600 border-blue-600 shadow-md shadow-blue-600/20' : 'border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-900 group-hover/consent:border-blue-400'}`}>
+                                                    {member.communityConsent && <span className="material-symbols-outlined text-white text-base font-bold animate-scale-in">check</span>}
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`font-bold text-sm transition-colors duration-300 ${member.communityConsent ? 'text-blue-600' : 'text-slate-900 dark:text-white'}`}>Persetujuan Bergabung Komunitas</span>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Saya menyatakan bersedia dan menyetujui untuk bergabung dalam komunitas profesional GMIT Emaus Liliba guna mendukung program pengembangan jemaat.</p>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        {/* Footer Actions (Delete & Save Area) */}
+                                        <div className="pt-6 border-t border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+                                            {/* Delete Button */}
+                                            {formData.professionalFamilyMembers.length > 1 ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newList = [...formData.professionalFamilyMembers];
+                                                        newList.splice(index, 1);
+                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                    }}
+                                                    className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center gap-1"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                    Hapus
+                                                </button>
+                                            ) : (
+                                                <div /> /* Empty div to push the save button to the right */
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setEditingIndex(null);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:shadow-emerald-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center gap-2 group"
+                                            >
+                                                <span className="material-symbols-outlined group-hover:animate-bounce">save</span>
+                                                Simpan Anggota Ini
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {editingIndex === null && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const newList = [...(formData.professionalFamilyMembers || [])];
+                                    newList.push({
+                                        name: '', hasProfessionalSkill: '', skillType: '', skillLevel: '', workplace: '', position: '',
+                                        yearsExperience: '', specificSkills: [], churchServiceInterest: '', serviceInterestArea: '',
+                                        contributionForm: [], communityConsent: false
+                                    });
+                                    setFormData({ ...formData, professionalFamilyMembers: newList });
+                                    setEditingIndex(newList.length - 1);
+                                }}
+                                className="w-full py-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all outline-none font-bold group"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-inner">
+                                    <span className="material-symbols-outlined text-2xl">person_add</span>
+                                </div>
+                                <span className="font-bold text-base tracking-tight">Tambah Anggota Profesional Lainnya</span>
+                            </button>
+                        )}
                     </div>
                 )}
 
                 {/* Step 4: Education (Children) */}
                 {step === 4 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        {selectInput('education_schoolingStatus', 'Anak Bersekolah?', ['Ya', 'Tidak'])}
+                    <div className="space-y-8 animate-fade-in border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none" />
+
+                        <SectionDivider title="Bidang Pendidikan" />
+
+                        {/* Question 1: Schooling Status */}
+                        <div className="space-y-4 relative z-10">
+                            <FormLabel required>Apakah semua anak usia sekolah (7-18 tahun) di rumah ini sedang bersekolah?</FormLabel>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                {['Ya', 'Tidak', 'Tidak ada anak usia sekolah'].map((opt) => (
+                                    <label key={opt} className={`cursor-pointer p-3.5 border-2 rounded-xl flex items-start gap-3 transition-all duration-200 ${formData.education_schoolingStatus === opt ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-slate-200 dark:border-slate-700'}`}>
+                                        <input
+                                            type="radio"
+                                            value={opt}
+                                            checked={formData.education_schoolingStatus === opt}
+                                            onChange={(e) => setFormData({ ...formData, education_schoolingStatus: e.target.value })}
+                                            className="mt-1"
+                                        />
+                                        <span className="font-bold text-slate-900 dark:text-white text-sm">{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Question 2: Currently in School (Conditional) */}
                         {formData.education_schoolingStatus === 'Ya' && (
-                            <>
-                                <SectionDivider title="Sedang Sekolah" />
-                                {numInput('education_inSchool_tk_paud', 'TK/PAUD')}
-                                {numInput('education_inSchool_sd', 'SD')}
-                                {numInput('education_inSchool_smp', 'SMP')}
-                                {numInput('education_inSchool_sma', 'SMA')}
-                                {numInput('education_inSchool_university', 'Universitas')}
+                            <div className="space-y-6 pl-4 border-l-2 border-primary/20">
+                                <div className="space-y-4">
+                                    <FormLabel required>Total anak sekolah dan distribusinya:</FormLabel>
+                                    <div className="max-w-[200px] flex flex-col gap-2">
+                                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Sekolah</label>
+                                        <CountSelect
+                                            id="totalInSchool"
+                                            value={formData.education_totalInSchool || 0}
+                                            onChange={(val) => setFormData({
+                                                ...formData,
+                                                education_totalInSchool: val,
+                                                education_inSchool_tk_paud: 0,
+                                                education_inSchool_sd: 0,
+                                                education_inSchool_smp: 0,
+                                                education_inSchool_sma: 0,
+                                                education_inSchool_university: 0
+                                            })}
+                                            max={15}
+                                            placeholder="Pilih Total..."
+                                        />
+                                    </div>
+                                </div>
 
-                                <SectionDivider title="Putus Sekolah" />
-                                {numInput('education_dropout_tk_paud', 'TK/PAUD')}
-                                {numInput('education_dropout_sd', 'SD')}
-                                {numInput('education_dropout_smp', 'SMP')}
-                                {numInput('education_dropout_sma', 'SMA')}
-                                {numInput('education_dropout_university', 'Universitas')}
+                                {formData.education_totalInSchool > 0 && (() => {
+                                    const totalInSchool = formData.education_totalInSchool || 0;
+                                    const allocatedInSchool = (formData.education_inSchool_tk_paud || 0) +
+                                        (formData.education_inSchool_sd || 0) +
+                                        (formData.education_inSchool_smp || 0) +
+                                        (formData.education_inSchool_sma || 0) +
+                                        (formData.education_inSchool_university || 0);
+                                    const isSummaryValid = totalInSchool === 0 || allocatedInSchool === totalInSchool;
 
-                                <SectionDivider title="Pengangguran (Lulus)" />
-                                {numInput('education_unemployed_sd', 'SD')}
-                                {numInput('education_unemployed_smp', 'SMP')}
-                                {numInput('education_unemployed_sma', 'SMA')}
-                                {numInput('education_unemployed_university', 'Universitas')}
-                                {numInput('education_working', 'Sudah Bekerja')}
-                            </>
+                                    return (
+                                        <div className="space-y-4 animate-fadeIn">
+                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                {[
+                                                    { label: 'TK/PAUD', field: 'education_inSchool_tk_paud' },
+                                                    { label: 'SD', field: 'education_inSchool_sd' },
+                                                    { label: 'SMP', field: 'education_inSchool_smp' },
+                                                    { label: 'SMA', field: 'education_inSchool_sma' },
+                                                    { label: 'Perguruan Tinggi', field: 'education_inSchool_university' },
+                                                ].map(({ label, field }) => {
+                                                    const currentVal = (formData[field as keyof typeof formData] as number) || 0;
+                                                    const otherAllocated = allocatedInSchool - currentVal;
+                                                    const maxPossible = totalInSchool - otherAllocated;
+
+                                                    return (
+                                                        <div key={field} className="flex flex-col gap-2">
+                                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                                            <CountSelect
+                                                                id={field}
+                                                                value={currentVal}
+                                                                onChange={(val) => setFormData({ ...formData, [field]: val })}
+                                                                max={maxPossible}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {!isSummaryValid && (
+                                                <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg max-w-fit">
+                                                    <span className="material-symbols-outlined text-sm shrink-0">warning</span>
+                                                    Total distribusi ({allocatedInSchool}) belum sesuai dengan Total Anak ({totalInSchool})
+                                                </p>
+                                            )}
+
+                                            {isSummaryValid && allocatedInSchool > 0 && (
+                                                <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit">
+                                                    <span className="material-symbols-outlined text-sm shrink-0">check_circle</span>
+                                                    Distribusi data sudah sesuai dengan total anak.
+                                                </p>
+                                            )}
+                                        </div>
+                                    )
+                                })()}
+                            </div>
                         )}
+
+                        {/* Question 3: Dropouts */}
+                        {(formData.education_schoolingStatus === 'Ya' || formData.education_schoolingStatus === 'Tidak') && (
+                            <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <FormLabel required>Anak Putus Sekolah:</FormLabel>
+                                    <div className="max-w-[200px] flex flex-col gap-2">
+                                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Putus Sekolah</label>
+                                        <CountSelect
+                                            id="totalDropout"
+                                            value={formData.education_totalDropout || 0}
+                                            onChange={(val) => setFormData({
+                                                ...formData,
+                                                education_totalDropout: val,
+                                                education_dropout_sd: 0,
+                                                education_dropout_smp: 0,
+                                                education_dropout_sma: 0,
+                                                education_dropout_university: 0
+                                            })}
+                                            max={15}
+                                            placeholder="Pilih Total..."
+                                        />
+                                    </div>
+                                </div>
+
+                                {formData.education_totalDropout > 0 && (() => {
+                                    const totalDropout = formData.education_totalDropout || 0;
+                                    const allocatedDropout = (formData.education_dropout_sd || 0) +
+                                        (formData.education_dropout_smp || 0) +
+                                        (formData.education_dropout_sma || 0) +
+                                        (formData.education_dropout_university || 0);
+                                    const isDropoutSummaryValid = totalDropout === 0 || allocatedDropout === totalDropout;
+
+                                    return (
+                                        <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                {[
+                                                    { label: 'SD', field: 'education_dropout_sd' },
+                                                    { label: 'SMP', field: 'education_dropout_smp' },
+                                                    { label: 'SMA', field: 'education_dropout_sma' },
+                                                    { label: 'Perguruan Tinggi', field: 'education_dropout_university' },
+                                                ].map(({ label, field }) => {
+                                                    const currentVal = (formData[field as keyof typeof formData] as number) || 0;
+                                                    const otherAllocated = allocatedDropout - currentVal;
+                                                    const maxPossible = totalDropout - otherAllocated;
+
+                                                    return (
+                                                        <div key={field} className="flex flex-col gap-2">
+                                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                                            <CountSelect
+                                                                id={field}
+                                                                value={currentVal}
+                                                                onChange={(val) => setFormData({ ...formData, [field]: val })}
+                                                                max={maxPossible}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {!isDropoutSummaryValid && (
+                                                <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg max-w-fit">
+                                                    <span className="material-symbols-outlined text-sm shrink-0">warning</span>
+                                                    Total distribusi ({allocatedDropout}) belum sesuai dengan Total ({totalDropout})
+                                                </p>
+                                            )}
+                                            {isDropoutSummaryValid && allocatedDropout > 0 && (
+                                                <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit">
+                                                    <span className="material-symbols-outlined text-sm shrink-0">check_circle</span>
+                                                    Distribusi data sudah sesuai.
+                                                </p>
+                                            )}
+                                        </div>
+                                    )
+                                })()}
+                            </div>
+                        )}
+
+                        {/* Question 4: Graduated but Unemployed */}
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <FormLabel required>Anak Tamat Sekolah Belum Bekerja:</FormLabel>
+                                <div className="max-w-[200px] flex flex-col gap-2">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Belum Bekerja</label>
+                                    <CountSelect
+                                        id="totalUnemployed"
+                                        value={formData.education_totalUnemployed || 0}
+                                        onChange={(val) => setFormData({
+                                            ...formData,
+                                            education_totalUnemployed: val,
+                                            education_unemployed_sd: 0,
+                                            education_unemployed_smp: 0,
+                                            education_unemployed_sma: 0,
+                                            education_unemployed_university: 0
+                                        })}
+                                        max={15}
+                                        placeholder="Pilih Total..."
+                                    />
+                                </div>
+                            </div>
+
+                            {formData.education_totalUnemployed > 0 && (() => {
+                                const totalUnemployed = formData.education_totalUnemployed || 0;
+                                const allocatedUnemployed = (formData.education_unemployed_sd || 0) +
+                                    (formData.education_unemployed_smp || 0) +
+                                    (formData.education_unemployed_sma || 0) +
+                                    (formData.education_unemployed_university || 0);
+                                const isUnemployedSummaryValid = totalUnemployed === 0 || allocatedUnemployed === totalUnemployed;
+
+                                return (
+                                    <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            {[
+                                                { label: 'SD', field: 'education_unemployed_sd' },
+                                                { label: 'SMP', field: 'education_unemployed_smp' },
+                                                { label: 'SMA', field: 'education_unemployed_sma' },
+                                                { label: 'Perguruan Tinggi', field: 'education_unemployed_university' },
+                                            ].map(({ label, field }) => {
+                                                const currentVal = (formData[field as keyof typeof formData] as number) || 0;
+                                                const otherAllocated = allocatedUnemployed - currentVal;
+                                                const maxPossible = totalUnemployed - otherAllocated;
+
+                                                return (
+                                                    <div key={field} className="flex flex-col gap-2">
+                                                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                                        <CountSelect
+                                                            id={field}
+                                                            value={currentVal}
+                                                            onChange={(val) => setFormData({ ...formData, [field]: val })}
+                                                            max={maxPossible}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {!isUnemployedSummaryValid && (
+                                            <p className="text-red-500 text-xs font-medium flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg max-w-fit">
+                                                <span className="material-symbols-outlined text-sm shrink-0">warning</span>
+                                                Total distribusi ({allocatedUnemployed}) belum sesuai dengan Total ({totalUnemployed})
+                                            </p>
+                                        )}
+                                        {isUnemployedSummaryValid && allocatedUnemployed > 0 && (
+                                            <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit">
+                                                <span className="material-symbols-outlined text-sm shrink-0">check_circle</span>
+                                                Distribusi data sudah sesuai.
+                                            </p>
+                                        )}
+                                    </div>
+                                )
+                            })()}
+                        </div>
+
+                        {/* Question 5: Working Children */}
+                        <div className="space-y-4">
+                            <FormLabel required>Jumlah anak sudah bekerja:</FormLabel>
+                            <div className="max-w-[200px] flex flex-col gap-2">
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Orang</label>
+                                <CountSelect
+                                    id="education_working"
+                                    value={formData.education_working || 0}
+                                    onChange={(val) => setFormData({ ...formData, education_working: val })}
+                                    max={15}
+                                    placeholder="Pilih Total..."
+                                />
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -625,9 +1482,15 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 {step === 5 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
                         <SectionDivider title="Pekerjaan & Pendapatan" />
-                        {selectInput('economics_headOccupation', 'Pekerjaan Kepala Keluarga', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'Pensiunan', 'Tidak Bekerja', 'Lainnya'])}
-                        {selectInput('economics_spouseOccupation', 'Pekerjaan Pasangan', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'IRT', 'Tidak Bekerja', 'Lainnya'])}
-                        {selectInput('economics_incomeRange', 'Penghasilan', ['< 1 Juta', '1-3 Juta', '3-5 Juta', '5-10 Juta', '> 10 Juta'])}
+                        <div className="col-span-2">
+                            {selectInput('economics_headOccupation', 'Pekerjaan Utama Kepala Keluarga', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'Pensiunan', 'Tidak Bekerja', 'Lainnya'])}
+                        </div>
+                        <div className="col-span-2">
+                            {selectInput('economics_spouseOccupation', 'Pekerjaan Utama Istri', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'IRT', 'Tidak Bekerja', 'Lainnya'])}
+                        </div>
+                        <div className="col-span-2">
+                            {selectInput('economics_incomeRange', 'Range Pendapatan Rumah Tangga Per Bulan', ['< 1 Juta', '1-3 Juta', '3-5 Juta', '5-10 Juta', '> 10 Juta'])}
+                        </div>
 
                         <SectionDivider title="Pengeluaran (Rp/bulan)" />
                         {numInput('economics_expense_food', 'Makan/Minum')}
@@ -672,16 +1535,16 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             </div>
 
             {/* Footer Actions */}
-            <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800">
-                <button onClick={handleBack} className="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                    {step === 1 ? 'Batal' : '← Kembali'}
+            <div className="flex justify-between items-center pt-4 mt-6 border-t border-slate-100 dark:border-slate-800">
+                <button onClick={handleBack} className="px-6 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 border-2 border-red-500/20 hover:border-red-500/50 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all">
+                    {step === 1 ? 'Batal' : '← Sebelumnya'}
                 </button>
                 <button onClick={handleNext} disabled={isLoading}
-                    className="px-8 py-2.5 rounded-xl text-sm font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 disabled:opacity-50 transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    className="px-8 py-2.5 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30 active:scale-95 transition-all flex items-center gap-2">
                     {isLoading && <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>}
-                    {step === TOTAL_STEPS ? (initialData ? 'Simpan Perubahan' : 'Tambah Jemaat') : 'Lanjut →'}
+                    {step === TOTAL_STEPS ? (initialData ? 'Simpan Perubahan' : 'Tambah Jemaat') : 'Lanjutkan →'}
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
