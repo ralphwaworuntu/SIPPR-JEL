@@ -144,7 +144,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                             className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors cursor-pointer text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                         >
                             <span className="material-symbols-outlined text-sm">download</span>
-                            <span className="text-sm font-medium">Install App</span>
+                            <span className="text-sm font-medium">Install Aplikasi</span>
                         </div>
                     )}
 

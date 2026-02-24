@@ -555,7 +555,7 @@ app.delete("/api/members/:id", async (req, res) => {
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
         // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes] = await Promise.all([
+        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes] = await Promise.all([
             // 1. Total Households (Records)
             db.select({ count: sql<number>`count(*)` }).from(congregants),
 
@@ -590,7 +590,18 @@ app.get("/api/dashboard/stats", async (req, res) => {
             db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.lingkungan),
 
             // 9. Rayon Distribution
-            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon)
+            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon),
+
+            // 10. Education Summary (Children in School)
+            db.select({
+                total: sql<number>`SUM(
+                    COALESCE(education_in_school_tk_paud, 0) + 
+                    COALESCE(education_in_school_sd, 0) + 
+                    COALESCE(education_in_school_smp, 0) + 
+                    COALESCE(education_in_school_sma, 0) + 
+                    COALESCE(education_in_school_university, 0)
+                )`
+            }).from(congregants)
         ]);
 
         const total = totalRes[0]?.count || 0;
@@ -671,6 +682,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
             }
         });
 
+
         res.json({
             total,
             totalSouls,
@@ -681,6 +693,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
             professionalCount,
             professionalFamilyCount,
             volunteerCount,
+            educationCount: Number(eduSumRes[0]?.total) || 0,
             distributions: {
                 sector: sectorCounts,
                 gender: genderCounts,
@@ -716,15 +729,106 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
         .on('data', (data: any) => results.push(data))
         .on('end', async () => {
             try {
-                // Bulk insert
+                const safeInt = (val: any) => {
+                    const n = parseInt(val);
+                    return isNaN(n) ? 0 : n;
+                };
+
+                const safeJSON = (val: any) => {
+                    if (!val) return JSON.stringify([]);
+                    if (typeof val === 'string' && val.includes(';')) {
+                        return JSON.stringify(val.split(';').map(s => s.trim()).filter(Boolean));
+                    }
+                    return JSON.stringify([val]);
+                };
+
+                // Enhanced mapping for all fields
                 const insertData = results.map(row => ({
-                    fullName: row.Nama || row.Name || "Tanpa Nama",
-                    sector: row.Sektor || "Efata",
-                    educationLevel: row.Pendidikan || "SMA",
-                    jobCategory: row.Pekerjaan || "Belum Bekerja",
-                    gender: row.Gender || "Laki-laki",
-                    dateOfBirth: row.Umur ? new Date(new Date().getFullYear() - parseInt(row.Umur), 0, 1) : null,
-                    skills: row.Keahlian ? JSON.stringify(row.Keahlian.split(';')) : JSON.stringify([]),
+                    fullName: row["Nama Lengkap"] || row["Nama"] || row["Name"] || "Tanpa Nama",
+                    gender: row["Gender"] || "Laki-laki",
+                    dateOfBirth: row["Tanggal Lahir"] ? new Date(row["Tanggal Lahir"]) : null,
+                    phone: row["No HP"] || null,
+                    address: row["Alamat"] || null,
+                    sector: row["Sektor"] || "Efata",
+                    lingkungan: row["Lingkungan"] || "-",
+                    rayon: row["Rayon"] || "-",
+                    kkNumber: row["No KK"] || null,
+                    nik: row["NIK"] || null,
+
+                    // Family
+                    familyMembers: safeInt(row["Total Anggota Keluarga"]),
+                    familyMembersMale: safeInt(row["Laki-laki"]),
+                    familyMembersFemale: safeInt(row["Perempuan"]),
+                    familyMembersOutside: safeInt(row["Di Luar Kota"]),
+                    familyMembersSidi: safeInt(row["Sudah Sidi"]),
+                    familyMembersSidiMale: safeInt(row["Sidi Laki-laki"]),
+                    familyMembersSidiFemale: safeInt(row["Sidi Perempuan"]),
+                    familyMembersNonBaptized: safeInt(row["Belum Baptis"]),
+                    familyMembersNonSidi: safeInt(row["Belum Sidi"]),
+
+                    // Diakonia
+                    diakoniaRecipient: row["Penerima Diakonia"] || "Tidak",
+                    diakoniaYear: row["Tahun Diakonia"] || null,
+                    diakoniaType: row["Jenis Diakonia"] || null,
+
+                    // Professional
+                    educationLevel: row["Pendidikan Terakhir"] || row["Pendidikan"] || "SMA",
+                    major: row["Jurusan"] || null,
+                    jobCategory: row["Kategori Pekerjaan"] || row["Pekerjaan"] || "Belum Bekerja",
+                    jobTitle: row["Jabatan"] || null,
+                    companyName: row["Nama Instansi"] || null,
+                    yearsOfExperience: safeInt(row["Lama Kerja (Tahun)"]),
+                    skills: safeJSON(row["Daftar Keahlian"] || row["Keahlian"]),
+
+                    // Commitment
+                    willingnessToServe: row["Kesediaan Melayani"] || "Not-available",
+                    interestAreas: safeJSON(row["Minat Pelayanan"]),
+                    contributionTypes: safeJSON(row["Bentuk Kontribusi"]),
+
+                    // Education (Children)
+                    educationSchoolingStatus: row["Status Anak Bersekolah"] || "Tidak Ada",
+                    educationInSchoolTkPaud: safeInt(row["TK/PAUD (Sekolah)"]),
+                    educationInSchoolSd: safeInt(row["SD (Sekolah)"]),
+                    educationInSchoolSmp: safeInt(row["SMP (Sekolah)"]),
+                    educationInSchoolSma: safeInt(row["SMA (Sekolah)"]),
+                    educationInSchoolUniversity: safeInt(row["Universitas (Sekolah)"]),
+                    educationDropoutTkPaud: safeInt(row["TK/PAUD (Putus)"]),
+                    educationDropoutSd: safeInt(row["SD (Putus)"]),
+                    educationDropoutSmp: safeInt(row["SMP (Putus)"]),
+                    educationDropoutSma: safeInt(row["SMA (Putus)"]),
+                    educationDropoutUniversity: safeInt(row["Universitas (Putus)"]),
+                    educationWorking: safeInt(row["Anak Sudah Bekerja"]),
+
+                    // Economics
+                    economicsHeadOccupation: row["Pekerjaan KK"] || null,
+                    economicsSpouseOccupation: row["Pekerjaan Pasangan"] || null,
+                    economicsIncomeRange: row["Range Pendapatan"] || null,
+                    economicsExpenseFood: safeInt(row["Pengeluaran Pangan"]),
+                    economicsExpenseUtilities: safeInt(row["Pengeluaran Utilitas"]),
+                    economicsExpenseEducation: safeInt(row["Pengeluaran Pendidikan"]),
+                    economicsExpenseOther: safeInt(row["Pengeluaran Lainnya"]),
+                    economicsHasBusiness: row["Punya Usaha?"] || "Tidak",
+                    economicsBusinessName: row["Nama Usaha"] || null,
+                    economicsBusinessType: row["Jenis Usaha"] || null,
+                    economicsHouseStatus: row["Status Rumah"] || null,
+                    economicsHouseType: row["Jenis Rumah"] || null,
+                    economicsWaterSource: row["Sumber Air"] || null,
+                    economicsAssets: safeJSON(row["Daftar Aset"]),
+
+                    // Health
+                    healthSick30Days: row["Sakit 30 Hari Terakhir"] || "Tidak",
+                    healthChronicSick: row["Penyakit Kronis"] || "Tidak",
+                    healthChronicDisease: safeJSON(row["Daftar Penyakit"]),
+                    healthHasBPJS: row["BPJS Kesehatan"] || "Tidak",
+                    healthHasBPJSKetenagakerjaan: row["BPJS Ketenagakerjaan"] || "Tidak",
+                    healthSocialAssistance: row["Bantuan Sosial"] || "Tidak",
+                    healthHasDisability: row["Disabilitas"] || "Tidak",
+                    healthDisabilityPhysical: safeJSON(row["Daftar Disabilitas"]),
+
+                    // Geolocation
+                    latitude: row["Latitude"] || "-10.1633",
+                    longitude: row["Longitude"] || "123.6083",
+
                     status: 'VALIDATED'
                 }));
 
@@ -733,11 +837,10 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                 }
 
                 fs.unlinkSync(file.path);
-
                 res.json({ success: true, count: insertData.length });
             } catch (error) {
                 console.error("Import error:", error);
-                res.status(500).json({ error: "Failed to import data" });
+                res.status(500).json({ error: "Failed to import data. Check CSV headers." });
             }
         });
 });

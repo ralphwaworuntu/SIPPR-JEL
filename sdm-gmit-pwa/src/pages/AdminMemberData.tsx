@@ -184,820 +184,875 @@ const AdminMemberData = () => {
     // Export Logic
     const handleExportCSV = () => {
         const headers = [
-            "Nama", "ID", "Sektor", "Lingkungan", "Rayon", "Gender", "Tanggal Lahir", "Umur", "No HP", "Alamat", "No KK", "NIK",
-            "Pendidikan", "Jurusan", "Kategori Pekerjaan", "Jabatan", "Instansi", "Lama Kerja", "Keahlian",
-            "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi",
-            "Anggota Keluarga", "Laki-laki", "Perempuan", "Luar Kota", "Sidi", "Sidi L", "Sidi P", "Belum Baptis", "Belum Sidi",
+            // Step 1: Identitas & Keluarga
+            "Nama Lengkap", "ID Sistem", "Sektor", "Lingkungan", "Rayon", "Gender", "Tanggal Lahir", "Umur", "No HP", "Alamat", "No KK", "NIK",
+            "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Sidi Laki-laki", "Sidi Perempuan", "Belum Baptis", "Belum Sidi",
+
+            // Step 2: Diakonia & Profesional
             "Penerima Diakonia", "Tahun Diakonia", "Jenis Diakonia",
-            "Anak Bersekolah", "Bekerja",
-            "Pekerjaan KK", "Pekerjaan Pasangan", "Pendapatan", "Punya Usaha", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air",
-            "Sakit 30 Hari", "Penyakit Kronis", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas",
-            "Status"
+            "Pendidikan Terakhir", "Jurusan", "Kategori Pekerjaan", "Jabatan", "Nama Instansi", "Lama Kerja (Tahun)", "Daftar Keahlian",
+
+            // Step 3: Komitmen
+            "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi",
+
+            // Step 4: Pendidikan Anak
+            "Status Anak Bersekolah", "TK/PAUD (Sekolah)", "SD (Sekolah)", "SMP (Sekolah)", "SMA (Sekolah)", "Universitas (Sekolah)",
+            "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)",
+            "Anak Sudah Bekerja",
+
+            // Step 5: Ekonomi & Aset
+            "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
+            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
+
+            // Step 6: Kesehatan
+            "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
+
+            // Geo & Status
+            "Latitude", "Longitude", "Status Data"
         ];
+
         const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-        const arrStr = (v: any) => Array.isArray(v) ? v.join('; ') : '';
+        const arrStr = (v: any) => Array.isArray(v) ? v.join('; ') : (v || '');
+
         const rows = filteredMembers.map(m => [
+            // Identitas
             esc(m.name), esc(m.id), esc(m.sector), esc(m.lingkungan), esc(m.rayon), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.phone), esc(m.address), esc(m.kkNumber), esc(m.nik),
-            esc(m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
-            esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
             m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonBaptized || 0, m.familyMembersNonSidi || 0,
+
+            // Diakonia & Profesi
             esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
-            esc(m.education_schoolingStatus), m.education_working || 0,
-            esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource),
-            esc(m.health_sick30Days), esc(m.health_chronicSick), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability),
-            esc(m.statusGerejawi)
+            esc(m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
+
+            // Komitmen
+            esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
+
+            // Pendidikan Anak
+            esc(m.education_schoolingStatus), m.education_inSchool_tk_paud || 0, m.education_inSchool_sd || 0, m.education_inSchool_smp || 0, m.education_inSchool_sma || 0, m.education_inSchool_university || 0,
+            m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0,
+            m.education_working || 0,
+
+            // Ekonomi
+            esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), m.economics_expense_food || 0, m.economics_expense_utilities || 0, m.economics_expense_education || 0, m.economics_expense_other || 0,
+            esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource), esc(arrStr(m.economics_assets)),
+
+            // Kesehatan
+            esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease)), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability), esc(arrStr(m.health_disabilityPhysical)),
+
+            // Extra
+            m.latitude || "", m.longitude || "", esc(m.statusGerejawi || 'AKTIF')
         ].join(','));
+
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows].join("\n");
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `data_jemaat_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute("download", `data_jemaat_EMAUS_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        toast.success(`CSV berhasil diexport (${filteredMembers.length} data)`);
+        toast.success(`CSV berhasil diexport (${filteredMembers.length} jemaat)`);
     };
 
     const handleExportPDF = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
 
         doc.setFontSize(18);
-        doc.text("Laporan Data Jemaat", 14, 22);
+        doc.text("Laporan Data Jemaat Terpadu - Emaus Liliba", 14, 22);
         doc.setFontSize(11);
-        doc.text(`Total Data: ${filteredMembers.length} | Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 30);
 
-        const tableColumn = ["No", "Nama", "Sektor", "L/R", "Pendidikan", "Pekerjaan", "Gender", "Umur", "Keluarga", "BPJS", "Status"];
+        const tableColumn = ["No", "Nama", "Sektor", "Rayon/Ling", "Pendidikan", "Pekerjaan", "Gender", "Umur", "Status"];
         const tableRows = filteredMembers.map((m, i) => [
             i + 1,
             m.name,
             m.sector,
-            `L${m.lingkungan}/R${m.rayon}`,
+            `R${m.rayon}/L${m.lingkungan}`,
             m.education,
-            m.jobCategory || m.job,
+            m.jobCategory,
             m.gender === 'Laki-laki' ? 'L' : 'P',
             calculateAge(m.birthDate),
-            m.familyMembers || 0,
-            m.health_hasBPJS || '-',
-            m.statusGerejawi || '-'
+            m.statusGerejawi || 'AKTIF'
         ]);
 
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,
             startY: 40,
-            styles: { fontSize: 7 },
-            headStyles: { fillColor: [30, 41, 59] },
+            theme: 'grid',
+            headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 8, cellPadding: 2 },
+            columnStyles: {
+                0: { cellWidth: 10 },
+                1: { cellWidth: 50 },
+                4: { cellWidth: 25 },
+                5: { cellWidth: 35 }
+            },
+            alternateRowStyles: { fillColor: [248, 250, 252] }
         });
 
-        doc.save(`laporan_jemaat_${new Date().toISOString().split('T')[0]}.pdf`);
-        toast.success("PDF berhasil didownload");
+        doc.save(`Laporan_Jemaat_Emaus_Liliba_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success("PDF berhasil diexport");
     };
 
     return (
         <AdminLayout title="Data Jemaat">
-            {/* Page Header */}
-            <div className="flex flex-wrap justify-between gap-3 mb-6">
-                <div className="flex min-w-72 flex-col gap-1">
-                    <p className="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight">Manajemen Data</p>
-                    <p className="text-slate-500 text-sm font-normal">Kelola data profesional dan potensi SDM jemaat.</p>
-                </div>
-                <div className="flex gap-2 items-end flex-wrap">
-                    <button onClick={() => setIsImportModalOpen(true)} className="flex items-center gap-2 px-4 h-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 font-bold text-slate-700 dark:text-slate-200 text-sm shadow-sm transition-colors">
-                        <span className="material-symbols-outlined text-lg">upload_file</span>
-                        Import
-                    </button>
-                    <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                        <button onClick={handleExportCSV} className="px-3 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2">
-                            <span className="material-symbols-outlined text-lg">csv</span> CSV
-                        </button>
-                        <button onClick={handleExportPDF} className="px-3 h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2">
-                            <span className="material-symbols-outlined text-lg">picture_as_pdf</span> PDF
-                        </button>
-                    </div>
-                    <button onClick={() => { setIsEditMode(false); setIsAddModalOpen(true); }} className="flex items-center gap-2 px-4 h-10 rounded-lg bg-primary text-slate-900 font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors">
-                        <span className="material-symbols-outlined text-lg">add</span>
-                        Tambah
-                    </button>
-                </div>
-            </div>
-
-            {/* Bulk Action Bar */}
-            {selectedIds.length > 0 && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border border-slate-700">
-                    <span className="font-bold text-sm">{selectedIds.length} terpilih</span>
-                    <div className="h-4 w-px bg-slate-700"></div>
-                    <div className="flex gap-2">
-                        <button onClick={() => setIsBulkEditModalOpen(true)} className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-800 rounded-lg transition-colors text-sm font-bold text-blue-400">
-                            <span className="material-symbols-outlined text-lg">edit_note</span> Edit Massal
-                        </button>
-                        <button onClick={handleBulkDelete} className="flex items-center gap-2 px-3 py-1.5 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors text-sm font-bold">
-                            <span className="material-symbols-outlined text-lg">delete</span> Hapus
-                        </button>
-                    </div>
-                    <button onClick={() => setSelectedIds([])} className="ml-2 bg-slate-800 hover:bg-slate-700 rounded-full p-1 text-slate-400 transition-colors">
-                        <span className="material-symbols-outlined text-lg">close</span>
-                    </button>
-                </div>
-            )}
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Jemaat</p>
-                        <span className="material-symbols-outlined text-primary/80">groups</span>
-                    </div>
-                    <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.total}</p>
-                    <div className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-xs text-green-500">trending_up</span>
-                        <p className="text-green-500 text-xs font-bold">+{stats.growth}% bulan ini</p>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Sektor Dominan</p>
-                        <span className="material-symbols-outlined text-primary/80">domain</span>
-                    </div>
-                    <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.sectorDominant}</p>
-                    <p className="text-slate-500 text-xs font-medium">Populasi Terbanyak</p>
-                </div>
-                <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Keahlian</p>
-                        <span className="material-symbols-outlined text-primary/80">psychology</span>
-                    </div>
-                    <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.activeSkills}</p>
-                    <p className="text-slate-500 text-xs font-medium">Skill Terdata</p>
-                </div>
-            </div>
-
-            {/* Filter & View Controls */}
-            <div className="flex flex-col gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm mb-6">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="relative flex-1 min-w-[200px]">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-                        <input
-                            id="search-input"
-                            type="text"
-                            placeholder="Cari (Tekan '/')"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all"
-                        />
-                    </div>
-
-                    <div className="flex gap-2 items-center overflow-x-auto">
-                        <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
-                            <button onClick={() => setViewMode('table')} className={`p-1.5 rounded transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-400 hover:text-slate-600'}`}>
-                                <span className="material-symbols-outlined text-xl">table_rows</span>
+            <div className="min-h-screen bg-slate-50/30 dark:bg-transparent p-4 lg:p-8">
+                <div className="max-w-[1600px] mx-auto">
+                    {/* Page Header */}
+                    <div className="flex flex-wrap justify-between gap-6 mb-8">
+                        <div className="flex min-w-72 flex-col gap-1">
+                            <h1 className="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-tight">Manajemen Data Jemaat Emaus Liliba</h1>
+                            <p className="text-slate-500 text-sm font-medium">Kelola profil lengkap dan data jemaat.</p>
+                        </div>
+                        <div className="flex gap-3 items-end flex-wrap">
+                            <button onClick={() => setIsImportModalOpen(true)} className="flex items-center gap-2 px-5 h-11 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 font-bold text-slate-700 dark:text-slate-200 text-sm shadow-sm transition-all active:scale-95">
+                                <span className="material-symbols-outlined text-xl text-primary font-icon">upload_file</span>
+                                Import Data
                             </button>
-                            <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-400 hover:text-slate-600'}`}>
-                                <span className="material-symbols-outlined text-xl">grid_view</span>
+                            <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm bg-white dark:bg-slate-800">
+                                <button onClick={handleExportCSV} className="px-4 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip" title="Export ke CSV">
+                                    <span className="material-symbols-outlined text-xl text-green-500 font-icon">csv</span> CSV
+                                </button>
+                                <button onClick={handleExportPDF} className="px-4 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip" title="Export ke PDF">
+                                    <span className="material-symbols-outlined text-xl text-red-500 font-icon">picture_as_pdf</span> PDF
+                                </button>
+                            </div>
+                            <button onClick={() => { setIsEditMode(false); setIsAddModalOpen(true); }} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-primary text-slate-900 font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all active:scale-95">
+                                <span className="material-symbols-outlined text-xl font-icon">person_add</span>
+                                TAMBAH JEMAAT
                             </button>
                         </div>
-                        <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                        <select
-                            value={filterSector}
-                            onChange={(e) => setFilterSector(e.target.value)}
-                            className="h-10 pl-3 pr-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium border-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
-                        >
-                            <option value="Semua">Semua Sektor Kat.</option>
-                            <option value="Pemuda">Pemuda</option>
-                            <option value="Kaum Perempuan">Kaum Perempuan</option>
-                            <option value="Kaum Bapak">Kaum Bapak</option>
-                            <option value="Lansia">Lansia</option>
-                        </select>
-                        <button
-                            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-bold border transition-colors ${showAdvancedFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-lg">tune</span>
-                            Filter
-                        </button>
-                        {/* Clear Filter Button - Only visible if filters active */}
-                        {(searchTerm || filterSector !== "Semua" || filterGender !== "Semua" || filterAgeCategory !== "Semua" || filterStatus !== "Semua") &&
-                            <button
-                                onClick={() => { setSearchTerm(""); setFilterSector("Semua"); setFilterGender("Semua"); setFilterAgeCategory("Semua"); setFilterStatus("Semua"); }}
-                                className="text-red-500 text-xs font-bold px-2 hover:bg-red-50 rounded py-1 transition-colors"
-                            >
-                                <span className="material-symbols-outlined text-lg align-middle">backspace</span>
+                    </div>
+
+
+                    {/* Bulk Action Bar */}
+                    {selectedIds.length > 0 && (
+                        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 border border-slate-700">
+                            <span className="font-bold text-sm">{selectedIds.length} terpilih</span>
+                            <div className="h-4 w-px bg-slate-700"></div>
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsBulkEditModalOpen(true)} className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-800 rounded-lg transition-colors text-sm font-bold text-blue-400">
+                                    <span className="material-symbols-outlined text-lg">edit_note</span> Edit Massal
+                                </button>
+                                <button onClick={handleBulkDelete} className="flex items-center gap-2 px-3 py-1.5 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors text-sm font-bold">
+                                    <span className="material-symbols-outlined text-lg">delete</span> Hapus
+                                </button>
+                            </div>
+                            <button onClick={() => setSelectedIds([])} className="ml-2 bg-slate-800 hover:bg-slate-700 rounded-full p-1 text-slate-400 transition-colors">
+                                <span className="material-symbols-outlined text-lg">close</span>
                             </button>
-                        }
-                    </div>
-                </div>
+                        </div>
+                    )}
 
-                {showAdvancedFilters && (
-                    <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-down">
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Jenis Kelamin</label>
-                            <select
-                                value={filterGender}
-                                onChange={(e) => setFilterGender(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="Semua">Semua</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Jemaat</p>
+                                <span className="material-symbols-outlined text-primary/80">groups</span>
+                            </div>
+                            <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.total}</p>
+                            <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-xs text-green-500">trending_up</span>
+                                <p className="text-green-500 text-xs font-bold">+{stats.growth}% bulan ini</p>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Kategori Usia</label>
-                            <select
-                                value={filterAgeCategory}
-                                onChange={(e) => setFilterAgeCategory(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="Semua">Semua</option>
-                                <option value="Anak">Anak (0-12)</option>
-                                <option value="Remaja">Remaja (13-17)</option>
-                                <option value="Pemuda">Pemuda (18-30)</option>
-                                <option value="Dewasa">Dewasa (31-60)</option>
-                                <option value="Lansia">Lansia ({'>'}60)</option>
-                            </select>
+                        <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Sektor Dominan</p>
+                                <span className="material-symbols-outlined text-primary/80">domain</span>
+                            </div>
+                            <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.sectorDominant}</p>
+                            <p className="text-slate-500 text-xs font-medium">Populasi Terbanyak</p>
                         </div>
-                        <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Status Gerejawi</label>
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="Semua">Semua</option>
-                                <option value="Sidi">Sidi</option>
-                                <option value="Baptis">Baptis</option>
-                                <option value="Katekisasi">Katekisasi</option>
-                            </select>
+                        <div className="flex flex-col gap-2 rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Keahlian</p>
+                                <span className="material-symbols-outlined text-primary/80">psychology</span>
+                            </div>
+                            <p className="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">{stats.activeSkills}</p>
+                            <p className="text-slate-500 text-xs font-medium">Skill Terdata</p>
                         </div>
                     </div>
-                )}
-            </div>
 
-            {/* Table View Tabs */}
-            <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
-                {['Identitas', 'Profesional', 'Komitmen', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setTableTab(tab as any)}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${tableTab === tab ? 'bg-primary text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                    >
-                        Data {tab}
-                    </button>
-                ))}
-            </div>
+                    {/* Filter & View Controls */}
+                    <div className="flex flex-col gap-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm mb-6">
+                        <div className="flex flex-wrap items-center gap-4">
+                            <div className="relative flex-1 min-w-[200px]">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                                <input
+                                    id="search-input"
+                                    type="text"
+                                    placeholder="Cari (Tekan '/')"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 font-medium transition-all"
+                                />
+                            </div>
 
-            {/* List View */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-1 flex flex-col">
-                {isLoading ? (
-                    <TableSkeleton />
-                ) : viewMode === 'table' ? (
-                    <>
-                        {/* Desktop Table View */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                        <th className="px-6 py-4 w-12">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.length === currentMembers.length && currentMembers.length > 0}
-                                                onChange={toggleAll}
-                                                className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                                            />
-                                        </th>
-                                        {(() => {
-                                            const baseCols = [
-                                                { label: "Nama Lengkap", key: "name", width: "min-w-[250px]" },
-                                                { label: "Sektor", key: "sector", width: "min-w-[100px]" }
-                                            ];
-                                            let cols: any[] = [];
-                                            switch (tableTab) {
-                                                case 'Identitas': cols = [...baseCols, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }, { label: "Umur", key: "birthDate", width: "w-20" }, { label: "Jml Keluarga", key: "familyMembers", width: "w-24" }]; break;
-                                                case 'Profesional': cols = [...baseCols, { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[100px]" }, { label: "Pendidikan", key: "education", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "job", width: "min-w-[150px]" }, { label: "Instansi", key: "companyName", width: "min-w-[150px]" }]; break;
-                                                case 'Komitmen': cols = [...baseCols, { label: "Kesediaan", key: "willingnessToServe", width: "min-w-[150px]" }, { label: "Minat", key: "interestAreas", width: "min-w-[200px]" }, { label: "Bentuk Kontribusi", key: "contributionTypes", width: "min-w-[200px]" }]; break;
-                                                case 'Pendidikan': cols = [...baseCols, { label: "Anak Sekolah?", key: "education_schoolingStatus", width: "min-w-[120px]" }, { label: "Sedang Sekolah", key: "education_inSchool_sd", width: "min-w-[120px]" }, { label: "Putus Sekolah", key: "education_dropout_sd", width: "min-w-[120px]" }, { label: "Sdh Bekerja", key: "education_working", width: "w-24" }]; break;
-                                                case 'Ekonomi': cols = [...baseCols, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha", key: "economics_hasBusiness", width: "min-w-[150px]" }, { label: "Rumah", key: "economics_houseStatus", width: "min-w-[150px]" }]; break;
-                                                case 'Kesehatan': cols = [...baseCols, { label: "Penyakit Kronis", key: "health_chronicSick", width: "min-w-[120px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "BPJS", key: "health_hasBPJS", width: "min-w-[120px]" }, { label: "Bantuan Sosial", key: "health_socialAssistance", width: "min-w-[150px]" }]; break;
-                                                default: cols = baseCols;
-                                            }
-                                            cols.push({ label: "Kualitas", key: "name", width: "w-20" }); // Fake key
-                                            return cols.map((col: any) => (
-                                                <th
-                                                    key={col.label}
-                                                    onClick={() => handleSort(col.key as keyof Member)}
-                                                    className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        {col.label}
-                                                        {sortConfig.key === col.key && (
-                                                            <span className="material-symbols-outlined text-sm font-bold">
-                                                                {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </th>
-                                            ));
-                                        })()}
-                                        <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
-                                    {currentMembers.length > 0 ? (
-                                        currentMembers.map((member) => (
-                                            <tr
-                                                key={member.id}
-                                                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
-                                                onClick={() => {
-                                                    setSelectedMember(member);
-                                                    setIsDetailModalOpen(true);
-                                                }}
-                                            >
-                                                <td className="px-6 py-4 relative">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-left"></div>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedIds.includes(member.id)}
-                                                        onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                                                    />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.initials}</div>
-                                                        <div>
-                                                            <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
-                                                            <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                                                <span>{member.id}</span>
-                                                                <span className="size-1 rounded-full bg-slate-300"></span>
-                                                                <span>{member.gender}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">{member.sector}</span>
-                                                </td>
-                                                {tableTab === 'Identitas' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.nik || '-'}</td>
-                                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.kkNumber || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.address || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{calculateAge(member.birthDate)} Thn</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembers || 0}</td>
-                                                    </>
-                                                )}
-                                                {tableTab === 'Profesional' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded text-xs font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600' : 'text-slate-400'}`}>{member.diakonia_recipient || '-'}</span></td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobCategory || member.job || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.companyName || '-'}</td>
-                                                    </>
-                                                )}
-                                                {tableTab === 'Komitmen' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.willingnessToServe || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.interestAreas || []).join(', ') || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.contributionTypes || []).join(', ') || '-'}</td>
-                                                    </>
-                                                )}
-                                                {tableTab === 'Pendidikan' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_schoolingStatus || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_inSchool_tk_paud || 0) + (member.education_inSchool_sd || 0) + (member.education_inSchool_smp || 0) + (member.education_inSchool_sma || 0) + (member.education_inSchool_university || 0)) || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_dropout_tk_paud || 0) + (member.education_dropout_sd || 0) + (member.education_dropout_smp || 0) + (member.education_dropout_sma || 0)) || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_working || '-'}</td>
-                                                    </>
-                                                )}
-                                                {tableTab === 'Ekonomi' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_incomeRange || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Ya' : 'Tidak'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
-                                                    </>
-                                                )}
-                                                {tableTab === 'Kesehatan' && (
-                                                    <>
-                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded text-xs font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'Ya' : '-'}</span></td>
-                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded text-xs font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'Ya' : '-'}</span></td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJS || '-'}</td>
-                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{member.health_socialAssistance || '-'}</td>
-                                                    </>
-                                                )}
-                                                <td className="px-6 py-4">
-                                                    {(() => {
-                                                        const c = calculateCompleteness(member);
-                                                        const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
-                                                            : c.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
-                                                                : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
-                                                        return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
-                                                    })()}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedMember(member);
-                                                                setIsEditMode(true);
-                                                                setIsDetailModalOpen(false);
-                                                                setIsAddModalOpen(true);
-                                                            }}
-                                                            className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors tooltip"
-                                                            title="Edit"
-                                                        >
-                                                            <span className="material-symbols-outlined text-lg">edit</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setConfirmDialog({
-                                                                    isOpen: true,
-                                                                    title: "Hapus Data Member",
-                                                                    message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
-                                                                    variant: 'danger',
-                                                                    action: async () => {
-                                                                        try {
-                                                                            await deleteMutation.mutateAsync(member.id);
-                                                                            toast.success('Data berhasil dihapus');
-                                                                        } catch (error) {
-                                                                            toast.error('Gagal menghapus data');
-                                                                        } finally {
-                                                                            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }}
-                                                            className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors tooltip"
-                                                            title="Hapus"
-                                                        >
-                                                            <span className="material-symbols-outlined text-lg">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
-                                                    <p>Tidak ada data member yang cocok dengan filter Anda.</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Mobile Card View (Fallback for Table) */}
-                        <div className="md:hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-                            {currentMembers.length > 0 ? (
-                                currentMembers.map((member) => (
-                                    <div key={member.id} className="p-4 flex flex-col gap-3" onClick={() => setSelectedMember(member)}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex gap-3 items-center">
-                                                <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">
-                                                    {member.initials}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
-                                                    <p className="text-xs text-slate-500">{member.id} • {member.sector}</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">R{member.rayon} - L{member.lingkungan}</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
-                                            <div>
-                                                <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan</span>
-                                                <span className="font-medium text-slate-700 dark:text-slate-300">{member.job}</span>
-                                            </div>
-                                            <div>
-                                                <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pendidikan</span>
-                                                <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 mt-1">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedMember(member);
-                                                    setIsEditMode(true);
-                                                    setIsAddModalOpen(true);
-                                                }}
-                                                className="flex-1 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setConfirmDialog({
-                                                        isOpen: true,
-                                                        title: "Hapus Data Member",
-                                                        message: `Apakah Anda yakin ingin menghapus data ${member.name}?`,
-                                                        variant: 'danger',
-                                                        action: () => {
-                                                            setMembers(members.filter(m => m.id !== member.id));
-                                                            toast.success('Data berhasil dihapus');
-                                                            setConfirmDialog(prev => ({ ...prev, isOpen: false }));
-                                                        }
-                                                    });
-                                                }}
-                                                className="px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/30 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
-                                            >
-                                                Hapus
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="p-8 text-center text-slate-500">Tidak ada data.</div>
-                            )}
-                        </div>
-                    </>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-                        {currentMembers.length > 0 ? (
-                            currentMembers.map((member) => (
-                                <div
-                                    key={member.id}
-                                    onClick={() => {
-                                        setSelectedMember(member);
-                                        setIsDetailModalOpen(true);
-                                    }}
-                                    className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer relative group"
-                                >
-                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIds.includes(member.id)}
-                                            onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-4 mb-3">
-                                        <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">{member.initials}</div>
-                                        <div>
-                                            <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
-                                            <p className="text-sm text-slate-500">{member.sector}</p>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500">Pekerjaan</span>
-                                            <span className="font-medium dark:text-slate-200">{member.job}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500">Status</span>
-                                            <span className="font-medium dark:text-slate-200">{member.statusGerejawi}</span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap gap-1">
-                                        {Array.isArray(member.skills) && member.skills.slice(0, 3).map((skill, skIdx) => (
-                                            <span key={skIdx} className="bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700">{skill}</span>
-                                        ))}
-                                        {Array.isArray(member.skills) && member.skills.length > 3 && <span className="text-xs text-slate-400 pl-1">+{member.skills.length - 3}</span>}
-                                    </div>
+                            <div className="flex gap-2 items-center overflow-x-auto">
+                                <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+                                    <button onClick={() => setViewMode('table')} className={`p-1.5 rounded transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-400 hover:text-slate-600'}`}>
+                                        <span className="material-symbols-outlined text-xl">table_rows</span>
+                                    </button>
+                                    <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-400 hover:text-slate-600'}`}>
+                                        <span className="material-symbols-outlined text-xl">grid_view</span>
+                                    </button>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
-                                <div className="flex flex-col items-center gap-2">
-                                    <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
-                                    <p>Tidak ada data member yang cocok dengan filter Anda.</p>
+                                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                                <select
+                                    value={filterSector}
+                                    onChange={(e) => setFilterSector(e.target.value)}
+                                    className="h-10 pl-3 pr-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium border-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+                                >
+                                    <option value="Semua">Semua Sektor Kat.</option>
+                                    <option value="Pemuda">Pemuda</option>
+                                    <option value="Kaum Perempuan">Kaum Perempuan</option>
+                                    <option value="Kaum Bapak">Kaum Bapak</option>
+                                    <option value="Lansia">Lansia</option>
+                                </select>
+                                <button
+                                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-bold border transition-colors ${showAdvancedFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined text-lg">tune</span>
+                                    Filter
+                                </button>
+                                {/* Clear Filter Button - Only visible if filters active */}
+                                {(searchTerm || filterSector !== "Semua" || filterGender !== "Semua" || filterAgeCategory !== "Semua" || filterStatus !== "Semua") &&
                                     <button
                                         onClick={() => { setSearchTerm(""); setFilterSector("Semua"); setFilterGender("Semua"); setFilterAgeCategory("Semua"); setFilterStatus("Semua"); }}
-                                        className="mt-2 text-primary font-bold hover:underline"
+                                        className="text-red-500 text-xs font-bold px-2 hover:bg-red-50 rounded py-1 transition-colors"
                                     >
-                                        Reset Filter
+                                        <span className="material-symbols-outlined text-lg align-middle">backspace</span>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        {showAdvancedFilters && (
+                            <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-down">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1">Jenis Kelamin</label>
+                                    <select
+                                        value={filterGender}
+                                        onChange={(e) => setFilterGender(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1">Kategori Usia</label>
+                                    <select
+                                        value={filterAgeCategory}
+                                        onChange={(e) => setFilterAgeCategory(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Anak">Anak (0-12)</option>
+                                        <option value="Remaja">Remaja (13-17)</option>
+                                        <option value="Pemuda">Pemuda (18-30)</option>
+                                        <option value="Dewasa">Dewasa (31-60)</option>
+                                        <option value="Lansia">Lansia ({'>'}60)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 mb-1">Status Gerejawi</label>
+                                    <select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Sidi">Sidi</option>
+                                        <option value="Baptis">Baptis</option>
+                                        <option value="Katekisasi">Katekisasi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Table View Tabs */}
+                    <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
+                        {['Identitas', 'Profesional', 'Komitmen', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setTableTab(tab as any)}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${tableTab === tab ? 'bg-primary text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                            >
+                                Data {tab}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* List View */}
+                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex-1 flex flex-col">
+                        {isLoading ? (
+                            <TableSkeleton />
+                        ) : viewMode === 'table' ? (
+                            <>
+                                {/* Desktop Table View */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                                <th className="px-6 py-4 w-12">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedIds.length === currentMembers.length && currentMembers.length > 0}
+                                                        onChange={toggleAll}
+                                                        className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                                                    />
+                                                </th>
+                                                {(() => {
+                                                    const baseCols = [
+                                                        { label: "Nama Lengkap", key: "name", width: "min-w-[250px]" },
+                                                        { label: "Sektor", key: "sector", width: "min-w-[100px]" }
+                                                    ];
+                                                    let cols: any[] = [];
+                                                    switch (tableTab) {
+                                                        case 'Identitas': cols = [...baseCols, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }, { label: "Umur", key: "birthDate", width: "w-20" }, { label: "Anggota", key: "familyMembers", width: "w-24" }]; break;
+                                                        case 'Profesional': cols = [...baseCols, { label: "Pendidikan", key: "education", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Relawan", key: "willingnessToServe", width: "min-w-[120px]" }]; break;
+                                                        case 'Komitmen': cols = [...baseCols, { label: "Minat Melayani", key: "interestAreas", width: "min-w-[200px]" }, { label: "Bentuk Kontribusi", key: "contributionTypes", width: "min-w-[200px]" }, { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[100px]" }]; break;
+                                                        case 'Pendidikan': cols = [...baseCols, { label: "Anak Sekolah?", key: "education_schoolingStatus", width: "min-w-[150px]" }, { label: "Total SD-SMA", key: "education_inSchool_sd", width: "min-w-[150px]" }, { label: "Putus Sekolah", key: "education_dropout_sd", width: "min-w-[150px]" }, { label: "Bekerja", key: "education_working", width: "w-24" }]; break;
+                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Info Usaha", key: "economics_hasBusiness", width: "min-w-[150px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[150px]" }]; break;
+                                                        case 'Kesehatan': cols = [...baseCols, { label: "Kronis", key: "health_chronicSick", width: "min-w-[100px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "BPJS", key: "health_hasBPJS", width: "min-w-[120px]" }, { label: "Bansos", key: "health_socialAssistance", width: "min-w-[150px]" }]; break;
+                                                        default: cols = baseCols;
+                                                    }
+                                                    cols.push({ label: "Kelengkapan", key: "name", width: "w-20" }); // Metric column
+                                                    return cols.map((col: any) => (
+                                                        <th
+                                                            key={col.label}
+                                                            onClick={() => handleSort(col.key as keyof Member)}
+                                                            className={`px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider ${col.width} cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none group`}
+                                                        >
+                                                            <div className="flex items-center gap-1">
+                                                                {col.label}
+                                                                {sortConfig.key === col.key && (
+                                                                    <span className="material-symbols-outlined text-sm font-bold">
+                                                                        {sortConfig.direction === 'asc' ? 'arrow_downward' : 'arrow_upward'}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </th>
+                                                    ));
+                                                })()}
+                                                <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                            {currentMembers.length > 0 ? (
+                                                currentMembers.map((member) => (
+                                                    <tr
+                                                        key={member.id}
+                                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
+                                                        onClick={() => {
+                                                            setSelectedMember(member);
+                                                            setIsDetailModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <td className="px-6 py-4 relative">
+                                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform origin-left"></div>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedIds.includes(member.id)}
+                                                                onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                                                            />
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.initials}</div>
+                                                                <div>
+                                                                    <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
+                                                                    <div className="flex items-center gap-1 text-slate-500 text-xs">
+                                                                        <span>{member.id}</span>
+                                                                        <span className="size-1 rounded-full bg-slate-300"></span>
+                                                                        <span>{member.gender}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">{member.sector}</span>
+                                                        </td>
+                                                        {tableTab === 'Identitas' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.nik || '-'}</td>
+                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.kkNumber || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.address || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{calculateAge(member.birthDate)} Thn</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembers || 0}</td>
+                                                            </>
+                                                        )}
+                                                        {tableTab === 'Profesional' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobTitle || member.jobCategory || '-'}</td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex -space-x-1 overflow-hidden">
+                                                                        {(member.skills || []).slice(0, 3).map((s: string, i: number) => (
+                                                                            <div key={i} className="inline-block size-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-600" title={s}>{s[0]}</div>
+                                                                        ))}
+                                                                        {(member.skills || []).length > 3 && <div className="inline-block size-6 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-400">+{(member.skills || []).length - 3}</div>}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.willingnessToServe === 'Active' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>{member.willingnessToServe || 'Off'}</span>
+                                                                </td>
+                                                            </>
+                                                        )}
+                                                        {tableTab === 'Komitmen' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.interestAreas || []).join(', ') || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{(member.contributionTypes || []).join(', ') || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'PENERIMA' : 'TIDAK'}</span></td>
+                                                            </>
+                                                        )}
+                                                        {tableTab === 'Pendidikan' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_schoolingStatus || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_inSchool_tk_paud || 0) + (member.education_inSchool_sd || 0) + (member.education_inSchool_smp || 0) + (member.education_inSchool_sma || 0) + (member.education_inSchool_university || 0)) || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{((member.education_dropout_tk_paud || 0) + (member.education_dropout_sd || 0) + (member.education_dropout_smp || 0) + (member.education_dropout_sma || 0)) || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_working || '-'}</td>
+                                                            </>
+                                                        )}
+                                                        {tableTab === 'Ekonomi' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_incomeRange || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Ya' : 'Tidak'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
+                                                            </>
+                                                        )}
+                                                        {tableTab === 'Kesehatan' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'ADA' : '-'}</span></td>
+                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'ADA' : '-'}</span></td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJS || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{member.health_socialAssistance || '-'}</td>
+                                                            </>
+                                                        )}
+                                                        <td className="px-6 py-4">
+                                                            {(() => {
+                                                                const c = calculateCompleteness(member);
+                                                                const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                                                                    : c.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
+                                                                        : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+                                                                return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
+                                                            })()}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-right">
+                                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedMember(member);
+                                                                        setIsEditMode(true);
+                                                                        setIsDetailModalOpen(false);
+                                                                        setIsAddModalOpen(true);
+                                                                    }}
+                                                                    className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-primary/10 hover:text-primary transition-colors tooltip"
+                                                                    title="Edit"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-lg">edit</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setConfirmDialog({
+                                                                            isOpen: true,
+                                                                            title: "Hapus Data Member",
+                                                                            message: `Apakah Anda yakin ingin menghapus data ${member.name} (${member.id})?`,
+                                                                            variant: 'danger',
+                                                                            action: async () => {
+                                                                                try {
+                                                                                    await deleteMutation.mutateAsync(member.id);
+                                                                                    toast.success('Data berhasil dihapus');
+                                                                                } catch (error) {
+                                                                                    toast.error('Gagal menghapus data');
+                                                                                } finally {
+                                                                                    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }}
+                                                                    className="size-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors tooltip"
+                                                                    title="Hapus"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-lg">delete</span>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={8} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
+                                                            <p>Tidak ada data member yang cocok dengan filter Anda.</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Mobile Card View (Fallback for Table) */}
+                                <div className="md:hidden flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+                                    {currentMembers.length > 0 ? (
+                                        currentMembers.map((member) => (
+                                            <div key={member.id} className="p-4 flex flex-col gap-3" onClick={() => setSelectedMember(member)}>
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex gap-3 items-center">
+                                                        <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">
+                                                            {member.initials}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
+                                                            <p className="text-xs text-slate-500">{member.id} • {member.sector}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">R{member.rayon} - L{member.lingkungan}</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                                                    <div>
+                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan</span>
+                                                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.job}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pendidikan</span>
+                                                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 mt-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedMember(member);
+                                                            setIsEditMode(true);
+                                                            setIsAddModalOpen(true);
+                                                        }}
+                                                        className="flex-1 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setConfirmDialog({
+                                                                isOpen: true,
+                                                                title: "Hapus Data Member",
+                                                                message: `Apakah Anda yakin ingin menghapus data ${member.name}?`,
+                                                                variant: 'danger',
+                                                                action: () => {
+                                                                    setMembers(members.filter(m => m.id !== member.id));
+                                                                    toast.success('Data berhasil dihapus');
+                                                                    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                }
+                                                            });
+                                                        }}
+                                                        className="px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/30 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"
+                                                    >
+                                                        Hapus
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-8 text-center text-slate-500">Tidak ada data.</div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                                {currentMembers.length > 0 ? (
+                                    currentMembers.map((member) => (
+                                        <div
+                                            key={member.id}
+                                            onClick={() => {
+                                                setSelectedMember(member);
+                                                setIsDetailModalOpen(true);
+                                            }}
+                                            className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer relative group"
+                                        >
+                                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.includes(member.id)}
+                                                    onChange={(e) => { e.stopPropagation(); toggleSelection(member.id); }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                                                />
+                                            </div>
+                                            <div className="flex items-center gap-4 mb-3">
+                                                <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">{member.initials}</div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
+                                                    <p className="text-sm text-slate-500">{member.sector}</p>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500">Pekerjaan</span>
+                                                    <span className="font-medium dark:text-slate-200">{member.job}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500">Status</span>
+                                                    <span className="font-medium dark:text-slate-200">{member.statusGerejawi}</span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 flex flex-wrap gap-1">
+                                                {Array.isArray(member.skills) && member.skills.slice(0, 3).map((skill, skIdx) => (
+                                                    <span key={skIdx} className="bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700">{skill}</span>
+                                                ))}
+                                                {Array.isArray(member.skills) && member.skills.length > 3 && <span className="text-xs text-slate-400 pl-1">+{member.skills.length - 3}</span>}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <span className="material-symbols-outlined text-4xl text-slate-300">search_off</span>
+                                            <p>Tidak ada data member yang cocok dengan filter Anda.</p>
+                                            <button
+                                                onClick={() => { setSearchTerm(""); setFilterSector("Semua"); setFilterGender("Semua"); setFilterAgeCategory("Semua"); setFilterStatus("Semua"); }}
+                                                className="mt-2 text-primary font-bold hover:underline"
+                                            >
+                                                Reset Filter
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Pagination Controls */}
+                        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 mt-auto rounded-b-xl">
+                            <div className="text-slate-500 text-sm font-medium">
+                                Menampilkan <span className="text-slate-900 dark:text-white font-bold">{filteredMembers.length > 0 ? indexOfFirstItem + 1 : 0}-{Math.min(indexOfLastItem, filteredMembers.length)}</span> dari <span className="text-slate-900 dark:text-white font-bold">{filteredMembers.length}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                                    className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium focus:ring-2 focus:ring-primary/50"
+                                >
+                                    <option value={10}>10 / Halaman</option>
+                                    <option value={25}>25 / Halaman</option>
+                                    <option value={50}>50 / Halaman</option>
+                                </select>
+                                <div className="flex gap-2">
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        className="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-sm font-bold disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    >
+                                        Prev
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`size-8 rounded flex items-center justify-center text-sm font-bold transition-colors ${currentPage === page ? 'bg-primary text-slate-900' : 'border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        className="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-sm font-bold disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                    >
+                                        Next
                                     </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Pagination Controls */}
-                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 mt-auto rounded-b-xl">
-                    <div className="text-slate-500 text-sm font-medium">
-                        Menampilkan <span className="text-slate-900 dark:text-white font-bold">{filteredMembers.length > 0 ? indexOfFirstItem + 1 : 0}-{Math.min(indexOfLastItem, filteredMembers.length)}</span> dari <span className="text-slate-900 dark:text-white font-bold">{filteredMembers.length}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium focus:ring-2 focus:ring-primary/50"
-                        >
-                            <option value={10}>10 / Halaman</option>
-                            <option value={25}>25 / Halaman</option>
-                            <option value={50}>50 / Halaman</option>
-                        </select>
-                        <div className="flex gap-2">
-                            <button
-                                disabled={currentPage === 1}
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                className="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-sm font-bold disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                Prev
-                            </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`size-8 rounded flex items-center justify-center text-sm font-bold transition-colors ${currentPage === page ? 'bg-primary text-slate-900' : 'border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-                            <button
-                                disabled={currentPage === totalPages}
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                className="px-3 py-1 rounded border border-slate-200 dark:border-slate-700 text-sm font-bold disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                Next
-                            </button>
                         </div>
                     </div>
+
+                    {/* Modals */}
+                    <Modal
+                        isOpen={isAddModalOpen}
+                        onClose={() => {
+                            setIsAddModalOpen(false);
+                            if (!isDetailModalOpen) setSelectedMember(null);
+                        }}
+                        title={isEditMode ? "Edit Data Jemaat" : "Tambah Jemaat Baru"}
+                    >
+                        <AddMemberForm
+                            onClose={() => setIsAddModalOpen(false)}
+                            initialData={isEditMode ? selectedMember : undefined}
+                            onSuccess={() => {
+                                // All mutations inside AddMemberForm already invalidate query
+                                setIsAddModalOpen(false);
+                            }}
+                        />
+                    </Modal>
+
+                    <Modal
+                        isOpen={isDetailModalOpen}
+                        onClose={() => {
+                            setIsDetailModalOpen(false);
+                            setSelectedMember(null);
+                        }}
+                        title="Detail Jemaat"
+                    >
+                        <MemberDetailModal
+                            member={selectedMember}
+                            onClose={() => {
+                                setIsDetailModalOpen(false);
+                                setSelectedMember(null);
+                            }}
+                            onEdit={() => {
+                                setIsDetailModalOpen(false);
+                                setIsEditMode(true);
+                                setIsAddModalOpen(true);
+                            }}
+                        />
+                    </Modal>
+
+                    {/* Import Modal */}
+                    <Modal
+                        isOpen={isImportModalOpen}
+                        onClose={() => setIsImportModalOpen(false)}
+                        title="Import Data Jemaat"
+                    >
+                        <div className="flex flex-col gap-6">
+                            <div
+                                {...getRootProps()}
+                                className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors relative ${isDragActive
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                    }`}
+                            >
+                                <input {...getInputProps()} />
+                                <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
+                                {importFile ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <p className="font-bold text-primary">{importFile.name}</p>
+                                        <p className="text-sm text-slate-500">{(importFile.size / 1024).toFixed(2)} KB</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="font-bold text-slate-900 dark:text-white">Klik atau drag & drop file CSV</p>
+                                        <p className="text-sm text-slate-500 mt-1">Format: Nama, Sektor, Pendidikan, Pekerjaan</p>
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => { setIsImportModalOpen(false); setImportFile(null); }}
+                                    className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg dark:text-slate-300 dark:hover:bg-slate-800"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleImportSubmit}
+                                    disabled={!importFile || importMutation.isPending}
+                                    className="px-4 py-2 bg-primary text-slate-900 font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {importMutation.isPending && <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>}
+                                    Upload & Import
+                                </button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    {/* Bulk Edit Modal */}
+                    <Modal
+                        isOpen={isBulkEditModalOpen}
+                        onClose={() => setIsBulkEditModalOpen(false)}
+                        title={`Edit Massal (${selectedIds.length} Data)`}
+                    >
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih Kolom yang akan Diubah</label>
+                                <select
+                                    value={bulkEditField}
+                                    // @ts-ignore
+                                    onChange={(e) => setBulkEditField(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                >
+                                    <option value="">-- Pilih Kolom --</option>
+                                    <option value="sector">Sektor</option>
+                                    <option value="statusGerejawi">Status Gerejawi</option>
+                                    <option value="gender">Jenis Kelamin</option>
+                                </select>
+                            </div>
+
+                            {bulkEditField === 'sector' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Sektor Baru</label>
+                                    <select
+                                        value={bulkEditValue}
+                                        onChange={(e) => setBulkEditValue(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="">-- Pilih Sektor --</option>
+                                        <option value="Efata">Efata</option>
+                                        <option value="Betel">Betel</option>
+                                        <option value="Sion">Sion</option>
+                                        <option value="Eden">Eden</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {bulkEditField === 'statusGerejawi' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Status Baru</label>
+                                    <select
+                                        value={bulkEditValue}
+                                        onChange={(e) => setBulkEditValue(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="">-- Pilih Status --</option>
+                                        <option value="Sidi">Sidi</option>
+                                        <option value="Baptis">Baptis</option>
+                                        <option value="Katekisasi">Katekisasi</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {bulkEditField === 'gender' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Gender Baru</label>
+                                    <select
+                                        value={bulkEditValue}
+                                        onChange={(e) => setBulkEditValue(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="">-- Pilih Gender --</option>
+                                        <option value="Laki-laki">Laki-laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            <div className="flex justify-end gap-3 mt-4">
+                                <button onClick={() => setIsBulkEditModalOpen(false)} className="px-4 py-2 rounded-lg font-bold text-slate-500 hover:bg-slate-100">Batal</button>
+                                <button onClick={handleBulkEditSubmit} className="px-6 py-2 rounded-lg font-bold bg-primary text-slate-900 shadow-lg shadow-primary/20">Simpan Perubahan</button>
+                            </div>
+                        </div>
+                    </Modal>
+                    <ConfirmDialog
+                        isOpen={confirmDialog.isOpen}
+                        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                        onConfirm={confirmDialog.action}
+                        title={confirmDialog.title}
+                        message={confirmDialog.message}
+                        variant={confirmDialog.variant}
+                    />
                 </div>
             </div>
-
-            {/* Modals */}
-            <Modal
-                isOpen={isAddModalOpen}
-                onClose={() => {
-                    setIsAddModalOpen(false);
-                    if (!isDetailModalOpen) setSelectedMember(null);
-                }}
-                title={isEditMode ? "Edit Data Jemaat" : "Tambah Jemaat Baru"}
-            >
-                <AddMemberForm
-                    onClose={() => setIsAddModalOpen(false)}
-                    initialData={isEditMode ? selectedMember : undefined}
-                    onSuccess={() => {
-                        // All mutations inside AddMemberForm already invalidate query
-                        setIsAddModalOpen(false);
-                    }}
-                />
-            </Modal>
-
-            <Modal
-                isOpen={isDetailModalOpen}
-                onClose={() => {
-                    setIsDetailModalOpen(false);
-                    setSelectedMember(null);
-                }}
-                title="Detail Jemaat"
-            >
-                <MemberDetailModal
-                    member={selectedMember}
-                    onClose={() => {
-                        setIsDetailModalOpen(false);
-                        setSelectedMember(null);
-                    }}
-                    onEdit={() => {
-                        setIsDetailModalOpen(false);
-                        setIsEditMode(true);
-                        setIsAddModalOpen(true);
-                    }}
-                />
-            </Modal>
-
-            {/* Import Modal */}
-            <Modal
-                isOpen={isImportModalOpen}
-                onClose={() => setIsImportModalOpen(false)}
-                title="Import Data Jemaat"
-            >
-                <div className="flex flex-col gap-6">
-                    <div
-                        {...getRootProps()}
-                        className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors relative ${isDragActive
-                            ? 'border-primary bg-primary/5'
-                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                            }`}
-                    >
-                        <input {...getInputProps()} />
-                        <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
-                        {importFile ? (
-                            <div className="flex flex-col items-center gap-2">
-                                <p className="font-bold text-primary">{importFile.name}</p>
-                                <p className="text-sm text-slate-500">{(importFile.size / 1024).toFixed(2)} KB</p>
-                            </div>
-                        ) : (
-                            <>
-                                <p className="font-bold text-slate-900 dark:text-white">Klik atau drag & drop file CSV</p>
-                                <p className="text-sm text-slate-500 mt-1">Format: Nama, Sektor, Pendidikan, Pekerjaan</p>
-                            </>
-                        )}
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <button
-                            onClick={() => { setIsImportModalOpen(false); setImportFile(null); }}
-                            className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg dark:text-slate-300 dark:hover:bg-slate-800"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            onClick={handleImportSubmit}
-                            disabled={!importFile || importMutation.isPending}
-                            className="px-4 py-2 bg-primary text-slate-900 font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {importMutation.isPending && <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>}
-                            Upload & Import
-                        </button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* Bulk Edit Modal */}
-            <Modal
-                isOpen={isBulkEditModalOpen}
-                onClose={() => setIsBulkEditModalOpen(false)}
-                title={`Edit Massal (${selectedIds.length} Data)`}
-            >
-                <div className="flex flex-col gap-4">
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pilih Kolom yang akan Diubah</label>
-                        <select
-                            value={bulkEditField}
-                            // @ts-ignore
-                            onChange={(e) => setBulkEditField(e.target.value)}
-                            className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                        >
-                            <option value="">-- Pilih Kolom --</option>
-                            <option value="sector">Sektor</option>
-                            <option value="statusGerejawi">Status Gerejawi</option>
-                            <option value="gender">Jenis Kelamin</option>
-                        </select>
-                    </div>
-
-                    {bulkEditField === 'sector' && (
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Sektor Baru</label>
-                            <select
-                                value={bulkEditValue}
-                                onChange={(e) => setBulkEditValue(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="">-- Pilih Sektor --</option>
-                                <option value="Efata">Efata</option>
-                                <option value="Betel">Betel</option>
-                                <option value="Sion">Sion</option>
-                                <option value="Eden">Eden</option>
-                            </select>
-                        </div>
-                    )}
-
-                    {bulkEditField === 'statusGerejawi' && (
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Status Baru</label>
-                            <select
-                                value={bulkEditValue}
-                                onChange={(e) => setBulkEditValue(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="">-- Pilih Status --</option>
-                                <option value="Sidi">Sidi</option>
-                                <option value="Baptis">Baptis</option>
-                                <option value="Katekisasi">Katekisasi</option>
-                            </select>
-                        </div>
-                    )}
-
-                    {bulkEditField === 'gender' && (
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Gender Baru</label>
-                            <select
-                                value={bulkEditValue}
-                                onChange={(e) => setBulkEditValue(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50"
-                            >
-                                <option value="">-- Pilih Gender --</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
-                        </div>
-                    )}
-
-                    <div className="flex justify-end gap-3 mt-4">
-                        <button onClick={() => setIsBulkEditModalOpen(false)} className="px-4 py-2 rounded-lg font-bold text-slate-500 hover:bg-slate-100">Batal</button>
-                        <button onClick={handleBulkEditSubmit} className="px-6 py-2 rounded-lg font-bold bg-primary text-slate-900 shadow-lg shadow-primary/20">Simpan Perubahan</button>
-                    </div>
-                </div>
-            </Modal>
-            {/* Confirmation Dialog */}
-            <ConfirmDialog
-                isOpen={confirmDialog.isOpen}
-                onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
-                onConfirm={confirmDialog.action}
-                title={confirmDialog.title}
-                message={confirmDialog.message}
-                variant={confirmDialog.variant}
-            />
-
         </AdminLayout>
     );
 };
+
 export default AdminMemberData;

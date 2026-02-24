@@ -11,6 +11,7 @@ export interface DashboardStats {
     professionalCount: number;
     professionalFamilyCount: number;
     volunteerCount: number;
+    educationCount: number;
     distributions: {
         sector: Record<string, number>;
         gender: Record<string, number>;
