@@ -108,8 +108,8 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
     const totalExpense = (member.economics_expense_food || 0) + (member.economics_expense_utilities || 0) + (member.economics_expense_education || 0) + (member.economics_expense_other || 0);
 
     return (
-        <div className="flex flex-col animate-fade-in-up h-full max-h-full">
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div className="flex flex-col animate-fade-in-up h-full max-h-full min-h-0">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-h-0">
                 {/* Header Passport Card - Shrinked */}
                 <div className="flex flex-row items-center gap-4 p-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl border border-slate-700 relative overflow-hidden shadow-xl shrink-0 mx-1 mt-1 ring-1 ring-white/10">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>

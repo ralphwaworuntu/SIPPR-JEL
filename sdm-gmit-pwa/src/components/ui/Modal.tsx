@@ -44,7 +44,7 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-2xl"
                 </div>
 
                 {/* Body - Let children handle their own scroll so sticky footers work */}
-                <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                     {children}
                 </div>
             </div>
