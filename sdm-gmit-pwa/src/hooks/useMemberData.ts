@@ -258,6 +258,9 @@ export const useMemberData = () => {
     const [filterGender, setFilterGender] = useState("Semua");
     const [filterAgeCategory, setFilterAgeCategory] = useState("Semua");
     const [filterWillingness, setFilterWillingness] = useState("Semua");
+    const [filterBusiness, setFilterBusiness] = useState("Semua");
+    const [filterCompleteness, setFilterCompleteness] = useState("Semua");
+    const [filterDisability, setFilterDisability] = useState("Semua");
 
     const [sortConfig, setSortConfig] = useState<{ key: keyof Member | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
 
@@ -330,6 +333,24 @@ export const useMemberData = () => {
                 if (filterWillingness === 'On-demand') return ['On-demand', 'Ya, bila dibutuhkan'].includes(w);
                 if (filterWillingness === 'Tidak') return ['Tidak', 'Belum', 'Belum bersedia'].includes(w);
                 return w === filterWillingness;
+            });
+        }
+        if (filterBusiness !== "Semua") {
+            result = result.filter(m => {
+                const hasBusiness = m.economics_hasBusiness === 'Ya';
+                return filterBusiness === 'Ya' ? hasBusiness : !hasBusiness;
+            });
+        }
+        if (filterCompleteness !== "Semua") {
+            result = result.filter(m => {
+                const c = calculateCompleteness(m);
+                return filterCompleteness === 'Lengkap' ? c.percent >= 80 : filterCompleteness === 'Belum Lengkap' ? c.percent < 80 : true;
+            });
+        }
+        if (filterDisability !== "Semua") {
+            result = result.filter(m => {
+                const hasDisability = m.health_hasDisability === 'Ya' || m.health_hasDisability === 'Yes';
+                return filterDisability === 'Ya' ? hasDisability : !hasDisability;
             });
         }
 
@@ -508,6 +529,9 @@ export const useMemberData = () => {
         filterGender, setFilterGender,
         filterAgeCategory, setFilterAgeCategory,
         filterWillingness, setFilterWillingness,
+        filterBusiness, setFilterBusiness,
+        filterCompleteness, setFilterCompleteness,
+        filterDisability, setFilterDisability,
         sortConfig, handleSort,
         stats,
         isLoading,

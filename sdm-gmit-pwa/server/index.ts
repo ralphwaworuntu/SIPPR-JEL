@@ -596,10 +596,18 @@ app.delete("/api/members/:id", async (req, res) => {
 // 5. Dashboard Stats (Aggregated)
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
+        const { rayon, lingkungan } = req.query;
+
+        // Base where condition based on filters
+        const baseWhere = and(
+            rayon ? eq(congregants.rayon, rayon as string) : undefined,
+            lingkungan ? eq(congregants.lingkungan, lingkungan as string) : undefined
+        );
+
         // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes] = await Promise.all([
+        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes, diakoniaRes, economicsRes, healthRes] = await Promise.all([
             // 1. Total Households (Records)
-            db.select({ count: sql<number>`count(*)` }).from(congregants),
+            db.select({ count: sql<number>`count(*)` }).from(congregants).where(baseWhere),
 
             // 1b. Total Souls (Aggregated Family Members)
             db.select({
@@ -653,7 +661,32 @@ app.get("/api/dashboard/stats", async (req, res) => {
                     COALESCE(education_unemployed_university, 0) +
                     COALESCE(education_working, 0)
                 )`
-            }).from(congregants)
+            }).from(congregants).where(baseWhere),
+
+            // 11. Diakonia
+            db.select({ type: congregants.diakoniaType, count: sql<number>`count(*)` }).from(congregants).where(and(baseWhere, eq(congregants.diakoniaRecipient, 'Ya'))).groupBy(congregants.diakoniaType),
+
+            // 12. Economics Raw Data (for processing assets, issues etc)
+            db.select({
+                assets: congregants.economicsAssets,
+                businessType: congregants.economicsBusinessType,
+                businessTurnover: congregants.economicsBusinessTurnover,
+                businessIssues: congregants.economicsBusinessIssues,
+                businessTraining: congregants.economicsBusinessTraining,
+                businessNeeds: congregants.economicsBusinessNeeds,
+                waterSource: congregants.economicsWaterSource
+            }).from(congregants).where(baseWhere),
+
+            // 13. Health Raw Data (for processing disabilities and chronics)
+            db.select({
+                disabilityPhysical: congregants.healthDisabilityPhysical,
+                disabilityIntellectual: congregants.healthDisabilityIntellectual,
+                disabilityMental: congregants.healthDisabilityMental,
+                disabilitySensory: congregants.healthDisabilitySensory,
+                chronicDisease: congregants.healthChronicDisease,
+                sick30Days: congregants.healthSick30Days,
+                regularTreatment: congregants.healthRegularTreatment
+            }).from(congregants).where(baseWhere)
         ]);
 
         const total = totalRes[0]?.count || 0;
@@ -686,6 +719,99 @@ app.get("/api/dashboard/stats", async (req, res) => {
             if (s.sector) {
                 sectorCounts[s.sector] = s.count;
                 if (s.count > maxSec) { maxSec = s.count; dominant = s.sector; }
+            }
+        });
+
+        // 11. Process Diakonia
+        const diakoniaCounts: Record<string, number> = {};
+        diakoniaRes.forEach(d => { if (d.type) diakoniaCounts[d.type] = d.count; });
+
+        // 12. Process Economics (Assets, UMKM)
+        const assetsCount: Record<string, number> = {};
+        const businessIssuesCount: Record<string, number> = {};
+        const businessTrainingCount: Record<string, number> = {};
+        const businessTurnoverCount: Record<string, number> = {};
+        const businessNeedsCount: Record<string, number> = {};
+        const waterSourceCount: Record<string, number> = {};
+
+        economicsRes.forEach(e => {
+            if (e.waterSource) waterSourceCount[e.waterSource] = (waterSourceCount[e.waterSource] || 0) + 1;
+
+            // Assets
+            if (e.assets) {
+                try {
+                    const parsed = typeof e.assets === 'string' ? JSON.parse(e.assets) : e.assets;
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(a => { assetsCount[a] = (assetsCount[a] || 0) + 1; });
+                    }
+                } catch (err) { }
+            }
+            // UMKM Stats
+            if (e.businessType) {
+                if (e.businessTurnover) businessTurnoverCount[e.businessTurnover] = (businessTurnoverCount[e.businessTurnover] || 0) + 1;
+
+                try {
+                    const parsedIssues = typeof e.businessIssues === 'string' ? JSON.parse(e.businessIssues) : e.businessIssues;
+                    if (Array.isArray(parsedIssues)) {
+                        parsedIssues.forEach(i => { businessIssuesCount[i] = (businessIssuesCount[i] || 0) + 1; });
+                    }
+                } catch (err) { }
+
+                try {
+                    const parsedTraining = typeof e.businessTraining === 'string' ? JSON.parse(e.businessTraining) : e.businessTraining;
+                    if (Array.isArray(parsedTraining)) {
+                        parsedTraining.forEach(t => { businessTrainingCount[t] = (businessTrainingCount[t] || 0) + 1; });
+                    }
+                } catch (err) { }
+
+                try {
+                    const parsedNeeds = typeof e.businessNeeds === 'string' ? JSON.parse(e.businessNeeds) : e.businessNeeds;
+                    if (Array.isArray(parsedNeeds)) {
+                        parsedNeeds.forEach(t => { businessNeedsCount[t] = (businessNeedsCount[t] || 0) + 1; });
+                    }
+                } catch (err) { }
+            }
+        });
+
+        // 13. Process Health (Disabilities & Chronics)
+        const disabilityCount: Record<string, number> = {
+            "Fisik": 0, "Intelektual": 0, "Mental": 0, "Sensorik": 0
+        };
+        const chronicCount: Record<string, number> = {};
+        let sick30DaysCount = 0;
+        let regularTreatmentCount = 0;
+
+        healthRes.forEach(h => {
+            if (h.sick30Days === 'Ya') sick30DaysCount++;
+            if (h.regularTreatment === 'Ya') regularTreatmentCount++;
+            // Disabilities
+            try {
+                if (h.disabilityPhysical) {
+                    const p = typeof h.disabilityPhysical === 'string' ? JSON.parse(h.disabilityPhysical) : h.disabilityPhysical;
+                    if (Array.isArray(p) && p.length > 0) disabilityCount["Fisik"]++;
+                }
+                if (h.disabilityIntellectual) {
+                    const p = typeof h.disabilityIntellectual === 'string' ? JSON.parse(h.disabilityIntellectual) : h.disabilityIntellectual;
+                    if (Array.isArray(p) && p.length > 0) disabilityCount["Intelektual"]++;
+                }
+                if (h.disabilityMental) {
+                    const p = typeof h.disabilityMental === 'string' ? JSON.parse(h.disabilityMental) : h.disabilityMental;
+                    if (Array.isArray(p) && p.length > 0) disabilityCount["Mental"]++;
+                }
+                if (h.disabilitySensory) {
+                    const p = typeof h.disabilitySensory === 'string' ? JSON.parse(h.disabilitySensory) : h.disabilitySensory;
+                    if (Array.isArray(p) && p.length > 0) disabilityCount["Sensorik"]++;
+                }
+            } catch (err) { }
+
+            // Chronics
+            if (h.chronicDisease) {
+                try {
+                    const parsed = typeof h.chronicDisease === 'string' ? JSON.parse(h.chronicDisease) : h.chronicDisease;
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(c => { chronicCount[c] = (chronicCount[c] || 0) + 1; });
+                    }
+                } catch (err) { }
             }
         });
 
@@ -746,13 +872,24 @@ app.get("/api/dashboard/stats", async (req, res) => {
             professionalFamilyCount,
             volunteerCount,
             educationCount: Number(eduSumRes[0]?.total) || 0,
+            sick30DaysCount,
+            regularTreatmentCount,
             distributions: {
                 sector: sectorCounts,
                 gender: genderCounts,
                 education: educationCounts,
                 willingness: willingnessCounts,
                 lingkungan: lingkunganCounts,
-                rayon: rayonCounts
+                rayon: rayonCounts,
+                diakonia: diakoniaCounts,
+                assets: assetsCount,
+                businessTurnover: businessTurnoverCount,
+                businessIssues: Object.entries(businessIssuesCount).sort((a, b) => b[1] - a[1]).slice(0, 5).reduce((obj, [k, v]) => { obj[k] = v; return obj; }, {} as Record<string, number>),
+                businessTraining: Object.entries(businessTrainingCount).sort((a, b) => b[1] - a[1]).slice(0, 5).reduce((obj, [k, v]) => { obj[k] = v; return obj; }, {} as Record<string, number>),
+                businessNeeds: Object.entries(businessNeedsCount).sort((a, b) => b[1] - a[1]).slice(0, 5).reduce((obj, [k, v]) => { obj[k] = v; return obj; }, {} as Record<string, number>),
+                waterSource: waterSourceCount,
+                disabilities: disabilityCount,
+                chronics: Object.entries(chronicCount).sort((a, b) => b[1] - a[1]).slice(0, 5).reduce((obj, [k, v]) => { obj[k] = v; return obj; }, {} as Record<string, number>),
             }
         });
     } catch (error) {

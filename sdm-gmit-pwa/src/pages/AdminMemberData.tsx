@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from '../components/ui/Toast';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+
+import { ExportDropdown } from '../components/admin/reports/ExportDropdown';
 
 import { AdminLayout } from '../components/layouts/AdminLayout';
 import { Modal } from '../components/ui/Modal';
@@ -25,6 +25,9 @@ const AdminMemberData = () => {
         filterGender, setFilterGender,
         filterAgeCategory, setFilterAgeCategory,
         filterWillingness, setFilterWillingness,
+        filterBusiness, setFilterBusiness,
+        filterCompleteness, setFilterCompleteness,
+        filterDisability, setFilterDisability,
         sortConfig, handleSort,
         stats,
         isLoading,
@@ -142,6 +145,26 @@ const AdminMemberData = () => {
             setFilterWillingness(filterWillingnessParam);
         }
     }, [searchParams]);
+
+    // Handle deep linking for member ID
+    useEffect(() => {
+        const idParam = searchParams.get('id');
+        if (idParam && members && members.length > 0) {
+            // Check if not already opened
+            if (!isDetailModalOpen && !selectedMember) {
+                const found = members.find(m => m.id === idParam);
+                if (found) {
+                    setSelectedMember(found);
+                    setIsDetailModalOpen(true);
+
+                    // Remove id from URL without triggering a React Router state change that resets the view
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('id');
+                    window.history.replaceState({}, '', url.toString());
+                }
+            }
+        }
+    }, [searchParams, members, isDetailModalOpen, selectedMember]);
 
 
     // Keyboard Shortcuts
@@ -275,130 +298,9 @@ const AdminMemberData = () => {
         toast.success(`CSV berhasil diexport (${filteredMembers.length} jemaat)`);
     };
 
-    const handleExportPDF = () => {
-        const doc = new jsPDF({ orientation: 'landscape' });
-        const arrStr = (v: any) => Array.isArray(v) ? v.join(', ') : (v || '-');
-
-        doc.setFontSize(18);
-        doc.text("Laporan Data Jemaat Terpadu - Emaus Liliba", 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 30);
-
-        const baseTableConfig = {
-            theme: 'grid' as const,
-            headStyles: { fillColor: [51, 65, 85] as [number, number, number], textColor: [255, 255, 255] as [number, number, number], fontStyle: 'bold' as const },
-            styles: { fontSize: 8, cellPadding: 2 },
-            alternateRowStyles: { fillColor: [248, 250, 252] as [number, number, number] },
-        };
-
-        // 1. Identitas
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 1: Identitas", 14, 40);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Gender", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif", "Lingkungan", "Rayon", "Alamat Lengkap"]],
-            body: filteredMembers.map((m, i) => [i + 1, m.kkNumber || '-', m.nik || '-', m.name, m.gender, m.birthDate, calculateAge(m.birthDate), m.phone || '-', m.lingkungan, m.rayon, m.address?.substring(0, 30) || '-']),
-            startY: 45,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
-        });
-
-        // 2. Keluarga & Diakonia
-        doc.addPage();
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 2: Keluarga & Diakonia", 14, 25);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Penerima Diakonia", "Jenis Diakonia"]],
-            body: filteredMembers.map((m, i) => [i + 1, m.name, m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.diakonia_recipient || '-', m.diakonia_type?.substring(0, 30) || '-']),
-            startY: 30,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
-        });
-
-        // 3. Profesi & Pelayanan
-        doc.addPage();
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 3: Profesi & Pelayanan", 14, 25);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Pendidikan Terakhir", "Kategori Pekerjaan", "Daftar Keahlian", "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi"]],
-            body: filteredMembers.map((m, i) => [i + 1, m.name, m.educationLevel || m.education || '-', m.jobCategory || '-', arrStr(m.skills), m.willingnessToServe || '-', arrStr(m.interestAreas), arrStr(m.contributionTypes)]),
-            startY: 30,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 35 }, 4: { cellWidth: 50 }, 6: { cellWidth: 40 }, 7: { cellWidth: 40 } }
-        });
-
-        // 4. Pendidikan Anak
-        doc.addPage();
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 4: Pendidikan Anak (Keluarga)", 14, 25);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Status Anak Bersekolah", "Total Bersekolah", "Total Putus Sekolah", "Anak Sudah Bekerja"]],
-            body: filteredMembers.map((m, i) => {
-                const totalIn = (m.education_inSchool_tk_paud || 0) + (m.education_inSchool_sd || 0) + (m.education_inSchool_smp || 0) + (m.education_inSchool_sma || 0) + (m.education_inSchool_university || 0);
-                const totalOut = (m.education_dropout_tk_paud || 0) + (m.education_dropout_sd || 0) + (m.education_dropout_smp || 0) + (m.education_dropout_sma || 0) + (m.education_dropout_university || 0);
-                return [i + 1, m.name, m.education_schoolingStatus || '-', totalIn, totalOut, m.education_working || 0]
-            }),
-            startY: 30,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 60 } }
-        });
-
-        // 5. Ekonomi
-        doc.addPage();
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 5: Ekonomi & Aset", 14, 25);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Range Pendapatan", "Punya Usaha?", "Modal Usaha", "Status Rumah", "Sumber Air", "Total Aset", "Biaya Listrik"]],
-            body: filteredMembers.map((m, i) => [i + 1, m.name, m.economics_incomeRange || '-', m.economics_hasBusiness || '-', m.economics_businessCapital ? `Rp${m.economics_businessCapital.toLocaleString('id-ID')}` : '-', m.economics_houseStatus || '-', m.economics_waterSource || '-', m.economics_totalAssets || 0, m.economics_electricity_total_cost ? `Rp${m.economics_electricity_total_cost.toLocaleString('id-ID')}` : 0]),
-            startY: 30,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
-        });
-
-        // 6. Kesehatan
-        doc.addPage();
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
-        doc.setFontSize(14);
-        doc.setTextColor(50);
-        doc.text("Tabel 6: Kesehatan & Disabilitas", 14, 25);
-        autoTable(doc, {
-            ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Sakit 30 Hari Terakhir", "Penyakit Kronis", "BPJS Kesehatan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas"]],
-            body: filteredMembers.map((m, i) => {
-                const arr: string[] = [];
-                if (m.health_disabilityPhysical?.length) arr.push(...m.health_disabilityPhysical);
-                if (m.health_disabilityIntellectual?.length) arr.push(...m.health_disabilityIntellectual);
-                if (m.health_disabilityMental?.length) arr.push(...m.health_disabilityMental);
-                if (m.health_disabilitySensory?.length) arr.push(...m.health_disabilitySensory);
-                if (m.health_disabilityDouble) arr.push("Ganda/Multi");
-                return [i + 1, m.name, m.health_sick30Days || '-', m.health_chronicSick || '-', m.health_hasBPJS || '-', m.health_socialAssistance || '-', m.health_hasDisability || '-', arrStr(arr)];
-            }),
-            startY: 30,
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 40 }, 7: { cellWidth: 40 } }
-        });
-
-        doc.save(`Laporan_Jemaat_Emaus_Liliba_${new Date().toISOString().split('T')[0]}.pdf`);
-        toast.success("PDF berhasil diexport");
-    };
+    // Thematic Exports are handled within ExportDropdown.tsx
+    // The handleExportCSV is kept for backwards compatibility or full raw export
+    // The previous giant PDF export handler is removed in favor of thematic ones in the dropdown.
 
     return (
         <AdminLayout title="Data Jemaat">
@@ -415,13 +317,8 @@ const AdminMemberData = () => {
                                 <span className="material-symbols-outlined text-xl text-primary font-icon">upload_file</span>
                                 Import Data
                             </button>
-                            <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm bg-white dark:bg-slate-800">
-                                <button onClick={handleExportCSV} className="px-4 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip" title="Export ke CSV">
-                                    <span className="material-symbols-outlined text-xl text-green-500 font-icon">csv</span> CSV
-                                </button>
-                                <button onClick={handleExportPDF} className="px-4 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip" title="Export ke PDF">
-                                    <span className="material-symbols-outlined text-xl text-red-500 font-icon">picture_as_pdf</span> PDF
-                                </button>
+                            <div className="flex z-[50]">
+                                <ExportDropdown members={filteredMembers} onExportCSV={handleExportCSV} />
                             </div>
                             <button onClick={() => { setIsEditMode(false); setIsAddModalOpen(true); }} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-primary text-slate-900 font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all active:scale-95">
                                 <span className="material-symbols-outlined text-xl font-icon">person_add</span>
@@ -534,9 +431,9 @@ const AdminMemberData = () => {
                                     Filter
                                 </button>
                                 {/* Clear Filter Button - Only visible if filters active */}
-                                {(searchTerm || filterLingkungan !== "Semua" || filterRayon !== "Semua" || filterGender !== "Semua" || filterAgeCategory !== "Semua" || filterWillingness !== "Semua") &&
+                                {(searchTerm || filterLingkungan !== "Semua" || filterRayon !== "Semua" || filterGender !== "Semua" || filterAgeCategory !== "Semua" || filterWillingness !== "Semua" || filterBusiness !== "Semua" || filterCompleteness !== "Semua" || filterDisability !== "Semua") &&
                                     <button
-                                        onClick={() => { setSearchTerm(""); setFilterLingkungan("Semua"); setFilterRayon("Semua"); setFilterGender("Semua"); setFilterAgeCategory("Semua"); setFilterWillingness("Semua"); }}
+                                        onClick={() => { setSearchTerm(""); setFilterLingkungan("Semua"); setFilterRayon("Semua"); setFilterGender("Semua"); setFilterAgeCategory("Semua"); setFilterWillingness("Semua"); setFilterBusiness("Semua"); setFilterCompleteness("Semua"); setFilterDisability("Semua"); }}
                                         className="text-red-500 text-xs font-bold px-2 hover:bg-red-50 rounded py-1 transition-colors"
                                     >
                                         <span className="material-symbols-outlined text-lg align-middle">backspace</span>
@@ -546,13 +443,13 @@ const AdminMemberData = () => {
                         </div>
 
                         {showAdvancedFilters && (
-                            <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-down">
+                            <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-fade-in-down">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Jenis Kelamin</label>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Jenis Kelamin</label>
                                     <select
                                         value={filterGender}
                                         onChange={(e) => setFilterGender(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
                                     >
                                         <option value="Semua">Semua</option>
                                         <option value="Laki-laki">Laki-laki</option>
@@ -560,15 +457,66 @@ const AdminMemberData = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Kesediaan Melayani</label>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Status Pelayanan</label>
                                     <select
                                         value={filterWillingness}
                                         onChange={(e) => setFilterWillingness(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
                                     >
                                         <option value="Semua">Semua</option>
-                                        <option value="Aktif">Ya, bersedia aktif</option>
-                                        <option value="On-demand">Ya, bersedia bila dibutuhkan</option>
+                                        <option value="Aktif">Bersedia Aktif</option>
+                                        <option value="On-demand">Bila Dibutuhkan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Usia Jemaat</label>
+                                    <select
+                                        value={filterAgeCategory}
+                                        onChange={(e) => setFilterAgeCategory(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua Usia</option>
+                                        <option value="Anak">Anak (&le;12 thn)</option>
+                                        <option value="Remaja">Remaja (13-17 thn)</option>
+                                        <option value="Pemuda">Pemuda (18-30 thn)</option>
+                                        <option value="Dewasa">Dewasa (31-60 thn)</option>
+                                        <option value="Lansia">Lansia (&gt;60 thn)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Punya Usaha UMKM</label>
+                                    <select
+                                        value={filterBusiness}
+                                        onChange={(e) => setFilterBusiness(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Ya">Punya Usaha</option>
+                                        <option value="Tidak">Tidak Punya</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Disabilitas</label>
+                                    <select
+                                        value={filterDisability}
+                                        onChange={(e) => setFilterDisability(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Ya">Ada Disabilitas</option>
+                                        <option value="Tidak">Tidak Ada</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Status Kelengkapan</label>
+                                    <select
+                                        value={filterCompleteness}
+                                        onChange={(e) => setFilterCompleteness(e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
+                                    >
+                                        <option value="Semua">Semua</option>
+                                        <option value="Lengkap">Lengkap (&ge;80%)</option>
+                                        <option value="Belum Lengkap">Belum Lengkap</option>
                                     </select>
                                 </div>
                             </div>

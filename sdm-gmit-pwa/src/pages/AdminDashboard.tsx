@@ -251,8 +251,35 @@ const AdminDashboard = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
 
-    const { data: stats, isLoading: isStatsLoading, isError: isStatsError, error: statsError } = useDashboardStats();
-    const { members, isLoading: isMembersLoading, isError: isMembersError } = useMemberData();
+    const [globalFilterRayon, setGlobalFilterRayon] = useState('Semua');
+    const [globalFilterLingkungan, setGlobalFilterLingkungan] = useState('Semua');
+
+    const lingkunganRayonMap: Record<string, number[]> = {
+        '1': [1, 2, 17],
+        '2': [12, 13, 16],
+        '3': [7, 14, 15],
+        '4': [3, 8, 9],
+        '5': [5, 10],
+        '6': [6, 20],
+        '7': [4, 18],
+        '8': [11, 19],
+    };
+
+    const availableRayons = globalFilterLingkungan !== 'Semua' ? lingkunganRayonMap[globalFilterLingkungan] || [] : Array.from({ length: 20 }, (_, i) => i + 1);
+
+
+    const { data: stats, isLoading: isStatsLoading, isError: isStatsError, error: statsError } = useDashboardStats(globalFilterRayon, globalFilterLingkungan);
+    const { members: allMembers, isLoading: isMembersLoading, isError: isMembersError } = useMemberData();
+
+    // Filter members based on global filters
+    const members = useMemo(() => {
+        if (!allMembers) return [];
+        return allMembers.filter(m => {
+            const rMatch = globalFilterRayon === 'Semua' || m.rayon === globalFilterRayon;
+            const lMatch = globalFilterLingkungan === 'Semua' || m.lingkungan === globalFilterLingkungan;
+            return rMatch && lMatch;
+        });
+    }, [allMembers, globalFilterRayon, globalFilterLingkungan]);
 
 
 
@@ -685,21 +712,7 @@ const AdminDashboard = () => {
         };
     }, [members]);
 
-    const businessTypeData = useMemo<ChartDataPoints>(() => {
-        const types: Record<string, number> = {};
-        members.forEach(m => {
-            if (m.economics_hasBusiness === 'Ya' && m.economics_businessType) {
-                types[m.economics_businessType] = (types[m.economics_businessType] || 0) + 1;
-            }
-        });
-        const sorted = Object.entries(types).sort((a, b) => b[1] - a[1]).slice(0, 6);
-        return {
-            labels: sorted.map(e => e[0]),
-            data: sorted.map(e => e[1]),
-            colors: Array(sorted.length).fill('#fbbf24'),
-            type: 'bar'
-        };
-    }, [members]);
+
 
     // Tab: Kesehatan
     const bpjsData = useMemo<ChartDataPoints>(() => {
@@ -742,8 +755,87 @@ const AdminDashboard = () => {
         };
     }, [members]);
 
-    const disabilityCount = useMemo(() => members.filter(m => m.health_hasDisability === 'Ya').length, [members]);
     const workingChildrenCount = useMemo(() => members.reduce((acc, m) => acc + (Number(m.education_working) || 0), 0), [members]);
+
+    // NEW CHARTS: Ekonomic
+    const assetsData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'bar' };
+        const d = stats.distributions.assets || {};
+        const sorted = Object.entries(d).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        return {
+            labels: sorted.map(e => e[0].substring(0, 15)),
+            data: sorted.map(e => e[1]),
+            colors: Array(sorted.length).fill('#10b981'),
+            type: 'bar'
+        };
+    }, [stats]);
+
+    const turnoverData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'doughnut' };
+        const d = stats.distributions.businessTurnover || {};
+        return {
+            labels: Object.keys(d),
+            data: Object.values(d),
+            colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            type: 'doughnut'
+        };
+    }, [stats]);
+
+    const businessIssuesData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'bar' };
+        const d = stats.distributions.businessIssues || {};
+        return {
+            labels: Object.keys(d).map(k => k.substring(0, 15)),
+            data: Object.values(d),
+            colors: Array(Object.keys(d).length).fill('#f43f5e'),
+            type: 'bar'
+        };
+    }, [stats]);
+
+    const businessNeedsData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'doughnut' };
+        const d = stats.distributions.businessNeeds || {};
+        return {
+            labels: Object.keys(d),
+            data: Object.values(d),
+            colors: ['#a855f7', '#fbbf24', '#34d399', '#f43f5e', '#60a5fa'],
+            type: 'doughnut'
+        };
+    }, [stats]);
+
+    const waterSourceData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'doughnut' };
+        const d = stats.distributions.waterSource || {};
+        return {
+            labels: Object.keys(d),
+            data: Object.values(d),
+            colors: ['#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6'],
+            type: 'doughnut'
+        };
+    }, [stats]);
+
+    // NEW CHARTS: Health
+    const disabilitiesDistributionData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'doughnut' };
+        const d = stats.distributions.disabilities || {};
+        return {
+            labels: Object.keys(d),
+            data: Object.values(d),
+            colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+            type: 'doughnut'
+        };
+    }, [stats]);
+
+    const chronicsDistributionData = useMemo<ChartDataPoints>(() => {
+        if (!stats) return { labels: [], data: [], colors: [], type: 'bar' };
+        const d = stats.distributions.chronics || {};
+        return {
+            labels: Object.keys(d).map(k => k.substring(0, 15)),
+            data: Object.values(d),
+            colors: Array(Object.keys(d).length).fill('#ef4444'),
+            type: 'bar'
+        };
+    }, [stats]);
 
     // ─────────────────────────────
     // RENDER CHART CARDS PER TAB
@@ -1119,9 +1211,17 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <ChartCard title="Pendapatan (KK)" subtitle="Range pendapatan rumah tangga" icon="payments" iconColor="#34d399" data={incomeData} />
                     <ChartCard title="Status Rumah" subtitle="Kepemilikan rumah keluarga" icon="house" iconColor="#60a5fa" data={houseStatusData} />
+                    <ChartCard title="Sumber Air" subtitle="Fasilitas sumber air primer" icon="water_drop" iconColor="#0ea5e9" data={waterSourceData} />
                     <ChartCard title="Kepemilikan Usaha" subtitle="Punya usaha produktif?" icon="storefront" iconColor="#4ade80" data={businessData} />
-                    <ChartCard title="Jenis Usaha" subtitle="Kategori usaha keluarga" icon="category" iconColor="#fbbf24" data={businessTypeData} />
                 </div>
+                {businessData.data[0] > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                        <ChartCard title="Aset Dominan" subtitle="Kepemilikan aset tertinggi" icon="diamond" iconColor="#10b981" data={assetsData} />
+                        <ChartCard title="Omset Usaha" subtitle="Rentang omset bulanan UMKM" icon="trending_up" iconColor="#3b82f6" data={turnoverData} />
+                        <ChartCard title="Kendala Usaha" subtitle="Top 5 Kendala UMKM" icon="warning" iconColor="#f43f5e" data={businessIssuesData} />
+                        <ChartCard title="Kebutuhan Pelatihan" subtitle="Bantuan yg dibutuhkan" icon="model_training" iconColor="#a855f7" data={businessNeedsData} />
+                    </div>
+                )}
             </div>
         ),
         kesehatan: (
@@ -1137,8 +1237,12 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <ChartCard title="Cakupan BPJS" subtitle="Status kepesertaan KK" icon="medical_services" iconColor="#10b981" data={bpjsData} />
                     <ChartCard title="Penyakit Kronis" subtitle="KK dengan riwayat kronis" icon="monitor_heart" iconColor="#ef4444" data={chronicData} />
-                    <CountCard title="Disabilitas" subtitle="Jiwa dengan disabilitas" value={disabilityCount} icon="accessible" gradient="bg-gradient-to-br from-rose-500/10 to-pink-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400" />
-                    <ChartCard title="Bantuan Sosial" subtitle="Penerima bantuan bansos" icon="add_reaction" iconColor="#8b5cf6" data={socialAssistData} />
+                    <CountCard title="Sakit Berlanjut" subtitle="30 Hari Terakhir" value={stats?.sick30DaysCount || 0} icon="sick" gradient="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400" />
+                    <CountCard title="Pengobatan Rutin" subtitle="Sedang terapi/obat" value={stats?.regularTreatmentCount || 0} icon="medication" gradient="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                    <ChartCard title="Jenis Disabilitas" subtitle="Kategori Disabilitas (Semua)" icon="accessible_forward" iconColor="#3b82f6" data={disabilitiesDistributionData} />
+                    <ChartCard title="Top 5 Penyakit Kronis" subtitle="Penyakit Dominan (Semua)" icon="coronavirus" iconColor="#ef4444" data={chronicsDistributionData} />
                 </div>
             </div>
         )
@@ -1199,6 +1303,44 @@ const AdminDashboard = () => {
                                         <option value="kesehatan">🏥 Kesehatan</option>
                                     </select>
                                     <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">unfold_more</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Global Filters */}
+                        <div className="col-span-12 flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-sm">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <span className="material-symbols-outlined text-primary">filter_alt</span>
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter Global:</span>
+                            </div>
+                            <div className="flex gap-4 w-full sm:w-auto flex-1">
+                                <div className="flex-1 sm:max-w-xs relative group">
+                                    <select
+                                        value={globalFilterLingkungan}
+                                        onChange={(e) => {
+                                            setGlobalFilterLingkungan(e.target.value);
+                                            setGlobalFilterRayon('Semua');
+                                        }}
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 ring-primary/20 appearance-none"
+                                    >
+                                        <option value="Semua">Semua Lingkungan</option>
+                                        {Array.from({ length: 8 }, (_, i) => i + 1).map(l => (
+                                            <option key={l} value={l.toString()}>Lingkungan {l}</option>))}
+                                    </select>
+                                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                                </div>
+                                <div className="flex-1 sm:max-w-xs relative group">
+                                    <select
+                                        value={globalFilterRayon}
+                                        onChange={(e) => setGlobalFilterRayon(e.target.value)}
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 ring-primary/20 appearance-none"
+                                    >
+                                        <option value="Semua">Semua Rayon</option>
+                                        {availableRayons.map((r) => (
+                                            <option key={r} value={r.toString()}>Rayon {r}</option>
+                                        ))}
+                                    </select>
+                                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                                 </div>
                             </div>
                         </div>
@@ -1371,7 +1513,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-12">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-12">
                             {/* 1. Academic Snapshot */}
                             <ChartCard
                                 title="Tingkat Pendidikan"
@@ -1577,7 +1719,7 @@ const AdminDashboard = () => {
                                         <div
                                             key={m.id}
                                             onClick={() => {
-                                                navigate(`/admin/members/${m.id}`);
+                                                navigate(`/admin/members?id=${m.id}`);
                                                 setIsSearchOpen(false);
                                                 setSearchQuery('');
                                             }}
@@ -1646,7 +1788,7 @@ const AdminDashboard = () => {
                                         <div
                                             key={m.id}
                                             onClick={() => {
-                                                navigate(`/admin/members/${m.id}`);
+                                                navigate(`/admin/members?id=${m.id}`);
                                                 setShowRecentModal(false);
                                             }}
                                             className="group p-5 rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-transparent hover:border-emerald-500/30 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer flex items-center justify-between"

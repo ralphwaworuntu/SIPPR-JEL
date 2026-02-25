@@ -215,7 +215,7 @@ const AdminReports = () => {
             });
         } else if (type === 'relawan') {
             title = 'Laporan Potensi Relawan';
-            const relawan = members.filter(m => ['Aktif', 'Active', 'Ya'].includes(m.willingnessToServe));
+            const relawan = members.filter(m => ['Aktif', 'Active', 'Ya'].includes(m.willingnessToServe || ''));
             headers = ['No', 'Nama', 'Kontak', 'Minat', 'Kontribusi'];
             data = relawan.map((m, i) => [(i + 1).toString(), m.name, m.phone || '-', (m.interestAreas || []).join(', ') || '-', (m.contributionTypes || []).join(', ') || '-']);
         } else if (type === 'sekolah') {

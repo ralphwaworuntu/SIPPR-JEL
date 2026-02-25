@@ -12,6 +12,8 @@ export interface DashboardStats {
     professionalFamilyCount: number;
     volunteerCount: number;
     educationCount: number;
+    sick30DaysCount: number;
+    regularTreatmentCount: number;
     distributions: {
         sector: Record<string, number>;
         gender: Record<string, number>;
@@ -19,14 +21,27 @@ export interface DashboardStats {
         willingness: Record<string, number>;
         lingkungan: Record<string, number>;
         rayon: Record<string, number>;
+        diakonia: Record<string, number>;
+        assets: Record<string, number>;
+        businessTurnover: Record<string, number>;
+        businessIssues: Record<string, number>;
+        businessTraining: Record<string, number>;
+        businessNeeds: Record<string, number>;
+        waterSource: Record<string, number>;
+        disabilities: Record<string, number>;
+        chronics: Record<string, number>;
     };
 }
 
-export const useDashboardStats = () => {
+export const useDashboardStats = (rayon: string = 'Semua', lingkungan: string = 'Semua') => {
     return useQuery({
-        queryKey: ['dashboard-stats'],
+        queryKey: ['dashboard-stats', rayon, lingkungan],
         queryFn: async () => {
-            const response = await apiClient.get<DashboardStats>('/dashboard/stats');
+            const params = new URLSearchParams();
+            if (rayon && rayon !== 'Semua') params.append('rayon', rayon);
+            if (lingkungan && lingkungan !== 'Semua') params.append('lingkungan', lingkungan);
+
+            const response = await apiClient.get<DashboardStats>(`/dashboard/stats?${params.toString()}`);
             return response.data;
         },
         staleTime: 1000 * 60 * 5, // 5 minutes
