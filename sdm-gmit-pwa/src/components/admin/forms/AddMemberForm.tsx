@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import Step5Economics from '../../form/Step5Economics';
+import Step6Health from '../../form/Step6Health';
 import { toast } from '../../ui/Toast';
 import { useMemberData } from '../../../hooks/useMemberData';
 
@@ -138,29 +140,88 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         education_unemployed_university: initialData?.education_unemployed_university || 0,
         education_working: initialData?.education_working || 0,
 
-        // Step 5: Economics
+        // Step 5: Economics & Assets (fully expanded)
         economics_headOccupation: initialData?.economics_headOccupation || '',
+        economics_headOccupationOther: initialData?.economics_headOccupationOther || '',
         economics_spouseOccupation: initialData?.economics_spouseOccupation || '',
+        economics_spouseOccupationOther: initialData?.economics_spouseOccupationOther || '',
         economics_incomeRange: initialData?.economics_incomeRange || '',
+        economics_incomeRangeDetailed: initialData?.economics_incomeRangeDetailed || '',
+
         economics_expense_food: initialData?.economics_expense_food || 0,
         economics_expense_utilities: initialData?.economics_expense_utilities || 0,
         economics_expense_education: initialData?.economics_expense_education || 0,
         economics_expense_other: initialData?.economics_expense_other || 0,
+
         economics_hasBusiness: initialData?.economics_hasBusiness || '',
         economics_businessName: initialData?.economics_businessName || '',
         economics_businessType: initialData?.economics_businessType || '',
+        economics_businessTypeOther: initialData?.economics_businessTypeOther || '',
+        economics_businessDuration: initialData?.economics_businessDuration || '',
+        economics_businessDurationYears: initialData?.economics_businessDurationYears || 0,
+        economics_businessStatus: initialData?.economics_businessStatus || '',
+        economics_businessStatusOther: initialData?.economics_businessStatusOther || '',
+        economics_businessLocation: initialData?.economics_businessLocation || '',
+        economics_businessLocationOther: initialData?.economics_businessLocationOther || '',
+        economics_businessEmployeeCount: initialData?.economics_businessEmployeeCount || '',
+        economics_businessCapital: initialData?.economics_businessCapital || 0,
+        economics_businessCapitalSource: initialData?.economics_businessCapitalSource || '',
+        economics_businessCapitalSourceOther: initialData?.economics_businessCapitalSourceOther || '',
+        economics_businessPermit: Array.isArray(initialData?.economics_businessPermit) ? initialData.economics_businessPermit : [],
+        economics_businessPermitOther: initialData?.economics_businessPermitOther || '',
+        economics_businessMarketing: Array.isArray(initialData?.economics_businessMarketing) ? initialData.economics_businessMarketing : [],
+        economics_businessMarketingOther: initialData?.economics_businessMarketingOther || '',
+        economics_businessMarketArea: initialData?.economics_businessMarketArea || '',
+        economics_businessIssues: Array.isArray(initialData?.economics_businessIssues) ? initialData.economics_businessIssues : [],
+        economics_businessIssuesOther: initialData?.economics_businessIssuesOther || '',
+        economics_businessNeeds: Array.isArray(initialData?.economics_businessNeeds) ? initialData.economics_businessNeeds : [],
+        economics_businessNeedsOther: initialData?.economics_businessNeedsOther || '',
+        economics_businessSharing: initialData?.economics_businessSharing || '',
+        economics_businessTraining: Array.isArray(initialData?.economics_businessTraining) ? initialData.economics_businessTraining : [],
+        economics_businessTrainingOther: initialData?.economics_businessTrainingOther || '',
+
         economics_houseStatus: initialData?.economics_houseStatus || '',
         economics_houseType: initialData?.economics_houseType || '',
+        economics_houseIMB: initialData?.economics_houseIMB || '',
         economics_hasAssets: initialData?.economics_hasAssets || '',
+        economics_totalAssets: initialData?.economics_totalAssets || 0,
+        economics_assets: Array.isArray(initialData?.economics_assets) ? initialData.economics_assets : [],
+        economics_asset_motor_qty: initialData?.economics_asset_motor_qty || 0,
+        economics_asset_mobil_qty: initialData?.economics_asset_mobil_qty || 0,
+        economics_asset_kulkas_qty: initialData?.economics_asset_kulkas_qty || 0,
+        economics_asset_laptop_qty: initialData?.economics_asset_laptop_qty || 0,
+        economics_asset_tv_qty: initialData?.economics_asset_tv_qty || 0,
+        economics_asset_internet_qty: initialData?.economics_asset_internet_qty || 0,
+        economics_asset_lahan_qty: initialData?.economics_asset_lahan_qty || 0,
+        economics_landStatus: initialData?.economics_landStatus || '',
         economics_waterSource: initialData?.economics_waterSource || '',
+        economics_electricity_capacities: Array.isArray(initialData?.economics_electricity_capacities) ? initialData.economics_electricity_capacities : [],
+        economics_electricity_450_qty: initialData?.economics_electricity_450_qty || 0,
+        economics_electricity_900_qty: initialData?.economics_electricity_900_qty || 0,
+        economics_electricity_1200_qty: initialData?.economics_electricity_1200_qty || 0,
+        economics_electricity_2200_qty: initialData?.economics_electricity_2200_qty || 0,
+        economics_electricity_5000_qty: initialData?.economics_electricity_5000_qty || 0,
+        economics_electricity_total_cost: initialData?.economics_electricity_total_cost || 0,
 
         // Step 6: Health
         health_sick30Days: initialData?.health_sick30Days || '',
         health_chronicSick: initialData?.health_chronicSick || '',
+        health_chronicDisease: Array.isArray(initialData?.health_chronicDisease) ? initialData.health_chronicDisease : [],
+        health_chronicDiseaseOther: initialData?.health_chronicDiseaseOther || '',
         health_hasBPJS: initialData?.health_hasBPJS || '',
+        health_regularTreatment: initialData?.health_regularTreatment || '',
         health_hasBPJSKetenagakerjaan: initialData?.health_hasBPJSKetenagakerjaan || '',
         health_socialAssistance: initialData?.health_socialAssistance || '',
         health_hasDisability: initialData?.health_hasDisability || '',
+        health_disabilityDouble: initialData?.health_disabilityDouble || false,
+        health_disabilityPhysical: Array.isArray(initialData?.health_disabilityPhysical) ? initialData.health_disabilityPhysical : [],
+        health_disabilityPhysicalOther: initialData?.health_disabilityPhysicalOther || '',
+        health_disabilityIntellectual: Array.isArray(initialData?.health_disabilityIntellectual) ? initialData.health_disabilityIntellectual : [],
+        health_disabilityIntellectualOther: initialData?.health_disabilityIntellectualOther || '',
+        health_disabilityMental: Array.isArray(initialData?.health_disabilityMental) ? initialData.health_disabilityMental : [],
+        health_disabilityMentalOther: initialData?.health_disabilityMentalOther || '',
+        health_disabilitySensory: Array.isArray(initialData?.health_disabilitySensory) ? initialData.health_disabilitySensory : [],
+        health_disabilitySensoryOther: initialData?.health_disabilitySensoryOther || '',
 
         // Geo
         latitude: initialData?.latitude || -10.1772,
@@ -237,12 +298,16 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 };
             }
             if (name === 'familyMembersSidi') {
-                return {
+                const updates = {
                     ...prev,
                     familyMembersSidi: val,
                     familyMembersSidiMale: 0,
                     familyMembersSidiFemale: 0
                 };
+                if (val === prev.familyMembers) {
+                    updates.familyMembersNonBaptized = 0;
+                }
+                return updates;
             }
             return { ...prev, [name]: val };
         });
@@ -335,8 +400,10 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             }
         } else if (currentStep === 5) {
             if (!formData.economics_headOccupation) { toast.error("Mohon pilih Pekerjaan Utama Kepala Keluarga"); isValid = false; }
-            else if (!formData.economics_spouseOccupation) { toast.error("Mohon pilih Pekerjaan Utama Istri"); isValid = false; }
-            else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga Per Bulan"); isValid = false; }
+            else if (formData.economics_headOccupation === 'Lainnya' && !formData.economics_headOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Kepala Keluarga Lainnya"); isValid = false; }
+            else if (formData.economics_spouseOccupation === 'Lainnya' && !formData.economics_spouseOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Istri Lainnya"); isValid = false; }
+            else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga"); isValid = false; }
+            else if (formData.economics_incomeRange === '≥ Rp 5.000.000' && !formData.economics_incomeRangeDetailed) { toast.error("Mohon pilih Detail Range Pendapatan"); isValid = false; }
             else if (
                 (formData.economics_expense_food < 0) ||
                 (formData.economics_expense_utilities < 0) ||
@@ -345,15 +412,126 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             ) {
                 toast.error("Pengeluaran tidak boleh negatif"); isValid = false;
             }
-            else if (!formData.economics_hasBusiness) { toast.error("Mohon pilih Punya Usaha?"); isValid = false; }
+            else if (!formData.economics_hasBusiness) { toast.error("Mohon pilih status kepemilikan usaha"); isValid = false; }
             else if (formData.economics_hasBusiness === 'Ya') {
-                if (!formData.economics_businessName) { toast.error("Mohon isi Nama Usaha"); isValid = false; }
-                else if (!formData.economics_businessType) { toast.error("Mohon isi Jenis Usaha"); isValid = false; }
+                if (!formData.economics_businessName) { toast.error("Mohon isi Nama/Jenis Usaha"); isValid = false; }
+                else if (!formData.economics_businessType) { toast.error("Mohon pilih Jenis Usaha"); isValid = false; }
+                else if (formData.economics_businessType === 'Lainnya' && !formData.economics_businessTypeOther) { toast.error("Mohon lengkapi Jenis Usaha lainnya"); isValid = false; }
+                else if (!formData.economics_businessDuration) { toast.error("Mohon pilih Lama Usaha"); isValid = false; }
+                else if (formData.economics_businessDuration === '> 5 tahun' && !formData.economics_businessDurationYears) { toast.error("Mohon isi lama usaha dalam tahun"); isValid = false; }
+                else if (!formData.economics_businessStatus) { toast.error("Mohon pilih Status Usaha"); isValid = false; }
+                else if (formData.economics_businessStatus === 'Lainnya' && !formData.economics_businessStatusOther) { toast.error("Mohon lengkapi Status Usaha lainnya"); isValid = false; }
+                else if (!formData.economics_businessLocation) { toast.error("Mohon pilih Lokasi Usaha"); isValid = false; }
+                else if (formData.economics_businessLocation === 'Lainnya' && !formData.economics_businessLocationOther) { toast.error("Mohon lengkapi Lokasi Usaha lainnya"); isValid = false; }
+                else if (!formData.economics_businessEmployeeCount) { toast.error("Mohon pilih Jumlah Tenaga Kerja"); isValid = false; }
+                else if (formData.economics_businessCapital < 0) { toast.error("Mohon isi Modal Awal Usaha (minimal 0)"); isValid = false; }
+                else if (!formData.economics_businessCapitalSource) { toast.error("Mohon pilih Sumber Modal"); isValid = false; }
+                else if (formData.economics_businessCapitalSource === 'Lainnya' && !formData.economics_businessCapitalSourceOther) { toast.error("Mohon lengkapi Sumber Modal lainnya"); isValid = false; }
+                else if (!formData.economics_businessPermit || formData.economics_businessPermit.length === 0) { toast.error("Mohon pilih Izin Usaha"); isValid = false; }
+                else if (formData.economics_businessPermit.includes('Lainnya') && !formData.economics_businessPermitOther) { toast.error("Mohon lengkapi Izin Usaha lainnya"); isValid = false; }
+                else if (!formData.economics_businessMarketing || formData.economics_businessMarketing.length === 0) { toast.error("Mohon pilih Cara Pemasaran Utama"); isValid = false; }
+                else if (formData.economics_businessMarketing.includes('Lainnya') && !formData.economics_businessMarketingOther) { toast.error("Mohon lengkapi Cara Pemasaran lainnya"); isValid = false; }
+                else if (!formData.economics_businessMarketArea) { toast.error("Mohon pilih Wilayah Pemasaran"); isValid = false; }
+                else if (!formData.economics_businessIssues || formData.economics_businessIssues.length === 0) { toast.error("Mohon pilih Tantangan Utama"); isValid = false; }
+                else if (formData.economics_businessIssues.includes('Lainnya') && !formData.economics_businessIssuesOther) { toast.error("Mohon lengkapi Tantangan Utama lainnya"); isValid = false; }
+                else if (!formData.economics_businessNeeds || formData.economics_businessNeeds.length === 0) { toast.error("Mohon pilih Dukungan yang Dibutuhkan"); isValid = false; }
+                else if (formData.economics_businessNeeds.includes('Lainnya') && !formData.economics_businessNeedsOther) { toast.error("Mohon lengkapi Dukungan lainnya"); isValid = false; }
+                else if (!formData.economics_businessSharing) { toast.error("Mohon pilih Kesediaan Berbagi Ilmu"); isValid = false; }
+                else if (!formData.economics_businessTraining || formData.economics_businessTraining.length === 0) { toast.error("Mohon pilih Minat Pelatihan"); isValid = false; }
+                else if (formData.economics_businessTraining.includes('Lainnya') && !formData.economics_businessTrainingOther) { toast.error("Mohon lengkapi Minat Pelatihan lainnya"); isValid = false; }
             }
-            else if (!formData.economics_houseStatus) { toast.error("Mohon pilih Status Rumah"); isValid = false; }
-            else if (!formData.economics_houseType) { toast.error("Mohon pilih Jenis Rumah"); isValid = false; }
-            else if (!formData.economics_hasAssets) { toast.error("Mohon pilih Punya Aset?"); isValid = false; }
-            else if (!formData.economics_waterSource) { toast.error("Mohon pilih Sumber Air"); isValid = false; }
+
+            // Home / Asset Check (only check if business valid or not present)
+            if (isValid) {
+                if (!formData.economics_houseStatus) { toast.error("Mohon pilih Status Rumah"); isValid = false; }
+                else if (!formData.economics_houseType) { toast.error("Mohon pilih Tipe Rumah"); isValid = false; }
+                else if (formData.economics_houseType === 'Permanen' && !formData.economics_houseIMB) { toast.error("Mohon pilih Status IMB"); isValid = false; }
+                else if (!formData.economics_hasAssets) { toast.error("Mohon pilih Kepemilikan Aset (Ya/Tidak ada)"); isValid = false; }
+                else if (!formData.economics_landStatus) { toast.error("Mohon pilih Status Kepemilikan Tanah"); isValid = false; }
+                else if (!formData.economics_waterSource) { toast.error("Mohon pilih Sumber Air Minum Utama"); isValid = false; }
+                else if (!formData.economics_electricity_capacities || formData.economics_electricity_capacities.length === 0) { toast.error("Mohon pilih minimal satu Daya Listrik Terpasang"); isValid = false; }
+                else if (formData.economics_electricity_capacities.length > 0) {
+                    for (const cap of formData.economics_electricity_capacities) {
+                        const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof typeof formData;
+                        if (!(formData[key] as number > 0)) {
+                            toast.error(`Mohon isi jumlah meteran untuk daya ${cap}`);
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isValid && (formData.economics_electricity_total_cost === undefined || formData.economics_electricity_total_cost < 0)) { toast.error("Mohon isi Total Biaya Listrik Bulanan (minimal 0)"); isValid = false; }
+                else if (formData.economics_hasAssets === 'Ya') {
+                    if (!formData.economics_assets || formData.economics_assets.length === 0) {
+                        toast.error("Mohon isi minimal satu jumlah aset"); isValid = false;
+                    } else {
+                        const allAssetsValid = formData.economics_assets.every(asset => {
+                            const m = {
+                                'Motor': 'economics_asset_motor_qty',
+                                'Mobil': 'economics_asset_mobil_qty',
+                                'Kulkas': 'economics_asset_kulkas_qty',
+                                'Laptop/Komputer': 'economics_asset_laptop_qty',
+                                'Televisi': 'economics_asset_tv_qty',
+                                'Internet/Indihome': 'economics_asset_internet_qty',
+                                'Lahan Pertanian': 'economics_asset_lahan_qty'
+                            }[asset as string];
+                            const val = m && (formData as any)[m];
+                            return val && val > 0;
+                        });
+                        if (!allAssetsValid) {
+                            toast.error(`Mohon isi jumlah masing-masing aset secara lengkap`); isValid = false;
+                        }
+                    }
+                }
+            }
+        } else if (currentStep === 6) {
+            if (!formData.health_sick30Days) { toast.error("Mohon pilih status Sakit 30 Hari Terakhir"); isValid = false; }
+            else if (!formData.health_chronicSick) { toast.error("Mohon pilih status Sakit Menahun"); isValid = false; }
+            else if (formData.health_chronicSick === 'Ya') {
+                if (!formData.health_chronicDisease || formData.health_chronicDisease.length === 0) { toast.error("Mohon pilih Jenis Penyakit Menahun"); isValid = false; }
+                else if (formData.health_chronicDisease.includes('Lainnya') && !formData.health_chronicDiseaseOther) { toast.error("Mohon lengkapi Jenis Penyakit Menahun lainnya"); isValid = false; }
+            }
+
+            if (isValid) {
+                if (!formData.health_hasBPJS) { toast.error("Mohon pilih Status BPJS Kesehatan"); isValid = false; }
+                else if (!formData.health_regularTreatment) { toast.error("Mohon pilih Status Pengobatan Teratur"); isValid = false; }
+                else if (!formData.health_hasBPJSKetenagakerjaan) { toast.error("Mohon pilih Status BPJS Ketenagakerjaan"); isValid = false; }
+                else if (!formData.health_socialAssistance) { toast.error("Mohon pilih Jenis Bantuan Sosial"); isValid = false; }
+                else if (!formData.health_hasDisability) { toast.error("Mohon pilih Status Penyandang Disabilitas"); isValid = false; }
+                else if (formData.health_hasDisability === 'Ya') {
+                    const hasPhysical = (formData.health_disabilityPhysical?.length ?? 0) > 0;
+                    const hasIntellectual = (formData.health_disabilityIntellectual?.length ?? 0) > 0;
+                    const hasMental = (formData.health_disabilityMental?.length ?? 0) > 0;
+                    const hasSensory = (formData.health_disabilitySensory?.length ?? 0) > 0;
+
+                    const totalKategoriDipilih = (hasPhysical ? 1 : 0) + (hasIntellectual ? 1 : 0) + (hasMental ? 1 : 0) + (hasSensory ? 1 : 0);
+
+                    // 1. Validasi minimal ada data yang diisi
+                    if (totalKategoriDipilih === 0) {
+                        toast.error("Mohon lengkapi detail kategori disabilitas yang dipilih."); isValid = false;
+                    }
+
+                    // 2. Jika Ganda dicentang, minimal harus 2 kategori
+                    else if (formData.health_disabilityDouble && totalKategoriDipilih < 2) {
+                        toast.error("Anda mencentang Disabilitas Ganda, mohon pilih minimal dua kategori disabilitas."); isValid = false;
+                    }
+
+                    // 3. Validasi isian "Lainnya" hanya pada kategori yang memang dipilih
+                    else if (hasPhysical && formData.health_disabilityPhysical.includes('Lainnya') && !formData.health_disabilityPhysicalOther) {
+                        toast.error("Mohon lengkapi keterangan Disabilitas Fisik lainnya"); isValid = false;
+                    }
+                    else if (hasIntellectual && formData.health_disabilityIntellectual.includes('Lainnya') && !formData.health_disabilityIntellectualOther) {
+                        toast.error("Mohon lengkapi keterangan Disabilitas Intelektual lainnya"); isValid = false;
+                    }
+                    else if (hasMental && formData.health_disabilityMental.includes('Lainnya') && !formData.health_disabilityMentalOther) {
+                        toast.error("Mohon lengkapi keterangan Disabilitas Mental lainnya"); isValid = false;
+                    }
+                    else if (hasSensory && formData.health_disabilitySensory.includes('Lainnya') && !formData.health_disabilitySensoryOther) {
+                        toast.error("Mohon lengkapi keterangan Disabilitas Sensorik lainnya"); isValid = false;
+                    }
+                }
+            }
         }
 
         setErrors(newErrors);
@@ -419,8 +597,11 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             education_working: formData.education_working,
             // Step 5
             economics_headOccupation: formData.economics_headOccupation,
+            economics_headOccupationOther: formData.economics_headOccupationOther,
             economics_spouseOccupation: formData.economics_spouseOccupation,
+            economics_spouseOccupationOther: formData.economics_spouseOccupationOther,
             economics_incomeRange: formData.economics_incomeRange,
+            economics_incomeRangeDetailed: formData.economics_incomeRangeDetailed,
             economics_expense_food: formData.economics_expense_food,
             economics_expense_utilities: formData.economics_expense_utilities,
             economics_expense_education: formData.economics_expense_education,
@@ -428,17 +609,70 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             economics_hasBusiness: formData.economics_hasBusiness,
             economics_businessName: formData.economics_businessName,
             economics_businessType: formData.economics_businessType,
+            economics_businessTypeOther: formData.economics_businessTypeOther,
+            economics_businessDuration: formData.economics_businessDuration,
+            economics_businessDurationYears: formData.economics_businessDurationYears,
+            economics_businessStatus: formData.economics_businessStatus,
+            economics_businessStatusOther: formData.economics_businessStatusOther,
+            economics_businessLocation: formData.economics_businessLocation,
+            economics_businessLocationOther: formData.economics_businessLocationOther,
+            economics_businessEmployeeCount: formData.economics_businessEmployeeCount,
+            economics_businessCapital: formData.economics_businessCapital,
+            economics_businessCapitalSource: formData.economics_businessCapitalSource,
+            economics_businessCapitalSourceOther: formData.economics_businessCapitalSourceOther,
+            economics_businessPermit: formData.economics_businessPermit,
+            economics_businessPermitOther: formData.economics_businessPermitOther,
+            economics_businessMarketing: formData.economics_businessMarketing,
+            economics_businessMarketingOther: formData.economics_businessMarketingOther,
+            economics_businessMarketArea: formData.economics_businessMarketArea,
+            economics_businessIssues: formData.economics_businessIssues,
+            economics_businessIssuesOther: formData.economics_businessIssuesOther,
+            economics_businessNeeds: formData.economics_businessNeeds,
+            economics_businessNeedsOther: formData.economics_businessNeedsOther,
+            economics_businessSharing: formData.economics_businessSharing,
+            economics_businessTraining: formData.economics_businessTraining,
+            economics_businessTrainingOther: formData.economics_businessTrainingOther,
             economics_houseStatus: formData.economics_houseStatus,
             economics_houseType: formData.economics_houseType,
+            economics_houseIMB: formData.economics_houseIMB,
             economics_hasAssets: formData.economics_hasAssets,
+            economics_totalAssets: formData.economics_totalAssets,
+            economics_assets: formData.economics_assets,
+            economics_asset_motor_qty: formData.economics_asset_motor_qty,
+            economics_asset_mobil_qty: formData.economics_asset_mobil_qty,
+            economics_asset_kulkas_qty: formData.economics_asset_kulkas_qty,
+            economics_asset_laptop_qty: formData.economics_asset_laptop_qty,
+            economics_asset_tv_qty: formData.economics_asset_tv_qty,
+            economics_asset_internet_qty: formData.economics_asset_internet_qty,
+            economics_asset_lahan_qty: formData.economics_asset_lahan_qty,
+            economics_landStatus: formData.economics_landStatus,
             economics_waterSource: formData.economics_waterSource,
+            economics_electricity_capacities: formData.economics_electricity_capacities,
+            economics_electricity_450_qty: formData.economics_electricity_450_qty,
+            economics_electricity_900_qty: formData.economics_electricity_900_qty,
+            economics_electricity_1200_qty: formData.economics_electricity_1200_qty,
+            economics_electricity_2200_qty: formData.economics_electricity_2200_qty,
+            economics_electricity_5000_qty: formData.economics_electricity_5000_qty,
+            economics_electricity_total_cost: formData.economics_electricity_total_cost,
             // Step 6
             health_sick30Days: formData.health_sick30Days,
             health_chronicSick: formData.health_chronicSick,
+            health_chronicDisease: formData.health_chronicDisease,
+            health_chronicDiseaseOther: formData.health_chronicDiseaseOther,
             health_hasBPJS: formData.health_hasBPJS,
+            health_regularTreatment: formData.health_regularTreatment,
             health_hasBPJSKetenagakerjaan: formData.health_hasBPJSKetenagakerjaan,
             health_socialAssistance: formData.health_socialAssistance,
             health_hasDisability: formData.health_hasDisability,
+            health_disabilityDouble: formData.health_disabilityDouble,
+            health_disabilityPhysical: formData.health_disabilityPhysical,
+            health_disabilityPhysicalOther: formData.health_disabilityPhysicalOther,
+            health_disabilityIntellectual: formData.health_disabilityIntellectual,
+            health_disabilityIntellectualOther: formData.health_disabilityIntellectualOther,
+            health_disabilityMental: formData.health_disabilityMental,
+            health_disabilityMentalOther: formData.health_disabilityMentalOther,
+            health_disabilitySensory: formData.health_disabilitySensory,
+            health_disabilitySensoryOther: formData.health_disabilitySensoryOther,
         };
 
         if (initialData) {
@@ -624,8 +858,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             <ErrorMsg msg={errors.rayon} />
                         </div>
                         <div className="col-span-2 flex flex-col">
-                            <FormLabel required>Alamat</FormLabel>
-                            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} className={inputClass(!!errors.address)} placeholder="Alamat lengkap..." />
+                            <div className="flex flex-col pb-1 gap-1">
+                                <FormLabel required>Alamat</FormLabel>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002, Kel. Liliba, Kec. Oebobo, Kota Kupang.
+                                </span>
+                            </div>
+                            <textarea name="address" value={formData.address} onChange={handleChange} rows={2} className={inputClass(!!errors.address)} />
                             {formData.address && formData.address.trim().length > 0 && formData.address.trim().length < 20 && (
                                 <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
                                     <span className="material-symbols-outlined text-base">warning</span>
@@ -697,7 +936,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 <>
                                     {countSelectInput('familyMembersSidiMale', 'Sidi (Laki-laki)', Math.max(0, totalSidi - femaleSidi))}
                                     {countSelectInput('familyMembersSidiFemale', 'Sidi (Perempuan)', Math.max(0, totalSidi - maleSidi))}
-                                    {countSelectInput('familyMembersNonBaptized', 'Belum Dibaptis', totalMembers)}
+                                    {countSelectInput('familyMembersNonBaptized', 'Belum Dibaptis', Math.max(0, totalMembers - totalSidi))}
 
                                     {showSidiValidation && (
                                         <div className="col-span-1 md:col-span-2">
@@ -983,7 +1222,22 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                     <FormLabel required>Jenis Keahlian Utama</FormLabel>
                                                     <select
                                                         className={selectClass()}
-                                                        value={member.skillType || ''}
+                                                        value={
+                                                            !member.skillType ? "" :
+                                                                [
+                                                                    'Kesehatan & Medis',
+                                                                    'Pendidikan & Pelatihan',
+                                                                    'Teknologi, IT & Digital',
+                                                                    'Teknik, Sipil & Konstruksi',
+                                                                    'Hukum, Advokasi & Keamanan',
+                                                                    'Keuangan, Akuntansi & Perbankan',
+                                                                    'Seni, Musik & Kreatif',
+                                                                    'Kewirausahaan & Bisnis',
+                                                                    'Pelayanan Jasa & Perdagangan',
+                                                                    'Administrasi & Pemerintahan',
+                                                                    'Agrikultur & Alam'
+                                                                ].includes(member.skillType) ? member.skillType : 'Lainnya'
+                                                        }
                                                         onChange={(e) => {
                                                             const newList = [...formData.professionalFamilyMembers];
                                                             newList[index].skillType = e.target.value;
@@ -1002,7 +1256,36 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                         <option value="Pelayanan Jasa & Perdagangan">Pelayanan Jasa & Perdagangan</option>
                                                         <option value="Administrasi & Pemerintahan">Administrasi & Pemerintahan</option>
                                                         <option value="Agrikultur & Alam">Agrikultur & Alam</option>
+                                                        <option value="Lainnya">Lainnya</option>
                                                     </select>
+
+                                                    {member.skillType !== undefined && member.skillType !== '' && ![
+                                                        'Kesehatan & Medis',
+                                                        'Pendidikan & Pelatihan',
+                                                        'Teknologi, IT & Digital',
+                                                        'Teknik, Sipil & Konstruksi',
+                                                        'Hukum, Advokasi & Keamanan',
+                                                        'Keuangan, Akuntansi & Perbankan',
+                                                        'Seni, Musik & Kreatif',
+                                                        'Kewirausahaan & Bisnis',
+                                                        'Pelayanan Jasa & Perdagangan',
+                                                        'Administrasi & Pemerintahan',
+                                                        'Agrikultur & Alam'
+                                                    ].includes(member.skillType) && (
+                                                            <div className="mt-2 animate-fadeIn">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Spesifikasikan Keahlian Utama..."
+                                                                    className={inputClass()}
+                                                                    value={member.skillType === 'Lainnya' ? '' : member.skillType}
+                                                                    onChange={(e) => {
+                                                                        const newList = [...formData.professionalFamilyMembers];
+                                                                        newList[index].skillType = e.target.value;
+                                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        )}
                                                 </div>
                                                 <div className="flex flex-col gap-2">
                                                     <FormLabel required>Tingkat Keahlian</FormLabel>
@@ -1480,56 +1763,23 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
                 {/* Step 5: Economics & Assets */}
                 {step === 5 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <SectionDivider title="Pekerjaan & Pendapatan" />
-                        <div className="col-span-2">
-                            {selectInput('economics_headOccupation', 'Pekerjaan Utama Kepala Keluarga', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'Pensiunan', 'Tidak Bekerja', 'Lainnya'])}
-                        </div>
-                        <div className="col-span-2">
-                            {selectInput('economics_spouseOccupation', 'Pekerjaan Utama Istri', ['PNS/ASN', 'TNI/Polri', 'Swasta', 'Wirausaha', 'Petani', 'Nelayan', 'Buruh', 'IRT', 'Tidak Bekerja', 'Lainnya'])}
-                        </div>
-                        <div className="col-span-2">
-                            {selectInput('economics_incomeRange', 'Range Pendapatan Rumah Tangga Per Bulan', ['< 1 Juta', '1-3 Juta', '3-5 Juta', '5-10 Juta', '> 10 Juta'])}
-                        </div>
-
-                        <SectionDivider title="Pengeluaran (Rp/bulan)" />
-                        {numInput('economics_expense_food', 'Makan/Minum')}
-                        {numInput('economics_expense_utilities', 'Utilitas')}
-                        {numInput('economics_expense_education', 'Pendidikan')}
-                        {numInput('economics_expense_other', 'Lain-lain')}
-
-                        <SectionDivider title="Usaha" />
-                        {selectInput('economics_hasBusiness', 'Punya Usaha?', ['Ya', 'Tidak'])}
-                        {formData.economics_hasBusiness === 'Ya' && (
-                            <>
-                                <div>
-                                    <FormLabel>Nama Usaha</FormLabel>
-                                    <input name="economics_businessName" value={formData.economics_businessName} onChange={handleChange} className={inputClass()} />
-                                </div>
-                                <div>
-                                    <FormLabel>Jenis Usaha</FormLabel>
-                                    <input name="economics_businessType" value={formData.economics_businessType} onChange={handleChange} className={inputClass()} />
-                                </div>
-                            </>
-                        )}
-
-                        <SectionDivider title="Rumah & Aset" />
-                        {selectInput('economics_houseStatus', 'Status Rumah', ['Milik Sendiri', 'Sewa/Kontrak', 'Menumpang', 'Dinas', 'Lainnya'])}
-                        {selectInput('economics_houseType', 'Jenis Rumah', ['Permanen', 'Semi Permanen', 'Non Permanen'])}
-                        {selectInput('economics_hasAssets', 'Punya Aset?', ['Ya', 'Tidak'])}
-                        {selectInput('economics_waterSource', 'Sumber Air', ['PDAM', 'Sumur', 'Mata Air', 'Sungai', 'Lainnya'])}
+                    <div className="w-full">
+                        <Step5Economics
+                            data={formData as any}
+                            update={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
+                            goToStep={() => { }}
+                        />
                     </div>
                 )}
 
                 {/* Step 6: Health */}
                 {step === 6 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        {selectInput('health_sick30Days', 'Sakit 30 Hari Terakhir?', ['Ya', 'Tidak'])}
-                        {selectInput('health_chronicSick', 'Penyakit Kronis?', ['Ya', 'Tidak'])}
-                        {selectInput('health_hasBPJS', 'BPJS Kesehatan', ['Ya - PBI', 'Ya - Mandiri', 'Tidak'])}
-                        {selectInput('health_hasBPJSKetenagakerjaan', 'BPJS Ketenagakerjaan', ['Ya', 'Tidak'])}
-                        {selectInput('health_socialAssistance', 'Bantuan Sosial', ['PKH', 'BPNT', 'BLT', 'Tidak Ada', 'Lainnya'])}
-                        {selectInput('health_hasDisability', 'Ada Disabilitas?', ['Ya', 'Tidak'])}
+                    <div className="w-full">
+                        <Step6Health
+                            data={formData as any}
+                            update={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
+                            goToStep={() => { }}
+                        />
                     </div>
                 )}
             </div>

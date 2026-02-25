@@ -262,10 +262,14 @@ const FormPage = () => {
 
                 if (formData.economics_houseType === 'Permanen' && !formData.economics_houseIMB) return handleValidationError('houseIMB', "Mohon pilih Status IMB");
 
-                if (!formData.economics_assets || formData.economics_assets.length === 0) return handleValidationError('assets', "Mohon pilih Kepemilikan Aset (min. 'Tidak ada')");
+                if (!formData.economics_hasAssets) return handleValidationError('hasAssets', "Mohon pilih Kepemilikan Aset (Ya/Tidak ada)");
 
-                // Validate asset quantities if "Tidak ada" is NOT selected
-                if (!formData.economics_assets.includes('Tidak ada')) {
+                // Validate asset quantities if "Ya" is selected
+                if (formData.economics_hasAssets === 'Ya') {
+                    if (!formData.economics_assets || formData.economics_assets.length === 0) {
+                        return handleValidationError('totalAssets', "Mohon isi minimal satu aset");
+                    }
+
                     const assetMap: { [key: string]: string } = {
                         'Motor': 'economics_asset_motor_qty',
                         'Mobil': 'economics_asset_mobil_qty',
@@ -280,7 +284,7 @@ const FormPage = () => {
                         const qtyField = assetMap[assetLabel];
                         if (qtyField) {
                             const qty = formData[qtyField as keyof typeof formData] as number;
-                            if (!qty || qty <= 0) return handleValidationError('assets', `Mohon isi jumlah untuk aset: ${assetLabel}`);
+                            if (!qty || qty <= 0) return handleValidationError('totalAssets', `Mohon isi jumlah untuk aset: ${assetLabel}`);
                         }
                     }
                 }

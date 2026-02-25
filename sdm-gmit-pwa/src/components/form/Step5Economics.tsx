@@ -731,113 +731,96 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
                     {data.economics_hasAssets === 'Ya' && (
                         <div className="space-y-6 animate-fadeIn">
-                            <div className="flex flex-col gap-1.5 max-w-[200px]">
-                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Jumlah Unit Aset</label>
-                                <CountSelect
-                                    id="totalAssets"
-                                    value={data.economics_totalAssets}
-                                    onChange={(val) => update({ economics_totalAssets: val })}
-                                    max={30}
-                                    startFrom={1}
-                                    placeholder="Total unit..."
-                                    required={true}
-                                />
-                            </div>
-
-                            {data.economics_totalAssets > 0 && (
-                                <div className="space-y-4 animate-fadeIn">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {[
-                                            { label: 'Motor', key: 'economics_asset_motor_qty', icon: 'motorcycle' },
-                                            { label: 'Mobil', key: 'economics_asset_mobil_qty', icon: 'directions_car' },
-                                            { label: 'Kulkas', key: 'economics_asset_kulkas_qty', icon: 'kitchen' },
-                                            { label: 'Laptop/Komputer', key: 'economics_asset_laptop_qty', icon: 'laptop' },
-                                            { label: 'Televisi', key: 'economics_asset_tv_qty', icon: 'tv' },
-                                            { label: 'Internet/Indihome', key: 'economics_asset_internet_qty', icon: 'wifi' },
-                                            { label: 'Lahan Pertanian', key: 'economics_asset_lahan_qty', icon: 'potted_plant' }
-                                        ].map((asset) => {
-                                            const assetKey = asset.key as keyof typeof data;
-                                            const currentVal = (data[assetKey] as number) || 0;
-                                            const allocatedAssets = (data.economics_asset_motor_qty || 0) +
-                                                (data.economics_asset_mobil_qty || 0) +
-                                                (data.economics_asset_kulkas_qty || 0) +
-                                                (data.economics_asset_laptop_qty || 0) +
-                                                (data.economics_asset_tv_qty || 0) +
-                                                (data.economics_asset_internet_qty || 0) +
-                                                (data.economics_asset_lahan_qty || 0);
-
-                                            const otherAllocated = allocatedAssets - currentVal;
-                                            const maxPossible = data.economics_totalAssets - otherAllocated;
-
-                                            return (
-                                                <div key={asset.label} className="p-4 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl bg-white dark:bg-slate-800/30 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-inner">
-                                                                <span className="material-symbols-outlined text-primary text-xl">{asset.icon}</span>
-                                                            </div>
-                                                            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{asset.label}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Jml:</span>
-                                                            <div className="w-20">
-                                                                <CountSelect
-                                                                    id={asset.key}
-                                                                    value={currentVal}
-                                                                    max={maxPossible > 0 ? maxPossible : 0}
-                                                                    onChange={(numVal) => {
-                                                                        update({ [asset.key]: numVal });
-
-                                                                        // Sync with economics_assets array for summary display if needed
-                                                                        let currentAssets = [...(data.economics_assets || [])];
-                                                                        if (numVal > 0) {
-                                                                            if (!currentAssets.includes(asset.label)) {
-                                                                                currentAssets.push(asset.label);
-                                                                            }
-                                                                        } else {
-                                                                            currentAssets = currentAssets.filter(a => a !== asset.label);
-                                                                        }
-                                                                        update({ economics_assets: currentAssets });
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Validation Feedback (Step 4 style) */}
-                                    {(() => {
-                                        const allocated = (data.economics_asset_motor_qty || 0) +
+                            <div className="space-y-4 animate-fadeIn mt-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                        { label: 'Motor', key: 'economics_asset_motor_qty', icon: 'motorcycle' },
+                                        { label: 'Mobil', key: 'economics_asset_mobil_qty', icon: 'directions_car' },
+                                        { label: 'Kulkas', key: 'economics_asset_kulkas_qty', icon: 'kitchen' },
+                                        { label: 'Laptop/Komputer', key: 'economics_asset_laptop_qty', icon: 'laptop' },
+                                        { label: 'Televisi', key: 'economics_asset_tv_qty', icon: 'tv' },
+                                        { label: 'Internet/Indihome', key: 'economics_asset_internet_qty', icon: 'wifi' },
+                                        { label: 'Lahan Pertanian', key: 'economics_asset_lahan_qty', icon: 'potted_plant' }
+                                    ].map((asset) => {
+                                        const assetKey = asset.key as keyof typeof data;
+                                        const currentVal = (data[assetKey] as number) || 0;
+                                        const allocatedAssets = (data.economics_asset_motor_qty || 0) +
                                             (data.economics_asset_mobil_qty || 0) +
                                             (data.economics_asset_kulkas_qty || 0) +
                                             (data.economics_asset_laptop_qty || 0) +
                                             (data.economics_asset_tv_qty || 0) +
                                             (data.economics_asset_internet_qty || 0) +
                                             (data.economics_asset_lahan_qty || 0);
-                                        const isValid = allocated === data.economics_totalAssets;
 
                                         return (
-                                            <div className="animate-fadeIn">
-                                                {!isValid && (
-                                                    <div className="text-red-500 text-xs font-semibold flex items-center gap-1.5 mt-2 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg max-w-fit border border-red-200/50 dark:border-red-900/30">
-                                                        <span className="material-symbols-outlined text-sm shrink-0">warning</span>
-                                                        Total unit yang didata ({allocated}) belum sesuai dengan Total Aset ({data.economics_totalAssets})
+                                            <div key={asset.label} className="p-4 border-2 border-slate-200 dark:border-slate-700/50 rounded-2xl bg-white dark:bg-slate-800/30 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm">
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-inner">
+                                                            <span className="material-symbols-outlined text-primary text-xl">{asset.icon}</span>
+                                                        </div>
+                                                        <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{asset.label}</span>
                                                     </div>
-                                                )}
-                                                {isValid && allocated > 0 && (
-                                                    <div className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit border border-emerald-200/50 dark:border-emerald-900/30">
-                                                        <span className="material-symbols-outlined text-sm shrink-0">check_circle</span>
-                                                        Distribusi jumlah aset sudah sesuai.
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">Jml:</span>
+                                                        <div className="w-20">
+                                                            <CountSelect
+                                                                id={asset.key}
+                                                                value={currentVal}
+                                                                max={30}
+                                                                onChange={(numVal) => {
+                                                                    const newAllocatedAssets = allocatedAssets - currentVal + numVal;
+
+                                                                    // Sync with economics_assets array for summary display if needed
+                                                                    let currentAssets = [...(data.economics_assets || [])];
+                                                                    if (numVal > 0) {
+                                                                        if (!currentAssets.includes(asset.label)) {
+                                                                            currentAssets.push(asset.label);
+                                                                        }
+                                                                    } else {
+                                                                        currentAssets = currentAssets.filter(a => a !== asset.label);
+                                                                    }
+                                                                    update({
+                                                                        [asset.key]: numVal,
+                                                                        economics_assets: currentAssets,
+                                                                        economics_totalAssets: newAllocatedAssets
+                                                                    });
+                                                                }}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
                                         );
-                                    })()}
+                                    })}
                                 </div>
-                            )}
+
+                                {/* Summary of Assets */}
+                                {(() => {
+                                    const allocated = (data.economics_asset_motor_qty || 0) +
+                                        (data.economics_asset_mobil_qty || 0) +
+                                        (data.economics_asset_kulkas_qty || 0) +
+                                        (data.economics_asset_laptop_qty || 0) +
+                                        (data.economics_asset_tv_qty || 0) +
+                                        (data.economics_asset_internet_qty || 0) +
+                                        (data.economics_asset_lahan_qty || 0);
+
+                                    return (
+                                        <div className="animate-fadeIn mt-4">
+                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+                                                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/60 group-hover:bg-primary transition-colors"></div>
+                                                <div>
+                                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Total Keseluruhan Aset</h4>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">Total unit aset yang didata</p>
+                                                </div>
+                                                <div className="text-3xl font-black text-primary transition-colors duration-300">
+                                                    {allocated} <span className="text-sm font-semibold text-slate-500">Unit</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
                         </div>
                     )}
                 </div>

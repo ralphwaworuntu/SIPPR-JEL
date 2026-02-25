@@ -46,12 +46,22 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
     // Auto calculate non-Sidi members
     useEffect(() => {
         if (data.familyMembers) {
+            const updates: Partial<FormData> = {};
             const calculatedNonSidi = Math.max(0, totalMembers - totalSidi).toString();
+
             if (data.familyMembersNonSidi !== calculatedNonSidi) {
-                update({ familyMembersNonSidi: calculatedNonSidi });
+                updates.familyMembersNonSidi = calculatedNonSidi;
+            }
+
+            if (calculatedNonSidi === '0' && data.familyMembersNonBaptized !== '0') {
+                updates.familyMembersNonBaptized = '0';
+            }
+
+            if (Object.keys(updates).length > 0) {
+                update(updates);
             }
         }
-    }, [data.familyMembers, data.familyMembersSidi, data.familyMembersNonSidi, totalMembers, totalSidi, update]);
+    }, [data.familyMembers, data.familyMembersSidi, data.familyMembersNonSidi, data.familyMembersNonBaptized, totalMembers, totalSidi, update]);
 
     const SuccessMessage = ({ message }: { message: string }) => (
         <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit animate-fadeIn">

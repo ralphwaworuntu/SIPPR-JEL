@@ -272,14 +272,16 @@ const Step1Identity = ({ data, update }: StepProps) => {
 
             {/* Alamat Lengkap */}
             <div className="flex flex-col group relative">
-                <div className="flex flex-col md:flex-row md:items-end justify-between pb-2 gap-2">
+                <div className="flex flex-col pb-2 gap-1">
                     <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
                         Alamat Lengkap<span className="text-red-500">*</span>
                     </label>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002, Kel. Liliba, Kec. Oebobo, Kota Kupang.
+                    </span>
                 </div>
                 <textarea
                     className="w-full rounded-xl text-slate-900 dark:text-white border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] h-32 px-4 py-3 text-base resize-none placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-all duration-300"
-                    placeholder="Contoh: Jl. El Tari No. 1, RT.001/RW.002, Kel. Oebobo, Kec. Oebobo, Kota Kupang"
                     id="address"
                     value={data.address}
                     onChange={(e) => update({ address: e.target.value })}

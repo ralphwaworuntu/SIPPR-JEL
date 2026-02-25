@@ -322,7 +322,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                     }
                                                     onChange={(e) => {
                                                         const newList = [...data.professionalFamilyMembers];
-                                                        newList[index].skillType = e.target.value === 'Lainnya' ? '' : e.target.value;
+                                                        newList[index].skillType = e.target.value;
                                                         update({ professionalFamilyMembers: newList });
                                                     }}
                                                 >
@@ -343,26 +343,25 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                                             </div>
 
-                                            {member.skillType !== undefined && ![
-                                                '',
-                                                'Kesehatan (Dokter, Perawat, Bidan, Apoteker, Ahli Gizi, Psikolog)',
-                                                'Teknologi & Digital(IT Support, Programmer, Desain Grafis, Editor Video, Admin Sosial Media)',
-                                                'Pendidikan (Guru, Dosen, Pelatih, Tutor)',
-                                                'Teknik & Konstruksi (Arsitek, Sipil, Tukang Bangunan, Listrik, AC, Plumbing)',
-                                                'Hukum (Advokat, Notaris, Staf Legal, Konsultan Hukum)',
-                                                'Keuangan & Perbankan (Akuntan, Auditor, Teller, Analis Keuangan, Pajak)',
-                                                'Seni, Musik & Kreatif (Seniman, Musisi, Desainer, Penulis)',
-                                                'Kewirausahaan & Bisnis (Pengusaha, Pedagang, Investor)',
-                                                'Pelayanan Jasa & Perdagangan (Pelayan, Pedagang, Pramuniaga)',
-                                                'Administrasi & Pemerintahan (Pegawai Negeri, Staf Administrasi)',
-                                                'Agrikultur & Alam (Petani, Peternak, Nelayan, Perkebunan, Kehutanan)'
+                                            {member.skillType !== undefined && member.skillType !== '' && ![
+                                                'Kesehatan & Medis',
+                                                'Pendidikan & Pelatihan',
+                                                'Teknologi, IT & Digital',
+                                                'Teknik, Sipil & Konstruksi',
+                                                'Hukum, Advokasi & Keamanan',
+                                                'Keuangan, Akuntansi & Perbankan',
+                                                'Seni, Musik & Kreatif',
+                                                'Kewirausahaan & Bisnis',
+                                                'Pelayanan Jasa & Perdagangan',
+                                                'Administrasi & Pemerintahan',
+                                                'Agrikultur & Alam'
                                             ].includes(member.skillType) && (
                                                     <div className="mt-2 animate-fadeIn">
                                                         <input
                                                             type="text"
                                                             placeholder="Spesifikasikan Keahlian Utama..."
                                                             className={inputClass}
-                                                            value={member.skillType}
+                                                            value={member.skillType === 'Lainnya' ? '' : member.skillType}
                                                             onChange={(e) => {
                                                                 const newList = [...data.professionalFamilyMembers];
                                                                 newList[index].skillType = e.target.value;
