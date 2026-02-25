@@ -257,17 +257,9 @@ export const useMemberData = () => {
 
     // Fetch Data from API
     const { data: rawMembers = [], isLoading, isError } = useQuery({
-        queryKey: ['members', { searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness }],
+        queryKey: ['members'], // Removed filter params from queryKey to load all data
         queryFn: async () => {
-            const params: Record<string, any> = {};
-            if (searchTerm) params.search = searchTerm;
-            if (filterLingkungan !== "Semua") params.lingkungan = filterLingkungan;
-            if (filterRayon !== "Semua") params.rayon = filterRayon;
-            if (filterGender !== "Semua") params.gender = filterGender;
-            if (filterAgeCategory !== "Semua") params.ageCategory = filterAgeCategory;
-            if (filterWillingness !== "Semua") params.willingnessToServe = filterWillingness;
-
-            const response = await apiClient.get<Member[]>('/members', { params });
+            const response = await apiClient.get<Member[]>('/members');
             return response.data.map(m => ({
                 ...m,
                 skills: Array.isArray(m.skills)
@@ -287,16 +279,49 @@ export const useMemberData = () => {
     });
 
     const setMembers = (action: Member[] | ((prev: Member[]) => Member[])) => {
-        const queryKey = ['members', { searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness }];
+        const queryKey = ['members'];
         queryClient.setQueryData(queryKey, (oldData: Member[] | undefined) => {
             const current = oldData || [];
             return typeof action === 'function' ? action(current) : action;
         });
     };
 
-    // Client-side Sorting (Optional: can be moved to backend too, but keeping here for responsiveness)
+    // Client-side Sorting and Filtering
     const members = useMemo(() => {
         let result = [...rawMembers];
+
+        // Filtering
+        if (searchTerm) {
+            const lowerQuery = searchTerm.toLowerCase();
+            result = result.filter(m =>
+                m.name?.toLowerCase().includes(lowerQuery) ||
+                m.nik?.toLowerCase().includes(lowerQuery) ||
+                m.kkNumber?.toLowerCase().includes(lowerQuery) ||
+                m.address?.toLowerCase().includes(lowerQuery)
+            );
+        }
+        if (filterLingkungan !== "Semua") {
+            result = result.filter(m => m.lingkungan === filterLingkungan);
+        }
+        if (filterRayon !== "Semua") {
+            result = result.filter(m => m.rayon === filterRayon);
+        }
+        if (filterGender !== "Semua") {
+            result = result.filter(m => m.gender === filterGender);
+        }
+        if (filterAgeCategory !== "Semua") {
+            result = result.filter(m => {
+                if (!m.birthDate) return false;
+                const age = calculateAge(m.birthDate);
+                const cat = getAgeCategory(age);
+                return cat === filterAgeCategory;
+            });
+        }
+        if (filterWillingness !== "Semua") {
+            result = result.filter(m => m.willingnessToServe === filterWillingness);
+        }
+
+        // Sorting
         if (sortConfig.key) {
             result.sort((a, b) => {
                 // @ts-ignore
@@ -309,9 +334,17 @@ export const useMemberData = () => {
                 }
                 return 0;
             });
+        } else {
+            // "Ensuring the table displays data in the order it was entered"
+            // Usually this means descending by createdAt or id
+            result.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA;
+            });
         }
         return result;
-    }, [rawMembers, sortConfig]);
+    }, [rawMembers, sortConfig, searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness]);
 
     const handleSort = (key: keyof Member) => {
         let direction: 'asc' | 'desc' = 'asc';

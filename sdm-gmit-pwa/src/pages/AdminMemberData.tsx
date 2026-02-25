@@ -94,7 +94,7 @@ const AdminMemberData = () => {
 
     const handleDownloadTemplate = () => {
         const headers = [
-            "Nomor Kartu Keluarga", "NIK", "Nama Lengkap Kepala Keluarga", "Jenis Kelamin", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif",
+            "Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Jenis Kelamin", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif",
             "Lingkungan", "Rayon", "Alamat Lengkap",
             "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Sidi Laki-laki", "Sidi Perempuan", "Belum Baptis", "Belum Sidi",
             "Penerima Diakonia", "Tahun Diakonia", "Jenis Diakonia",
@@ -105,7 +105,6 @@ const AdminMemberData = () => {
             "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
             "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
             "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
-            "Latitude", "Longitude"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
         const encodedUri = encodeURI(csvContent);
@@ -210,65 +209,48 @@ const AdminMemberData = () => {
     // Export Logic
     const handleExportCSV = () => {
         const headers = [
-            // Step 1: Data Umum
-            "Nama Lengkap", "ID Sistem", "Lingkungan", "Rayon", "Gender", "Tanggal Lahir", "Umur", "No HP", "Alamat", "No KK", "NIK",
+            "Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Jenis Kelamin", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif",
+            "Lingkungan", "Rayon", "Alamat Lengkap",
             "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Sidi Laki-laki", "Sidi Perempuan", "Belum Baptis", "Belum Sidi",
-
-            // Step 2: Diakonia & Profesional
             "Penerima Diakonia", "Tahun Diakonia", "Jenis Diakonia",
             "Pendidikan Terakhir", "Jurusan", "Kategori Pekerjaan", "Jabatan", "Nama Instansi", "Lama Kerja (Tahun)", "Daftar Keahlian",
-
-            // Step 3: Komitmen
             "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi",
-
-            // Step 4: Pendidikan Anak
             "Status Anak Bersekolah", "TK/PAUD (Sekolah)", "SD (Sekolah)", "SMP (Sekolah)", "SMA (Sekolah)", "Universitas (Sekolah)",
-            "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)",
-            "Anak Sudah Bekerja",
-
-            // Step 5: Ekonomi & Aset
-            "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Detail Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
-            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Lama Usaha", "Status Usaha", "Lokasi Usaha", "Jml. Tenaga Kerja", "Modal", "Sumber Modal", "Izin Usaha", "Pemasaran", "Wilayah Pemasaran", "Tantangan", "Dukungan", "Manfaat Pelatihan",
-            "Status Rumah", "Jenis Rumah", "IMB", "Status Tanah", "Sumber Air", "Total Aset", "Daftar Aset", "Biaya Listrik",
-
-            // Step 6: Kesehatan
-            "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Pengobatan Teratur", "Disabilitas", "Disabilitas Ganda", "Disabilitas Fisik", "Disabilitas Intelektual", "Disabilitas Mental", "Disabilitas Sensorik",
-
-            // Geo & Status
-            "Latitude", "Longitude", "Status Gerejawi"
+            "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)", "Anak Sudah Bekerja",
+            "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
+            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
+            "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
+            "Latitude", "Longitude"
         ];
 
         const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
         const arrStr = (v: any) => Array.isArray(v) ? v.join('; ') : (v || '');
 
-        const rows = filteredMembers.map(m => [
-            // Identitas
-            esc(m.name), esc(m.id), esc(m.lingkungan), esc(m.rayon), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.phone), esc(m.address), esc(m.kkNumber), esc(m.nik),
-            m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonBaptized || 0, m.familyMembersNonSidi || 0,
+        const rows = filteredMembers.map(m => {
+            const getDisabilityList = () => {
+                const arr: string[] = [];
+                if (m.health_disabilityPhysical?.length) arr.push(...m.health_disabilityPhysical);
+                if (m.health_disabilityIntellectual?.length) arr.push(...m.health_disabilityIntellectual);
+                if (m.health_disabilityMental?.length) arr.push(...m.health_disabilityMental);
+                if (m.health_disabilitySensory?.length) arr.push(...m.health_disabilitySensory);
+                return arr;
+            };
 
-            // Diakonia & Profesi
-            esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
-            esc(m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
-
-            // Komitmen
-            esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
-
-            // Pendidikan Anak
-            esc(m.education_schoolingStatus), m.education_inSchool_tk_paud || 0, m.education_inSchool_sd || 0, m.education_inSchool_smp || 0, m.education_inSchool_sma || 0, m.education_inSchool_university || 0,
-            m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0,
-            m.education_working || 0,
-
-            // Ekonomi
-            esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), esc(m.economics_incomeRangeDetailed), m.economics_expense_food || 0, m.economics_expense_utilities || 0, m.economics_expense_education || 0, m.economics_expense_other || 0,
-            esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_businessDuration), esc(m.economics_businessStatus), esc(m.economics_businessLocation), esc(m.economics_businessEmployeeCount), m.economics_businessCapital || 0, esc(m.economics_businessCapitalSource), esc(arrStr(m.economics_businessPermit)), esc(arrStr(m.economics_businessMarketing)), esc(m.economics_businessMarketArea), esc(arrStr(m.economics_businessIssues)), esc(arrStr(m.economics_businessNeeds)), esc(arrStr(m.economics_businessTraining)),
-            esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_houseIMB), esc(m.economics_landStatus), esc(m.economics_waterSource), m.economics_totalAssets || 0, esc(arrStr(m.economics_assets)), m.economics_electricity_total_cost || 0,
-
-            // Kesehatan
-            esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease)), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_regularTreatment), esc(m.health_hasDisability), m.health_disabilityDouble ? "Ya" : "Tidak", esc(arrStr(m.health_disabilityPhysical)), esc(arrStr(m.health_disabilityIntellectual)), esc(arrStr(m.health_disabilityMental)), esc(arrStr(m.health_disabilitySensory)),
-
-            // Extra
-            m.latitude || "", m.longitude || "", esc(m.statusGerejawi || 'AKTIF')
-        ].join(','));
+            return [
+                esc(m.kkNumber), esc(m.nik), esc(m.name), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.phone),
+                esc(m.lingkungan), esc(m.rayon), esc(m.address),
+                m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonBaptized || 0, m.familyMembersNonSidi || 0,
+                esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
+                esc(m.educationLevel || m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
+                esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
+                esc(m.education_schoolingStatus), m.education_inSchool_tk_paud || 0, m.education_inSchool_sd || 0, m.education_inSchool_smp || 0, m.education_inSchool_sma || 0, m.education_inSchool_university || 0,
+                m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0, m.education_working || 0,
+                esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), m.economics_expense_food || 0, m.economics_expense_utilities || 0, m.economics_expense_education || 0, m.economics_expense_other || 0,
+                esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource), esc(arrStr(m.economics_assets)),
+                esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease)), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability), esc(arrStr(getDisabilityList())),
+                m.latitude || "", m.longitude || ""
+            ].join(',');
+        });
 
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows].join("\n");
         const link = document.createElement("a");
@@ -282,6 +264,7 @@ const AdminMemberData = () => {
 
     const handleExportPDF = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
+        const arrStr = (v: any) => Array.isArray(v) ? v.join(', ') : (v || '-');
 
         doc.setFontSize(18);
         doc.text("Laporan Data Jemaat Terpadu - Emaus Liliba", 14, 22);
@@ -289,33 +272,107 @@ const AdminMemberData = () => {
         doc.setTextColor(100);
         doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 30);
 
-        const tableColumn = ["No", "Nama Lengkap", "Lingk.", "Rayon", "Gender", "Umur", "Pendidikan", "Pekerjaan", "Relawan"];
-        const tableRows = filteredMembers.map((m, i) => [
-            i + 1,
-            m.name,
-            m.lingkungan,
-            m.rayon,
-            m.gender === 'Laki-laki' ? 'L' : 'P',
-            calculateAge(m.birthDate),
-            m.education,
-            m.jobCategory,
-            m.willingnessToServe === 'Aktif' ? 'Aktif' : m.willingnessToServe === 'On-demand' ? 'On-dem' : '-'
-        ]);
-
-        autoTable(doc, {
-            head: [tableColumn],
-            body: tableRows,
-            startY: 40,
-            theme: 'grid',
-            headStyles: { fillColor: [51, 65, 85], textColor: [255, 255, 255], fontStyle: 'bold' },
+        const baseTableConfig = {
+            theme: 'grid' as const,
+            headStyles: { fillColor: [51, 65, 85] as [number, number, number], textColor: [255, 255, 255] as [number, number, number], fontStyle: 'bold' as const },
             styles: { fontSize: 8, cellPadding: 2 },
-            columnStyles: {
-                0: { cellWidth: 10 },
-                1: { cellWidth: 50 },
-                4: { cellWidth: 25 },
-                5: { cellWidth: 35 }
-            },
-            alternateRowStyles: { fillColor: [248, 250, 252] }
+            alternateRowStyles: { fillColor: [248, 250, 252] as [number, number, number] },
+        };
+
+        // 1. Identitas
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 1: Identitas", 14, 40);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Gender", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif", "Lingkungan", "Rayon", "Alamat Lengkap"]],
+            body: filteredMembers.map((m, i) => [i + 1, m.kkNumber || '-', m.nik || '-', m.name, m.gender, m.birthDate, calculateAge(m.birthDate), m.phone || '-', m.lingkungan, m.rayon, m.address?.substring(0, 30) || '-']),
+            startY: 45,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
+        });
+
+        // 2. Keluarga & Diakonia
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 2: Keluarga & Diakonia", 14, 25);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Lengkap", "Total Anggota Keluarga", "Laki-laki", "Perempuan", "Di Luar Kota", "Sudah Sidi", "Penerima Diakonia", "Jenis Diakonia"]],
+            body: filteredMembers.map((m, i) => [i + 1, m.name, m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.diakonia_recipient || '-', m.diakonia_type?.substring(0, 30) || '-']),
+            startY: 30,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
+        });
+
+        // 3. Profesi & Pelayanan
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 3: Profesi & Pelayanan", 14, 25);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Lengkap", "Pendidikan Terakhir", "Kategori Pekerjaan", "Daftar Keahlian", "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi"]],
+            body: filteredMembers.map((m, i) => [i + 1, m.name, m.educationLevel || m.education || '-', m.jobCategory || '-', arrStr(m.skills), m.willingnessToServe || '-', arrStr(m.interestAreas), arrStr(m.contributionTypes)]),
+            startY: 30,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 35 }, 4: { cellWidth: 50 }, 6: { cellWidth: 40 }, 7: { cellWidth: 40 } }
+        });
+
+        // 4. Pendidikan Anak
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 4: Pendidikan Anak (Keluarga)", 14, 25);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Lengkap", "Status Anak Bersekolah", "Total Bersekolah", "Total Putus Sekolah", "Anak Sudah Bekerja"]],
+            body: filteredMembers.map((m, i) => {
+                const totalIn = (m.education_inSchool_tk_paud || 0) + (m.education_inSchool_sd || 0) + (m.education_inSchool_smp || 0) + (m.education_inSchool_sma || 0) + (m.education_inSchool_university || 0);
+                const totalOut = (m.education_dropout_tk_paud || 0) + (m.education_dropout_sd || 0) + (m.education_dropout_smp || 0) + (m.education_dropout_sma || 0) + (m.education_dropout_university || 0);
+                return [i + 1, m.name, m.education_schoolingStatus || '-', totalIn, totalOut, m.education_working || 0]
+            }),
+            startY: 30,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 60 } }
+        });
+
+        // 5. Ekonomi
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 5: Ekonomi & Aset", 14, 25);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Lengkap", "Range Pendapatan", "Punya Usaha?", "Modal Usaha", "Status Rumah", "Sumber Air", "Total Aset", "Biaya Listrik"]],
+            body: filteredMembers.map((m, i) => [i + 1, m.name, m.economics_incomeRange || '-', m.economics_hasBusiness || '-', m.economics_businessCapital ? `Rp${m.economics_businessCapital.toLocaleString('id-ID')}` : '-', m.economics_houseStatus || '-', m.economics_waterSource || '-', m.economics_totalAssets || 0, m.economics_electricity_total_cost ? `Rp${m.economics_electricity_total_cost.toLocaleString('id-ID')}` : 0]),
+            startY: 30,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
+        });
+
+        // 6. Kesehatan
+        doc.addPage();
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Total Jemaat: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 15);
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text("Tabel 6: Kesehatan & Disabilitas", 14, 25);
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Lengkap", "Sakit 30 Hari Terakhir", "Penyakit Kronis", "BPJS Kesehatan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas Fisik"]],
+            body: filteredMembers.map((m, i) => [i + 1, m.name, m.health_sick30Days || '-', m.health_chronicSick || '-', m.health_hasBPJS || '-', m.health_socialAssistance || '-', m.health_hasDisability || '-', arrStr(m.health_disabilityPhysical)]),
+            startY: 30,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 40 }, 7: { cellWidth: 40 } }
         });
 
         doc.save(`Laporan_Jemaat_Emaus_Liliba_${new Date().toISOString().split('T')[0]}.pdf`);
@@ -482,21 +539,6 @@ const AdminMemberData = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 mb-1">Kategori Usia</label>
-                                    <select
-                                        value={filterAgeCategory}
-                                        onChange={(e) => setFilterAgeCategory(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
-                                    >
-                                        <option value="Semua">Semua</option>
-                                        <option value="Anak">Anak (0-12)</option>
-                                        <option value="Remaja">Remaja (13-17)</option>
-                                        <option value="Pemuda">Pemuda (18-30)</option>
-                                        <option value="Dewasa">Dewasa (31-60)</option>
-                                        <option value="Lansia">Lansia ({'>'}60)</option>
-                                    </select>
-                                </div>
-                                <div>
                                     <label className="block text-xs font-bold text-slate-500 mb-1">Kesediaan Melayani</label>
                                     <select
                                         value={filterWillingness}
@@ -504,9 +546,8 @@ const AdminMemberData = () => {
                                         className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-primary/50"
                                     >
                                         <option value="Semua">Semua</option>
-                                        <option value="Aktif">Aktif</option>
-                                        <option value="On-demand">On-demand</option>
-                                        <option value="Belum bersedia">Belum Bersedia</option>
+                                        <option value="Aktif">Ya, bersedia aktif</option>
+                                        <option value="On-demand">Ya, bersedia bila dibutuhkan</option>
                                     </select>
                                 </div>
                             </div>
@@ -515,7 +556,7 @@ const AdminMemberData = () => {
 
                     {/* Table View Tabs */}
                     <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
-                        {['Identitas', 'Keluarga & Diakonia', 'Profesi & Pelayanan', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
+                        {['Umum', 'Keluarga', 'Profesional', 'Pendidikan', 'Ekonomi & Aset Keluarga', 'Kesehatan'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setTableTab(tab as any)}
