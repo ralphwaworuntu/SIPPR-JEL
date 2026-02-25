@@ -215,7 +215,7 @@ const AdminReports = () => {
             });
         } else if (type === 'relawan') {
             title = 'Laporan Potensi Relawan';
-            const relawan = members.filter(m => m.willingnessToServe === 'Active');
+            const relawan = members.filter(m => ['Aktif', 'Active', 'Ya'].includes(m.willingnessToServe));
             headers = ['No', 'Nama', 'Kontak', 'Minat', 'Kontribusi'];
             data = relawan.map((m, i) => [(i + 1).toString(), m.name, m.phone || '-', (m.interestAreas || []).join(', ') || '-', (m.contributionTypes || []).join(', ') || '-']);
         } else if (type === 'sekolah') {
@@ -223,8 +223,14 @@ const AdminReports = () => {
             const students = members.filter(m => m.education_schoolingStatus === 'Ya');
             headers = ['No', 'Nama Wali/Keluarga', 'Total Anak', 'Pendidikan'];
             data = students.map((m, i) => {
-                const total = (m.education_inSchool_sd || 0) + (m.education_inSchool_smp || 0) + (m.education_inSchool_sma || 0);
-                return [(i + 1).toString(), m.name, `${total} Anak`, `SD/SMP/SMA Terkait`];
+                const total = (m.education_inSchool_tk_paud || 0) + (m.education_inSchool_sd || 0) + (m.education_inSchool_smp || 0) + (m.education_inSchool_sma || 0) + (m.education_inSchool_university || 0);
+                const levels = [];
+                if (m.education_inSchool_tk_paud) levels.push(`TK/PAUD: ${m.education_inSchool_tk_paud}`);
+                if (m.education_inSchool_sd) levels.push(`SD: ${m.education_inSchool_sd}`);
+                if (m.education_inSchool_smp) levels.push(`SMP: ${m.education_inSchool_smp}`);
+                if (m.education_inSchool_sma) levels.push(`SMA: ${m.education_inSchool_sma}`);
+                if (m.education_inSchool_university) levels.push(`Universitas: ${m.education_inSchool_university}`);
+                return [(i + 1).toString(), m.name, `${total} Anak`, levels.join(', ') || '-'];
             });
         } else if (type === 'diakonia') {
             title = 'Daftar Penerima Diakonia';

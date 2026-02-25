@@ -86,7 +86,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
         doc.text("Pendidikan", 5, startY + lh * 6); doc.setFont("helvetica", "bold"); doc.text(`: ${member.education || '-'}`, 30, startY + lh * 6); doc.setFont("helvetica", "normal");
         doc.text("Pekerjaan", 5, startY + lh * 7); doc.setFont("helvetica", "bold"); doc.text(`: ${member.job || '-'}`, 30, startY + lh * 7); doc.setFont("helvetica", "normal");
         doc.text("Status Gerejawi", 5, startY + lh * 8); doc.setFont("helvetica", "bold"); doc.text(`: ${member.statusGerejawi || '-'}`, 30, startY + lh * 8); doc.setFont("helvetica", "normal");
-        doc.text("Relawan", 5, startY + lh * 9); doc.setFont("helvetica", "bold"); doc.text(`: ${member.willingnessToServe === 'Active' ? 'Aktif' : member.willingnessToServe === 'On-demand' ? 'On-demand' : '-'}`, 30, startY + lh * 9); doc.setFont("helvetica", "normal");
+        doc.text("Relawan", 5, startY + lh * 9); doc.setFont("helvetica", "bold"); doc.text(`: ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe) ? 'Aktif' : member.willingnessToServe === 'On-demand' ? 'On-demand' : '-'}`, 30, startY + lh * 9); doc.setFont("helvetica", "normal");
         doc.text("BPJS Kes", 5, startY + lh * 10); doc.setFont("helvetica", "bold"); doc.text(`: ${member.health_hasBPJS || '-'}`, 30, startY + lh * 10); doc.setFont("helvetica", "normal");
 
         const addr = member.address ? (member.address.length > 50 ? member.address.substring(0, 50) + "..." : member.address) : '-';
@@ -123,8 +123,8 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                         <div>
                             <div className="flex flex-wrap items-center gap-2 mb-0.5">
                                 <h3 className="text-lg font-black text-white leading-none">{member.name}</h3>
-                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${member.willingnessToServe === 'Aktif' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-slate-800/50 text-slate-300 border border-slate-600'}`}>
-                                    {member.willingnessToServe === 'Aktif' ? 'RELAWAN AKTIF' : member.willingnessToServe === 'On-demand' ? 'RELAWAN ON-DEMAND' : 'JEMAAT'}
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe) ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-slate-800/50 text-slate-300 border border-slate-600'}`}>
+                                    {['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe) ? 'RELAWAN AKTIF' : member.willingnessToServe === 'On-demand' ? 'RELAWAN ON-DEMAND' : 'JEMAAT'}
                                 </span>
                             </div>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-slate-400">
@@ -153,7 +153,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <DetailRow label="Nomor Telepon / WA" value={member.phone ? `+62 ${member.phone}` : '-'} />
                             <DetailRow label="Lingkungan" value={member.lingkungan} />
                             <DetailRow label="Rayon" value={member.rayon} />
-                            <DetailRow label="Status Gerejawi" value={member.statusGerejawi || 'AKTIF / SIDI'} />
+
                             <div className="flex flex-col gap-1.5 bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 mt-2">
                                 <span className="text-[10px] uppercase font-bold text-slate-400">Alamat Lengkap</span>
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{member.address || "-"}</span>
@@ -301,6 +301,19 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                     </div>
                                 </div>
                             )}
+                            {(member.education_unemployed_sd > 0 || member.education_unemployed_smp > 0 || member.education_unemployed_sma > 0 || member.education_unemployed_university > 0) && (
+                                <div className="mt-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">Tidak Bersekolah</span>
+                                    </div>
+                                    <div className="space-y-1.5 ml-1">
+                                        <DetailRow label="SD" value={member.education_unemployed_sd || 0} />
+                                        <DetailRow label="SMP" value={member.education_unemployed_smp || 0} />
+                                        <DetailRow label="SMA" value={member.education_unemployed_sma || 0} />
+                                        <DetailRow label="Universitas" value={member.education_unemployed_university || 0} />
+                                    </div>
+                                </div>
+                            )}
                             {(member.education_dropout_tk_paud > 0 || member.education_dropout_sd > 0 || member.education_dropout_smp > 0 || member.education_dropout_sma > 0 || member.education_dropout_university > 0) && (
                                 <div className="mt-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50">
                                     <div className="flex items-center gap-2 mb-2">
@@ -397,11 +410,11 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                         )}
 
                                         {/* Kolom 4: Sharing & Training */}
-                                        {(member.economics_businessKnowledgeShare === 'Ya' || member.economics_businessTraining?.length > 0) && (
+                                        {(member.economics_businessSharing === 'Ya' || member.economics_businessTraining?.length > 0) && (
                                             <div className="p-3 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Networking & Pelatihan</span>
-                                                    {member.economics_businessKnowledgeShare === 'Ya' && (
+                                                    {member.economics_businessSharing === 'Ya' && (
                                                         <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-700 tracking-wide uppercase">Bersedia Berbagi Edukasi</span>
                                                     )}
                                                 </div>

@@ -30,7 +30,7 @@ export const AdminLayout = ({ children, title = "Dashboard" }: AdminLayoutProps)
                     </div>
                     <div className="mt-12 py-6 text-center border-t border-slate-100 dark:border-slate-800">
                         <p className="text-sm text-slate-400 dark:text-slate-500">
-                            &copy; {new Date().getFullYear()} SI-EMAUS. Hak cipta dilindungi undang-undang.
+                            Developed by GMIT Emaus Liliba. &copy; {new Date().getFullYear()}
                         </p>
                     </div>
                 </div>

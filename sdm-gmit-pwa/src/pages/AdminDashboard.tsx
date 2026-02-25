@@ -1294,7 +1294,7 @@ const AdminDashboard = () => {
                                 icon="school"
                                 color="#3b82f6"
                                 progress={stats?.totalSouls ? Math.round(((schoolingStatusData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => setActiveTab('pendidikan')}
+                                onClick={() => navigate('/admin/members?tab=Pendidikan')}
                             />
                             <QuickInsight
                                 title="Ekonomi"
@@ -1303,7 +1303,7 @@ const AdminDashboard = () => {
                                 icon="storefront"
                                 color="#f59e0b"
                                 progress={stats?.total ? Math.round(((businessData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => setActiveTab('ekonomi')}
+                                onClick={() => navigate('/admin/members?tab=Ekonomi')}
                             />
                             <QuickInsight
                                 title="Kesehatan"
@@ -1312,7 +1312,7 @@ const AdminDashboard = () => {
                                 icon="health_and_safety"
                                 color="#ef4444"
                                 progress={stats?.total ? Math.round(((bpjsData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => setActiveTab('kesehatan')}
+                                onClick={() => navigate('/admin/members?tab=Kesehatan')}
                             />
                             <QuickInsight
                                 title="Pelayanan"
@@ -1321,7 +1321,7 @@ const AdminDashboard = () => {
                                 icon="volunteer_activism"
                                 color="#10b981"
                                 progress={stats?.total ? Math.round((((willingnessData.data[0] || 0) + (willingnessData.data[1] || 0)) / stats.total) * 100) : 0}
-                                onClick={() => setActiveTab('komitmen')}
+                                onClick={() => navigate('/admin/members?tab=Profesi %26 Pelayanan')}
                             />
                             <QuickInsight
                                 title="Sakramen"
@@ -1330,7 +1330,7 @@ const AdminDashboard = () => {
                                 icon="water_drop"
                                 color="#0ea5e9"
                                 progress={stats?.totalSouls ? Math.round(((sakramenData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => setActiveTab('keluarga')}
+                                onClick={() => navigate('/admin/members?tab=Keluarga %26 Diakonia')}
                             />
                             <QuickInsight
                                 title="Sidi"
@@ -1339,7 +1339,7 @@ const AdminDashboard = () => {
                                 icon="verified"
                                 color="#8b5cf6"
                                 progress={stats?.totalSouls ? Math.round(((stats?.totalSidi || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => setActiveTab('keluarga')}
+                                onClick={() => navigate('/admin/members?tab=Keluarga %26 Diakonia')}
                             />
                             <QuickInsight
                                 title="Wilayah"
@@ -1348,7 +1348,7 @@ const AdminDashboard = () => {
                                 icon="location_on"
                                 color="#f43f5e"
                                 progress={stats?.totalSouls ? Math.round(((residencyData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => setActiveTab('keluarga')}
+                                onClick={() => navigate('/admin/members?tab=Identitas')}
                             />
                             <QuickInsight
                                 title="Sosial"
@@ -1357,7 +1357,7 @@ const AdminDashboard = () => {
                                 icon="handshake"
                                 color="#ec4899"
                                 progress={stats?.total ? Math.round(((socialAssistData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => setActiveTab('kesehatan')}
+                                onClick={() => navigate('/admin/members?tab=Kesehatan')}
                             />
                         </div>
                     </div>

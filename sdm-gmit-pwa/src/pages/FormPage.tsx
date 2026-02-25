@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { initialFormData, type FormData } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
@@ -19,9 +19,12 @@ const FormPage = () => {
     const [formData, setFormData] = useState<FormData>(initialFormData);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [registrationId, setRegistrationId] = useState<number | null>(null);
     const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
     const [isEditing, setIsEditing] = useState(false); // Track if we are editing from Step 7
     const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'error' | 'success' }>({ message: '', visible: false, type: 'error' });
+    const [showReturningUserBanner, setShowReturningUserBanner] = useState(false);
+    const [savedRegistrationId, setSavedRegistrationId] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -40,6 +43,15 @@ const FormPage = () => {
     });
 
     const progressPercentage = Math.round(((step - 1) / 6) * 100);
+
+    // Detect returning user
+    useEffect(() => {
+        const savedId = localStorage.getItem('gmit-registration-id');
+        if (savedId) {
+            setShowReturningUserBanner(true);
+            setSavedRegistrationId(savedId);
+        }
+    }, []);
 
     const updateFormData = (newData: Partial<FormData>) => {
         setFormData(prev => ({ ...prev, ...newData }));
@@ -437,6 +449,9 @@ const FormPage = () => {
 
             const result = await response.json();
             console.log("Success:", result);
+            if (result.id) {
+                setRegistrationId(result.id);
+            }
 
             setIsSubmitting(false);
             // Success State Transition
@@ -459,7 +474,7 @@ const FormPage = () => {
     };
 
     const renderStep = () => {
-        if (isSuccess) return <SuccessStep />;
+        if (isSuccess) return <SuccessStep formData={formData} registrationId={registrationId} />;
 
         const stepContent = (() => {
             switch (step) {
@@ -573,22 +588,65 @@ const FormPage = () => {
                 <main className="max-w-[1000px] mx-auto px-4 py-8 md:py-10 w-full flex-grow">
                     {/* Header Section - Hide on Success */}
                     {!isSuccess && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="mb-4 md:mb-6 text-center max-w-4xl mx-auto"
-                        >
-                            <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary">
-                                <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>edit_document</span>
-                            </div>
-                            <h1 className="text-black dark:text-white text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-3">
-                                Pemutakhiran Database <br />Jemaat GMIT Emaus Liliba 2026
-                            </h1>
-                            <p className="text-black/80 dark:text-slate-400 text-base md:text-lg font-medium max-w-2xl mx-auto">
-                                Hanya untuk kepentingan Statistik Jemaat GMIT Emaus Liliba
-                            </p>
-                        </motion.div>
+                        <>
+                            {/* Returning User Banner */}
+                            <AnimatePresence>
+                                {showReturningUserBanner && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                                        transition={{ duration: 0.4 }}
+                                        className="mb-6 max-w-4xl mx-auto bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-5 shadow-sm"
+                                    >
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                            <div className="flex items-start gap-3 flex-1">
+                                                <span className="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-2xl mt-0.5 shrink-0">info</span>
+                                                <div>
+                                                    <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">Anda sudah pernah mendaftarkan data.</p>
+                                                    <p className="text-xs text-indigo-700 dark:text-indigo-400 mt-0.5">ID Registrasi: <span className="font-mono font-bold">REG-{savedRegistrationId?.padStart(4, '0')}</span></p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                                <button
+                                                    onClick={() => navigate(`/status?id=${savedRegistrationId}`)}
+                                                    className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                                                >
+                                                    <span className="material-symbols-outlined text-base">search</span>
+                                                    Cek Status
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowReturningUserBanner(false);
+                                                        localStorage.removeItem('gmit-registration-id');
+                                                    }}
+                                                    className="flex-1 sm:flex-none px-4 py-2 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 text-sm font-bold rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                                                >
+                                                    Isi Data Baru
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                className="mb-4 md:mb-6 text-center max-w-4xl mx-auto"
+                            >
+                                <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-4 text-primary">
+                                    <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>edit_document</span>
+                                </div>
+                                <h1 className="text-black dark:text-white text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-3">
+                                    Pemutakhiran Database <br />Jemaat GMIT Emaus Liliba 2026
+                                </h1>
+                                <p className="text-black/80 dark:text-slate-400 text-base md:text-lg font-medium max-w-2xl mx-auto">
+                                    Hanya untuk kepentingan Statistik Jemaat GMIT Emaus Liliba
+                                </p>
+                            </motion.div>
+                        </>
                     )}
 
                     {/* Toast Notification */}

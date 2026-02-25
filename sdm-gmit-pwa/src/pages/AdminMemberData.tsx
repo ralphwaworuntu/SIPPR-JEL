@@ -130,6 +130,17 @@ const AdminMemberData = () => {
         if (searchParams.get('action') === 'add') {
             setIsAddModalOpen(true);
         }
+
+        const tabParam = searchParams.get('tab');
+        if (tabParam) {
+            setTableTab(tabParam as any);
+        }
+
+        // Also support deep linking filters if needed
+        const filterWillingnessParam = searchParams.get('willingness');
+        if (filterWillingnessParam) {
+            setFilterWillingness(filterWillingnessParam);
+        }
     }, [searchParams]);
 
 
@@ -556,13 +567,13 @@ const AdminMemberData = () => {
 
                     {/* Table View Tabs */}
                     <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
-                        {['Umum', 'Keluarga', 'Profesional', 'Pendidikan', 'Ekonomi & Aset Keluarga', 'Kesehatan'].map((tab) => (
+                        {['Identitas', 'Keluarga & Diakonia', 'Profesi & Pelayanan', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setTableTab(tab as any)}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${tableTab === tab ? 'bg-primary text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                             >
-                                Data {tab}
+                                Data {tab.replace(' & Diakonia', '').replace(' & Pelayanan', '')}
                             </button>
                         ))}
                     </div>
@@ -595,11 +606,11 @@ const AdminMemberData = () => {
                                                     let cols: any[] = [];
                                                     switch (tableTab) {
                                                         case 'Identitas': cols = [...baseCols, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "Usia", key: "birthDate", width: "w-20" }, { label: "Anggota (KK)", key: "familyMembers", width: "w-24" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }]; break;
-                                                        case 'Keluarga & Diakonia': cols = [...baseCols, { label: "Sidi", key: "familyMembersSidi", width: "w-24" }, { label: "Penerima Diakonia", key: "diakonia_recipient", width: "min-w-[150px]" }, { label: "Tahun Diakonia", key: "diakonia_year", width: "min-w-[150px]" }, { label: "Jenis Diakonia", key: "diakonia_type", width: "min-w-[150px]" }]; break;
-                                                        case 'Profesi & Pelayanan': cols = [...baseCols, { label: "Pendidikan", key: "educationLevel", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Status Relawan", key: "willingnessToServe", width: "min-w-[150px]" }]; break;
+                                                        case 'Keluarga & Diakonia': cols = [...baseCols, { label: "L", key: "familyMembersMale", width: "w-16" }, { label: "P", key: "familyMembersFemale", width: "w-16" }, { label: "Luar Kupang", key: "familyMembersOutside", width: "w-24" }, { label: "Sidi", key: "familyMembersSidi", width: "w-20" }, { label: "Belum Baptis", key: "familyMembersNonBaptized", width: "w-24" }, { label: "Penerima Diakonia", key: "diakonia_recipient", width: "min-w-[130px]" }]; break;
+                                                        case 'Profesi & Pelayanan': cols = [...baseCols, { label: "Pendidikan", key: "educationLevel", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Tempat Kerja", key: "companyName", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Status Relawan", key: "willingnessToServe", width: "min-w-[130px]" }]; break;
                                                         case 'Pendidikan': cols = [...baseCols, { label: "Status Sekolah", key: "education_schoolingStatus", width: "min-w-[150px]" }, { label: "Total Bersekolah", key: "education_inSchool_sd", width: "min-w-[150px]" }, { label: "Total Putus Sekolah", key: "education_dropout_sd", width: "min-w-[180px]" }, { label: "Total Bekerja", key: "education_working", width: "min-w-[120px]" }]; break;
-                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha UMKM", key: "economics_hasBusiness", width: "min-w-[120px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[150px]" }, { label: "Cakupan Air", key: "economics_waterSource", width: "min-w-[120px]" }, { label: "Kep. Aset (Unit)", key: "economics_totalAssets", width: "min-w-[150px]" }]; break;
-                                                        case 'Kesehatan': cols = [...baseCols, { label: "Sakit Kronis", key: "health_chronicSick", width: "min-w-[120px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "Berobat Rutin", key: "health_regularTreatment", width: "min-w-[120px]" }, { label: "BPJS JKN", key: "health_hasBPJS", width: "min-w-[120px]" }, { label: "BPJS Naker", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[120px]" }]; break;
+                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pekerjaan KK", key: "economics_headOccupation", width: "min-w-[150px]" }, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha UMKM", key: "economics_hasBusiness", width: "min-w-[120px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[120px]" }, { label: "Sumber Air", key: "economics_waterSource", width: "min-w-[120px]" }]; break;
+                                                        case 'Kesehatan': cols = [...baseCols, { label: "Sakit 30 Hari", key: "health_sick30Days", width: "min-w-[100px]" }, { label: "Sakit Kronis", key: "health_chronicSick", width: "min-w-[100px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "Berobat Rutin", key: "health_regularTreatment", width: "min-w-[100px]" }, { label: "BPJS JKN", key: "health_hasBPJS", width: "min-w-[100px]" }, { label: "BPJS Naker", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[100px]" }, { label: "Bansos", key: "health_socialAssistance", width: "min-w-[100px]" }]; break;
                                                         default: cols = baseCols;
                                                     }
                                                     cols.push({ label: "Kelengkapan", key: "name", width: "w-20" }); // Metric column
@@ -674,16 +685,19 @@ const AdminMemberData = () => {
                                                         )}
                                                         {tableTab === 'Keluarga & Diakonia' && (
                                                             <>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersSidi || '-'} Org</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersMale || 0}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersFemale || 0}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutside || 0}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersSidi || 0}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonBaptized || 0}</td>
                                                                 <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'PENERIMA' : 'TIDAK'}</span></td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.diakonia_year || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.diakonia_type || '-'}</td>
                                                             </>
                                                         )}
                                                         {tableTab === 'Profesi & Pelayanan' && (
                                                             <>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.educationLevel || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobTitle || member.jobCategory || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.companyName || '-'}</td>
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex -space-x-1 overflow-hidden">
                                                                         {(member.skills || []).slice(0, 3).map((s: string, i: number) => (
@@ -694,7 +708,7 @@ const AdminMemberData = () => {
                                                                     </div>
                                                                 </td>
                                                                 <td className="px-6 py-4">
-                                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${member.willingnessToServe === 'Active' ? 'bg-green-100 text-green-600 border-green-200' : member.willingnessToServe === 'On-demand' ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>{member.willingnessToServe === 'Active' ? 'AKTIF' : member.willingnessToServe === 'On-demand' ? 'ON-DEMAND' : 'UMUM'}</span>
+                                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'bg-green-100 text-green-600 border-green-200' : member.willingnessToServe === 'On-demand' ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>{['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'AKTIF' : member.willingnessToServe === 'On-demand' ? 'ON-DEMAND' : 'UMUM'}</span>
                                                                 </td>
                                                             </>
                                                         )}
@@ -708,20 +722,22 @@ const AdminMemberData = () => {
                                                         )}
                                                         {tableTab === 'Ekonomi' && (
                                                             <>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_headOccupation || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_incomeRange || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Punya Usaha' : 'Tidak Ada'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_waterSource || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm font-medium text-blue-600">{member.economics_totalAssets || '0'} Unit</td>
                                                             </>
                                                         )}
                                                         {tableTab === 'Kesehatan' && (
                                                             <>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'ADA KMS' : '-'}</span></td>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'ADA KMS' : '-'}</span></td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_sick30Days || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'ADA' : '-'}</span></td>
+                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'ADA' : '-'}</span></td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_regularTreatment || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJS || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJSKetenagakerjaan || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_socialAssistance || '-'}</td>
                                                             </>
                                                         )}
                                                         <td className="px-6 py-4">

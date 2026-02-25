@@ -285,6 +285,7 @@ app.get("/api/family-members", async (req, res) => {
             id: congregants.id,
             name: congregants.fullName,
             sector: congregants.sector,
+            lingkungan: congregants.lingkungan,
             professionalFamilyMembers: congregants.professionalFamilyMembers,
             kkNumber: congregants.kkNumber
         })
@@ -308,6 +309,7 @@ app.get("/api/family-members", async (req, res) => {
                                     mainMemberId: member.id,
                                     mainMemberName: member.name,
                                     mainMemberSector: member.sector,
+                                    mainMemberLingkungan: member.lingkungan,
                                     mainMemberKkNumber: member.kkNumber,
                                 });
                             }
@@ -510,14 +512,54 @@ app.post("/api/congregants", async (req, res) => {
         const data = req.body;
         console.log("New Registration Attempt:", data.fullName);
 
-        await db.insert(congregants).values(buildCongregantValues(data, false));
+        const [result] = await db.insert(congregants).values(buildCongregantValues(data, false));
 
-        console.log("Registration Successful:", data.fullName);
-        res.status(201).json({ success: true, message: "Pendaftaran berhasil" });
+        console.log("Registration Successful:", data.fullName, "ID:", result.insertId);
+        res.status(201).json({ success: true, message: "Pendaftaran berhasil", id: result.insertId });
     } catch (error) {
         console.error("Submission Error:", error);
         console.error("Error saving congregant:", error);
         res.status(500).json({ error: "Gagal menyimpan data pendaftaran. Pastikan data lengkap." });
+    }
+});
+
+// 2c. Public: Check Registration Status by ID (No Auth)
+app.get("/api/congregants/:id/status", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.select({
+            id: congregants.id,
+            fullName: congregants.fullName,
+            kkNumber: congregants.kkNumber,
+            lingkungan: congregants.lingkungan,
+            rayon: congregants.rayon,
+            phone: congregants.phone,
+            status: congregants.status,
+            createdAt: congregants.createdAt,
+            updatedAt: congregants.updatedAt,
+        }).from(congregants).where(eq(congregants.id, Number(id))).limit(1);
+
+        if (!result || result.length === 0) {
+            res.status(404).json({ error: "ID Registrasi tidak ditemukan" });
+            return;
+        }
+
+        const r = result[0];
+        res.json({
+            id: r.id,
+            displayId: `REG-${r.id.toString().padStart(4, '0')}`,
+            fullName: r.fullName,
+            kkNumber: r.kkNumber,
+            lingkungan: r.lingkungan,
+            rayon: r.rayon,
+            phone: r.phone,
+            status: r.status,
+            createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : null,
+            updatedAt: r.updatedAt ? new Date(r.updatedAt).toISOString() : null,
+        });
+    } catch (error) {
+        console.error("Status Check Error:", error);
+        res.status(500).json({ error: "Gagal mengambil status registrasi" });
     }
 });
 
@@ -592,14 +634,24 @@ app.get("/api/dashboard/stats", async (req, res) => {
             // 9. Rayon Distribution
             db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon),
 
-            // 10. Education Summary (Children in School)
+            // 10. Education Summary (All Child Data)
             db.select({
                 total: sql<number>`SUM(
                     COALESCE(education_in_school_tk_paud, 0) + 
                     COALESCE(education_in_school_sd, 0) + 
                     COALESCE(education_in_school_smp, 0) + 
                     COALESCE(education_in_school_sma, 0) + 
-                    COALESCE(education_in_school_university, 0)
+                    COALESCE(education_in_school_university, 0) +
+                    COALESCE(education_dropout_tk_paud, 0) + 
+                    COALESCE(education_dropout_sd, 0) + 
+                    COALESCE(education_dropout_smp, 0) + 
+                    COALESCE(education_dropout_sma, 0) + 
+                    COALESCE(education_dropout_university, 0) +
+                    COALESCE(education_unemployed_sd, 0) + 
+                    COALESCE(education_unemployed_smp, 0) + 
+                    COALESCE(education_unemployed_sma, 0) + 
+                    COALESCE(education_unemployed_university, 0) +
+                    COALESCE(education_working, 0)
                 )`
             }).from(congregants)
         ]);
@@ -643,7 +695,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
         willingnessRes.forEach(w => {
             if (w.willingness) {
                 willingnessCounts[w.willingness] = w.count;
-                if (['Aktif', 'On-demand'].includes(w.willingness)) {
+                if (['Aktif', 'Active', 'Ya', 'On-demand'].includes(w.willingness)) {
                     volunteerCount += w.count;
                 }
             }

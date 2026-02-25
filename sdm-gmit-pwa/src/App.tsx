@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { toast } from './components/ui/Toast';
 import LandingPage from './pages/LandingPage';
 import FormPage from './pages/FormPage';
+import StatusPage from './pages/StatusPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SeedUser from './pages/SeedUser';
@@ -75,6 +76,7 @@ const AppContent = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/form" element={<FormPage />} />
+        <Route path="/status" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/seed-user" element={<SeedUser />} />
 
