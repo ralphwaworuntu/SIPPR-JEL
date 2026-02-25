@@ -227,7 +227,8 @@ const AdminMemberData = () => {
             "Pendidikan Terakhir", "Jurusan", "Kategori Pekerjaan", "Jabatan", "Nama Instansi", "Lama Kerja (Tahun)", "Daftar Keahlian",
             "Kesediaan Melayani", "Minat Pelayanan", "Bentuk Kontribusi",
             "Status Anak Bersekolah", "TK/PAUD (Sekolah)", "SD (Sekolah)", "SMP (Sekolah)", "SMA (Sekolah)", "Universitas (Sekolah)",
-            "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)", "Anak Sudah Bekerja",
+            "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)",
+            "SD (Tidak Sekolah)", "SMP (Tidak Sekolah)", "SMA (Tidak Sekolah)", "Universitas (Tidak Sekolah)", "Anak Sudah Bekerja",
             "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
             "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
             "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
@@ -255,7 +256,8 @@ const AdminMemberData = () => {
                 esc(m.educationLevel || m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
                 esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
                 esc(m.education_schoolingStatus), m.education_inSchool_tk_paud || 0, m.education_inSchool_sd || 0, m.education_inSchool_smp || 0, m.education_inSchool_sma || 0, m.education_inSchool_university || 0,
-                m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0, m.education_working || 0,
+                m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0,
+                m.education_unemployed_sd || 0, m.education_unemployed_smp || 0, m.education_unemployed_sma || 0, m.education_unemployed_university || 0, m.education_working || 0,
                 esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), m.economics_expense_food || 0, m.economics_expense_utilities || 0, m.economics_expense_education || 0, m.economics_expense_other || 0,
                 esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource), esc(arrStr(m.economics_assets)),
                 esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease)), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability), esc(arrStr(getDisabilityList())),
@@ -296,7 +298,7 @@ const AdminMemberData = () => {
         doc.text("Tabel 1: Identitas", 14, 40);
         autoTable(doc, {
             ...baseTableConfig,
-            head: [["Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Gender", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif", "Lingkungan", "Rayon", "Alamat Lengkap"]],
+            head: [["No", "Nomor Kartu Keluarga", "NIK", "Nama Lengkap", "Gender", "Tanggal Lahir", "Usia", "Nomor Telepon/ WhatsApp Aktif", "Lingkungan", "Rayon", "Alamat Lengkap"]],
             body: filteredMembers.map((m, i) => [i + 1, m.kkNumber || '-', m.nik || '-', m.name, m.gender, m.birthDate, calculateAge(m.birthDate), m.phone || '-', m.lingkungan, m.rayon, m.address?.substring(0, 30) || '-']),
             startY: 45,
             columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
@@ -380,8 +382,16 @@ const AdminMemberData = () => {
         doc.text("Tabel 6: Kesehatan & Disabilitas", 14, 25);
         autoTable(doc, {
             ...baseTableConfig,
-            head: [["No", "Nama Lengkap", "Sakit 30 Hari Terakhir", "Penyakit Kronis", "BPJS Kesehatan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas Fisik"]],
-            body: filteredMembers.map((m, i) => [i + 1, m.name, m.health_sick30Days || '-', m.health_chronicSick || '-', m.health_hasBPJS || '-', m.health_socialAssistance || '-', m.health_hasDisability || '-', arrStr(m.health_disabilityPhysical)]),
+            head: [["No", "Nama Lengkap", "Sakit 30 Hari Terakhir", "Penyakit Kronis", "BPJS Kesehatan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas"]],
+            body: filteredMembers.map((m, i) => {
+                const arr: string[] = [];
+                if (m.health_disabilityPhysical?.length) arr.push(...m.health_disabilityPhysical);
+                if (m.health_disabilityIntellectual?.length) arr.push(...m.health_disabilityIntellectual);
+                if (m.health_disabilityMental?.length) arr.push(...m.health_disabilityMental);
+                if (m.health_disabilitySensory?.length) arr.push(...m.health_disabilitySensory);
+                if (m.health_disabilityDouble) arr.push("Ganda/Multi");
+                return [i + 1, m.name, m.health_sick30Days || '-', m.health_chronicSick || '-', m.health_hasBPJS || '-', m.health_socialAssistance || '-', m.health_hasDisability || '-', arrStr(arr)];
+            }),
             startY: 30,
             columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 40 }, 7: { cellWidth: 40 } }
         });
@@ -606,10 +616,10 @@ const AdminMemberData = () => {
                                                     let cols: any[] = [];
                                                     switch (tableTab) {
                                                         case 'Identitas': cols = [...baseCols, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "Usia", key: "birthDate", width: "w-20" }, { label: "Anggota (KK)", key: "familyMembers", width: "w-24" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }]; break;
-                                                        case 'Keluarga & Diakonia': cols = [...baseCols, { label: "L", key: "familyMembersMale", width: "w-16" }, { label: "P", key: "familyMembersFemale", width: "w-16" }, { label: "Luar Kupang", key: "familyMembersOutside", width: "w-24" }, { label: "Sidi", key: "familyMembersSidi", width: "w-20" }, { label: "Belum Baptis", key: "familyMembersNonBaptized", width: "w-24" }, { label: "Penerima Diakonia", key: "diakonia_recipient", width: "min-w-[130px]" }]; break;
-                                                        case 'Profesi & Pelayanan': cols = [...baseCols, { label: "Pendidikan", key: "educationLevel", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Tempat Kerja", key: "companyName", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Status Relawan", key: "willingnessToServe", width: "min-w-[130px]" }]; break;
-                                                        case 'Pendidikan': cols = [...baseCols, { label: "Status Sekolah", key: "education_schoolingStatus", width: "min-w-[150px]" }, { label: "Total Bersekolah", key: "education_inSchool_sd", width: "min-w-[150px]" }, { label: "Total Putus Sekolah", key: "education_dropout_sd", width: "min-w-[180px]" }, { label: "Total Bekerja", key: "education_working", width: "min-w-[120px]" }]; break;
-                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pekerjaan KK", key: "economics_headOccupation", width: "min-w-[150px]" }, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha UMKM", key: "economics_hasBusiness", width: "min-w-[120px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[120px]" }, { label: "Sumber Air", key: "economics_waterSource", width: "min-w-[120px]" }]; break;
+                                                        case 'Keluarga & Diakonia': cols = [...baseCols, { label: "L", key: "familyMembersMale", width: "w-16" }, { label: "P", key: "familyMembersFemale", width: "w-16" }, { label: "Luar Kupang", key: "familyMembersOutside", width: "w-24" }, { label: "Sidi", key: "familyMembersSidi", width: "w-20" }, { label: "Belum Baptis", key: "familyMembersNonBaptized", width: "w-24" }, { label: "Belum Sidi", key: "familyMembersNonSidi", width: "w-24" }, { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[130px]" }]; break;
+                                                        case 'Profesi & Pelayanan': cols = [...baseCols, { label: "Pendidikan", key: "educationLevel", width: "min-w-[120px]" }, { label: "Jurusan", key: "major", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Jabatan", key: "jobTitle", width: "min-w-[150px]" }, { label: "Tempat Kerja", key: "companyName", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Status Relawan", key: "willingnessToServe", width: "min-w-[130px]" }]; break;
+                                                        case 'Pendidikan': cols = [...baseCols, { label: "Status Sekolah", key: "education_schoolingStatus", width: "min-w-[150px]" }, { label: "Total Bersekolah", key: "education_inSchool_sd", width: "min-w-[150px]" }, { label: "Total Putus Sekolah", key: "education_dropout_sd", width: "min-w-[180px]" }, { label: "Total Tidak Sekolah", key: "education_unemployed_sd", width: "min-w-[180px]" }, { label: "Total Bekerja", key: "education_working", width: "min-w-[120px]" }]; break;
+                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pekerjaan KK", key: "economics_headOccupation", width: "min-w-[150px]" }, { label: "Pek. Pasangan", key: "economics_spouseOccupation", width: "min-w-[150px]" }, { label: "Pendapatan", key: "economics_incomeRange", width: "min-w-[150px]" }, { label: "Usaha UMKM", key: "economics_hasBusiness", width: "min-w-[120px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[120px]" }, { label: "Sumber Air", key: "economics_waterSource", width: "min-w-[120px]" }]; break;
                                                         case 'Kesehatan': cols = [...baseCols, { label: "Sakit 30 Hari", key: "health_sick30Days", width: "min-w-[100px]" }, { label: "Sakit Kronis", key: "health_chronicSick", width: "min-w-[100px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "Berobat Rutin", key: "health_regularTreatment", width: "min-w-[100px]" }, { label: "BPJS JKN", key: "health_hasBPJS", width: "min-w-[100px]" }, { label: "BPJS Naker", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[100px]" }, { label: "Bansos", key: "health_socialAssistance", width: "min-w-[100px]" }]; break;
                                                         default: cols = baseCols;
                                                     }
@@ -690,13 +700,21 @@ const AdminMemberData = () => {
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutside || 0}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersSidi || 0}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonBaptized || 0}</td>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'PENERIMA' : 'TIDAK'}</span></td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonSidi || 0}</td>
+                                                                <td className="px-6 py-4 text-sm">
+                                                                    <div className="flex flex-col gap-1 items-start">
+                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'PENERIMA' : 'TIDAK'}</span>
+                                                                        {member.diakonia_recipient === 'Ya' && <span className="text-[9px] font-medium text-slate-400">{member.diakonia_type} ({member.diakonia_year})</span>}
+                                                                    </div>
+                                                                </td>
                                                             </>
                                                         )}
                                                         {tableTab === 'Profesi & Pelayanan' && (
                                                             <>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.educationLevel || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobTitle || member.jobCategory || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.major || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobCategory || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.jobTitle || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.companyName || '-'}</td>
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex -space-x-1 overflow-hidden">
@@ -717,12 +735,14 @@ const AdminMemberData = () => {
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{member.education_schoolingStatus || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-emerald-600 font-bold dark:text-emerald-400">{((member.education_inSchool_tk_paud || 0) + (member.education_inSchool_sd || 0) + (member.education_inSchool_smp || 0) + (member.education_inSchool_sma || 0) + (member.education_inSchool_university || 0)) || '-'} Org</td>
                                                                 <td className="px-6 py-4 text-sm text-red-600 font-bold dark:text-red-400">{((member.education_dropout_tk_paud || 0) + (member.education_dropout_sd || 0) + (member.education_dropout_smp || 0) + (member.education_dropout_sma || 0) + (member.education_dropout_university || 0)) || '-'} Org</td>
+                                                                <td className="px-6 py-4 text-sm text-amber-600 font-bold dark:text-amber-400">{((member.education_unemployed_sd || 0) + (member.education_unemployed_smp || 0) + (member.education_unemployed_sma || 0) + (member.education_unemployed_university || 0)) || '-'} Org</td>
                                                                 <td className="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-400">{member.education_working || '-'} Org</td>
                                                             </>
                                                         )}
                                                         {tableTab === 'Ekonomi' && (
                                                             <>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_headOccupation || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_spouseOccupation || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_incomeRange || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Punya Usaha' : 'Tidak Ada'}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
@@ -818,20 +838,32 @@ const AdminMemberData = () => {
                                                             {member.initials}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
-                                                            <p className="text-xs text-slate-500">{member.id} • Ling. {member.lingkungan}</p>
+                                                            <p className="font-bold text-slate-900 dark:text-white mb-0.5">{member.name}</p>
+                                                            <p className="text-xs text-slate-500 flex items-center gap-1.5"><span className="material-symbols-outlined text-[12px]">wc</span>{member.gender} <span className="text-[10px]">•</span> <span className="material-symbols-outlined text-[12px]">cake</span>{calculateAge(member.birthDate)} Thn</p>
                                                         </div>
                                                     </div>
-                                                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">R{member.rayon} - L{member.lingkungan}</span>
+                                                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">Ling. {member.lingkungan} / Rayon {member.rayon}</span>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
                                                     <div>
-                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan</span>
-                                                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.job}</span>
+                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan & Kelengkapan</span>
+                                                        <div className="mt-0.5 flex flex-wrap gap-1 items-center">
+                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.jobCategory || member.job}</span>
+                                                            {(() => {
+                                                                const c = calculateCompleteness(member);
+                                                                const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30'
+                                                                    : c.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30'
+                                                                        : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30';
+                                                                return <span className={`px-1.5 py-0.5 text-[8px] font-bold rounded border ${bg}`}>{c.percent}% Lengkap</span>;
+                                                            })()}
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pendidikan</span>
-                                                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
+                                                        <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pend. & Status Pelayanan</span>
+                                                        <div className="mt-0.5 flex flex-wrap gap-1">
+                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
+                                                            <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold border ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'bg-green-100 text-green-600 border-green-200' : member.willingnessToServe === 'On-demand' ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>{['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'AKTIF' : member.willingnessToServe === 'On-demand' ? 'ON-DEMAND' : 'UMUM'}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-2 mt-1">
@@ -898,17 +930,17 @@ const AdminMemberData = () => {
                                                 <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">{member.initials}</div>
                                                 <div>
                                                     <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
-                                                    <p className="text-sm text-slate-500">{member.sector}</p>
+                                                    <p className="text-sm text-slate-500">Ling. {member.lingkungan} • Rayon {member.rayon}</p>
                                                 </div>
                                             </div>
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Pekerjaan</span>
-                                                    <span className="font-medium dark:text-slate-200">{member.job}</span>
+                                                    <span className="font-medium dark:text-slate-200">{member.jobCategory || member.job}</span>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                    <span className="text-slate-500">Status</span>
-                                                    <span className="font-medium dark:text-slate-200">{member.statusGerejawi}</span>
+                                                    <span className="text-slate-500">Pelayanan</span>
+                                                    <span className="font-medium dark:text-slate-200">{['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'Relawan' : member.willingnessToServe === 'On-demand' ? 'On-demand' : 'Umum'}</span>
                                                 </div>
                                             </div>
                                             <div className="mt-4 flex flex-wrap gap-1">

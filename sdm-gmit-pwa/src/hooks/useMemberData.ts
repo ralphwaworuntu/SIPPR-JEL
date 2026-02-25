@@ -192,12 +192,12 @@ export const calculateAge = (birthDate: string) => {
     return age;
 };
 
-// Data completeness scoring — checks 20 key fields across 6 categories
+// Data completeness scoring — checks 25 key fields across 6 categories
 export const calculateCompleteness = (m: Member): { percent: number; label: string; color: string } => {
     const has = (v: any) => v !== undefined && v !== null && v !== '' && v !== '-' && v !== 0;
     const hasArr = (v: any) => Array.isArray(v) && v.length > 0;
     let filled = 0;
-    const total = 20;
+    const total = 25;
 
     // Identity (5)
     if (has(m.name)) filled++;
@@ -220,15 +220,21 @@ export const calculateCompleteness = (m: Member): { percent: number; label: stri
     // Education (1)
     if (has(m.education_schoolingStatus)) filled++;
 
-    // Economics (4)
+    // Economics (7)
     if (has(m.economics_headOccupation)) filled++;
     if (has(m.economics_incomeRange)) filled++;
     if (has(m.economics_houseStatus)) filled++;
+    if (has(m.economics_spouseOccupation)) filled++;
+    if (has(m.economics_hasBusiness)) filled++;
+    if (has(m.economics_waterSource)) filled++;
+    if (has(m.economics_totalAssets)) filled++;
 
-    // Health (3)
+    // Health (5)
     if (has(m.health_sick30Days)) filled++;
     if (has(m.health_hasBPJS)) filled++;
     if (has(m.health_hasDisability)) filled++;
+    if (has(m.health_chronicSick)) filled++;
+    if (has(m.health_socialAssistance)) filled++;
 
     const percent = Math.round((filled / total) * 100);
     const label = percent >= 80 ? 'Lengkap' : percent >= 50 ? 'Sebagian' : 'Kurang';
@@ -318,7 +324,13 @@ export const useMemberData = () => {
             });
         }
         if (filterWillingness !== "Semua") {
-            result = result.filter(m => m.willingnessToServe === filterWillingness);
+            result = result.filter(m => {
+                const w = m.willingnessToServe || "";
+                if (filterWillingness === 'Aktif') return ['Aktif', 'Active', 'Ya', 'Ya, bersedia aktif'].includes(w);
+                if (filterWillingness === 'On-demand') return ['On-demand', 'Ya, bila dibutuhkan'].includes(w);
+                if (filterWillingness === 'Tidak') return ['Tidak', 'Belum', 'Belum bersedia'].includes(w);
+                return w === filterWillingness;
+            });
         }
 
         // Sorting
@@ -366,8 +378,28 @@ export const useMemberData = () => {
         let maxCount = 0;
         let dominant = "-";
 
+        let currentMonthCount = 0;
+        let previousMonthCount = 0;
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
         members.forEach(m => {
             if (!m) return;
+
+            // Growth calculation
+            if (m.createdAt) {
+                const createdDate = new Date(m.createdAt);
+                if (createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear) {
+                    currentMonthCount++;
+                } else if (
+                    (createdDate.getMonth() === currentMonth - 1 && createdDate.getFullYear() === currentYear) ||
+                    (currentMonth === 0 && createdDate.getMonth() === 11 && createdDate.getFullYear() === currentYear - 1)
+                ) {
+                    previousMonthCount++;
+                }
+            }
+
             // Lingkungan
             const lingkungan = m.lingkungan || "Lainnya";
             lingkunganCounts[lingkungan] = (lingkunganCounts[lingkungan] || 0) + 1;
@@ -406,15 +438,22 @@ export const useMemberData = () => {
             }
         });
 
-        // Calculate Profession/Skill stats
         const professionalCount = members.filter(m => m.education && (m.education.startsWith('S') || m.education === 'D3')).length;
         const skillCount = members.reduce((acc, curr) => acc + (curr.skills?.length || 0), 0);
+
+        // Calculate Growth %
+        let growthPercent = 0;
+        if (previousMonthCount === 0) {
+            growthPercent = currentMonthCount > 0 ? 100 : 0;
+        } else {
+            growthPercent = Math.round(((currentMonthCount - previousMonthCount) / previousMonthCount) * 100);
+        }
 
         return {
             total: members.length,
             lingkunganDominant: dominant,
             activeSkills: skillCount,
-            growth: 12, // Placeholder
+            growth: growthPercent,
             professionalCount,
             volunteerCount: willingnessCounts["Bersedia"],
             distributions: {
