@@ -247,23 +247,25 @@ export const getAgeCategory = (age: number) => {
 export const useMemberData = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterSector, setFilterSector] = useState("Semua");
+    const [filterLingkungan, setFilterLingkungan] = useState("Semua");
+    const [filterRayon, setFilterRayon] = useState("Semua");
     const [filterGender, setFilterGender] = useState("Semua");
     const [filterAgeCategory, setFilterAgeCategory] = useState("Semua");
-    const [filterStatus, setFilterStatus] = useState("Semua");
+    const [filterWillingness, setFilterWillingness] = useState("Semua");
 
     const [sortConfig, setSortConfig] = useState<{ key: keyof Member | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
 
     // Fetch Data from API
     const { data: rawMembers = [], isLoading, isError } = useQuery({
-        queryKey: ['members', { searchTerm, filterSector, filterGender, filterAgeCategory, filterStatus }],
+        queryKey: ['members', { searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness }],
         queryFn: async () => {
             const params: Record<string, any> = {};
             if (searchTerm) params.search = searchTerm;
-            if (filterSector !== "Semua") params.sector = filterSector;
+            if (filterLingkungan !== "Semua") params.lingkungan = filterLingkungan;
+            if (filterRayon !== "Semua") params.rayon = filterRayon;
             if (filterGender !== "Semua") params.gender = filterGender;
             if (filterAgeCategory !== "Semua") params.ageCategory = filterAgeCategory;
-            if (filterStatus !== "Semua") params.status = filterStatus;
+            if (filterWillingness !== "Semua") params.willingnessToServe = filterWillingness;
 
             const response = await apiClient.get<Member[]>('/members', { params });
             return response.data.map(m => ({
@@ -285,7 +287,7 @@ export const useMemberData = () => {
     });
 
     const setMembers = (action: Member[] | ((prev: Member[]) => Member[])) => {
-        const queryKey = ['members', { searchTerm, filterSector, filterGender, filterAgeCategory, filterStatus }];
+        const queryKey = ['members', { searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness }];
         queryClient.setQueryData(queryKey, (oldData: Member[] | undefined) => {
             const current = oldData || [];
             return typeof action === 'function' ? action(current) : action;
@@ -322,7 +324,8 @@ export const useMemberData = () => {
     // Stats Calculation (based on the currently fetched/filtered data)
     const stats = useMemo(() => {
         // Simple Counters
-        const sectorCounts: Record<string, number> = {};
+        const lingkunganCounts: Record<string, number> = {};
+        const rayonCounts: Record<string, number> = {};
         const genderCounts: Record<string, number> = { "Laki-laki": 0, "Perempuan": 0 };
         const educationCounts: Record<string, number> = {};
         const willingnessCounts: Record<string, number> = { "Bersedia": 0, "Ragu-ragu": 0, "Tidak": 0 };
@@ -332,13 +335,17 @@ export const useMemberData = () => {
 
         members.forEach(m => {
             if (!m) return;
-            // Sector
-            const sector = m.sector || "Lainnya";
-            sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
-            if (sectorCounts[sector] > maxCount) {
-                maxCount = sectorCounts[sector];
-                dominant = sector;
+            // Lingkungan
+            const lingkungan = m.lingkungan || "Lainnya";
+            lingkunganCounts[lingkungan] = (lingkunganCounts[lingkungan] || 0) + 1;
+            if (lingkunganCounts[lingkungan] > maxCount) {
+                maxCount = lingkunganCounts[lingkungan];
+                dominant = lingkungan;
             }
+
+            // Rayon
+            const rayon = m.rayon || "Lainnya";
+            rayonCounts[rayon] = (rayonCounts[rayon] || 0) + 1;
 
             // Gender
             const gender = m.gender;
@@ -372,13 +379,14 @@ export const useMemberData = () => {
 
         return {
             total: members.length,
-            sectorDominant: dominant,
+            lingkunganDominant: dominant,
             activeSkills: skillCount,
             growth: 12, // Placeholder
             professionalCount,
             volunteerCount: willingnessCounts["Bersedia"],
             distributions: {
-                sector: sectorCounts,
+                lingkungan: lingkunganCounts,
+                rayon: rayonCounts,
                 gender: genderCounts,
                 education: educationCounts,
                 willingness: willingnessCounts
@@ -423,10 +431,11 @@ export const useMemberData = () => {
         setMembers,
         filteredMembers: members, // Alias for compatibility
         searchTerm, setSearchTerm,
-        filterSector, setFilterSector,
+        filterLingkungan, setFilterLingkungan,
+        filterRayon, setFilterRayon,
         filterGender, setFilterGender,
         filterAgeCategory, setFilterAgeCategory,
-        filterStatus, setFilterStatus,
+        filterWillingness, setFilterWillingness,
         sortConfig, handleSort,
         stats,
         isLoading,

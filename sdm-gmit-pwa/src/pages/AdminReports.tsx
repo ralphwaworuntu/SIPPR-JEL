@@ -42,22 +42,19 @@ const AdminReports = () => {
     const [drillDownSector, setDrillDownSector] = useState<string | null>(null);
     const sectorChartRef = useRef<any>(null);
 
-    // 1. Age Distribution Logic (Actually Sector/Kategorial Distribution)
+    // 1. Age Distribution Logic (Actually Lingkungan Distribution)
     const ageData = useMemo(() => {
         const categories = {
-            'Pemuda': 0,
-            'Kaum Bapak': 0,
-            'Kaum Perempuan': 0,
-            'Lansia': 0
+            '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0
         };
         members.forEach(m => {
-            const sector = m.sector;
-            if (Object.keys(categories).includes(sector)) {
-                categories[sector as keyof typeof categories]++;
+            const ling = m.lingkungan;
+            if (ling && Object.keys(categories).includes(ling.toString())) {
+                categories[ling.toString() as keyof typeof categories]++;
             }
         });
         return {
-            labels: Object.keys(categories),
+            labels: Object.keys(categories).map(k => `Lingkungan ${k}`),
             data: Object.values(categories)
         };
     }, [members]);
@@ -91,15 +88,15 @@ const AdminReports = () => {
         };
     }, [members, selectedYear]);
 
-    // 3. Sector Analysis Logic
+    // 3. Sector Analysis Logic (Now Lingkungan Analysis)
     const sectorData = useMemo(() => {
-        // Compare Family count vs Member count per sector
-        const sectors = Object.keys(memberStats.distributions.sector);
-        const familyCounts = sectors.map(s => families.filter(f => f.sector === s).length);
-        const memberCounts = sectors.map(s => memberStats.distributions.sector[s] || 0);
+        // Compare Family count vs Member count per lingkungan
+        const lingkungans = Object.keys(memberStats.distributions.lingkungan);
+        const familyCounts = lingkungans.map(l => families.filter(f => f.lingkungan === l).length);
+        const memberCounts = lingkungans.map(l => memberStats.distributions.lingkungan[l] || 0);
 
         return {
-            labels: sectors,
+            labels: lingkungans.map(l => `Lingkungan ${l}`),
             datasets: [
                 {
                     label: 'Jumlah KK',
@@ -144,8 +141,8 @@ const AdminReports = () => {
     const handleSectorClick = (_event: any, elements: any[]) => {
         if (elements.length > 0) {
             const index = elements[0].index;
-            const sectorName = sectorData.labels[index];
-            setDrillDownSector(sectorName);
+            const lingName = sectorData.labels[index].replace('Lingkungan ', '');
+            setDrillDownSector(lingName);
         }
     };
 
@@ -196,13 +193,13 @@ const AdminReports = () => {
     // Quick Reports Export Logic
     const generateQuickReport = (type: 'lansia' | 'sakit' | 'relawan' | 'sekolah' | 'diakonia') => {
         let title = '';
-        let headers: string[] = ['No', 'Nama', 'Sektor', 'Rayon/Ling', 'Detail'];
+        let headers: string[] = ['No', 'Nama', 'Lingkungan', 'Rayon', 'Detail'];
         let data: string[][] = [];
 
         if (type === 'lansia') {
             title = 'Laporan Jemaat Kategori Lansia (> 60 Tahun)';
             const lansia = members.filter(m => calculateAge(m.birthDate) >= 60);
-            data = lansia.map((m, i) => [(i + 1).toString(), m.name, m.sector || '-', `R${m.rayon} / L${m.lingkungan}`, `${calculateAge(m.birthDate)} Tahun`]);
+            data = lansia.map((m, i) => [(i + 1).toString(), m.name, `Lingkungan ${m.lingkungan}`, `Rayon ${m.rayon}`, `${calculateAge(m.birthDate)} Tahun`]);
         } else if (type === 'sakit') {
             title = 'Laporan Jemaat Sakit Kronis & Disabilitas';
             const sick = members.filter(m => m.health_chronicSick === 'Ya' || m.health_hasDisability === 'Ya');
@@ -321,7 +318,7 @@ const AdminReports = () => {
                     {/* Sector Density Chart (New) */}
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
                         <div className="mb-6 flex justify-between items-center">
-                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Kepadatan Sektor <span className="text-xs font-normal text-slate-500">(Klik untuk detail)</span></h3>
+                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Kepadatan Lingkungan <span className="text-xs font-normal text-slate-500">(Klik untuk detail)</span></h3>
                         </div>
                         <div className="flex-1 relative min-h-[250px]">
                             <Bar
@@ -582,7 +579,7 @@ const AdminReports = () => {
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
                         <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[80vh] flex flex-col animate-scale-in">
                             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-                                <h3 className="text-xl font-bold">Detail Sektor: {drillDownSector}</h3>
+                                <h3 className="text-xl font-bold">Detail Lingkungan: {drillDownSector}</h3>
                                 <button onClick={() => setDrillDownSector(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                                     <span className="material-symbols-outlined">close</span>
                                 </button>
@@ -592,26 +589,26 @@ const AdminReports = () => {
                                     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
                                         <div className="text-sm text-slate-500">Jumlah KK</div>
                                         <div className="text-2xl font-black text-slate-900 dark:text-white">
-                                            {families.filter(f => f.sector === drillDownSector).length}
+                                            {families.filter(f => f.lingkungan === drillDownSector).length}
                                         </div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
                                         <div className="text-sm text-slate-500">Jumlah Anggota</div>
                                         <div className="text-2xl font-black text-slate-900 dark:text-white">
-                                            {members.filter(m => m.sector === drillDownSector).length}
+                                            {members.filter(m => m.lingkungan === drillDownSector).length}
                                         </div>
                                     </div>
                                 </div>
                                 <h4 className="font-bold mb-3 text-sm text-slate-500 uppercase tracking-wider">Daftar Anggota</h4>
                                 <div className="space-y-2">
-                                    {members.filter(m => m.sector === drillDownSector).map(member => (
+                                    {members.filter(m => m.lingkungan === drillDownSector).map(member => (
                                         <div key={member.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                                             <div className={`size-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${member.gender === 'Laki-laki' ? 'bg-blue-500' : 'bg-pink-500'}`}>
                                                 {member.name.charAt(0)}
                                             </div>
                                             <div>
                                                 <div className="font-bold text-sm text-slate-900 dark:text-white">{member.name}</div>
-                                                <div className="text-xs text-slate-500">{calculateAge(member.birthDate)} Tahun • {member.sector}</div>
+                                                <div className="text-xs text-slate-500">{calculateAge(member.birthDate)} Tahun • L{member.lingkungan}/R{member.rayon}</div>
                                             </div>
                                         </div>
                                     ))}

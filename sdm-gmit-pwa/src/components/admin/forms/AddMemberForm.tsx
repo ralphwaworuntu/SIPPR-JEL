@@ -466,7 +466,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     if (!formData.economics_assets || formData.economics_assets.length === 0) {
                         toast.error("Mohon isi minimal satu jumlah aset"); isValid = false;
                     } else {
-                        const allAssetsValid = formData.economics_assets.every(asset => {
+                        const allAssetsValid = formData.economics_assets.every((asset: string) => {
                             const m = {
                                 'Motor': 'economics_asset_motor_qty',
                                 'Mobil': 'economics_asset_mobil_qty',
@@ -711,14 +711,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         if (step > 1) setStep(step - 1);
         else onClose();
     };
-
-    // Reusable number input helper
-    const numInput = (name: string, label: string) => (
-        <div>
-            <FormLabel>{label}</FormLabel>
-            <input type="number" min="0" name={name} value={(formData as any)[name]} onChange={e => handleNumberChange(name, e.target.value)} className={inputClass()} />
-        </div>
-    );
 
     // Reusable count select helper
     const countSelectInput = (name: string, label: string, max: number = 20) => (

@@ -34,7 +34,7 @@ export const FamilyDetailModal = ({ family, onClose, onEdit }: FamilyDetailModal
                             <span className="material-symbols-outlined text-primary">family_restroom</span>
                             {family.head}
                         </h3>
-                        <p className="text-slate-500 text-sm mt-1">{family.address} ({family.sector})</p>
+                        <p className="text-slate-500 text-sm mt-1">{family.address} (L{family.lingkungan}/R{family.rayon})</p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold border ${family.status === 'Aktif'
                         ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
