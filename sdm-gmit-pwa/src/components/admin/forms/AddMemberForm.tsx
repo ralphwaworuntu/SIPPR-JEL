@@ -35,10 +35,13 @@ const inputClass = (hasError?: boolean) =>
     `w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border ${hasError ? 'border-red-500' : 'border-slate-200 dark:border-slate-800'} focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white font-medium text-sm`;
 const selectClass = (hasError?: boolean) => inputClass(hasError) + ' appearance-none';
 const ErrorMsg = ({ msg }: { msg?: string }) => msg ? <p className="text-red-500 text-[10px] mt-1 ml-1">{msg}</p> : null;
-const SectionDivider = ({ title }: { title: string }) => (
-    <div className="col-span-2 flex items-center gap-2 pt-3 pb-1">
-        <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{title}</span>
-        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
+const SectionDivider = ({ title, subtitle }: { title: string, subtitle?: string }) => (
+    <div className="col-span-2 pt-3 pb-1">
+        <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{title}</span>
+            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
+        </div>
+        {subtitle && <p className="text-[11px] text-slate-500 dark:text-slate-400 italic font-medium">{subtitle}</p>}
     </div>
 );
 
@@ -86,6 +89,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         familyMembersSidiFemale: initialData?.familyMembersSidiFemale || 0,
         familyMembersNonBaptized: initialData?.familyMembersNonBaptized || 0,
         familyMembersNonSidi: initialData?.familyMembersNonSidi || 0,
+        familyMembersNonSidiNames: Array.isArray(initialData?.familyMembersNonSidiNames) ? initialData.familyMembersNonSidiNames : [],
 
         // Step 2: Diakonia & Professional
         diakonia_recipient: initialData?.diakonia_recipient || '',
@@ -293,11 +297,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     familyMembersSidiMale: 0,
                     familyMembersSidiFemale: 0,
                     familyMembersNonBaptized: 0,
-                    familyMembersNonSidi: 0
+                    familyMembersNonSidi: 0,
+                    familyMembersNonSidiNames: []
                 };
             }
             if (name === 'familyMembersSidi') {
-                const updates = {
+                const updates: any = {
                     ...prev,
                     familyMembersSidi: val,
                     familyMembersSidiMale: 0,
@@ -305,6 +310,14 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 };
                 if (val === prev.familyMembers) {
                     updates.familyMembersNonBaptized = 0;
+                }
+                const newNonSidiCount = Math.max(0, prev.familyMembers - val);
+                if (newNonSidiCount !== prev.familyMembersNonSidi) {
+                    updates.familyMembersNonSidi = newNonSidiCount;
+                    const currentNames = prev.familyMembersNonSidiNames || [];
+                    if (currentNames.length !== newNonSidiCount) {
+                        updates.familyMembersNonSidiNames = Array.from({ length: newNonSidiCount }, (_, i) => currentNames[i] || '');
+                    }
                 }
                 return updates;
             }
@@ -344,7 +357,21 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 isValid = false;
             }
 
-            if (!isValid) toast.error("Total pembagian laki-laki dan perempuan tidak sesuai dengan total yang diinput!");
+            const nonSidiCount = Math.max(0, totalMembers - totalSidi);
+            if (nonSidiCount > 0) {
+                if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length !== nonSidiCount) {
+                    isValid = false;
+                } else {
+                    for (let i = 0; i < nonSidiCount; i++) {
+                        if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!isValid) toast.error("Ada ketidaksesuaian data jumlah / nama anggota yang wajib diisi!");
         } else if (currentStep === 3) {
             const members = formData.professionalFamilyMembers || [];
             let step3Error = "";
@@ -570,6 +597,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             familyMembersSidiFemale: formData.familyMembersSidiFemale,
             familyMembersNonBaptized: formData.familyMembersNonBaptized,
             familyMembersNonSidi: Math.max(0, formData.familyMembers - formData.familyMembersSidi),
+            familyMembersNonSidiNames: formData.familyMembersNonSidiNames,
             diakonia_recipient: formData.diakonia_recipient,
             diakonia_year: formData.diakonia_year,
             diakonia_type: formData.diakonia_type,
@@ -888,7 +916,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
                     return (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                            <SectionDivider title="Jumlah Anggota Keluarga" />
+                            <SectionDivider title="Jumlah Anggota Keluarga" subtitle="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga Di Luar Kupang" />
                             <div className="col-span-1 md:col-span-2">
                                 {countSelectInput('familyMembers', 'Total Anggota Keluarga')}
                             </div>
@@ -952,6 +980,42 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                     {Math.max(0, totalMembers - totalSidi)} Orang
                                 </div>
                             </div>
+
+                            {Math.max(0, totalMembers - totalSidi) > 0 && (
+                                <div className="col-span-1 md:col-span-2 mt-4 p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
+                                            <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
+                                        </div>
+                                        <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                                            Nama Anggota Belum Sidi
+                                        </h4>
+                                    </div>
+                                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
+                                        Silakan masukkan nama lengkap anggota keluarga (18 tahun ke atas) yang belum mengikuti Sidi.
+                                    </p>
+
+                                    <div className="space-y-3">
+                                        {Array.from({ length: Math.max(0, totalMembers - totalSidi) }).map((_, idx) => (
+                                            <div key={`non-sidi-${idx}`} className="relative flex flex-col gap-1.5">
+                                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.familyMembersNonSidiNames?.[idx] || ''}
+                                                    onChange={(e) => {
+                                                        const newNames = [...(formData.familyMembersNonSidiNames || [])];
+                                                        newNames[idx] = e.target.value;
+                                                        setFormData({ ...formData, familyMembersNonSidiNames: newNames });
+                                                    }}
+                                                    placeholder={`Masukkan Nama Anggota ${idx + 1}`}
+                                                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
+                                                    required
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <SectionDivider title="Penerima Diakonia GMIT JEL" />
                             {selectInput('diakonia_recipient', 'Penerima Diakonia', ['Ya', 'Tidak'], true)}

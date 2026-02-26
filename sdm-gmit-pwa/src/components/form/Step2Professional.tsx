@@ -51,6 +51,13 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             if (data.familyMembersNonSidi !== calculatedNonSidi) {
                 updates.familyMembersNonSidi = calculatedNonSidi;
+
+                // Adjust array size for Non Sidi Names
+                const nonSidiCount = parseInt(calculatedNonSidi) || 0;
+                const currentNames = data.familyMembersNonSidiNames || [];
+                if (currentNames.length !== nonSidiCount) {
+                    updates.familyMembersNonSidiNames = Array.from({ length: nonSidiCount }, (_, i) => currentNames[i] || '');
+                }
             }
 
             if (calculatedNonSidi === '0' && data.familyMembersNonBaptized !== '0') {
@@ -61,7 +68,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                 update(updates);
             }
         }
-    }, [data.familyMembers, data.familyMembersSidi, data.familyMembersNonSidi, data.familyMembersNonBaptized, totalMembers, totalSidi, update]);
+    }, [data.familyMembers, data.familyMembersSidi, data.familyMembersNonSidi, data.familyMembersNonSidiNames, data.familyMembersNonBaptized, totalMembers, totalSidi, update]);
 
     const SuccessMessage = ({ message }: { message: string }) => (
         <p className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5 mt-2 bg-emerald-50 dark:bg-emerald-950/20 px-3 py-2 rounded-lg max-w-fit animate-fadeIn">
@@ -86,7 +93,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 1. Jumlah Anggota Keluarga */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Keluarga" />
+                <SectionHeader title="Jumlah Anggota Keluarga" description="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga Di Luar Kupang" />
                 <div className="flex flex-col gap-4">
                     <div className="max-w-[200px] flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota Keluarga</label>
@@ -102,7 +109,8 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                 familyMembersSidiMale: '',
                                 familyMembersSidiFemale: '',
                                 familyMembersNonBaptized: '',
-                                familyMembersNonSidi: ''
+                                familyMembersNonSidi: '',
+                                familyMembersNonSidiNames: []
                             })}
                             max={20}
                             startFrom={1}
@@ -217,6 +225,43 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         {data.familyMembersNonSidi || '0'} Orang
                     </div>
                 </div>
+
+                {/* Dynamic Name Fields for Non Sidi */}
+                {parseInt(data.familyMembersNonSidi || '0') > 0 && (
+                    <div className="mt-4 p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4 max-w-2xl">
+                        <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                                Nama Anggota Belum Sidi
+                            </h4>
+                        </div>
+                        <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
+                            Silakan masukkan nama lengkap anggota keluarga (18 tahun ke atas) yang belum mengikuti Sidi.
+                        </p>
+
+                        <div className="space-y-3">
+                            {Array.from({ length: parseInt(data.familyMembersNonSidi || '0') }).map((_, idx) => (
+                                <div key={`non-sidi-${idx}`} className="relative flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
+                                    <input
+                                        type="text"
+                                        value={data.familyMembersNonSidiNames?.[idx] || ''}
+                                        onChange={(e) => {
+                                            const newNames = [...(data.familyMembersNonSidiNames || [])];
+                                            newNames[idx] = e.target.value;
+                                            update({ familyMembersNonSidiNames: newNames });
+                                        }}
+                                        placeholder={`Masukkan Nama Anggota ${idx + 1}`}
+                                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
+                                        required
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* 5 Not Baptized */}

@@ -65,6 +65,7 @@ export interface Member {
     familyMembersSidiFemale?: number;
     familyMembersNonBaptized?: number;
     familyMembersNonSidi?: number;
+    familyMembersNonSidiNames?: string[];
 
     // Step 2: Diakonia
     diakonia_recipient?: string;

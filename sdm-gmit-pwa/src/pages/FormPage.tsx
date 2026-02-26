@@ -121,6 +121,19 @@ const FormPage = () => {
                 if (!formData.familyMembersNonBaptized) return handleValidationError('familyMembersNonBaptized', "Mohon isi Anggota belum di Baptis");
                 if (!formData.familyMembersNonSidi) return handleValidationError('familyMembersNonSidi', "Mohon isi Anggota belum Sidi");
 
+                // Validate non sidi names
+                const nonSidiCount = parseInt(formData.familyMembersNonSidi || '0');
+                if (nonSidiCount > 0) {
+                    if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length !== nonSidiCount) {
+                        return handleValidationError('familyMembersNonSidiNames', "Mohon lengkapi seluruh Nama Anggota Belum Sidi");
+                    }
+                    for (let i = 0; i < nonSidiCount; i++) {
+                        if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
+                            return handleValidationError('familyMembersNonSidiNames', `Mohon isi Nama Anggota Belum Sidi ke-${i + 1}`);
+                        }
+                    }
+                }
+
                 // Diakonia validation
                 if (!formData.diakonia_recipient) return handleValidationError('diakonia_recipient', "Mohon pilih apakah penerima Diakonia dari GMIT JEL");
                 if (formData.diakonia_recipient === 'Ya') {

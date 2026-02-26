@@ -73,6 +73,7 @@ export const congregants = mysqlTable("congregants", {
     familyMembersSidiFemale: int("family_members_sidi_female"),
     familyMembersNonBaptized: int("family_members_non_baptized"),
     familyMembersNonSidi: int("family_members_non_sidi"),
+    familyMembersNonSidiNames: json("family_members_non_sidi_names"), // string[]
 
     // Step 2: Diakonia
     diakoniaRecipient: varchar("diakonia_recipient", { length: 10 }),

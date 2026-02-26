@@ -70,6 +70,21 @@ const LoginPage = () => {
                     </div>
                 )}
 
+                {/* Quick Access Tokens (For Development/Ease of Use) */}
+                <div className="mb-6 flex flex-wrap gap-2 justify-center">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEmail('admin@gmitemaus.org');
+                            setPassword('admin123');
+                        }}
+                        className="text-xs bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-colors flex items-center gap-1"
+                    >
+                        <Shield size={14} /> Admin
+                    </button>
+                    {/* Add more roles here if needed in the future */}
+                </div>
+
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email</label>

@@ -1,12 +1,21 @@
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import heroBg from '../assets/hero-bg.png';
+import { Play, X } from 'lucide-react';
 
+// Declare YT for TypeScript
+declare global {
+    interface Window {
+        YT: any;
+        onYouTubeIframeAPIReady: () => void;
+    }
+}
 
 export const Hero = () => {
     const ref = useRef(null);
     const navigate = useNavigate();
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
     const { scrollYProgress } = useScroll({
         target: ref,
@@ -16,6 +25,53 @@ export const Hero = () => {
     const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
     const textY = useTransform(scrollYProgress, [0, 1], ["0%", "200%"]);
     const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+    // YouTube Player API
+    const playerRef = useRef<any>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    useEffect(() => {
+        // Load YT API script if not already loaded
+        if (isVideoModalOpen && !window.YT) {
+            const tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            window.onYouTubeIframeAPIReady = () => {
+                initializePlayer();
+            };
+        } else if (isVideoModalOpen && window.YT) {
+            // API is already loaded, just initialize
+            initializePlayer();
+        }
+
+        return () => {
+            if (playerRef.current) {
+                playerRef.current.destroy();
+                playerRef.current = null;
+            }
+        }
+    }, [isVideoModalOpen]);
+
+    const initializePlayer = () => {
+        if (!iframeRef.current || !window.YT) return;
+
+        playerRef.current = new window.YT.Player(iframeRef.current, {
+            events: {
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    const onPlayerStateChange = (event: any) => {
+        // YT.PlayerState.ENDED is 0
+        if (event.data === 0) {
+            setIsVideoModalOpen(false);
+            navigate('/form');
+        }
+    }
+
     return (
         <section ref={ref} className="relative w-full min-h-[85vh] flex flex-col overflow-hidden">
             {/* Parallax Background */}
@@ -78,17 +134,76 @@ export const Hero = () => {
                         className="flex flex-col sm:flex-row gap-4 pt-6"
                     >
                         <button
-                            onClick={() => navigate('/form')}
-                            className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 relative overflow-hidden group"
+                            onClick={() => setIsVideoModalOpen(true)}
+                            className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 relative overflow-hidden group flex items-center gap-3"
                         >
-                            <span className="relative z-10 flex items-center gap-2">
-                                Mulai
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                <Play size={20} className="fill-white" />
+                                MULAI
                                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform"></span>
                             </span>
                         </button>
                     </motion.div>
                 </div>
             </motion.div>
+
+            {/* Video Modal - Light Theme */}
+            <AnimatePresence>
+                {isVideoModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                        onClick={() => setIsVideoModalOpen(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col"
+                        >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                                <h3 className="text-slate-800 dark:text-white font-bold text-lg">Panduan Pengisian Data</h3>
+                                <button
+                                    onClick={() => setIsVideoModalOpen(false)}
+                                    className="p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Video Container (16:9 Aspect Ratio) */}
+                            <div className="relative w-full aspect-video bg-black">
+                                <iframe
+                                    ref={iframeRef}
+                                    className="absolute inset-0 w-full h-full"
+                                    src="https://www.youtube.com/embed/ZkE-nCD_OmQ?autoplay=1&controls=0&rel=0&modestbranding=1&enablejsapi=1"
+                                    title="YouTube video player"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+
+                            {/* Modal Footer / Action */}
+                            <div className="p-6 bg-white dark:bg-slate-900 flex justify-center border-t border-slate-100 dark:border-slate-800">
+                                <button
+                                    onClick={() => {
+                                        setIsVideoModalOpen(false);
+                                        navigate('/form');
+                                    }}
+                                    className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all duration-300 w-full max-w-sm flex flex-col items-center justify-center"
+                                >
+                                    <span>Lanjut Isi Data Jemaat</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Scroll Indicator */}
             <motion.div

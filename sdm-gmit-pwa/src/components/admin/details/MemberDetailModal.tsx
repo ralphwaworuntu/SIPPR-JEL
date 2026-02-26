@@ -187,6 +187,14 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                 )}
                                 <DetailRow label="Belum Dibaptis" value={`${member.familyMembersNonBaptized || 0} Orang`} />
                                 <DetailRow label="Belum Sidi" value={`${member.familyMembersNonSidi || 0} Orang`} />
+                                {(member.familyMembersNonSidi || 0) > 0 && Array.isArray(member.familyMembersNonSidiNames) && member.familyMembersNonSidiNames.length > 0 && (
+                                    <div className="ml-4 pl-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-1.5 mt-1 text-slate-500">
+                                        <div className="text-[10px] uppercase font-bold text-slate-400 mb-1">Nama:</div>
+                                        {member.familyMembersNonSidiNames.map((name: string, i: number) => (
+                                            <span key={i} className="block text-xs font-medium text-slate-700 dark:text-slate-300">- {name || '-'}</span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">

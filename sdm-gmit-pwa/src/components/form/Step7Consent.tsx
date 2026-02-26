@@ -146,6 +146,19 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                     </div>
                                 </div>
                             )}
+
+                            {parseInt(data.familyMembersNonSidi || '0') > 0 && (
+                                <div className="col-span-full bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-700/30 mt-2">
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 block mb-2">Nama Anggota Belum Sidi</span>
+                                    <div className="flex flex-col gap-1">
+                                        {data.familyMembersNonSidiNames?.map((name, idx) => (
+                                            <span key={idx} className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                                {idx + 1}. {name || '-'}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </SummaryCard>
                 </div>

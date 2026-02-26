@@ -35,6 +35,7 @@ export interface FormData {
     familyMembersSidiFemale: string;
     familyMembersNonBaptized: string;
     familyMembersNonSidi: string;
+    familyMembersNonSidiNames: string[];
 
     // Step 2: Diakonia
     diakonia_recipient: 'Ya' | 'Tidak' | '';
@@ -191,6 +192,7 @@ export const initialFormData: FormData = {
     familyMembersSidiFemale: '',
     familyMembersNonBaptized: '',
     familyMembersNonSidi: '',
+    familyMembersNonSidiNames: [],
     diakonia_recipient: '',
     diakonia_year: '',
     diakonia_type: '',
