@@ -5,7 +5,7 @@ import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
 import rateLimit from "express-rate-limit";
 import { auth } from "./auth";
 import { db } from "./db";
-import { congregants, notifications } from "./schema";
+import { congregants, notifications, enumerators, pendamping, user, account } from "./schema";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -119,6 +119,7 @@ const mapCongregantToMember = (c: any) => ({
     familyMembersSidiFemale: c.familyMembersSidiFemale || 0,
     familyMembersNonBaptized: c.familyMembersNonBaptized || 0,
     familyMembersNonSidi: c.familyMembersNonSidi || 0,
+    familyMembersNonSidiNames: safeParseJSON(c.familyMembersNonSidiNames),
 
     // Step 2: Diakonia
     diakonia_recipient: c.diakoniaRecipient || "",
@@ -271,9 +272,9 @@ app.get("/api/members", async (req, res) => {
 
             res.json(result.map(mapCongregantToMember));
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        res.status(500).json({ error: "Failed to fetch members" });
+        res.status(500).json({ error: "Failed to fetch members", details: error?.message || error });
     }
 });
 
@@ -354,6 +355,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         familyMembersSidiFemale: safeInt(data.familyMembersSidiFemale),
         familyMembersNonBaptized: safeInt(data.familyMembersNonBaptized),
         familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
+        familyMembersNonSidiNames: jsonStringify(data.familyMembersNonSidiNames),
 
         // Step 2: Diakonia
         diakoniaRecipient: data.diakonia_recipient || null,
@@ -1057,6 +1059,225 @@ app.post("/api/notifications/mark-all-read", async (req, res) => {
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('Unhandled error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
+});
+
+// ----------------------------------------------------
+// User Credential Management
+// ----------------------------------------------------
+
+app.post("/api/credentials", async (req, res) => {
+    try {
+        const { email, password, name, entityType, entityId } = req.body;
+
+        if (!email || !password || !name) {
+            return res.status(400).json({ error: "Email, password, dan nama wajib diisi" });
+        }
+
+        // Check if user with this email already exists
+        const existingUser = await db.select().from(user).where(eq(user.email, email));
+
+        if (existingUser.length > 0) {
+            // Update existing user's password via account table
+            const bcrypt = await import("bcryptjs");
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            await db.update(account)
+                .set({ password: hashedPassword })
+                .where(eq(account.userId, existingUser[0].id));
+
+            // Also update the name
+            await db.update(user)
+                .set({ name })
+                .where(eq(user.id, existingUser[0].id));
+        } else {
+            // Create new user via Better Auth signUp
+            const signUpResult = await auth.api.signUpEmail({
+                body: { email, password, name }
+            });
+
+            if (!signUpResult || !signUpResult.user) {
+                return res.status(500).json({ error: "Gagal membuat akun" });
+            }
+        }
+
+        // Store plain text credentials in enumerator/pendamping table
+        if (entityType === 'enumerator' && entityId) {
+            await db.update(enumerators)
+                .set({ loginEmail: email, loginPassword: password })
+                .where(eq(enumerators.id, Number(entityId)));
+        } else if (entityType === 'pendamping' && entityId) {
+            await db.update(pendamping)
+                .set({ loginEmail: email, loginPassword: password })
+                .where(eq(pendamping.id, Number(entityId)));
+        }
+
+        res.json({ success: true, message: existingUser.length > 0 ? "Akun berhasil diperbarui" : "Akun berhasil dibuat" });
+    } catch (error: any) {
+        console.error("Failed to manage credentials:", error);
+        res.status(500).json({ error: error.message || "Gagal mengelola akun" });
+    }
+});
+
+app.get("/api/credentials/check/:email", async (req, res) => {
+    try {
+        const { email } = req.params;
+        const existingUser = await db.select().from(user).where(eq(user.email, email));
+        res.json({ exists: existingUser.length > 0, user: existingUser[0] || null });
+    } catch (error) {
+        console.error("Failed to check user:", error);
+        res.status(500).json({ error: "Failed to check user" });
+    }
+});
+
+// ----------------------------------------------------
+// Enumerator Endpoints
+// ----------------------------------------------------
+
+app.post("/api/enumerators", async (req, res) => {
+    try {
+        const { name, rayon, lingkungan, familyCount, whatsapp, loginEmail, loginPassword } = req.body;
+        const result = await db.insert(enumerators).values({
+            name,
+            rayon,
+            lingkungan,
+            familyCount: familyCount ? Number(familyCount) : 0,
+            whatsapp: whatsapp || null,
+            loginEmail: loginEmail || null,
+            loginPassword: loginPassword || null
+        });
+
+        // If login credentials provided, create Better Auth user account
+        if (loginEmail && loginPassword) {
+            try {
+                const existingUser = await db.select().from(user).where(eq(user.email, loginEmail));
+                if (existingUser.length === 0) {
+                    await auth.api.signUpEmail({
+                        body: { email: loginEmail, password: loginPassword, name }
+                    });
+                }
+            } catch (authError) {
+                console.error("Failed to create auth account for enumerator:", authError);
+            }
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to create enumerator:", error);
+        res.status(500).json({ error: "Failed to create enumerator" });
+    }
+});
+
+app.get("/api/enumerators", async (req, res) => {
+    try {
+        const result = await db.select().from(enumerators).orderBy(desc(enumerators.createdAt));
+        res.json(result);
+    } catch (error) {
+        console.error("Failed to fetch enumerators:", error);
+        res.status(500).json({ error: "Failed to fetch enumerators" });
+    }
+});
+
+app.delete("/api/enumerators/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.delete(enumerators).where(eq(enumerators.id, Number(id)));
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to delete enumerator:", error);
+        res.status(500).json({ error: "Failed to delete enumerator" });
+    }
+});
+
+// ----------------------------------------------------
+// Pendamping Lingkungan Endpoints
+// ----------------------------------------------------
+
+app.post("/api/pendamping", async (req, res) => {
+    try {
+        const { name, lingkungan, whatsapp, loginEmail, loginPassword } = req.body;
+
+        // Count enumerators in this lingkungan
+        const enumeratorResult = await db.select({ count: sql<number>`count(*)` })
+            .from(enumerators)
+            .where(eq(enumerators.lingkungan, lingkungan));
+        const calculatedEnumeratorCount = enumeratorResult[0]?.count || 0;
+
+        // Count families (congregants) in this lingkungan
+        const familyResult = await db.select({ count: sql<number>`count(*)` })
+            .from(congregants)
+            .where(eq(congregants.lingkungan, lingkungan));
+        const calculatedFamilyCount = familyResult[0]?.count || 0;
+
+        await db.insert(pendamping).values({
+            name,
+            lingkungan,
+            familyCount: calculatedFamilyCount,
+            enumeratorCount: calculatedEnumeratorCount,
+            whatsapp: whatsapp || null,
+            loginEmail: loginEmail || null,
+            loginPassword: loginPassword || null
+        });
+
+        // If login credentials provided, create Better Auth user account
+        if (loginEmail && loginPassword) {
+            try {
+                const existingUser = await db.select().from(user).where(eq(user.email, loginEmail));
+                if (existingUser.length === 0) {
+                    await auth.api.signUpEmail({
+                        body: { email: loginEmail, password: loginPassword, name }
+                    });
+                }
+            } catch (authError) {
+                console.error("Failed to create auth account for pendamping:", authError);
+            }
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to create pendamping:", error);
+        res.status(500).json({ error: "Failed to create pendamping" });
+    }
+});
+
+app.get("/api/pendamping", async (req, res) => {
+    try {
+        const result = await db.select().from(pendamping).orderBy(desc(pendamping.createdAt));
+
+        // Dynamically update enumeratorCount and familyCount for each pendamping
+        const updatedResult = await Promise.all(result.map(async (p) => {
+            const enumeratorResult = await db.select({ count: sql<number>`count(*)` })
+                .from(enumerators)
+                .where(eq(enumerators.lingkungan, p.lingkungan));
+            const enumeratorCount = enumeratorResult[0]?.count || 0;
+
+            const familyResult = await db.select({ count: sql<number>`count(*)` })
+                .from(congregants)
+                .where(eq(congregants.lingkungan, p.lingkungan));
+            const familyCount = familyResult[0]?.count || 0;
+
+            return {
+                ...p,
+                enumeratorCount,
+                familyCount
+            };
+        }));
+
+        res.json(updatedResult);
+    } catch (error) {
+        console.error("Failed to fetch pendamping:", error);
+        res.status(500).json({ error: "Failed to fetch pendamping" });
+    }
+});
+
+app.delete("/api/pendamping/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.delete(pendamping).where(eq(pendamping.id, Number(id)));
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to delete pendamping:", error);
+        res.status(500).json({ error: "Failed to delete pendamping" });
+    }
 });
 
 app.listen(PORT, () => {

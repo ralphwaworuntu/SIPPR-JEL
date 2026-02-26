@@ -228,3 +228,29 @@ export const notifications = mysqlTable("notifications", {
     isRead: boolean("is_read").default(false),
     createdAt: timestamp("created_at").defaultNow()
 });
+
+export const enumerators = mysqlTable("enumerators", {
+    id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    rayon: varchar("rayon", { length: 50 }).notNull(),
+    lingkungan: varchar("lingkungan", { length: 50 }).notNull(),
+    familyCount: int("family_count").default(0),
+    whatsapp: varchar("whatsapp", { length: 20 }),
+    loginEmail: varchar("login_email", { length: 255 }),
+    loginPassword: varchar("login_password", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const pendamping = mysqlTable("pendamping", {
+    id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    lingkungan: varchar("lingkungan", { length: 50 }).notNull(),
+    familyCount: int("family_count").default(0),
+    enumeratorCount: int("enumerator_count").default(0),
+    whatsapp: varchar("whatsapp", { length: 20 }),
+    loginEmail: varchar("login_email", { length: 255 }),
+    loginPassword: varchar("login_password", { length: 255 }),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
