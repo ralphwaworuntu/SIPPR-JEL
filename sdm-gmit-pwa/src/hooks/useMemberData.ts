@@ -188,49 +188,24 @@ export const calculateAge = (birthDate: string) => {
     return age;
 };
 
-// Data completeness scoring — checks 25 key fields across 6 categories
+// Data completeness scoring — checks 10 core basic fields that should apply to to EVERY head of household
 export const calculateCompleteness = (m: Member): { percent: number; label: string; color: string } => {
     const has = (v: any) => v !== undefined && v !== null && v !== '' && v !== '-' && v !== 0;
-    const hasArr = (v: any) => Array.isArray(v) && v.length > 0;
-    let filled = 0;
-    const total = 25;
 
-    // Identity (5)
+    let filled = 0;
+    const total = 10;
+
+    // Minimum Viable Jemaat Identity
     if (has(m.name)) filled++;
     if (has(m.gender)) filled++;
     if (has(m.birthDate)) filled++;
     if (has(m.phone)) filled++;
     if (has(m.address)) filled++;
-
-    // Family (3)
-    if (has(m.familyMembers)) filled++;
     if (has(m.kkNumber)) filled++;
     if (has(m.nik)) filled++;
-
-    // Professional (4)
-    if (has(m.educationLevel)) filled++;
-    if (has(m.jobCategory)) filled++;
-    if (hasArr(m.skills)) filled++;
+    if (has(m.lingkungan)) filled++;
+    if (has(m.rayon)) filled++;
     if (has(m.willingnessToServe)) filled++;
-
-    // Education (1)
-    if (has(m.education_schoolingStatus)) filled++;
-
-    // Economics (7)
-    if (has(m.economics_headOccupation)) filled++;
-    if (has(m.economics_incomeRange)) filled++;
-    if (has(m.economics_houseStatus)) filled++;
-    if (has(m.economics_spouseOccupation)) filled++;
-    if (has(m.economics_hasBusiness)) filled++;
-    if (has(m.economics_waterSource)) filled++;
-    if (has(m.economics_totalAssets)) filled++;
-
-    // Health (5)
-    if (has(m.health_sick30Days)) filled++;
-    if (has(m.health_hasBPJS)) filled++;
-    if (has(m.health_hasDisability)) filled++;
-    if (has(m.health_chronicSick)) filled++;
-    if (has(m.health_socialAssistance)) filled++;
 
     const percent = Math.round((filled / total) * 100);
     const label = percent >= 80 ? 'Lengkap' : percent >= 50 ? 'Sebagian' : 'Kurang';
@@ -239,10 +214,9 @@ export const calculateCompleteness = (m: Member): { percent: number; label: stri
 };
 
 export const getAgeCategory = (age: number) => {
-    if (age <= 12) return "Anak";
-    if (age <= 17) return "Remaja";
     if (age <= 30) return "Pemuda";
-    if (age <= 60) return "Dewasa";
+    if (age <= 45) return "Dewasa Awal";
+    if (age <= 60) return "Dewasa Madya";
     return "Lansia";
 };
 

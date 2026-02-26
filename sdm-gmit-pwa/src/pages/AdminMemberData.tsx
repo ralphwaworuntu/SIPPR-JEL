@@ -469,12 +469,11 @@ const AdminMemberData = () => {
                                         onChange={(e) => setFilterAgeCategory(e.target.value)}
                                         className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
                                     >
-                                        <option value="Semua">Semua Usia</option>
-                                        <option value="Anak">Anak (&le;12 thn)</option>
-                                        <option value="Remaja">Remaja (13-17 thn)</option>
-                                        <option value="Pemuda">Pemuda (18-30 thn)</option>
-                                        <option value="Dewasa">Dewasa (31-60 thn)</option>
-                                        <option value="Lansia">Lansia (&gt;60 thn)</option>
+                                        <option value="Semua">Semua Usia KK</option>
+                                        <option value="Pemuda">&le;30 Tahun (Pemuda)</option>
+                                        <option value="Dewasa Awal">31-45 Tahun (Dewasa Awal)</option>
+                                        <option value="Dewasa Madya">46-60 Tahun (Dewasa Madya)</option>
+                                        <option value="Lansia">&gt;60 Tahun (Lansia)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -502,14 +501,14 @@ const AdminMemberData = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Status Kelengkapan</label>
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Status Kelengkapan Dasar</label>
                                     <select
                                         value={filterCompleteness}
                                         onChange={(e) => setFilterCompleteness(e.target.value)}
                                         className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
                                     >
                                         <option value="Semua">Semua</option>
-                                        <option value="Lengkap">Lengkap (&ge;80%)</option>
+                                        <option value="Lengkap">Valid / Lengkap (&ge;80%)</option>
                                         <option value="Belum Lengkap">Belum Lengkap</option>
                                     </select>
                                 </div>
