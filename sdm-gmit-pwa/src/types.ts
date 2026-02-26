@@ -88,6 +88,8 @@ export interface FormData {
     // Step 5: Household Expenses
     economics_expense_food: number;
     economics_expense_utilities: number;
+    economics_expense_nonPanganII: number;
+    economics_expense_loan: number;
     economics_expense_education: number;
     economics_expense_other: number;
 
@@ -232,6 +234,8 @@ export const initialFormData: FormData = {
     // Step 5: Household Expenses
     economics_expense_food: 0,
     economics_expense_utilities: 0,
+    economics_expense_nonPanganII: 0,
+    economics_expense_loan: 0,
     economics_expense_education: 0,
     economics_expense_other: 0,
 

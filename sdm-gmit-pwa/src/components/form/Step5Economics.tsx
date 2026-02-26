@@ -213,7 +213,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 2. Pekerjaan Utama Istri */}
             <div className="space-y-4" id="spouseOccupation">
-                <SectionHeader title="Pekerjaan Utama Istri" description="Opsional / Jika ada" />
+                <SectionHeader title="Pekerjaan Utama Istri/Suami" description="Opsional / Jika ada" />
                 <FormSelect
                     id="spouseOccupation"
                     options={occupationOptions}
@@ -282,9 +282,23 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Kebutuhan Dasar Non-Pangan <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, Pulsa)</span><span className="text-red-500">*</span>
+                            Kebutuhan Dasar Non-Pangan I <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, Pulsa)</span><span className="text-red-500">*</span>
                         </label>
                         <FormatRupiah value={data.economics_expense_utilities} onChange={(val) => update({ economics_expense_utilities: val })} required={true} />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
+                            Kebutuhan Dasar Non-Pangan II <span className="text-xs font-normal text-slate-500">(Rokok, Sirih Pinang, dsb)</span><span className="text-red-500">*</span>
+                        </label>
+                        <FormatRupiah value={data.economics_expense_nonPanganII} onChange={(val) => update({ economics_expense_nonPanganII: val })} required={true} />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
+                            Beban Pinjaman Bank/Koperasi <span className="text-xs font-normal text-slate-500">(Pinjaman Bank/Koperasi)</span><span className="text-red-500">*</span>
+                        </label>
+                        <FormatRupiah value={data.economics_expense_loan} onChange={(val) => update({ economics_expense_loan: val })} required={true} />
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -313,6 +327,8 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
                             (data.economics_expense_food || 0) +
                             (data.economics_expense_utilities || 0) +
+                            (data.economics_expense_nonPanganII || 0) +
+                            (data.economics_expense_loan || 0) +
                             (data.economics_expense_education || 0) +
                             (data.economics_expense_other || 0)
                         )}

@@ -81,7 +81,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
         <div className="flex flex-col gap-8">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
                 <span className="material-symbols-outlined text-primary">family_star</span>
-                Informasi Keluarga
+                Data Umum Anggota Keluarga
             </h3>
 
             {/* 1. Jumlah Anggota Keluarga */}
@@ -209,21 +209,21 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                 </div>
             </div>
 
-            {/* 4. Not Baptized */}
+            {/* 4. Not Sidi */}
             <div className="space-y-4">
-                <SectionHeader title="Anggota Keluarga belum di Baptis" />
-                <div className="max-w-[200px]">
-                    <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => update({ familyMembersNonBaptized: val })} max={parseInt(data.familyMembersNonSidi || '0')} />
-                </div>
-            </div>
-
-            {/* 5. Not Sidi */}
-            <div className="space-y-4">
-                <SectionHeader title="Anggota Keluarga belum Sidi" />
+                <SectionHeader title="Anggota Keluarga (18 tahun ke atas) yang belum Sidi" />
                 <div className="max-w-[300px]">
                     <div className="w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
                         {data.familyMembersNonSidi || '0'} Orang
                     </div>
+                </div>
+            </div>
+
+            {/* 5 Not Baptized */}
+            <div className="space-y-4">
+                <SectionHeader title="Anggota Keluarga (usia 0 tahun ke atas) yang belum di Baptis" />
+                <div className="max-w-[200px]">
+                    <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => update({ familyMembersNonBaptized: val })} max={parseInt(data.familyMembersNonSidi || '0')} />
                 </div>
             </div>
 

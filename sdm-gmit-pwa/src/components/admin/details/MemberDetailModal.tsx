@@ -456,7 +456,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                             <span className="text-[10px] font-bold text-slate-500">Total: {member.economics_totalAssets || 0} Unit</span>
                                         </div>
                                         <div className="flex flex-wrap gap-1.5">
-                                            {member.economics_assets && member.economics_assets.map((asset: string, i: number) => {
+                                            {Array.isArray(member.economics_assets) && member.economics_assets.map((asset: string, i: number) => {
                                                 const map: any = { 'Motor': 'motor_qty', 'Mobil': 'mobil_qty', 'Kulkas': 'kulkas_qty', 'Laptop/Komputer': 'laptop_qty', 'Televisi': 'tv_qty', 'Internet/Indihome': 'internet_qty', 'Lahan Pertanian': 'lahan_qty' };
                                                 const qty = (member as any)[`economics_asset_${map[asset]}`];
                                                 return <span key={i} className="px-2 py-1 text-[10px] font-bold rounded-lg border bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-100 dark:border-violet-800">{asset} {qty ? `(${qty})` : ''}</span>;

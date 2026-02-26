@@ -99,7 +99,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
         <div className="space-y-8 animate-fadeIn">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
                 <span className="material-symbols-outlined text-primary">person</span>
-                Informasi Dasar
+                Data Umum Kepala Keluarga
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

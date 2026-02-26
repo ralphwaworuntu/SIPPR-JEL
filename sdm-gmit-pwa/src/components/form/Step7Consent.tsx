@@ -317,7 +317,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                 <div>
                                     <span className="text-[11px] uppercase tracking-wider font-semibold text-gray-400 dark:text-gray-500 block mb-2">Daftar Aset</span>
                                     <div className="flex flex-wrap gap-2">
-                                        {data.economics_assets && data.economics_assets.length > 0 && !data.economics_assets.includes('Tidak ada') ? (
+                                        {Array.isArray(data.economics_assets) && data.economics_assets.length > 0 && !data.economics_assets.includes('Tidak ada') ? (
                                             data.economics_assets.map(asset => {
                                                 let qty = 0;
                                                 if (asset === 'Motor') qty = data.economics_asset_motor_qty;
