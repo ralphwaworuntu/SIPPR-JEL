@@ -7,9 +7,10 @@ import type { Member } from '../../../hooks/useMemberData';
 interface ExportDropdownProps {
     members: Member[];
     onExportCSV: () => void;
+    buttonClassName?: string;
 }
 
-export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) => {
+export const ExportDropdown = ({ members, onExportCSV, buttonClassName }: ExportDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -214,7 +215,7 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="px-5 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip"
+                className={buttonClassName || "px-5 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip"}
                 title="Pilih opsi Ekspor"
             >
                 <span className="material-symbols-outlined text-xl text-primary font-icon">save_alt</span>

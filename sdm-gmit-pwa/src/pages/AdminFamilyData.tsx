@@ -59,7 +59,9 @@ const AdminFamilyData = () => {
                 f.name.toLowerCase().includes(lowerTerm) ||
                 f.skillType.toLowerCase().includes(lowerTerm) ||
                 f.mainMemberName.toLowerCase().includes(lowerTerm) ||
-                (f.mainMemberKkNumber || "").toLowerCase().includes(lowerTerm)
+                (f.mainMemberKkNumber || "").toLowerCase().includes(lowerTerm) ||
+                (f.workplace || "").toLowerCase().includes(lowerTerm) ||
+                (f.serviceInterestArea || "").toLowerCase().includes(lowerTerm)
             );
         }
 
@@ -70,6 +72,10 @@ const AdminFamilyData = () => {
 
         return result;
     }, [familyMembers, searchTerm, filterLingkungan]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterLingkungan]);
 
     // Derived Logic for Pagination
     const totalPages = Math.ceil(filteredMembers.length / itemsPerPage) || 1;
@@ -87,12 +93,14 @@ const AdminFamilyData = () => {
         doc.setFontSize(11);
         doc.text(`Total Anggota: ${filteredMembers.length} | Dicetak pada: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
 
-        const tableColumn = ["Nama Anggota", "Terkait Jemaat (Ling)", "Keahlian", "Tempat Kerja", "Minat Pelayanan"];
+        const tableColumn = ["Nama Anggota", "Jemaat (Ling)", "Keahlian", "Level", "Tempat Kerja", "Lama Kerja", "Minat Pelayanan"];
         const tableRows = filteredMembers.map(m => [
             m.name,
             m.mainMemberName + (m.mainMemberKkNumber ? ` (KK: ${m.mainMemberKkNumber})` : '') + ` - Ling. ${m.mainMemberLingkungan || '-'}`,
-            `${m.skillType} ${m.skillLevel ? `(Lv ${m.skillLevel})` : ''}`,
+            m.skillType,
+            m.skillLevel || '-',
             m.workplace || '-',
+            m.yearsExperience || '-',
             m.serviceInterestArea || '-',
         ]);
 
@@ -110,9 +118,9 @@ const AdminFamilyData = () => {
     };
 
     const handleExport = () => {
-        const headers = ["Nama Anggota", "Terkait Jemaat (Kepala)", "Nomor KK", "Lingkungan", "Jenis Keahlian", "Tingkat Keahlian", "Tempat Kerja", "Jabatan", "Lama Bekerja", "Bidang Minat Pelayanan", "Keahlian Spesifik", "Bentuk Kontribusi", "Bersedia Pelayanan"];
+        const headers = ["Nama Anggota", "Terkait Jemaat (Kepala)", "Nomor KK", "Lingkungan", "Jenis Keahlian", "Tingkat Keahlian", "Tempat Kerja", "Jabatan", "Lama Bekerja", "Bidang Minat Pelayanan", "Keahlian Spesifik", "Bentuk Kontribusi", "Bersedia Pelayanan", "Persetujuan Komunitas"];
         const rows = filteredMembers.map(m =>
-            `"${m.name}","${m.mainMemberName}","${m.mainMemberKkNumber || ''}","${m.mainMemberLingkungan || ''}","${m.skillType}","${m.skillLevel}","${m.workplace || ''}","${m.position || ''}","${m.yearsExperience || ''}","${m.serviceInterestArea || ''}","${(m.specificSkills || []).join(', ')}","${(m.contributionForm || []).join(', ')}","${m.churchServiceInterest}"`
+            `"${m.name}","${m.mainMemberName}","${m.mainMemberKkNumber || ''}","${m.mainMemberLingkungan || ''}","${m.skillType}","${m.skillLevel}","${m.workplace || ''}","${m.position || ''}","${m.yearsExperience || ''}","${m.serviceInterestArea || ''}","${(m.specificSkills || []).join('; ')}","${(m.contributionForm || []).join('; ')}","${m.churchServiceInterest}","${m.communityConsent ? 'Ya' : 'Tidak'}"`
         );
         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(','), ...rows].join("\n");
         const encodedUri = encodeURI(csvContent);
@@ -133,12 +141,12 @@ const AdminFamilyData = () => {
                     <p className="text-slate-500 text-sm">Kelola data anggota keluarga yang memiliki keterampilan / potensi profesional.</p>
                 </div>
                 <div className="flex gap-3 items-center">
-                    <button onClick={handlePrintPDF} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
-                        <span className="material-symbols-outlined text-lg">print</span>
+                    <button onClick={handlePrintPDF} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-red-600 border border-transparent text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-600/20 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-lg text-white">print</span>
                         Cetak PDF
                     </button>
-                    <button onClick={handleExport} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 transition-colors shadow-sm">
-                        <span className="material-symbols-outlined text-lg">download</span>
+                    <button onClick={handleExport} className="flex h-10 items-center gap-2 px-4 rounded-lg bg-emerald-600 border border-transparent text-white font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
+                        <span className="material-symbols-outlined text-lg text-white">download</span>
                         Export CSV
                     </button>
                 </div>
@@ -221,7 +229,7 @@ const AdminFamilyData = () => {
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                                         Loading data...
                                     </td>
                                 </tr>
@@ -239,14 +247,27 @@ const AdminFamilyData = () => {
                                             <div className="flex flex-col gap-1 items-start">
                                                 <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs font-bold rounded-lg">{member.skillType || '-'}</span>
                                                 {member.skillLevel && <span className="text-[10px] uppercase font-bold text-slate-400">Level {member.skillLevel}</span>}
+                                                <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
+                                                    {member.specificSkills?.slice(0, 2).map((s, i) => (
+                                                        <span key={i} className="text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded truncate max-w-[100px]">{s}</span>
+                                                    ))}
+                                                    {(member.specificSkills?.length || 0) > 2 && <span className="text-[9px] text-slate-400">+{member.specificSkills.length - 2}</span>}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{member.position || '-'}</p>
                                             <p className="text-xs text-slate-500">{member.workplace || '-'}</p>
+                                            <p className="text-[10px] font-medium text-slate-400 mt-1">{member.yearsExperience ? `${member.yearsExperience} pengalaman` : ''}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{member.serviceInterestArea || '-'}</span>
+                                            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">{member.serviceInterestArea || '-'}</p>
+                                            <div className="flex flex-col gap-0.5 w-max">
+                                                {member.contributionForm?.slice(0, 2).map((c, i) => (
+                                                    <span key={i} className="flex items-center gap-1 text-[10px] text-emerald-600/70 dark:text-emerald-400/70"><span className="material-symbols-outlined text-[10px]">check_circle</span> {c}</span>
+                                                ))}
+                                                {(member.contributionForm?.length || 0) > 2 && <span className="text-[9px] text-slate-400 ml-3 mt-0.5">+{member.contributionForm.length - 2} lainnya</span>}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <button onClick={() => setSelectedMember(member)} className="text-sm font-bold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors">Detail</button>
@@ -255,7 +276,7 @@ const AdminFamilyData = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                                         Tidak ada data yang ditemukan.
                                     </td>
                                 </tr>
@@ -378,6 +399,17 @@ const AdminFamilyData = () => {
                                             <div>
                                                 <p className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mb-1">Bidang Minat Pelayanan</p>
                                                 <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">{selectedMember!.serviceInterestArea || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-widest mb-1">Persetujuan Komunitas</p>
+                                                <div className="flex items-center gap-1.5 mt-1">
+                                                    <div className={`size-5 rounded-full flex items-center justify-center ${selectedMember!.communityConsent ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'}`}>
+                                                        <span className="material-symbols-outlined text-[12px]">{selectedMember!.communityConsent ? 'check' : 'close'}</span>
+                                                    </div>
+                                                    <span className={`text-sm font-semibold ${selectedMember!.communityConsent ? 'text-emerald-800 dark:text-emerald-300' : 'text-red-700 dark:text-red-400'}`}>
+                                                        {selectedMember!.communityConsent ? 'Mengizinkan data dibagikan' : 'Tidak diizinkan'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                         <div>
