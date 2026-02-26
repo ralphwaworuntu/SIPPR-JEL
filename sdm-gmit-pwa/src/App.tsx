@@ -22,6 +22,8 @@ const AdminReports = React.lazy(() => import('./pages/AdminReports'));
 const AdminSettings = React.lazy(() => import('./pages/AdminSettings'));
 const AdminNotifications = React.lazy(() => import('./pages/AdminNotifications'));
 const AdminProfile = React.lazy(() => import('./pages/AdminProfile'));
+const EnumeratorPage = React.lazy(() => import('./pages/admin/EnumeratorPage'));
+const PendampingPage = React.lazy(() => import('./pages/admin/PendampingPage'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -97,6 +99,16 @@ const AppContent = () => {
           </ProtectedRoute>
         } />
 
+        <Route path="/admin/enumerator" element={
+          <ProtectedRoute>
+            <EnumeratorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/pendamping" element={
+          <ProtectedRoute>
+            <PendampingPage />
+          </ProtectedRoute>
+        } />
         <Route path="/admin/reports" element={
           <ProtectedRoute>
             <AdminReports />
