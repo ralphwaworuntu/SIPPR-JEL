@@ -36,13 +36,10 @@ export interface Member {
     latitude?: number | null;
     longitude?: number | null;
     phone?: string;
-    sector: string;
     lingkungan: string;
     rayon: string;
-    education: string;
     educationLevel?: string;
     major?: string;
-    job: string;
     jobCategory: string;
     jobTitle?: string;
     companyName?: string;
@@ -51,7 +48,6 @@ export interface Member {
     willingnessToServe?: string;
     interestAreas: string[];
     contributionTypes: string[];
-    initials: string;
     gender: "Laki-laki" | "Perempuan";
     birthDate: string; // YYYY-MM-DD
     statusGerejawi?: string;
@@ -212,7 +208,7 @@ export const calculateCompleteness = (m: Member): { percent: number; label: stri
     if (has(m.nik)) filled++;
 
     // Professional (4)
-    if (has(m.education)) filled++;
+    if (has(m.educationLevel)) filled++;
     if (has(m.jobCategory)) filled++;
     if (hasArr(m.skills)) filled++;
     if (has(m.willingnessToServe)) filled++;
@@ -440,7 +436,7 @@ export const useMemberData = () => {
             }
 
             // Education
-            const edu = m.education || "Lainnya";
+            const edu = m.educationLevel || "Lainnya";
             educationCounts[edu] = (educationCounts[edu] || 0) + 1;
 
             // Willingness
@@ -459,7 +455,7 @@ export const useMemberData = () => {
             }
         });
 
-        const professionalCount = members.filter(m => m.education && (m.education.startsWith('S') || m.education === 'D3')).length;
+        const professionalCount = members.filter(m => m.educationLevel && (m.educationLevel.startsWith('S') || m.educationLevel === 'D3')).length;
         const skillCount = members.reduce((acc, curr) => acc + (curr.skills?.length || 0), 0);
 
         // Calculate Growth %

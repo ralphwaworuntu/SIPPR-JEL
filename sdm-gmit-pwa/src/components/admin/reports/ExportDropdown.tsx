@@ -52,13 +52,13 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
     const exportIdentitas = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
         generateHeader(doc, "Master Data Identitas");
-        
+
         autoTable(doc, {
             ...baseTableConfig,
             head: [["No", "No. KK", "NIK", "Nama Lengkap", "L/P", "Usia", "No. HP", "Lingkungan", "Rayon", "Alamat"]],
             body: members.map((m, i) => [
-                i + 1, m.kkNumber || '-', m.nik || '-', m.name, 
-                m.gender === 'Laki-laki' ? 'L' : m.gender === 'Perempuan' ? 'P' : '-', 
+                i + 1, m.kkNumber || '-', m.nik || '-', m.name,
+                m.gender === 'Laki-laki' ? 'L' : m.gender === 'Perempuan' ? 'P' : '-',
                 getAge(m.birthDate), m.phone || '-', m.lingkungan, m.rayon, m.address?.substring(0, 30) || '-'
             ]),
             startY: 40,
@@ -79,8 +79,8 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
             head: [["No", "Nama KK", "Pekerjaan", "Pendapatan", "Punya Usaha", "Jenis Usaha", "Status Rumah", "Aset Dominan"]],
             body: members.map((m, i) => [
                 i + 1, m.name, m.economics_headOccupation || '-', m.economics_incomeRange || '-',
-                m.economics_hasBusiness || '-', m.economics_businessType || '-', 
-                m.economics_houseStatus || '-', 
+                m.economics_hasBusiness || '-', m.economics_businessType || '-',
+                m.economics_houseStatus || '-',
                 arrStr(m.economics_assets).substring(0, 30) || '-'
             ]),
             startY: 40,
@@ -113,6 +113,82 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
         setIsOpen(false);
     };
 
+    // 5. PDF Pendidikan Anak
+    const exportPendidikan = () => {
+        const doc = new jsPDF({ orientation: 'landscape' });
+        generateHeader(doc, "Pendidikan Anak Bersekolah");
+        const students = members.filter(m => m.education_schoolingStatus === 'Ya');
+
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama KK/Wali", "Lingkungan", "Total Anak Sekolah", "TK/PAUD", "SD", "SMP", "SMA", "Universitas"]],
+            body: students.map((m, i) => {
+                const total = (m.education_inSchool_tk_paud || 0) + (m.education_inSchool_sd || 0) + (m.education_inSchool_smp || 0) + (m.education_inSchool_sma || 0) + (m.education_inSchool_university || 0);
+                return [
+                    i + 1, m.name, `L${m.lingkungan}/R${m.rayon}`, total,
+                    m.education_inSchool_tk_paud || '-', m.education_inSchool_sd || '-', m.education_inSchool_smp || '-', m.education_inSchool_sma || '-', m.education_inSchool_university || '-'
+                ];
+            }),
+            startY: 40,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
+        });
+        doc.save(`Laporan_Pendidikan_Emaus_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success("Laporan Pendidikan berhasil diekspor");
+        setIsOpen(false);
+    };
+
+    // 6. PDF Diakonia
+    const exportDiakonia = () => {
+        const doc = new jsPDF({ orientation: 'landscape' });
+        generateHeader(doc, "Penerima Diakonia");
+        const diakoniaList = members.filter(m => m.diakonia_recipient === 'Ya');
+
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama Jemmat", "Lingkungan (Rayon)", "No. HP", "Tahun Terima", "Bentuk Diakonia", "Kondisi Ekonomi (Income)"]],
+            body: diakoniaList.map((m, i) => [
+                i + 1, m.name, `Lingkungan ${m.lingkungan} (R${m.rayon})`, m.phone || '-',
+                m.diakonia_year || '-', m.diakonia_type || '-', m.economics_incomeRange || '-'
+            ]),
+            startY: 40,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 45 } }
+        });
+        doc.save(`Laporan_Diakonia_Emaus_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success("Laporan Diakonia berhasil diekspor");
+        setIsOpen(false);
+    };
+
+    // 7. PDF Aset & Rumah
+    const exportAsetRumah = () => {
+        const doc = new jsPDF({ orientation: 'landscape' });
+        generateHeader(doc, "Pemetaan Aset & Rumah");
+
+        autoTable(doc, {
+            ...baseTableConfig,
+            head: [["No", "Nama KK", "Status Rumah", "Jenis Rumah", "Status Lahan", "Kendaraan (Motor/Mobil)", "Elektronik", "Listrik Terpasang"]],
+            body: members.map((m, i) => {
+                const kendaraan = [];
+                if (m.economics_asset_motor_qty) kendaraan.push(`${m.economics_asset_motor_qty} Motor`);
+                if (m.economics_asset_mobil_qty) kendaraan.push(`${m.economics_asset_mobil_qty} Mobil`);
+
+                const elektronik = [];
+                if (m.economics_asset_tv_qty) elektronik.push(`${m.economics_asset_tv_qty} TV`);
+                if (m.economics_asset_kulkas_qty) elektronik.push(`${m.economics_asset_kulkas_qty} Kulkas`);
+                if (m.economics_asset_laptop_qty) elektronik.push(`${m.economics_asset_laptop_qty} Laptop`);
+
+                return [
+                    i + 1, m.name, m.economics_houseStatus || '-', m.economics_houseType || '-', m.economics_landStatus || '-',
+                    kendaraan.join(', ') || '-', elektronik.join(', ') || '-', arrStr(m.economics_electricity_capacities) || '-'
+                ];
+            }),
+            startY: 40,
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 40 } }
+        });
+        doc.save(`Laporan_AsetRumah_Emaus_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success("Laporan Aset & Rumah berhasil diekspor");
+        setIsOpen(false);
+    };
+
     // 4. PDF Potensi Pelayanan
     const exportPelayanan = () => {
         const doc = new jsPDF({ orientation: 'landscape' });
@@ -136,12 +212,12 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
+            <button
+                onClick={() => setIsOpen(!isOpen)}
                 className="px-5 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip"
                 title="Pilih opsi Ekspor"
             >
-                <span className="material-symbols-outlined text-xl text-primary font-icon">save_alt</span> 
+                <span className="material-symbols-outlined text-xl text-primary font-icon">save_alt</span>
                 Export Laporan
                 <span className="material-symbols-outlined text-sm ml-1 transition-transform" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}>expand_more</span>
             </button>
@@ -158,7 +234,7 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
                             <p className="text-[10px] text-slate-500">Seluruh 70+ Kolom (Bisa dimodif Excel)</p>
                         </div>
                     </button>
-                    
+
                     <div className="p-3 border-y border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/80">
                         <p className="text-[10px] font-black tracking-widest uppercase text-slate-500">Laporan Tematik (PDF)</p>
                     </div>
@@ -184,11 +260,32 @@ export const ExportDropdown = ({ members, onExportCSV }: ExportDropdownProps) =>
                                 <p className="text-[10px] text-slate-500">Skill, kesediaan, profesi jemaat</p>
                             </div>
                         </button>
-                        <button onClick={exportKesehatan} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-3 transition-colors">
+                        <button onClick={exportKesehatan} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-3 transition-colors border-b border-slate-50 dark:border-slate-700/30">
                             <span className="material-symbols-outlined text-slate-400 text-xl">monitor_heart</span>
                             <div>
                                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Kesehatan Khusus</p>
                                 <p className="text-[10px] text-slate-500">Disabilitas & Penyakit Kronis</p>
+                            </div>
+                        </button>
+                        <button onClick={exportPendidikan} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-3 transition-colors border-b border-slate-50 dark:border-slate-700/30">
+                            <span className="material-symbols-outlined text-slate-400 text-xl">school</span>
+                            <div>
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Pendidikan Anak</p>
+                                <p className="text-[10px] text-slate-500">Rekap status anak usia sekolah</p>
+                            </div>
+                        </button>
+                        <button onClick={exportDiakonia} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-3 transition-colors border-b border-slate-50 dark:border-slate-700/30">
+                            <span className="material-symbols-outlined text-slate-400 text-xl">featured_seasonal_and_gifts</span>
+                            <div>
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Penerima Diakonia</p>
+                                <p className="text-[10px] text-slate-500">Daftar penerima bantuan kasih</p>
+                            </div>
+                        </button>
+                        <button onClick={exportAsetRumah} className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-3 transition-colors">
+                            <span className="material-symbols-outlined text-slate-400 text-xl">chair</span>
+                            <div>
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Aset & Tempat Tinggal</p>
+                                <p className="text-[10px] text-slate-500">Pemetaan tipe rumah dan aset jemaat</p>
                             </div>
                         </button>
                     </div>

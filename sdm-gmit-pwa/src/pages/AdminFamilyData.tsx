@@ -9,7 +9,6 @@ interface FamilyMemberExtend extends ProfessionalFamilyMember {
     _id: string; // generated client-side for keys
     mainMemberId: string;
     mainMemberName: string;
-    mainMemberSector: string;
     mainMemberLingkungan: string;
     mainMemberKkNumber?: string;
 }

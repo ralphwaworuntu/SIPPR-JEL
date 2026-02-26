@@ -58,7 +58,6 @@ export const congregants = mysqlTable("congregants", {
     nik: varchar("nik", { length: 20 }),
 
     // Church Details
-    sector: varchar("sector", { length: 50 }),
     lingkungan: varchar("lingkungan", { length: 50 }),
     rayon: varchar("rayon", { length: 50 }),
 

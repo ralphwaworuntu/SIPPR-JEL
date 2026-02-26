@@ -31,7 +31,7 @@ export const RecentActivity = ({ recentMembers }: RecentActivityProps) => {
                                 <span className="font-bold">{member.name}</span> terdaftar sebagai jemaat baru.
                             </p>
                             <div className="flex gap-2 mt-1">
-                                <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500">{member.sector}</span>
+                                <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500">Ling. {member.lingkungan}</span>
                                 <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500">{member.statusGerejawi}</span>
                             </div>
                         </div>

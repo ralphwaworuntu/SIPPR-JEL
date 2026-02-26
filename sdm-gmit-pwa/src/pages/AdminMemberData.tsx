@@ -106,8 +106,9 @@ const AdminMemberData = () => {
             "Status Anak Bersekolah", "TK/PAUD (Sekolah)", "SD (Sekolah)", "SMP (Sekolah)", "SMA (Sekolah)", "Universitas (Sekolah)",
             "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)", "Anak Sudah Bekerja",
             "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
-            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
-            "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
+            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Lama Usaha", "Status Usaha", "Lokasi Usaha", "Jml Karyawan", "Modal Usaha", "Sumber Modal", "Izin Usaha", "Cara Pemasaran", "Cakupan Pemasaran", "Tantangan Usaha", "Kebutuhan Usaha", "Bersedia Pelatihan",
+            "Status Rumah", "Jenis Rumah", "IMB", "Status Lahan", "Punya Aset?", "Total Aset Berharga", "Motor", "Mobil", "Kulkas", "Laptop", "TV", "Internet", "Lahan (bidang)", "Sumber Air", "Listrik 450", "Listrik 900", "Listrik 1300", "Listrik 2200", "Listrik >5000", "Total Biaya Listrik",
+            "Sakit 30 Hari Terakhir", "Penderita Penyakit Kronis", "Daftar Penyakit", "Punya BPJS Kesehatan?", "Punya BPJS Ketenagakerjaan?", "Punya Bantuan Sosial?", "Penyandang Disabilitas?", "Disabilitas Ganda?", "Disabilitas Fisik", "Disabilitas Intelektual", "Disabilitas Mental", "Disabilitas Sensorik",
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
         const encodedUri = encodeURI(csvContent);
@@ -253,8 +254,9 @@ const AdminMemberData = () => {
             "TK/PAUD (Putus)", "SD (Putus)", "SMP (Putus)", "SMA (Putus)", "Universitas (Putus)",
             "SD (Tidak Sekolah)", "SMP (Tidak Sekolah)", "SMA (Tidak Sekolah)", "Universitas (Tidak Sekolah)", "Anak Sudah Bekerja",
             "Pekerjaan KK", "Pekerjaan Pasangan", "Range Pendapatan", "Pengeluaran Pangan", "Pengeluaran Utilitas", "Pengeluaran Pendidikan", "Pengeluaran Lainnya",
-            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Status Rumah", "Jenis Rumah", "Sumber Air", "Daftar Aset",
-            "Sakit 30 Hari Terakhir", "Penyakit Kronis", "Daftar Penyakit", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Bantuan Sosial", "Disabilitas", "Daftar Disabilitas",
+            "Punya Usaha?", "Nama Usaha", "Jenis Usaha", "Lama Usaha", "Status Usaha", "Lokasi Usaha", "Jml Karyawan", "Modal Usaha", "Sumber Modal", "Izin Usaha", "Cara Pemasaran", "Cakupan Pemasaran", "Tantangan Usaha", "Kebutuhan Usaha", "Bersedia Pelatihan",
+            "Status Rumah", "Jenis Rumah", "IMB", "Status Lahan", "Punya Aset?", "Total Aset Berharga", "Motor", "Mobil", "Kulkas", "Laptop", "TV", "Internet", "Lahan (bidang)", "Sumber Air", "Listrik 450", "Listrik 900", "Listrik 1300", "Listrik 2200", "Listrik >5000", "Total Biaya Listrik",
+            "Sakit 30 Hari Terakhir", "Penderita Penyakit Kronis", "Daftar Penyakit", "Punya BPJS Kesehatan?", "Punya BPJS Ketenagakerjaan?", "Punya Bantuan Sosial?", "Penyandang Disabilitas?", "Disabilitas Ganda?", "Disabilitas Fisik", "Disabilitas Intelektual", "Disabilitas Mental", "Disabilitas Sensorik",
             "Latitude", "Longitude"
         ];
 
@@ -262,28 +264,20 @@ const AdminMemberData = () => {
         const arrStr = (v: any) => Array.isArray(v) ? v.join('; ') : (v || '');
 
         const rows = filteredMembers.map(m => {
-            const getDisabilityList = () => {
-                const arr: string[] = [];
-                if (m.health_disabilityPhysical?.length) arr.push(...m.health_disabilityPhysical);
-                if (m.health_disabilityIntellectual?.length) arr.push(...m.health_disabilityIntellectual);
-                if (m.health_disabilityMental?.length) arr.push(...m.health_disabilityMental);
-                if (m.health_disabilitySensory?.length) arr.push(...m.health_disabilitySensory);
-                return arr;
-            };
-
             return [
                 esc(m.kkNumber), esc(m.nik), esc(m.name), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.phone),
                 esc(m.lingkungan), esc(m.rayon), esc(m.address),
                 m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonBaptized || 0, m.familyMembersNonSidi || 0,
                 esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
-                esc(m.educationLevel || m.education), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
+                esc(m.educationLevel || '-'), esc(m.major), esc(m.jobCategory), esc(m.jobTitle), esc(m.companyName), m.yearsOfExperience || 0, esc(arrStr(m.skills)),
                 esc(m.willingnessToServe), esc(arrStr(m.interestAreas)), esc(arrStr(m.contributionTypes)),
                 esc(m.education_schoolingStatus), m.education_inSchool_tk_paud || 0, m.education_inSchool_sd || 0, m.education_inSchool_smp || 0, m.education_inSchool_sma || 0, m.education_inSchool_university || 0,
                 m.education_dropout_tk_paud || 0, m.education_dropout_sd || 0, m.education_dropout_smp || 0, m.education_dropout_sma || 0, m.education_dropout_university || 0,
                 m.education_unemployed_sd || 0, m.education_unemployed_smp || 0, m.education_unemployed_sma || 0, m.education_unemployed_university || 0, m.education_working || 0,
                 esc(m.economics_headOccupation), esc(m.economics_spouseOccupation), esc(m.economics_incomeRange), m.economics_expense_food || 0, m.economics_expense_utilities || 0, m.economics_expense_education || 0, m.economics_expense_other || 0,
-                esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType), esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_waterSource), esc(arrStr(m.economics_assets)),
-                esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease)), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability), esc(arrStr(getDisabilityList())),
+                esc(m.economics_hasBusiness), esc(m.economics_businessName), esc(m.economics_businessType === 'Lainnya' ? m.economics_businessTypeOther : m.economics_businessType), esc(m.economics_businessDuration === '> 5 tahun' ? m.economics_businessDurationYears + ' tahun' : m.economics_businessDuration), esc(m.economics_businessStatus === 'Lainnya' ? m.economics_businessStatusOther : m.economics_businessStatus), esc(m.economics_businessLocation === 'Lainnya' ? m.economics_businessLocationOther : m.economics_businessLocation), esc(m.economics_businessEmployeeCount), m.economics_businessCapital || 0, esc(m.economics_businessCapitalSource === 'Lainnya' ? m.economics_businessCapitalSourceOther : m.economics_businessCapitalSource), esc(arrStr(m.economics_businessPermit) + (m.economics_businessPermitOther ? ` (${m.economics_businessPermitOther})` : '')), esc(arrStr(m.economics_businessMarketing) + (m.economics_businessMarketingOther ? ` (${m.economics_businessMarketingOther})` : '')), esc(m.economics_businessMarketArea), esc(arrStr(m.economics_businessIssues) + (m.economics_businessIssuesOther ? ` (${m.economics_businessIssuesOther})` : '')), esc(arrStr(m.economics_businessNeeds) + (m.economics_businessNeedsOther ? ` (${m.economics_businessNeedsOther})` : '')), esc(arrStr(m.economics_businessTraining) + (m.economics_businessTrainingOther ? ` (${m.economics_businessTrainingOther})` : '')),
+                esc(m.economics_houseStatus), esc(m.economics_houseType), esc(m.economics_houseIMB), esc(m.economics_landStatus), esc(m.economics_hasAssets), m.economics_totalAssets || 0, m.economics_asset_motor_qty || 0, m.economics_asset_mobil_qty || 0, m.economics_asset_kulkas_qty || 0, m.economics_asset_laptop_qty || 0, m.economics_asset_tv_qty || 0, m.economics_asset_internet_qty || 0, m.economics_asset_lahan_qty || 0, esc(m.economics_waterSource), m.economics_electricity_450_qty || 0, m.economics_electricity_900_qty || 0, m.economics_electricity_1200_qty || 0, m.economics_electricity_2200_qty || 0, m.economics_electricity_5000_qty || 0, m.economics_electricity_total_cost || 0,
+                esc(m.health_sick30Days), esc(m.health_chronicSick), esc(arrStr(m.health_chronicDisease) + (m.health_chronicDiseaseOther ? ` (${m.health_chronicDiseaseOther})` : '')), esc(m.health_hasBPJS), esc(m.health_hasBPJSKetenagakerjaan), esc(m.health_socialAssistance), esc(m.health_hasDisability), m.health_disabilityDouble ? 'Ya' : 'Tidak', esc(arrStr(m.health_disabilityPhysical) + (m.health_disabilityPhysicalOther ? ` (${m.health_disabilityPhysicalOther})` : '')), esc(arrStr(m.health_disabilityIntellectual) + (m.health_disabilityIntellectualOther ? ` (${m.health_disabilityIntellectualOther})` : '')), esc(arrStr(m.health_disabilityMental) + (m.health_disabilityMentalOther ? ` (${m.health_disabilityMentalOther})` : '')), esc(arrStr(m.health_disabilitySensory) + (m.health_disabilitySensoryOther ? ` (${m.health_disabilitySensoryOther})` : '')),
                 m.latitude || "", m.longitude || ""
             ].join(',');
         });
@@ -615,7 +609,7 @@ const AdminMemberData = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.initials}</div>
+                                                                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.name?.charAt(0) || '?'}</div>
                                                                 <div>
                                                                     <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
                                                                     <div className="flex items-center gap-1 text-slate-500 text-xs">
@@ -783,7 +777,7 @@ const AdminMemberData = () => {
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex gap-3 items-center">
                                                         <div className="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-300">
-                                                            {member.initials}
+                                                            {member.name?.charAt(0) || '?'}
                                                         </div>
                                                         <div>
                                                             <p className="font-bold text-slate-900 dark:text-white mb-0.5">{member.name}</p>
@@ -796,7 +790,7 @@ const AdminMemberData = () => {
                                                     <div>
                                                         <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pekerjaan & Kelengkapan</span>
                                                         <div className="mt-0.5 flex flex-wrap gap-1 items-center">
-                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.jobCategory || member.job}</span>
+                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.jobCategory || '-'}</span>
                                                             {(() => {
                                                                 const c = calculateCompleteness(member);
                                                                 const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30'
@@ -809,7 +803,7 @@ const AdminMemberData = () => {
                                                     <div>
                                                         <span className="block text-[10px] uppercase tracking-wider mb-0.5">Pend. & Status Pelayanan</span>
                                                         <div className="mt-0.5 flex flex-wrap gap-1">
-                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.education}</span>
+                                                            <span className="font-medium text-slate-700 dark:text-slate-300">{member.educationLevel || '-'}</span>
                                                             <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold border ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'bg-green-100 text-green-600 border-green-200' : member.willingnessToServe === 'On-demand' ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>{['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'AKTIF' : member.willingnessToServe === 'On-demand' ? 'ON-DEMAND' : 'UMUM'}</span>
                                                         </div>
                                                     </div>
@@ -875,7 +869,7 @@ const AdminMemberData = () => {
                                                 />
                                             </div>
                                             <div className="flex items-center gap-4 mb-3">
-                                                <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">{member.initials}</div>
+                                                <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg">{member.name?.charAt(0) || '?'}</div>
                                                 <div>
                                                     <p className="font-bold text-slate-900 dark:text-white">{member.name}</p>
                                                     <p className="text-sm text-slate-500">Ling. {member.lingkungan} • Rayon {member.rayon}</p>
@@ -884,7 +878,7 @@ const AdminMemberData = () => {
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Pekerjaan</span>
-                                                    <span className="font-medium dark:text-slate-200">{member.jobCategory || member.job}</span>
+                                                    <span className="font-medium dark:text-slate-200">{member.jobCategory || '-'}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-500">Pelayanan</span>

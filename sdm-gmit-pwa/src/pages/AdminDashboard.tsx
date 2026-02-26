@@ -477,7 +477,7 @@ const AdminDashboard = () => {
                     id: m.id,
                     name: m.name,
                     category: m.jobCategory,
-                    jobTitle: m.jobTitle || m.job || '-',
+                    jobTitle: m.jobTitle || '-',
                     level: '2', // Default middle for head
                     willingness: m.willingnessToServe === 'Aktif' || m.willingnessToServe === 'Ya',
                     interestArea: m.interestAreas?.[0] || '-',

@@ -39,11 +39,11 @@ const AdminReports = () => {
     const [selectedYear, setSelectedYear] = useState(2026);
 
     // Drill-down State
-    const [drillDownSector, setDrillDownSector] = useState<string | null>(null);
-    const sectorChartRef = useRef<any>(null);
+    const [drillDownLingkungan, setDrillDownLingkungan] = useState<string | null>(null);
+    const lingkunganChartRef = useRef<any>(null);
 
-    // 1. Age Distribution Logic (Actually Lingkungan Distribution)
-    const ageData = useMemo(() => {
+    // 1. Lingkungan Distribution Logic
+    const lingkunganDensityData = useMemo(() => {
         const categories = {
             '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0, '8': 0
         };
@@ -88,8 +88,8 @@ const AdminReports = () => {
         };
     }, [members, selectedYear]);
 
-    // 3. Sector Analysis Logic (Now Lingkungan Analysis)
-    const sectorData = useMemo(() => {
+    // 3. Lingkungan Comparison Logic
+    const lingkunganComparisonData = useMemo(() => {
         // Compare Family count vs Member count per lingkungan
         const lingkungans = Object.keys(memberStats.distributions.lingkungan);
         const familyCounts = lingkungans.map(l => families.filter(f => f.lingkungan === l).length);
@@ -138,11 +138,11 @@ const AdminReports = () => {
             .slice(0, 10); // Show top 10 for report
     }, [members, families, selectedYear]);
 
-    const handleSectorClick = (_event: any, elements: any[]) => {
+    const handleLingkunganClick = (_event: any, elements: any[]) => {
         if (elements.length > 0) {
             const index = elements[0].index;
-            const lingName = sectorData.labels[index].replace('Lingkungan ', '');
-            setDrillDownSector(lingName);
+            const lingName = lingkunganComparisonData.labels[index].replace('Lingkungan ', '');
+            setDrillDownLingkungan(lingName);
         }
     };
 
@@ -300,10 +300,10 @@ const AdminReports = () => {
                         <div className="flex-1 relative min-h-[250px]">
                             <Bar
                                 data={{
-                                    labels: ageData.labels,
+                                    labels: lingkunganDensityData.labels,
                                     datasets: [{
                                         label: 'Jml Jemaat',
-                                        data: ageData.data,
+                                        data: lingkunganDensityData.data,
                                         backgroundColor: ['#93c5fd', '#60a5fa', '#3b82f6', '#22c55e', '#16a34a', '#f97316', '#ef4444'],
                                         borderRadius: 6,
                                     }]
@@ -328,8 +328,8 @@ const AdminReports = () => {
                         </div>
                         <div className="flex-1 relative min-h-[250px]">
                             <Bar
-                                ref={sectorChartRef}
-                                data={sectorData}
+                                ref={lingkunganChartRef}
+                                data={lingkunganComparisonData}
                                 options={{
                                     responsive: true,
                                     maintainAspectRatio: false,
@@ -338,7 +338,7 @@ const AdminReports = () => {
                                         y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
                                         x: { grid: { display: false } }
                                     },
-                                    onClick: handleSectorClick
+                                    onClick: handleLingkunganClick
                                 }}
                             />
                         </div>
@@ -581,12 +581,12 @@ const AdminReports = () => {
                 </div>
 
                 {/* Drill-down Modal */}
-                {drillDownSector && (
+                {drillDownLingkungan && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
                         <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[80vh] flex flex-col animate-scale-in">
                             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
-                                <h3 className="text-xl font-bold">Detail Lingkungan: {drillDownSector}</h3>
-                                <button onClick={() => setDrillDownSector(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                                <h3 className="text-xl font-bold">Detail Lingkungan: {drillDownLingkungan}</h3>
+                                <button onClick={() => setDrillDownLingkungan(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                                     <span className="material-symbols-outlined">close</span>
                                 </button>
                             </div>
@@ -595,19 +595,19 @@ const AdminReports = () => {
                                     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
                                         <div className="text-sm text-slate-500">Jumlah KK</div>
                                         <div className="text-2xl font-black text-slate-900 dark:text-white">
-                                            {families.filter(f => f.lingkungan === drillDownSector).length}
+                                            {families.filter(f => f.lingkungan === drillDownLingkungan).length}
                                         </div>
                                     </div>
                                     <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
                                         <div className="text-sm text-slate-500">Jumlah Anggota</div>
                                         <div className="text-2xl font-black text-slate-900 dark:text-white">
-                                            {members.filter(m => m.lingkungan === drillDownSector).length}
+                                            {members.filter(m => m.lingkungan === drillDownLingkungan).length}
                                         </div>
                                     </div>
                                 </div>
                                 <h4 className="font-bold mb-3 text-sm text-slate-500 uppercase tracking-wider">Daftar Anggota</h4>
                                 <div className="space-y-2">
-                                    {members.filter(m => m.lingkungan === drillDownSector).map(member => (
+                                    {members.filter(m => m.lingkungan === drillDownLingkungan).map(member => (
                                         <div key={member.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                                             <div className={`size-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${member.gender === 'Laki-laki' ? 'bg-blue-500' : 'bg-pink-500'}`}>
                                                 {member.name.charAt(0)}
@@ -621,7 +621,7 @@ const AdminReports = () => {
                                 </div>
                             </div>
                             <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl flex justify-end">
-                                <button onClick={() => setDrillDownSector(null)} className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700">
+                                <button onClick={() => setDrillDownLingkungan(null)} className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700">
                                     Tutup
                                 </button>
                             </div>

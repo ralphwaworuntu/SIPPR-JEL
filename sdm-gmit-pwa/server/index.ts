@@ -87,17 +87,14 @@ const safeParseJSON = (data: any, fallback: any = []) => {
 const mapCongregantToMember = (c: any) => ({
     id: c.id.toString(),
     name: c.fullName,
-    sector: c.sector || "-",
     lingkungan: c.lingkungan || "-",
     rayon: c.rayon || "-",
     address: c.address || "-",
     latitude: c.latitude || null,
     longitude: c.longitude || null,
     phone: c.phone || "-",
-    education: c.educationLevel || "-",
     educationLevel: c.educationLevel || "-",
     major: c.major || "-",
-    job: c.jobCategory || "-",
     jobCategory: c.jobCategory || "-",
     jobTitle: c.jobTitle || "-",
     companyName: c.companyName || "-",
@@ -106,7 +103,6 @@ const mapCongregantToMember = (c: any) => ({
     willingnessToServe: c.willingnessToServe || "Not-available",
     interestAreas: safeParseJSON(c.interestAreas),
     contributionTypes: safeParseJSON(c.contributionTypes),
-    initials: (c.fullName || "X").substring(0, 2).toUpperCase(),
     gender: c.gender || "Laki-laki",
     birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
@@ -238,11 +234,10 @@ import { eq, like, and, desc, count } from "drizzle-orm";
 // 1. GET Members (with Search, Filter & optional Pagination)
 app.get("/api/members", async (req, res) => {
     try {
-        const { search, sector, gender, education, page, limit: limitParam } = req.query;
+        const { search, gender, education, page, limit: limitParam } = req.query;
 
         const filters = [];
         if (search) filters.push(like(congregants.fullName, `%${search}%`));
-        if (sector && sector !== "Semua") filters.push(eq(congregants.sector, String(sector)));
         if (gender && gender !== "Semua") filters.push(eq(congregants.gender, String(gender)));
 
         // If page param is provided, paginate. Otherwise return all.
@@ -284,7 +279,6 @@ app.get("/api/family-members", async (req, res) => {
         const result = await db.select({
             id: congregants.id,
             name: congregants.fullName,
-            sector: congregants.sector,
             lingkungan: congregants.lingkungan,
             professionalFamilyMembers: congregants.professionalFamilyMembers,
             kkNumber: congregants.kkNumber
@@ -308,7 +302,6 @@ app.get("/api/family-members", async (req, res) => {
                                     ...pfm,
                                     mainMemberId: member.id,
                                     mainMemberName: member.name,
-                                    mainMemberSector: member.sector,
                                     mainMemberLingkungan: member.lingkungan,
                                     mainMemberKkNumber: member.kkNumber,
                                 });
@@ -342,7 +335,6 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         dateOfBirth: (data.birthDate || data.dateOfBirth) ? new Date(data.birthDate || data.dateOfBirth) : null,
         phone: data.phone,
         address: data.address,
-        sector: data.sector,
         lingkungan: data.lingkungan,
         rayon: data.rayon,
 
@@ -605,7 +597,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
         );
 
         // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, sectorRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes, diakoniaRes, economicsRes, healthRes] = await Promise.all([
+        const [totalRes, soulsRes, genderRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes, diakoniaRes, economicsRes, healthRes] = await Promise.all([
             // 1. Total Households (Records)
             db.select({ count: sql<number>`count(*)` }).from(congregants).where(baseWhere),
 
@@ -619,9 +611,6 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
             // 2. Gender of Head
             db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
-
-            // 3. Sector Distribution
-            db.select({ sector: congregants.sector, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.sector),
 
             // 4. Willingness Distribution
             db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.willingnessToServe),
@@ -710,17 +699,6 @@ app.get("/api/dashboard/stats", async (req, res) => {
         // Process Rayon
         const rayonCounts: Record<string, number> = {};
         rayonRes.forEach(r => { if (r.rayon) rayonCounts[r.rayon] = r.count; });
-
-        // Process Sector
-        const sectorCounts: Record<string, number> = {};
-        let dominant = "-";
-        let maxSec = 0;
-        sectorRes.forEach(s => {
-            if (s.sector) {
-                sectorCounts[s.sector] = s.count;
-                if (s.count > maxSec) { maxSec = s.count; dominant = s.sector; }
-            }
-        });
 
         // 11. Process Diakonia
         const diakoniaCounts: Record<string, number> = {};
@@ -865,7 +843,6 @@ app.get("/api/dashboard/stats", async (req, res) => {
             total,
             totalSouls,
             totalSidi: Number(soulsData.totalSidi) || 0,
-            sectorDominant: dominant,
             activeSkills,
             growth: 0,
             professionalCount,
@@ -875,7 +852,6 @@ app.get("/api/dashboard/stats", async (req, res) => {
             sick30DaysCount,
             regularTreatmentCount,
             distributions: {
-                sector: sectorCounts,
                 gender: genderCounts,
                 education: educationCounts,
                 willingness: willingnessCounts,

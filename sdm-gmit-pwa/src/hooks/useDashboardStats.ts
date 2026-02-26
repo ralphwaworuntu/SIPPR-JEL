@@ -5,7 +5,6 @@ export interface DashboardStats {
     total: number;
     totalSouls: number;
     totalSidi: number;
-    sectorDominant: string;
     activeSkills: number;
     growth: number;
     professionalCount: number;
@@ -15,7 +14,6 @@ export interface DashboardStats {
     sick30DaysCount: number;
     regularTreatmentCount: number;
     distributions: {
-        sector: Record<string, number>;
         gender: Record<string, number>;
         education: Record<string, number>;
         willingness: Record<string, number>;

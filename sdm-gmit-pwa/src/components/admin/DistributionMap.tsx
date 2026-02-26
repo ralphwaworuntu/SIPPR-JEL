@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 const CENTER_LILIBA: [number, number] = [-10.1708, 123.6068];
 
 // Filter types
-type FilterType = 'lingkungan' | 'education' | 'jobCategory' | 'sector' | 'willingness';
+type FilterType = 'lingkungan' | 'education' | 'jobCategory' | 'willingness';
 
 // Color palettes for each filter type
 const COLOR_PALETTES: Record<FilterType, Record<string, string>> = {
@@ -19,7 +19,7 @@ const COLOR_PALETTES: Record<FilterType, Record<string, string>> = {
         '5': '#06b6d4', // Cyan
         '6': '#3b82f6', // Blue
         '7': '#8b5cf6', // Violet
-        'Luar Wilayah': '#64748b', // Slate
+        '8': '#64748b', // Slate
     },
     education: {
         'SD': '#fca5a5',
@@ -41,16 +41,9 @@ const COLOR_PALETTES: Record<FilterType, Record<string, string>> = {
         'Pensiunan': '#64748b',
         'Belum Bekerja': '#94a3b8',
     },
-    sector: {
-        'Pemuda': '#3b82f6',
-        'Kaum Perempuan': '#ec4899',
-        'Kaum Bapak': '#10b981',
-        'Lansia': '#f59e0b',
-    },
     willingness: {
-        'Aktif': '#22c55e',
-        'On-demand': '#eab308',
-        'Not-available': '#ef4444',
+        'Ya, bersedia aktif': '#22c55e',
+        'Ya, bersedia bila dibutuhkan': '#eab308',
     },
 };
 
@@ -59,7 +52,6 @@ const FILTER_LABELS: Record<FilterType, string> = {
     lingkungan: 'Lingkungan',
     education: 'Pendidikan',
     jobCategory: 'Pekerjaan',
-    sector: 'Sektor Kategorial',
     willingness: 'Minat Pelayanan',
 };
 
@@ -74,9 +66,8 @@ const createMarkerIcon = (color: string) => L.divIcon({
 interface MemberLocation {
     id: string;
     name: string;
-    sector: string;
     lingkungan?: string;
-    education?: string;
+    educationLevel?: string;
     jobCategory?: string;
     willingnessToServe?: string;
     latitude?: number | null;
@@ -84,11 +75,10 @@ interface MemberLocation {
 }
 
 interface DistributionMapProps {
-    sectorData: Record<string, number>;
     members?: MemberLocation[];
 }
 
-const DistributionMap = ({ sectorData: _sectorData, members = [] }: DistributionMapProps) => {
+const DistributionMap = ({ members = [] }: DistributionMapProps) => {
     const [activeFilter, setActiveFilter] = useState<FilterType>('lingkungan');
 
     // Filter members with valid coordinates
@@ -104,13 +94,10 @@ const DistributionMap = ({ sectorData: _sectorData, members = [] }: Distribution
                 value = member.lingkungan;
                 break;
             case 'education':
-                value = member.education;
+                value = member.educationLevel;
                 break;
             case 'jobCategory':
                 value = member.jobCategory;
-                break;
-            case 'sector':
-                value = member.sector;
                 break;
             case 'willingness':
                 value = member.willingnessToServe;
@@ -129,9 +116,8 @@ const DistributionMap = ({ sectorData: _sectorData, members = [] }: Distribution
             let value: string | undefined;
             switch (activeFilter) {
                 case 'lingkungan': value = m.lingkungan; break;
-                case 'education': value = m.education; break;
+                case 'education': value = m.educationLevel; break;
                 case 'jobCategory': value = m.jobCategory; break;
-                case 'sector': value = m.sector; break;
                 case 'willingness': value = m.willingnessToServe; break;
             }
             if (value) {
@@ -171,8 +157,8 @@ const DistributionMap = ({ sectorData: _sectorData, members = [] }: Distribution
                     <Popup>
                         <div className="p-1 text-center">
                             <h4 className="font-bold text-sm">{member.name}</h4>
-                            <p className="text-xs text-slate-500">Ling. {member.lingkungan} • {member.sector}</p>
-                            <p className="text-[10px] text-slate-400">{member.education} • {member.jobCategory}</p>
+                            <p className="text-xs text-slate-500">Lingkungan {member.lingkungan}</p>
+                            <p className="text-[10px] text-slate-400">{member.educationLevel} • {member.jobCategory}</p>
                         </div>
                     </Popup>
                 </Marker>
