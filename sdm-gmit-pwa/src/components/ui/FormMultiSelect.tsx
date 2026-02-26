@@ -6,7 +6,7 @@ interface FormMultiSelectOption {
 }
 
 interface FormMultiSelectProps {
-    label?: string;
+    label?: string | React.ReactNode;
     id: string;
     value: string[];
     onChange: (value: string[]) => void;
@@ -14,6 +14,7 @@ interface FormMultiSelectProps {
     placeholder?: string;
     required?: boolean;
     className?: string;
+    tooltipText?: React.ReactNode;
 }
 
 const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
@@ -25,12 +26,15 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
     placeholder = 'Pilih beberapa...',
     required = false,
     className = '',
+    tooltipText,
 }) => {
     // Safety check: ensure value is always an array (prevents crash if localStorage has old string values)
     const safeValue = Array.isArray(value) ? value : [];
 
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [showTooltip, setShowTooltip] = useState(false);
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
     const normalizedOptions: FormMultiSelectOption[] = options.map(opt =>
         typeof opt === 'string' ? { value: opt, label: opt } : opt
@@ -40,6 +44,9 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
+            }
+            if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
+                setShowTooltip(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -62,10 +69,33 @@ const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
             {label && (
                 <label
                     htmlFor={id}
-                    className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300"
+                    className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300 relative z-10"
                 >
                     {label}
                     {required && <span className="text-red-500">*</span>}
+                    {tooltipText && (
+                        <div className="relative inline-flex items-center ml-1" ref={tooltipRef}>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowTooltip(!showTooltip);
+                                }}
+                                className="text-slate-400 hover:text-primary transition-colors focus:outline-none flex items-center bg-transparent border-none p-0 cursor-pointer"
+                                aria-label="Petunjuk pengisian"
+                            >
+                                <span className="material-symbols-outlined text-[5px]">help</span>
+                            </button>
+
+                            {showTooltip && (
+                                <div className="absolute left-[-10px] bottom-full mb-2 w-64 p-3 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-xl shadow-xl z-[100] border border-slate-700 dark:border-slate-700 font-normal leading-relaxed cursor-auto pointer-events-auto">
+                                    {tooltipText}
+                                    <div className="absolute -bottom-[5px] left-4 w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-b border-r border-slate-700 transform rotate-45"></div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </label>
             )}
             <div className="relative">

@@ -3,12 +3,23 @@ import type { FormData } from '../../types';
 import { checkDuplicateName } from '../../lib/validation';
 import FormInput from '../ui/FormInput';
 import FormSelect from '../ui/FormSelect';
+import FormMultiSelect from '../ui/FormMultiSelect';
+import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
     data: FormData;
     update: (data: Partial<FormData>) => void;
     goToStep: (step: number, editing?: boolean) => void;
 }
+
+const KUPANG_DATA: Record<string, string[]> = {
+    "Alak": ["Alak", "Batuplat", "Fatufeto", "Mantasi", "Manulai II", "Manutapen", "Naioni", "Namosain", "Nunbaun Delha", "Nunbaun Sabu", "Nunhila", "Penkase Oeleta"],
+    "Kelapa Lima": ["Kelapa Lima", "Lasiana", "Oesapa", "Oesapa Barat", "Oesapa Selatan"],
+    "Kota Lama": ["Air Mata", "Bonipoi", "Fatubesi", "Lai-lai Bisi Kopan", "Merdeka", "Nefonaek", "Oeba", "Pasir Panjang", "Solor", "Tode Kisar"],
+    "Kota Raja": ["Airnona", "Bakunase", "Bakunase II", "Fontein", "Kuanino", "Naikoten I", "Naikoten II", "Nunleu"],
+    "Maulafa": ["Belo", "Fatukoa", "Kolhua", "Maulafa", "Naikolan", "Naimata", "Oepura", "Penfui", "Sikumana"],
+    "Oebobo": ["Fatuli", "Kayu Putih", "Liliba", "Oebobo", "Oebufu", "Oetete", "Tuak Daun Merah"]
+};
 
 const Step1Identity = ({ data, update }: StepProps) => {
     const [nameError, setNameError] = useState<string | null>(null);
@@ -61,9 +72,10 @@ const Step1Identity = ({ data, update }: StepProps) => {
     };
 
     const calculateAge = (dob: string) => {
-        if (!dob) return '';
+        if (!dob || dob.length < 10) return '';
         const today = new Date();
         const birthDate = new Date(dob);
+        if (isNaN(birthDate.getTime())) return '';
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -95,6 +107,56 @@ const Step1Identity = ({ data, update }: StepProps) => {
         label: `Rayon ${r}`
     }));
 
+    const daysOptions = Array.from({ length: 31 }, (_, i) => ({
+        value: String(i + 1).padStart(2, '0'),
+        label: String(i + 1)
+    }));
+
+    const monthsOptions = [
+        { value: '01', label: 'Januari' },
+        { value: '02', label: 'Februari' },
+        { value: '03', label: 'Maret' },
+        { value: '04', label: 'April' },
+        { value: '05', label: 'Mei' },
+        { value: '06', label: 'Juni' },
+        { value: '07', label: 'Juli' },
+        { value: '08', label: 'Agustus' },
+        { value: '09', label: 'September' },
+        { value: '10', label: 'Oktober' },
+        { value: '11', label: 'November' },
+        { value: '12', label: 'Desember' }
+    ];
+
+    const currentYear = new Date().getFullYear();
+    const yearsOptions = Array.from({ length: 120 }, (_, i) => {
+        const y = currentYear - i;
+        return { value: String(y), label: String(y) };
+    });
+
+    const [dobYear = '', dobMonth = '', dobDay = ''] = (data.dateOfBirth || '').split('-');
+
+    const handleDobChange = (part: 'year' | 'month' | 'day', val: string) => {
+        let newY = dobYear;
+        let newM = dobMonth;
+        let newD = dobDay;
+        if (part === 'year') newY = val;
+        if (part === 'month') newM = val;
+        if (part === 'day') newD = val;
+        update({ dateOfBirth: `${newY}-${newM}-${newD}` });
+    };
+
+    const [marYear = '', marMonth = '', marDay = ''] = (data.marriageDate || '').split('-');
+
+    const handleMarChange = (part: 'year' | 'month' | 'day', val: string) => {
+        let newY = marYear;
+        let newM = marMonth;
+        let newD = marDay;
+        if (part === 'year') newY = val;
+        if (part === 'month') newM = val;
+        if (part === 'day') newD = val;
+        update({ marriageDate: `${newY}-${newM}-${newD}` });
+    };
+
     return (
         <div className="space-y-8 animate-fadeIn">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
@@ -116,6 +178,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         type="tel"
                         placeholder="16 Digit Nomor KK"
                         required
+                        tooltipText="Masukkan 16 digit Nomor Kartu Keluarga yang tertera pada bagian atas KK Anda."
                     />
                     {data.kkNumber && data.kkNumber.length > 0 && data.kkNumber.length < 16 && (
                         <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -144,6 +207,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         type="tel"
                         placeholder="16 Digit NIK"
                         required
+                        tooltipText="Masukkan 16 digit Nomor Induk Kependudukan (NIK) sesuai dengan e-KTP."
                     />
                     {data.nik && data.nik.length > 0 && data.nik.length < 16 && (
                         <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -173,6 +237,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         placeholder="Contoh: Heru Aldi Benu"
                         required
                         error={nameError}
+                        tooltipText="Masukkan nama lengkap kepala keluarga sesuai KTP, tanpa gelar akademik atau keagamaan (opsional)."
                     />
                     {isValidating && (
                         <div className="absolute right-3 top-[3.2rem]">
@@ -190,17 +255,42 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     options={['Laki-laki', 'Perempuan']}
                     placeholder="Pilih Jenis Kelamin"
                     required
+                    tooltipText="Pilih jenis kelamin."
                 />
 
                 {/* Date of Birth */}
-                <FormInput
-                    label="Tanggal Lahir"
-                    id="dateOfBirth"
-                    value={data.dateOfBirth}
-                    onChange={(val) => update({ dateOfBirth: val })}
-                    type="date"
-                    required
-                />
+                <div className="flex flex-col gap-2 relative z-20">
+                    <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                        Tanggal Lahir <span className="text-red-500">*</span>
+                        <FormTooltip text="Masukkan tanggal lahir sesuai akta kelahiran atau e-KTP." />
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                        <FormSelect
+                            id="dobDay"
+                            value={dobDay}
+                            onChange={(val) => handleDobChange('day', val)}
+                            options={daysOptions}
+                            placeholder="Tanggal"
+                            required
+                        />
+                        <FormSelect
+                            id="dobMonth"
+                            value={dobMonth}
+                            onChange={(val) => handleDobChange('month', val)}
+                            options={monthsOptions}
+                            placeholder="Bulan"
+                            required
+                        />
+                        <FormSelect
+                            id="dobYear"
+                            value={dobYear}
+                            onChange={(val) => handleDobChange('year', val)}
+                            options={yearsOptions}
+                            placeholder="Tahun"
+                            required
+                        />
+                    </div>
+                </div>
 
                 {/* Age (Auto-calculated) */}
                 <FormInput
@@ -209,6 +299,101 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     value={calculateAge(data.dateOfBirth) || '-'}
                     onChange={() => { }}
                     readOnly
+
+                />
+
+                {/* Blood Type */}
+                <FormSelect
+                    label="Golongan Darah"
+                    id="bloodType"
+                    value={data.bloodType}
+                    onChange={(val) => update({ bloodType: val })}
+                    options={['A', 'B', 'AB', 'O']}
+                    placeholder="Pilih Golongan Darah"
+                    required
+                    tooltipText="Pilih golongan darah sesuai dengan data medis atau e-KTP."
+                />
+
+                {/* Marital Status */}
+                <FormSelect
+                    label="Status Nikah"
+                    id="maritalStatus"
+                    value={data.maritalStatus}
+                    onChange={(val) => update({ maritalStatus: val })}
+                    options={['Belum Nikah', 'Sudah Nikah', 'Cerai Hidup', 'Cerai Mati']}
+                    placeholder="Pilih Status Nikah"
+                    required
+                    tooltipText="Pilih status pernikahan saat ini."
+                />
+
+                {/* Conditional Marriage Fields */}
+                {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(data.maritalStatus) && (
+                    <>
+                        <div className="flex flex-col gap-2 relative z-20">
+                            <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                                Tanggal Nikah <span className="text-red-500">*</span>
+                                <FormTooltip text="Masukkan tanggal pernikahan." />
+                            </label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <FormSelect
+                                    id="marDay"
+                                    value={marDay}
+                                    onChange={(val) => handleMarChange('day', val)}
+                                    options={daysOptions}
+                                    placeholder="Tanggal"
+                                    required
+                                />
+                                <FormSelect
+                                    id="marMonth"
+                                    value={marMonth}
+                                    onChange={(val) => handleMarChange('month', val)}
+                                    options={monthsOptions}
+                                    placeholder="Bulan"
+                                    required
+                                />
+                                <FormSelect
+                                    id="marYear"
+                                    value={marYear}
+                                    onChange={(val) => handleMarChange('year', val)}
+                                    options={yearsOptions}
+                                    placeholder="Tahun"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <FormInput
+                            label="Usia Pernikahan"
+                            id="marriageAge"
+                            value={calculateAge(data.marriageDate) || '-'}
+                            onChange={() => { }}
+                            readOnly
+
+                        />
+
+                        <FormMultiSelect
+                            label="Jenis Pernikahan"
+                            id="marriageType"
+                            value={data.marriageType}
+                            onChange={(val) => update({ marriageType: val })}
+                            options={['Nikah adat', 'Nikah gereja', 'Nikah catatan sipil', 'Nikah dinas']}
+                            placeholder="Pilih Jenis Pernikahan (Bisa >1)"
+                            required
+                            tooltipText="Pilih satu atau lebih jenis pernikahan yang diakui."
+                        />
+                    </>
+                )}
+
+                {/* Education */}
+                <FormSelect
+                    label="Pendidikan Terakhir"
+                    id="educationLevel"
+                    value={data.educationLevel}
+                    onChange={(val) => update({ educationLevel: val })}
+                    options={['Tidak tamat SD', 'SD/Sederajat', 'SMP/Sederajat', 'SMA/SMK/Sederajat', 'D1', 'D2', 'D3', 'D4/S1', 'S1', 'S2', 'S3']}
+                    placeholder="Pilih Tingkat Pendidikan"
+                    required
+                    tooltipText="Pendidikan terakhir yang telah ditamatkan."
                 />
 
                 {/* Phone Number */}
@@ -225,6 +410,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         placeholder="81234567890"
                         prefix="+62"
                         required
+                        tooltipText="Gunakan nomor yang aktif dan dapat dihubungi, disarankan nomor yang terdaftar di WhatsApp."
                     />
                     {data.phone && data.phone.length > 0 && data.phone.length < 10 && (
                         <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -256,6 +442,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     options={lingkunganOptions}
                     placeholder="Pilih Lingkungan..."
                     required
+                    tooltipText="Pilih Lingkungan tempat tinggal saat ini di Jemaat Emaus Liliba."
                 />
 
                 {/* Rayon */}
@@ -267,14 +454,16 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     options={rayonOptions}
                     placeholder={data.lingkungan ? "Pilih Rayon..." : "Pilih Lingkungan dahulu..."}
                     required
+                    tooltipText="Pilih Rayon sesuai Lingkungan tempat tinggal."
                 />
             </div>
 
             {/* Alamat Lengkap */}
             <div className="flex flex-col group relative">
                 <div className="flex flex-col pb-2 gap-1">
-                    <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
+                    <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300 relative z-10">
                         Alamat Lengkap<span className="text-red-500">*</span>
+                        <FormTooltip text="Masukkan alamat domisili saat ini, lengkap dengan RT/RW, dan jalan/gang. Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002." />
                     </label>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
                         Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002, Kel. Liliba, Kec. Oebobo, Kota Kupang.
@@ -286,18 +475,64 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     value={data.address}
                     onChange={(e) => update({ address: e.target.value })}
                 ></textarea>
-                {data.address && data.address.trim().length > 0 && data.address.trim().length < 20 && (
+                {data.address && data.address.trim().length > 0 && data.address.trim().length < 7 && (
                     <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
                         <span className="material-symbols-outlined text-base">warning</span>
-                        <span className="text-xs font-medium">Alamat terlalu singkat, minimal 20 karakter ({data.address.trim().length}/20)</span>
+                        <span className="text-xs font-medium">Alamat terlalu singkat, minimal 7 karakter ({data.address.trim().length}/7)</span>
                     </div>
                 )}
-                {data.address && data.address.trim().length >= 20 && (
+                {data.address && data.address.trim().length >= 7 && (
                     <div className="flex items-center gap-1.5 mt-1.5 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
                         <span className="material-symbols-outlined text-base">check_circle</span>
                         <span className="text-xs font-medium">Panjang alamat sudah memadai</span>
                     </div>
                 )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Kota/Kabupaten */}
+                <FormSelect
+                    label="Kota/Kabupaten"
+                    id="city"
+                    value={data.city}
+                    onChange={(val) => {
+                        if (val !== data.city) {
+                            update({ city: val, district: '', subdistrict: '' });
+                        }
+                    }}
+                    options={['Kota Kupang']}
+                    placeholder="Pilih Kota/Kabupaten"
+                    required
+                    tooltipText="Pilih Kota atau Kabupaten tempat domisili."
+                />
+
+                {/* Kecamatan */}
+                <FormSelect
+                    label="Kecamatan"
+                    id="district"
+                    value={data.district}
+                    onChange={(val) => {
+                        if (val !== data.district) {
+                            update({ district: val, subdistrict: '' });
+                        }
+                    }}
+                    options={data.city === 'Kota Kupang' ? Object.keys(KUPANG_DATA) : []}
+                    placeholder={data.city === 'Kota Kupang' ? "Pilih Kecamatan..." : "Pilih Kota dahulu..."}
+                    required={data.city === 'Kota Kupang'}
+                    tooltipText="Pilih Kecamatan domisili."
+                />
+
+                {/* Kelurahan */}
+                <FormSelect
+                    label="Kelurahan/Desa"
+                    id="subdistrict"
+                    value={data.subdistrict}
+                    onChange={(val) => update({ subdistrict: val })}
+                    options={data.district && KUPANG_DATA[data.district] ? KUPANG_DATA[data.district] : []}
+                    placeholder={data.district ? "Pilih Kelurahan..." : "Pilih Kecamatan..."}
+                    required={data.city === 'Kota Kupang'}
+                    tooltipText="Pilih Kelurahan atau Desa domisili."
+                />
             </div>
         </div>
     );

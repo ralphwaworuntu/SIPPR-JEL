@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { type FormData } from '../../types';
 import FormRadioGroup from '../ui/FormRadioGroup';
+import FormSelect from '../ui/FormSelect';
 import SectionHeader from '../ui/SectionHeader';
+import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
     data: FormData;
@@ -69,7 +71,7 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
 
             {/* Question 1: Schooling Status */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah semua anak usia sekolah (7-18 tahun) di rumah ini sedang bersekolah?" />
+                <SectionHeader title="Apakah semua anak usia sekolah (7-18 tahun) di rumah ini sedang bersekolah?" tooltipText="Pilih kondisi pendidikan anak di rumah tersebut." />
                 <FormRadioGroup
                     name="schoolingStatus"
                     options={['Ya', 'Tidak', 'Tidak ada anak usia sekolah']}
@@ -84,9 +86,9 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
             {showInSchool && (
                 <div className="space-y-6 pl-4 border-l-2 border-primary/20">
                     <div className="space-y-4">
-                        <SectionHeader title="Total anak sekolah dan distribusinya:" />
+                        <SectionHeader title="Total anak sekolah dan distribusinya:" tooltipText="Isi jumlah total dan jenjang pendidikan anak yang sedang bersekolah." />
                         <div className="max-w-[200px] flex flex-col gap-2">
-                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Sekolah</label>
+                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anak Sekolah <FormTooltip text="Jumlah seluruh anak yang masih sekolah." /></label>
                             <CountSelect
                                 id="totalInSchool"
                                 value={totalInSchool}
@@ -120,7 +122,7 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
 
                                     return (
                                         <div key={field} className="flex flex-col gap-2">
-                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">{label} <FormTooltip text={`Jumlah anak yang sedang sekolah di tingkat ${label}.`} /></label>
                                             <CountSelect
                                                 id={field}
                                                 value={currentVal}
@@ -154,9 +156,9 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
             {showDropout && (
                 <div className="space-y-6">
                     <div className="space-y-4">
-                        <SectionHeader title="Anak Putus Sekolah:" />
+                        <SectionHeader title="Anak Putus Sekolah:" tooltipText="Isi jumlah dan jenjang pendidikan terakhir anak yang putus sekolah." />
                         <div className="max-w-[200px] flex flex-col gap-2">
-                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Putus Sekolah</label>
+                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anak Putus Sekolah <FormTooltip text="Total anak usia sekolah yang tidak lagi bersekolah." /></label>
                             <CountSelect
                                 id="totalDropout"
                                 value={totalDropout}
@@ -188,7 +190,7 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
 
                                     return (
                                         <div key={field} className="flex flex-col gap-2">
-                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">{label} <FormTooltip text={`Jumlah anak putus sekolah di tingkat ${label}.`} /></label>
                                             <CountSelect
                                                 id={field}
                                                 value={currentVal}
@@ -221,9 +223,9 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
             {/* Question 4: Graduated but Unemployed */}
             <div className="space-y-6">
                 <div className="space-y-4">
-                    <SectionHeader title="Anak Tamat Sekolah Belum Bekerja:" />
+                    <SectionHeader title="Anak Tamat Sekolah Belum Bekerja:" tooltipText="Isi jumlah dan jenjang pendidikan tamatan anak yang belum bekerja." />
                     <div className="max-w-[200px] flex flex-col gap-2">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anak Belum Bekerja</label>
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anak Belum Bekerja <FormTooltip text="Total anak yang sudah tamat sekolah namun belum mendapat pekerjaan." /></label>
                         <CountSelect
                             id="totalUnemployed"
                             value={totalUnemployed}
@@ -255,7 +257,7 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
 
                                 return (
                                     <div key={field} className="flex flex-col gap-2">
-                                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">{label}</label>
+                                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">{label} <FormTooltip text={`Jumlah anak belum bekerja tamatan ${label}.`} /></label>
                                         <CountSelect
                                             id={field}
                                             value={currentVal}
@@ -286,9 +288,9 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
 
             {/* Question 5: Working Children */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah anak sudah bekerja:" />
+                <SectionHeader title="Jumlah anak sudah bekerja:" tooltipText="Total anak di rumah ini yang sudah memiliki pekerjaan dan berpenghasilan." />
                 <div className="flex flex-col gap-2 max-w-[200px]">
-                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Orang</label>
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Orang <FormTooltip text="Jumlah anak di KK ini yang sudah bekerja." /></label>
                     <CountSelect
                         id="education_working"
                         value={data.education_working || 0}
@@ -299,6 +301,42 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
                 </div>
             </div>
 
+            {/* Question 6: Scholarship */}
+            <div className="space-y-4">
+                <SectionHeader title="Penerima Beasiswa:" tooltipText="Apakah ada anggota keluarga yang sedang menerima beasiswa pendidikan?" />
+                <div className="max-w-md space-y-4">
+                    <FormRadioGroup
+                        label="Apakah saat ini sedang menerima beasiswa?"
+                        id="education_hasScholarship"
+                        name="education_hasScholarship"
+                        options={['Ya', 'Tidak']}
+                        value={data.education_hasScholarship || ''}
+                        onChange={(val) => {
+                            if (val === 'Tidak') {
+                                update({ education_hasScholarship: val as 'Ya' | 'Tidak', education_scholarshipType: '' });
+                            } else {
+                                update({ education_hasScholarship: val as 'Ya' | 'Tidak' });
+                            }
+                        }}
+                        tooltipText="Pilih Ya jika ada anggota keluarga yang sedang menerima beasiswa."
+                    />
+
+                    {data.education_hasScholarship === 'Ya' && (
+                        <div className="animate-fadeIn pl-4 border-l-2 border-primary/20">
+                            <FormSelect
+                                label="Jenis Beasiswa"
+                                id="education_scholarshipType"
+                                value={data.education_scholarshipType || ''}
+                                onChange={(val) => update({ education_scholarshipType: val })}
+                                options={['LPDP', 'PIP', 'KIP']}
+                                placeholder="Pilih Jenis Beasiswa"
+                                required
+                                tooltipText="Pilih jenis beasiswa yang diterima."
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,13 +1,15 @@
 import React from 'react';
+import { FormTooltip } from './FormTooltip';
 
 interface SectionHeaderProps {
     number?: number;
     title: string;
     description?: string;
     icon?: string;
+    tooltipText?: React.ReactNode;
 }
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ number, title, description, icon }) => {
+const SectionHeader: React.FC<SectionHeaderProps> = ({ number, title, description, icon, tooltipText }) => {
     return (
         <div className="flex items-start gap-4 pb-4 mb-6 relative group">
             {/* Subtle Gradient Bottom Border */}
@@ -27,7 +29,10 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ number, title, descriptio
                     </div>
                 )}
                 <div>
-                    <h4 className="text-base font-bold text-slate-900 dark:text-white">{title}</h4>
+                    <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                        {title}
+                        {tooltipText && <FormTooltip text={tooltipText} />}
+                    </h4>
                     {description && (
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>
                     )}

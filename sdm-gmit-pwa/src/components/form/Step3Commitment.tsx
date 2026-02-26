@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { type FormData } from '../../types';
+import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
     data: FormData;
@@ -151,8 +152,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                             <div className="space-y-6">
                                 {/* Identity & Work Section */}
                                 <div className="space-y-4">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Nama Anggota Keluarga<span className="text-red-500 ml-1">*</span></label>
+                                    <div className="flex flex-col gap-2 relative z-10">
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Nama Anggota Keluarga<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Masukkan nama lengkap anggota keluarga." /></label>
                                         <input
                                             className={inputClass}
                                             placeholder="Nama Lengkap"
@@ -167,8 +168,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Tempat Kerja / Instansi<span className="text-red-500 ml-1">*</span></label>
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Tempat Kerja / Instansi<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Nama tempat bekerja saat ini, misal: PT Makmur." /></label>
                                             <input
                                                 className={inputClass}
                                                 placeholder="Nama Instansi/Perusahaan"
@@ -181,8 +182,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                 }}
                                             />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Jabatan Saat Ini<span className="text-red-500 ml-1">*</span></label>
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Jabatan Saat Ini<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Jabatan di tempat kerja, misal: Guru, Manajer, Staf." /></label>
                                             <input
                                                 className={inputClass}
                                                 placeholder="Contoh: Staff, Manager"
@@ -195,8 +196,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                 }}
                                             />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Lama Bekerja<span className="text-red-500 ml-1">*</span></label>
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Lama Bekerja<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Pilih tentang lama waktu pengalaman kerja pada profesi ini." /></label>
                                             <div className="relative">
                                                 <select
                                                     className={`${inputClass} appearance-none pr-10`}
@@ -220,8 +221,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                     </div>
 
                                     {/* Specific Skills */}
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Keahlian Spesifik <span className="text-xs font-normal text-slate-500 dark:text-slate-400">(Dapat lebih dari satu)</span></label>
+                                    <div className="flex flex-col gap-2 relative z-10">
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 z-10">Keahlian Spesifik <span className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-1">(Dapat lebih dari satu)</span> <FormTooltip text="Tambahkan satu per satu apabila memiliki keahlian khusus. Misalnya: Desain Grafis, Pemrograman, dll." /></label>
                                         <div className="flex gap-2">
                                             <input
                                                 className={`flex-1 ${inputClass}`}
@@ -266,8 +267,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                 </div>
 
                                 {/* Has Professional Skill Question */}
-                                <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-slate-700 animate-fadeIn">
-                                    <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Apakah anggota ini memiliki Keahlian Profesional?<span className="text-red-500 ml-1">*</span></label>
+                                <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-slate-700 animate-fadeIn relative z-10">
+                                    <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Apakah anggota ini memiliki Keahlian Profesional?<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Memiliki keterampilan yang mendalam pada bidang tertentu." /></label>
                                     <div className="grid grid-cols-2 gap-3">
                                         {['Ya', 'Tidak'].map((opt) => (
                                             <label key={opt} className={`cursor-pointer p-3.5 border-2 rounded-xl flex items-center gap-3 transition-all duration-200 select-none ${member.hasProfessionalSkill === opt ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm shadow-primary/10' : 'border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
@@ -299,8 +300,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                 {/* Professional Skill Section - Conditional */}
                                 {member.hasProfessionalSkill === 'Ya' && (
                                     <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-700 animate-fadeIn">
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Jenis Keahlian Utama<span className="text-red-500 ml-1">*</span></label>
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Jenis Keahlian Utama<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Pilih kategori dari keahlian profesional yang dimiliki." /></label>
                                             <div className="relative">
                                                 <select
                                                     className={`${inputClass} appearance-none pr-10`}
@@ -372,8 +373,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                 )}
                                         </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Tingkat Keahlian<span className="text-red-500 ml-1">*</span></label>
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Tingkat Keahlian<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Berdasarkan pengalaman dan jam terbang pada keahlian tersebut." /></label>
                                             <div className="relative">
                                                 <select
                                                     className={`${inputClass} appearance-none pr-10`}
@@ -397,8 +398,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
 
                                 {/* Service Interest Section */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                                    <div className="flex flex-col gap-3">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Bersedia terlibat dalam pelayanan?<span className="text-red-500 ml-1">*</span></label>
+                                    <div className="flex flex-col gap-3 relative z-10">
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Bersedia terlibat dalam pelayanan?<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Kesediaan untuk turut mengambil bagian dalam pelayanan jika gereja membutuhkan." /></label>
                                         <div className="grid grid-cols-1 gap-3">
                                             {[
                                                 { value: 'Ya, bersedia aktif', desc: 'Saya rindu terlibat aktif dalam pelayanan.' },
@@ -429,8 +430,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-3">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Bidang Minat Pelayanan?<span className="text-red-500 ml-1">*</span></label>
+                                    <div className="flex flex-col gap-3 relative z-10">
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Bidang Minat Pelayanan?<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Memilih arah pelayanan sesuai profesi atau lintas profesi." /></label>
                                         <div className="grid grid-cols-1 gap-3">
                                             {[
                                                 { value: 'Sesuai Profesi', desc: 'Sesuai dengan keahlian profesional.' },
@@ -461,8 +462,8 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2 relative z-10">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100">Bentuk Kontribusi<span className="text-red-500 ml-1">*</span></label>
+                                    <div className="flex flex-col gap-2 relative z-10 md:col-span-2">
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Bentuk Kontribusi<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Dapat memilih lebih dari satu bentuk kontribusi yang bisa diberikan." /></label>
                                         <details className="group" ref={detailsRef}>
                                             <summary className={`${inputClass} flex items-center justify-between cursor-pointer select-none list-none group-open:border-primary group-open:ring-4 group-open:ring-primary/20 transition-all duration-300`}>
                                                 <span className={`block truncate ${(!member.contributionForm || member.contributionForm.length === 0) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white font-semibold'}`}>

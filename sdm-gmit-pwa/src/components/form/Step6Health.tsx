@@ -92,7 +92,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 1. Sakit 30 Hari Terakhir */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah ada anggota keluarga yang mengalami sakit dalam 30 hari terakhir?" />
+                <SectionHeader title="Apakah ada anggota keluarga yang mengalami sakit dalam 30 hari terakhir?" tooltipText="Pilih kondisi kesehatan terbaru anggota keluarga dalam sebulan terakhir." />
                 <FormRadioGroup
                     name="health_sick30Days"
                     options={['Ya, rawat inap', 'Ya, rawat jalan', 'Tidak ada']}
@@ -104,7 +104,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 2. Sakit Menahun */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah ada anggota keluarga sakit menahun?" />
+                <SectionHeader title="Apakah ada anggota keluarga sakit menahun?" tooltipText="Penyakit kronis yang diderita lebih dari 6 bulan berturut-turut." />
                 <FormRadioGroup
                     name="health_chronicSick"
                     options={['Ya', 'Tidak']}
@@ -123,6 +123,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                             value={data.health_chronicDisease}
                             onChange={(val) => update({ health_chronicDisease: val })}
                             placeholder="Pilih Penyakit (Bisa > 1)..."
+                            tooltipText="Pilih penyakit kronis apa saja yang dialami saat ini."
                         />
                         {data.health_chronicDisease.includes('Lainnya') && (
                             <div className="mt-2">
@@ -143,7 +144,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 4. BPJS Kesehatan */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah memiliki BPJS Kesehatan?" />
+                <SectionHeader title="Apakah memiliki BPJS Kesehatan?" tooltipText="Kartu jaminan kesehatan nasional dan asuransi lain yang masih aktif." />
                 <FormRadioGroup
                     name="health_hasBPJS"
                     options={['Ya', 'Tidak']}
@@ -155,7 +156,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 5. Pengobatan Teratur */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah mendapat pengobatan yang teratur dari Fasilitas Kesehatan?" />
+                <SectionHeader title="Apakah mendapat pengobatan yang teratur dari Fasilitas Kesehatan?" tooltipText="Rutin periksa atau disuntik/minum obat dari fasilitas kesehatan formal/puskesmas/terapis." />
                 <FormRadioGroup
                     name="health_regularTreatment"
                     options={['Ya', 'Tidak']}
@@ -167,7 +168,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 6. BPJS Ketenagakerjaan */}
             <div className="space-y-4">
-                <SectionHeader title="Apakah memiliki BPJS Ketenagakerjaan?" />
+                <SectionHeader title="Apakah memiliki BPJS Ketenagakerjaan?" tooltipText="Kepemilikan Jamsostek / BPJS Ketenagakerjaan / Astek." />
                 <FormRadioGroup
                     name="health_hasBPJSKetenagakerjaan"
                     options={['Ya', 'Tidak']}
@@ -187,13 +188,14 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                     onChange={(val) => update({ health_socialAssistance: val })}
                     placeholder="Pilih Jenis Bansos..."
                     required={true}
+                    tooltipText="Program bantuan sosial dari pemerintah (Dinas Sosial) yang rutin diterima keluarga."
                 />
             </div>
 
             {/* 8. Disabilitas */}
             <div className="space-y-6 bg-red-50/50 dark:bg-red-950/10 p-5 rounded-2xl border border-red-100 dark:border-red-900/20">
                 <div className="space-y-4">
-                    <SectionHeader title="Apakah ada anggota keluarga penyandang disabilitas?" />
+                    <SectionHeader title="Apakah ada anggota keluarga penyandang disabilitas?" tooltipText="Pilih Ya jika ada anggota keluarga dengan keterbatasan fisik, intelektual, mental, atau sensorik." />
                     <FormRadioGroup
                         name="health_hasDisability"
                         options={['Ya', 'Tidak']}
@@ -213,7 +215,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
 
                         {/* 13. Disabilitas Ganda */}
                         <div className="space-y-3">
-                            <SectionHeader title="Disabilitas Ganda" />
+                            <SectionHeader title="Disabilitas Ganda" tooltipText="Kondisi dimana penyandang disabilitas memiliki dua atau lebih hambatan sekaligus." />
                             <label className={`cursor-pointer p-4 border-2 rounded-xl flex items-center gap-4 transition-all duration-200 ${data.health_disabilityDouble ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 shadow-sm' : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}>
                                 <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${data.health_disabilityDouble
                                     ? 'border-indigo-600 bg-indigo-600 dark:border-indigo-500 dark:bg-indigo-500'
@@ -281,6 +283,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                                                     update(updates);
                                                 }}
                                                 placeholder="Pilih Jenis (Bisa > 1)..."
+                                                tooltipText="Keterbatasan fungsi gerak tubuh yang membatasi aktivitas fisik anggota badan."
                                             />
                                             {data.health_disabilityPhysical.includes('Lainnya') && (
                                                 <input
@@ -316,6 +319,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                                                     update(updates);
                                                 }}
                                                 placeholder="Pilih Jenis (Bisa > 1)..."
+                                                tooltipText="Gangguan fungsi nalar pikiran yang terjadi lambat laun dari usia anak, kecerdasan di bawah rata-rata."
                                             />
                                             {data.health_disabilityIntellectual.includes('Lainnya') && (
                                                 <input
@@ -351,6 +355,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                                                     update(updates);
                                                 }}
                                                 placeholder="Pilih Jenis (Bisa > 1)..."
+                                                tooltipText="Gangguan pikiran panjang, emosi, atau dalam berperilaku yang menghambat tumbuh kembang interaksi sosial."
                                             />
                                             {data.health_disabilityMental.includes('Lainnya') && (
                                                 <input
@@ -386,6 +391,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                                                     update(updates);
                                                 }}
                                                 placeholder="Pilih Jenis (Bisa > 1)..."
+                                                tooltipText="Keterbatasan fungsi alat indra (penglihatan, pendengaran/wicara)."
                                             />
                                             {data.health_disabilitySensory.includes('Lainnya') && (
                                                 <input

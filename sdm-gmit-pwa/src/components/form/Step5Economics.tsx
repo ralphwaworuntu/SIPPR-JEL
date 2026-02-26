@@ -4,6 +4,7 @@ import FormRadioGroup from '../ui/FormRadioGroup';
 import FormSelect from '../ui/FormSelect';
 import FormMultiSelect from '../ui/FormMultiSelect';
 import SectionHeader from '../ui/SectionHeader';
+import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
     data: FormData;
@@ -186,7 +187,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 1. Pekerjaan Utama Kepala Keluarga */}
             <div className="space-y-4" id="headOccupation">
-                <SectionHeader title="Pekerjaan Utama Kepala Keluarga" />
+                <SectionHeader title="Pekerjaan Utama Kepala Keluarga" tooltipText="Pilih pekerjaan utama yang memberikan penghasilan terbesar." />
                 <FormSelect
                     id="headOccupation"
                     options={occupationOptions}
@@ -213,7 +214,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 2. Pekerjaan Utama Istri */}
             <div className="space-y-4" id="spouseOccupation">
-                <SectionHeader title="Pekerjaan Utama Istri/Suami" description="Opsional / Jika ada" />
+                <SectionHeader title="Pekerjaan Utama Istri/Suami" description="Opsional / Jika ada" tooltipText="Pilih pekerjaan pasangan jika ada." />
                 <FormSelect
                     id="spouseOccupation"
                     options={occupationOptions}
@@ -240,7 +241,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 3. Range Pendapatan */}
             <div className="space-y-4" id="incomeRange">
-                <SectionHeader title="Range Pendapatan Rumah Tangga (per bulan)" />
+                <SectionHeader title="Range Pendapatan Rumah Tangga (per bulan)" tooltipText="Akumulasi pendapatan seluruh anggota keluarga dalam satu bulan." />
                 <FormSelect
                     id="incomeRange"
                     options={incomeRanges}
@@ -251,7 +252,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 />
                 {data.economics_incomeRange === '≥ Rp 5.000.000' && (
                     <div className="animate-fadeIn mt-4 pl-4 border-l-2 border-primary/20 space-y-2">
-                        <SectionHeader title="Detail Range Pendapatan (≥ Rp 5.000.000)" icon="tune" />
+                        <SectionHeader title="Detail Range Pendapatan (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan di atas 5 juta." />
                         <FormSelect
                             id="incomeRangeDetailed"
                             options={detailedIncomeRanges}
@@ -273,44 +274,44 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Konsumsi Pangan <span className="text-xs font-normal text-slate-500">(Beras, Lauk-pauk, Minyak, dsb)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Konsumsi Pangan <span className="text-xs font-normal text-slate-500">(Beras, Lauk-pauk, Minyak, dsb)</span><span className="text-red-500">*</span> <FormTooltip text="Estimasi biaya makan minum sehari-hari." />
                         </label>
                         <FormatRupiah value={data.economics_expense_food} onChange={(val) => update({ economics_expense_food: val })} required={true} />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Kebutuhan Dasar Non-Pangan I <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, Pulsa)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Kebutuhan Dasar Non-Pangan I <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, Pulsa)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya operasional rumah tangga rutin." />
                         </label>
                         <FormatRupiah value={data.economics_expense_utilities} onChange={(val) => update({ economics_expense_utilities: val })} required={true} />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Kebutuhan Dasar Non-Pangan II <span className="text-xs font-normal text-slate-500">(Rokok, Sirih Pinang, dsb)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Kebutuhan Dasar Non-Pangan II <span className="text-xs font-normal text-slate-500">(Rokok, Sirih Pinang, dsb)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya konsumsi tambahan di luar kebutuhan pokok." />
                         </label>
                         <FormatRupiah value={data.economics_expense_nonPanganII} onChange={(val) => update({ economics_expense_nonPanganII: val })} required={true} />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Beban Pinjaman Bank/Koperasi <span className="text-xs font-normal text-slate-500">(Pinjaman Bank/Koperasi)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Beban Pinjaman Bank/Koperasi <span className="text-xs font-normal text-slate-500">(Pinjaman Bank/Koperasi)</span><span className="text-red-500">*</span> <FormTooltip text="Cicilan bulanan yang harus dibayar." />
                         </label>
                         <FormatRupiah value={data.economics_expense_loan} onChange={(val) => update({ economics_expense_loan: val })} required={true} />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Pendidikan & Kesehatan <span className="text-xs font-normal text-slate-500">(SPP, Obat, dsb)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Pendidikan & Kesehatan <span className="text-xs font-normal text-slate-500">(SPP, Obat, dsb)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya sekolah anak dan biaya berobat." />
                         </label>
                         <FormatRupiah value={data.economics_expense_education} onChange={(val) => update({ economics_expense_education: val })} required={true} />
                     </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                            Kebutuhan Lainnya <span className="text-xs font-normal text-slate-500">(Pakaian, Hiburan, Tabungan)</span><span className="text-red-500">*</span>
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Kebutuhan Lainnya <span className="text-xs font-normal text-slate-500">(Pakaian, Hiburan, Tabungan)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya transportasi, pakaian, atau hiburan." />
                         </label>
                         <FormatRupiah value={data.economics_expense_other} onChange={(val) => update({ economics_expense_other: val })} required={true} />
                     </div>
@@ -353,6 +354,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     onChange={(val) => update({ economics_hasBusiness: val as 'Ya' | 'Tidak' })}
                     columns={2}
                     required={true}
+                    tooltipText="Usaha yang dijalankan untuk menambah penghasilan keluarga."
                 />
 
                 {/* Conditional Business Questions */}
@@ -360,9 +362,9 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     <div className="space-y-6 pl-4 border-l-2 border-primary/20 animate-fadeIn">
 
                         {/* Nama Usaha */}
-                        <div className="flex flex-col group relative">
-                            <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
-                                Nama Jenis Usaha/Brand <span className="text-red-500">*</span>
+                        <div className="flex flex-col group relative z-10">
+                            <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300 z-10">
+                                Nama Jenis Usaha/Brand <span className="text-red-500">*</span> <FormTooltip text="Nama usaha yang dijalankan." />
                             </label>
                             <textarea
                                 className="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition-all duration-200 resize-none h-24 capitalize text-base"
@@ -385,6 +387,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             onChange={(val) => update({ economics_businessType: val })}
                             placeholder="Pilih Jenis Usaha..."
                             required={true}
+                            tooltipText="Kategori bidang usaha."
                         />
                         {data.economics_businessType === 'Lainnya' && (
                             <div className="mt-2 animate-fadeIn">
@@ -409,10 +412,11 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             onChange={(val) => update({ economics_businessDuration: val })}
                             placeholder="Pilih Lama Usaha..."
                             required={true}
+                            tooltipText="Sudah berapa lama usaha ini ditekuni."
                         />
                         {data.economics_businessDuration === '> 5 tahun' && (
-                            <div className="mt-2 animate-fadeIn">
-                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sudah berapa tahun?</label>
+                            <div className="mt-2 animate-fadeIn relative z-10">
+                                <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1 z-10">Sudah berapa tahun? <FormTooltip text="Tulis angka tahun saja." /></label>
                                 <input
                                     type="text"
                                     inputMode="numeric"
@@ -436,6 +440,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             onChange={(val) => update({ economics_businessStatus: val })}
                             placeholder="Pilih Status Usaha..."
                             required={true}
+                            tooltipText="Kepemilikan usaha."
                         />
                         {data.economics_businessStatus === 'Lainnya' && (
                             <div className="mt-2 animate-fadeIn">
@@ -460,6 +465,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             onChange={(val) => update({ economics_businessLocation: val })}
                             placeholder="Pilih Lokasi Usaha..."
                             required={true}
+                            tooltipText="Tempat utama menjalankan usaha."
                         />
                         {data.economics_businessLocation === 'Lainnya' && (
                             <div className="mt-2 animate-fadeIn">
@@ -484,12 +490,13 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             onChange={(val) => update({ economics_businessEmployeeCount: val })}
                             placeholder="Pilih Jumlah..."
                             required={true}
+                            tooltipText="Termasuk pemilik jika ikut bekerja."
                         />
 
                         {/* Modal Awal */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1">
-                                Modal Awal Usaha <span className="text-red-500">*</span>
+                        <div className="flex flex-col gap-2 relative z-10">
+                            <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                                Modal Awal Usaha <span className="text-red-500">*</span> <FormTooltip text="Perkiraan modal saat pertama kali memulai usaha." />
                             </label>
                             <FormatRupiah value={data.economics_businessCapital} onChange={(val) => update({ economics_businessCapital: val })} required={true} />
                         </div>
@@ -504,6 +511,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_businessCapitalSource: val })}
                                 placeholder="Pilih Sumber Modal..."
                                 required={true}
+                                tooltipText="Asal modal yang paling besar."
                             />
                             {data.economics_businessCapitalSource === 'Lainnya' && (
                                 <div className="mt-2 animate-fadeIn">
@@ -522,7 +530,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         </div>
 
                         {/* Izin Usaha */}
-                        <div className="space-y-2">
+                        <div className="space-y-2 mt-4">
                             <FormMultiSelect
                                 label="Apakah memiliki Izin Usaha?"
                                 id="businessPermit"
@@ -531,6 +539,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_businessPermit: val })}
                                 placeholder="Pilih Status Izin..."
                                 required={true}
+                                tooltipText="Pilih legalitas yang dimiliki."
                             />
                             {data.economics_businessPermit.includes('Lainnya') && (
                                 <div className="animate-fadeIn mt-2">
@@ -547,7 +556,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 </div>
                             )}
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                             {/* Cara Pemasaran */}
                             <div className="space-y-2">
                                 <FormMultiSelect
@@ -558,6 +567,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     onChange={(val) => update({ economics_businessMarketing: val })}
                                     placeholder="Pilih Cara Pemasaran (Bisa > 1)..."
                                     required={true}
+                                    tooltipText="Metode utama menjual produk/jasa."
                                 />
                                 {data.economics_businessMarketing.includes('Lainnya') && (
                                     <div className="mt-2 animate-fadeIn">
@@ -583,6 +593,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_businessMarketArea: val })}
                                 placeholder="Pilih Wilayah Pemasaran..."
                                 required={true}
+                                tooltipText="Jangkauan pembeli."
                             />
 
                             {/* Tantangan Utama */}
@@ -595,6 +606,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     onChange={(val) => update({ economics_businessIssues: val })}
                                     placeholder="Pilih Tantangan (Bisa > 1)..."
                                     required={true}
+                                    tooltipText="Kendala yang paling sering dihadapi."
                                 />
                                 {data.economics_businessIssues.includes('Lainnya') && (
                                     <div className="mt-2 animate-fadeIn">
@@ -620,6 +632,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_businessNeeds: val })}
                                 placeholder="Pilih Dukungan (Bisa > 1)..."
                                 required={true}
+                                tooltipText="Bantuan yang paling diharapkan untuk mengembangkan usaha."
                             />
 
                             {/* Pengetahuan Berbagi */}
@@ -632,6 +645,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_businessSharing: val as 'Ya' | 'Tidak' })}
                                 columns={2}
                                 required={true}
+                                tooltipText="Kesediaan menjadi narasumber atau mentor."
                             />
 
                             {/* Minat Pelatihan */}
@@ -644,6 +658,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     onChange={(val) => update({ economics_businessTraining: val })}
                                     placeholder="Pilih Minat (Bisa > 1)..."
                                     required={true}
+                                    tooltipText="Jenis pelatihan yang diinginkan."
                                 />
                                 {data.economics_businessTraining.includes('Lainnya') && (
                                     <div className="mt-2 animate-fadeIn">
@@ -682,6 +697,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         onChange={(val) => update({ economics_houseStatus: val })}
                         placeholder="Pilih Status Rumah..."
                         required={true}
+                        tooltipText="Status kepemilikan tempat tinggal saat ini."
                     />
 
                     {/* Tipe Rumah */}
@@ -696,6 +712,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         }}
                         placeholder="Pilih Tipe Rumah..."
                         required={true}
+                        tooltipText="Kondisi bangunan fisik rumah."
                     />
 
                     {/* IMB (Conditional) */}
@@ -709,15 +726,16 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                 onChange={(val) => update({ economics_houseIMB: val })}
                                 columns={2}
                                 required={true}
+                                tooltipText="Legalitas bangunan tempat tinggal."
                             />
                         </div>
                     )}
                 </div>
 
                 {/* Kepemilikan Aset */}
-                <div className="space-y-6">
+                <div className="space-y-6 pt-4">
                     <div className="space-y-4">
-                        <SectionHeader title="Apakah keluarga bapak/ibu memiliki aset Transportasi/Elektronik/Lahan?" />
+                        <SectionHeader title="Apakah keluarga bapak/ibu memiliki aset Transportasi/Elektronik/Lahan?" tooltipText="Pilih Ya jika memiliki salah satu atau lebih aset berharga." />
                         <FormRadioGroup
                             name="hasAssets"
                             options={['Ya', 'Tidak ada']}

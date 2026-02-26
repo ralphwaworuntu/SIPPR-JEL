@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { type FormData } from '../../types';
 import SectionHeader from '../ui/SectionHeader';
 import FormRadioGroup from '../ui/FormRadioGroup';
+import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
     data: FormData;
@@ -93,10 +94,10 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 1. Jumlah Anggota Keluarga */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Keluarga" description="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga Di Luar Kupang" />
+                <SectionHeader title="Jumlah Anggota Keluarga" description="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga Di Luar Kupang" tooltipText="Masukkan total jumlah anggota keluarga (termasuk KK) sesuai Kartu Keluarga." />
                 <div className="flex flex-col gap-4">
                     <div className="max-w-[200px] flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota Keluarga</label>
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anggota Keluarga <FormTooltip text="Berapa total anggota keluarga Anda di rumah ini?" /></label>
                         <CountSelect
                             id="familyMembers"
                             value={data.familyMembers}
@@ -122,7 +123,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Laki-laki</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Laki-laki <FormTooltip text="Jumlah anggota keluarga laki-laki." /></label>
                                     <CountSelect
                                         id="familyMembersMale"
                                         value={data.familyMembersMale}
@@ -132,7 +133,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Perempuan</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Perempuan <FormTooltip text="Jumlah anggota keluarga perempuan." /></label>
                                     <CountSelect
                                         id="familyMembersFemale"
                                         value={data.familyMembersFemale}
@@ -156,7 +157,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 2. Di Luar Kupang */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Keluarga yang menetap di luar Kota Kupang" />
+                <SectionHeader title="Jumlah Anggota Keluarga yang menetap di luar Kota Kupang" tooltipText="Masukkan jumlah jika ada anggota keluarga yang tercatat di KK tetapi tinggal di luar atau dinas dll." />
                 <div className="max-w-[200px]">
                     <CountSelect id="familyMembersOutside" value={data.familyMembersOutside} onChange={(val) => update({ familyMembersOutside: val })} max={totalMembers} placeholder="Jumlah..." />
                 </div>
@@ -164,10 +165,10 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 3. Sidi Members */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Sidi" />
+                <SectionHeader title="Jumlah Anggota Sidi" tooltipText="Berapa orang dalam KK ini yang sudah dikonfirmasi/Sidi." />
                 <div className="flex flex-col gap-4">
                     <div className="max-w-[200px] flex flex-col gap-1.5">
-                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total Anggota Sidi</label>
+                        <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anggota Sidi <FormTooltip text="Total anggota Sidi di keluarga ini." /></label>
                         <CountSelect
                             id="familyMembersSidi"
                             value={data.familyMembersSidi}
@@ -185,7 +186,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         <div className="space-y-4 animate-fadeIn pl-4 border-l-2 border-primary/20">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Sidi Laki-laki</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Sidi Laki-laki <FormTooltip text="Jumlah anggota Sidi laki-laki." /></label>
                                     <CountSelect
                                         id="familyMembersSidiMale"
                                         value={data.familyMembersSidiMale}
@@ -195,7 +196,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400">Sidi Perempuan</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Sidi Perempuan <FormTooltip text="Jumlah anggota Sidi perempuan." /></label>
                                     <CountSelect
                                         id="familyMembersSidiFemale"
                                         value={data.familyMembersSidiFemale}
@@ -218,8 +219,8 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
             </div>
 
             {/* 4. Not Sidi */}
-            <div className="space-y-4">
-                <SectionHeader title="Anggota Keluarga (18 tahun ke atas) yang belum Sidi" />
+            <div className="space-y-4 z-10 relative">
+                <SectionHeader title="Anggota Keluarga (18 tahun ke atas) yang belum Sidi" tooltipText="Jumlah anggota yang belum Sidi (kalkulasi otomatis berdasarkan total anggota yang tidak Sidi dikurangi anggota sekolah minggu/yang belum Baptis jika ada secara logis, atau hanya menampilkan sisa belum sidi secara umum)." />
                 <div className="max-w-[300px]">
                     <div className="w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
                         {data.familyMembersNonSidi || '0'} Orang
@@ -265,15 +266,15 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
             </div>
 
             {/* 5 Not Baptized */}
-            <div className="space-y-4">
-                <SectionHeader title="Anggota Keluarga (usia 0 tahun ke atas) yang belum di Baptis" />
+            <div className="space-y-4 z-10 relative">
+                <SectionHeader title="Anggota Keluarga (usia 0 tahun ke atas) yang belum di Baptis" tooltipText="Total anggota dalam keluarga yang belum melangsungkan Baptisan." />
                 <div className="max-w-[200px]">
                     <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => update({ familyMembersNonBaptized: val })} max={parseInt(data.familyMembersNonSidi || '0')} />
                 </div>
             </div>
 
             {/* 6. Diakonia Recipient */}
-            <div className="space-y-4">
+            <div className="space-y-4 z-10 relative">
                 <SectionHeader title="Apakah penerima Diakonia dari GMIT JEL?" />
                 <FormRadioGroup
                     name="diakonia_recipient"
@@ -288,17 +289,18 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         }
                     }}
                     columns={2}
+                    tooltipText="Bantuan apa saja yang disalurkan oleh gereja/diakonia untuk kebutuhan dasar atau insidentil."
                 />
             </div>
 
             {/* 7. Diakonia Details (Conditional) */}
             {data.diakonia_recipient === 'Ya' && (
-                <div className="space-y-4">
+                <div className="space-y-4 z-10 relative">
                     <SectionHeader title="Tahun berapa dan Diakonia apa saja?" />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Year Select */}
                         <div className="flex flex-col gap-1.5">
-                            <label htmlFor="diakonia_year" className="text-xs font-semibold text-slate-600 dark:text-slate-400">Tahun Penerimaan</label>
+                            <label htmlFor="diakonia_year" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Tahun Penerimaan <FormTooltip text="Pilih tahun terakhir menerima bantuan Diakonia." /></label>
                             <div className="relative">
                                 <select
                                     id="diakonia_year"
@@ -316,8 +318,8 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                         </div>
                     </div>
                     {/* Diakonia Type Textarea */}
-                    <div className="flex flex-col gap-1.5">
-                        <label htmlFor="diakonia_type" className="text-xs font-semibold text-slate-600 dark:text-slate-400">Jenis Diakonia yang Diterima</label>
+                    <div className="flex flex-col gap-1.5 relative z-10">
+                        <label htmlFor="diakonia_type" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Jenis Diakonia yang Diterima <FormTooltip text="Contoh: Sembako, bantuan tunai, dll." /></label>
                         <textarea
                             id="diakonia_type"
                             className={textareaClass}

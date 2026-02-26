@@ -22,8 +22,15 @@ export interface FormData {
     fullName: string;
     gender: 'Laki-laki' | 'Perempuan' | '';
     dateOfBirth: string;
+    bloodType: string;
+    maritalStatus: string;
+    marriageDate: string;
+    marriageType: string[];
     phone: string;
     address: string;
+    city: string;
+    district: string;
+    subdistrict: string;
     lingkungan: string;
     rayon: string;
     familyMembers: string; // To be deprecated or used as total
@@ -77,6 +84,8 @@ export interface FormData {
     education_unemployed_sma: number;
     education_unemployed_university: number; // Added
     education_working: number;
+    education_hasScholarship: 'Ya' | 'Tidak' | '';
+    education_scholarshipType: string;
 
     // Step 5: Economics
     economics_headOccupation: string;
@@ -179,8 +188,15 @@ export const initialFormData: FormData = {
     fullName: '',
     gender: '',
     dateOfBirth: '',
+    bloodType: '',
+    maritalStatus: '',
+    marriageDate: '',
+    marriageType: [],
     phone: '',
     address: '',
+    city: '',
+    district: '',
+    subdistrict: '',
     lingkungan: '',
     rayon: '',
     familyMembers: '',
@@ -224,6 +240,8 @@ export const initialFormData: FormData = {
     education_unemployed_sma: 0,
     education_unemployed_university: 0,
     education_working: 0,
+    education_hasScholarship: '',
+    education_scholarshipType: '',
 
     // Step 5: Economics
     economics_headOccupation: '',

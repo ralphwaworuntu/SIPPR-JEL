@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface FormRadioGroupProps {
-    label?: string;
+    label?: string | React.ReactNode;
     required?: boolean;
     name: string;
     options: string[];
@@ -9,6 +9,7 @@ interface FormRadioGroupProps {
     onChange: (value: string) => void;
     columns?: 1 | 2 | 3 | 4;
     id?: string;
+    tooltipText?: React.ReactNode;
 }
 
 const colClasses: Record<number, string> = {
@@ -26,14 +27,51 @@ const FormRadioGroup: React.FC<FormRadioGroupProps> = ({
     value,
     onChange,
     columns = 2,
-    id
+    id,
+    tooltipText,
 }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const tooltipRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!showTooltip) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+                setShowTooltip(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showTooltip]);
+
     return (
         <div className="flex flex-col group relative">
             {label && (
-                <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300">
+                <label className="text-slate-800 dark:text-slate-100 text-sm font-bold leading-normal pb-2 flex items-center gap-1 group-focus-within:text-primary transition-colors duration-300 relative z-10">
                     {label}
                     {required && <span className="text-red-500">*</span>}
+                    {tooltipText && (
+                        <div className="relative inline-flex items-center ml-1" ref={tooltipRef}>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setShowTooltip(!showTooltip);
+                                }}
+                                className="text-slate-400 hover:text-primary transition-colors focus:outline-none flex items-center bg-transparent border-none p-0 cursor-pointer"
+                                aria-label="Petunjuk pengisian"
+                            >
+                                <span className="material-symbols-outlined text-[5px]">help</span>
+                            </button>
+
+                            {showTooltip && (
+                                <div className="absolute left-[-10px] bottom-full mb-2 w-64 p-3 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-xl shadow-xl z-[100] border border-slate-700 dark:border-slate-700 font-normal leading-relaxed cursor-auto pointer-events-auto">
+                                    {tooltipText}
+                                    <div className="absolute -bottom-[5px] left-4 w-2.5 h-2.5 bg-slate-900 dark:bg-slate-800 border-b border-r border-slate-700 transform rotate-45"></div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </label>
             )}
             <div className={`grid ${colClasses[columns]} gap-2.5`} id={id}>
