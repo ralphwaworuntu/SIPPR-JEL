@@ -210,7 +210,16 @@ const AdminReports = () => {
                 let kondisi = [];
                 let detail = [];
                 if (isChronic) { kondisi.push('Sakit Kronis'); detail.push((m.health_chronicDisease || []).join(', ')); }
-                if (isDisability) { kondisi.push('Disabilitas'); detail.push((m.health_disabilityPhysical || []).join(', ')); }
+                if (isDisability) {
+                    kondisi.push('Disabilitas');
+                    const allDisabilities = [
+                        ...(m.health_disabilityPhysical || []),
+                        ...(m.health_disabilityIntellectual || []),
+                        ...(m.health_disabilityMental || []),
+                        ...(m.health_disabilitySensory || [])
+                    ];
+                    detail.push(allDisabilities.join(', '));
+                }
                 return [(i + 1).toString(), m.name, kondisi.join(' & '), detail.join(' | ') || '-'];
             });
         } else if (type === 'relawan') {

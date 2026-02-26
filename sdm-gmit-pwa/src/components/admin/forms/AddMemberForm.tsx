@@ -91,7 +91,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         diakonia_recipient: initialData?.diakonia_recipient || '',
         diakonia_year: initialData?.diakonia_year || '',
         diakonia_type: initialData?.diakonia_type || '',
-        educationLevel: initialData?.education || initialData?.educationLevel || '',
+        educationLevel: initialData?.educationLevel || '',
         major: initialData?.major || '',
         jobCategory: initialData?.jobCategory || '',
         jobTitle: initialData?.jobTitle || '',

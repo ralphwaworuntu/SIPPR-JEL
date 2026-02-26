@@ -83,11 +83,10 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
         doc.text("Rayon", 5, startY + lh * 3); doc.setFont("helvetica", "bold"); doc.text(`: ${member.rayon || '-'}`, 30, startY + lh * 3); doc.setFont("helvetica", "normal");
         doc.text("Gender", 5, startY + lh * 4); doc.setFont("helvetica", "bold"); doc.text(`: ${member.gender || '-'}`, 30, startY + lh * 4); doc.setFont("helvetica", "normal");
         doc.text("Usia / Tgl Lahir", 5, startY + lh * 5); doc.setFont("helvetica", "bold"); doc.text(`: ${calculateAge(member.birthDate)} thn / ${member.birthDate}`, 30, startY + lh * 5); doc.setFont("helvetica", "normal");
-        doc.text("Pendidikan", 5, startY + lh * 6); doc.setFont("helvetica", "bold"); doc.text(`: ${member.education || '-'}`, 30, startY + lh * 6); doc.setFont("helvetica", "normal");
-        doc.text("Pekerjaan", 5, startY + lh * 7); doc.setFont("helvetica", "bold"); doc.text(`: ${member.job || '-'}`, 30, startY + lh * 7); doc.setFont("helvetica", "normal");
-        doc.text("Status Gerejawi", 5, startY + lh * 8); doc.setFont("helvetica", "bold"); doc.text(`: ${member.statusGerejawi || '-'}`, 30, startY + lh * 8); doc.setFont("helvetica", "normal");
-        doc.text("Relawan", 5, startY + lh * 9); doc.setFont("helvetica", "bold"); doc.text(`: ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe) ? 'Aktif' : member.willingnessToServe === 'On-demand' ? 'On-demand' : '-'}`, 30, startY + lh * 9); doc.setFont("helvetica", "normal");
-        doc.text("BPJS Kes", 5, startY + lh * 10); doc.setFont("helvetica", "bold"); doc.text(`: ${member.health_hasBPJS || '-'}`, 30, startY + lh * 10); doc.setFont("helvetica", "normal");
+        doc.text("Pendidikan", 5, startY + lh * 6); doc.setFont("helvetica", "bold"); doc.text(`: ${member.educationLevel || '-'}`, 30, startY + lh * 6); doc.setFont("helvetica", "normal");
+        doc.text("Pekerjaan", 5, startY + lh * 7); doc.setFont("helvetica", "bold"); doc.text(`: ${member.jobCategory || '-'}`, 30, startY + lh * 7); doc.setFont("helvetica", "normal");
+        doc.text("Relawan", 5, startY + lh * 8); doc.setFont("helvetica", "bold"); doc.text(`: ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe) ? 'Aktif' : member.willingnessToServe === 'On-demand' ? 'On-demand' : '-'}`, 30, startY + lh * 8); doc.setFont("helvetica", "normal");
+        doc.text("BPJS Kes", 5, startY + lh * 9); doc.setFont("helvetica", "bold"); doc.text(`: ${member.health_hasBPJS || '-'}`, 30, startY + lh * 9); doc.setFont("helvetica", "normal");
 
         const addr = member.address ? (member.address.length > 50 ? member.address.substring(0, 50) + "..." : member.address) : '-';
         doc.text("Alamat", 5, startY + lh * 11); doc.setFont("helvetica", "bold"); doc.text(`: ${addr}`, 30, startY + lh * 11); doc.setFont("helvetica", "normal");
@@ -116,7 +115,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                     <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-[60px] -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
 
                     <div className="size-16 rounded-full bg-slate-800 flex items-center justify-center text-white text-2xl font-black border-[3px] border-slate-700 shadow-inner z-10 shrink-0">
-                        {member.initials || "JEL"}
+                        {member.name?.charAt(0) || "?"}
                     </div>
 
                     <div className="flex-1 z-10 w-full flex flex-col sm:flex-row justify-between sm:items-center gap-2">
@@ -131,7 +130,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-primary">signpost</span> Ling. {member.lingkungan} / Rayon {member.rayon}</span>
                                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-primary">cake</span> {calculateAge(member.birthDate)} Tahun</span>
                                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-primary">family_restroom</span> {member.familyMembers || 0} Anggota Keluarga</span>
-                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-primary">work</span> {member.jobCategory || member.job || '-'}</span>
+                                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-primary">work</span> {member.jobCategory || '-'}</span>
                             </div>
                         </div>
                     </div>
@@ -212,7 +211,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
 
                         {/* Backward compatibility for head of household profession */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 pt-3 mt-1">
-                            <DetailRow label="Pendidikan KK" value={member.education} />
+                            <DetailRow label="Pendidikan KK" value={member.educationLevel} />
                             <DetailRow label="Kategori Pekerjaan KK" value={member.jobCategory} />
                             {(member.interestAreas?.length > 0 || member.contributionTypes?.length > 0) && (
                                 <div className="col-span-1 sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 bg-slate-100/50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
