@@ -63,6 +63,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             if (calculatedNonSidi === '0' && data.familyMembersNonBaptized !== '0') {
                 updates.familyMembersNonBaptized = '0';
+                updates.familyMembersNonBaptizedNames = [];
             }
 
             if (Object.keys(updates).length > 0) {
@@ -111,7 +112,8 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
                                 familyMembersSidiFemale: '',
                                 familyMembersNonBaptized: '',
                                 familyMembersNonSidi: '',
-                                familyMembersNonSidiNames: []
+                                familyMembersNonSidiNames: [],
+                                familyMembersNonBaptizedNames: []
                             })}
                             max={20}
                             startFrom={1}
@@ -269,9 +271,53 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
             <div className="space-y-4 z-10 relative">
                 <SectionHeader title="Anggota Keluarga (usia 0 tahun ke atas) yang belum di Baptis" tooltipText="Total anggota dalam keluarga yang belum melangsungkan Baptisan." />
                 <div className="max-w-[200px]">
-                    <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => update({ familyMembersNonBaptized: val })} max={parseInt(data.familyMembersNonSidi || '0')} />
+                    <CountSelect id="familyMembersNonBaptized" value={data.familyMembersNonBaptized} onChange={(val) => {
+                        const count = parseInt(val || '0');
+                        const currentNames = data.familyMembersNonBaptizedNames || [];
+                        update({
+                            familyMembersNonBaptized: val,
+                            familyMembersNonBaptizedNames: Array.from({ length: count }, (_, i) => currentNames[i] || '')
+                        });
+                    }} max={parseInt(data.familyMembersNonSidi || '0')} />
                 </div>
             </div>
+
+            {/* Dynamic Name Fields for Non Baptized */}
+            {parseInt(data.familyMembersNonBaptized || '0') > 0 && (
+                <div className="mt-4 p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4 max-w-2xl">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                            Nama Anggota Belum Baptis
+                        </h4>
+                    </div>
+                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
+                        Silakan masukkan nama lengkap anggota keluarga (usia 0 tahun ke atas) yang belum mengikuti Baptisan.
+                    </p>
+
+                    <div className="space-y-3">
+                        {Array.from({ length: parseInt(data.familyMembersNonBaptized || '0') }).map((_, idx) => (
+                            <div key={`non-baptized-${idx}`} className="relative flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
+                                <input
+                                    type="text"
+                                    value={data.familyMembersNonBaptizedNames?.[idx] || ''}
+                                    onChange={(e) => {
+                                        const newNames = [...(data.familyMembersNonBaptizedNames || [])];
+                                        newNames[idx] = e.target.value;
+                                        update({ familyMembersNonBaptizedNames: newNames });
+                                    }}
+                                    placeholder={`Masukkan Nama Anggota ${idx + 1}`}
+                                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
+                                    required
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* 6. Diakonia Recipient */}
             <div className="space-y-4 z-10 relative">
@@ -294,44 +340,46 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
             </div>
 
             {/* 7. Diakonia Details (Conditional) */}
-            {data.diakonia_recipient === 'Ya' && (
-                <div className="space-y-4 z-10 relative">
-                    <SectionHeader title="Tahun berapa dan Diakonia apa saja?" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Year Select */}
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="diakonia_year" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Tahun Penerimaan <FormTooltip text="Pilih tahun terakhir menerima bantuan Diakonia." /></label>
-                            <div className="relative">
-                                <select
-                                    id="diakonia_year"
-                                    className={selectClass}
-                                    value={data.diakonia_year}
-                                    onChange={(e) => update({ diakonia_year: e.target.value })}
-                                >
-                                    <option value="">Pilih Tahun...</option>
-                                    {yearOptions.map((year) => (
-                                        <option key={year} value={year}>{year}</option>
-                                    ))}
-                                </select>
-                                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+            {
+                data.diakonia_recipient === 'Ya' && (
+                    <div className="space-y-4 z-10 relative">
+                        <SectionHeader title="Tahun berapa dan Diakonia apa saja?" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Year Select */}
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="diakonia_year" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Tahun Penerimaan <FormTooltip text="Pilih tahun terakhir menerima bantuan Diakonia." /></label>
+                                <div className="relative">
+                                    <select
+                                        id="diakonia_year"
+                                        className={selectClass}
+                                        value={data.diakonia_year}
+                                        onChange={(e) => update({ diakonia_year: e.target.value })}
+                                    >
+                                        <option value="">Pilih Tahun...</option>
+                                        {yearOptions.map((year) => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </select>
+                                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">expand_more</span>
+                                </div>
                             </div>
                         </div>
+                        {/* Diakonia Type Textarea */}
+                        <div className="flex flex-col gap-1.5 relative z-10">
+                            <label htmlFor="diakonia_type" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Jenis Diakonia yang Diterima <FormTooltip text="Contoh: Sembako, bantuan tunai, dll." /></label>
+                            <textarea
+                                id="diakonia_type"
+                                className={textareaClass}
+                                value={data.diakonia_type}
+                                onChange={(e) => update({ diakonia_type: e.target.value })}
+                                placeholder="Tuliskan jenis diakonia yang pernah diterima..."
+                                rows={3}
+                            />
+                        </div>
                     </div>
-                    {/* Diakonia Type Textarea */}
-                    <div className="flex flex-col gap-1.5 relative z-10">
-                        <label htmlFor="diakonia_type" className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Jenis Diakonia yang Diterima <FormTooltip text="Contoh: Sembako, bantuan tunai, dll." /></label>
-                        <textarea
-                            id="diakonia_type"
-                            className={textareaClass}
-                            value={data.diakonia_type}
-                            onChange={(e) => update({ diakonia_type: e.target.value })}
-                            placeholder="Tuliskan jenis diakonia yang pernah diterima..."
-                            rows={3}
-                        />
-                    </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 export default Step2Professional;

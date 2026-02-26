@@ -121,7 +121,6 @@ const FormPage = () => {
                 if (!formData.familyMembersNonBaptized) return handleValidationError('familyMembersNonBaptized', "Mohon isi Anggota belum di Baptis");
                 if (!formData.familyMembersNonSidi) return handleValidationError('familyMembersNonSidi', "Mohon isi Anggota belum Sidi");
 
-                // Validate non sidi names
                 const nonSidiCount = parseInt(formData.familyMembersNonSidi || '0');
                 if (nonSidiCount > 0) {
                     if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length !== nonSidiCount) {
@@ -130,6 +129,19 @@ const FormPage = () => {
                     for (let i = 0; i < nonSidiCount; i++) {
                         if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
                             return handleValidationError('familyMembersNonSidiNames', `Mohon isi Nama Anggota Belum Sidi ke-${i + 1}`);
+                        }
+                    }
+                }
+
+                // Validate non baptized names
+                const nonBaptizedCount = parseInt(formData.familyMembersNonBaptized || '0');
+                if (nonBaptizedCount > 0) {
+                    if (!formData.familyMembersNonBaptizedNames || formData.familyMembersNonBaptizedNames.length !== nonBaptizedCount) {
+                        return handleValidationError('familyMembersNonBaptizedNames', "Mohon lengkapi seluruh Nama Anggota Belum Baptis");
+                    }
+                    for (let i = 0; i < nonBaptizedCount; i++) {
+                        if (!formData.familyMembersNonBaptizedNames[i] || formData.familyMembersNonBaptizedNames[i].trim() === '') {
+                            return handleValidationError('familyMembersNonBaptizedNames', `Mohon isi Nama Anggota Belum Baptis ke-${i + 1}`);
                         }
                     }
                 }
@@ -219,11 +231,20 @@ const FormPage = () => {
                     return handleValidationError('spouseOccupationOther', "Mohon lengkapi Pekerjaan Utama Istri yang dipilih Lainnya");
                 }
 
+                if (!formData.economics_headIncomeRange) return handleValidationError('headIncomeRange', "Mohon pilih Range Pendapatan Utama Kepala Keluarga");
+                if (formData.economics_headIncomeRange === '≥ Rp 5.000.000' && !formData.economics_headIncomeRangeDetailed) {
+                    return handleValidationError('headIncomeRangeDetailed', "Mohon pilih Detail Range Pendapatan Kepala Keluarga");
+                }
+
+                if (formData.economics_spouseIncomeRange === '≥ Rp 5.000.000' && !formData.economics_spouseIncomeRangeDetailed) {
+                    return handleValidationError('spouseIncomeRangeDetailed', "Mohon pilih Detail Range Pendapatan Istri/Suami");
+                }
+
                 if (!formData.economics_incomeRange) return handleValidationError('incomeRange', "Mohon pilih Range Pendapatan Rumah Tangga");
 
                 // Validate detailed income range if >= 5jt
                 if (formData.economics_incomeRange === '≥ Rp 5.000.000' && !formData.economics_incomeRangeDetailed) {
-                    return handleValidationError('incomeRange', "Mohon pilih Detail Range Pendapatan");
+                    return handleValidationError('incomeRangeDetailed', "Mohon pilih Detail Range Pendapatan");
                 }
 
                 // Validate Expenses
@@ -269,16 +290,16 @@ const FormPage = () => {
 
                     if (!formData.economics_businessMarketArea) return handleValidationError('businessMarketArea', "Mohon pilih Wilayah Pemasaran");
 
-                    if (!formData.economics_businessIssues || formData.economics_businessIssues.length === 0) return handleValidationError('businessIssues', "Mohon pilih Tantangan Utama");
-                    if (formData.economics_businessIssues.includes('Lainnya') && !formData.economics_businessIssuesOther) return handleValidationError('businessIssues', "Mohon lengkapi Tantangan Utama lainnya");
+                    if (!formData.economics_businessIssues) return handleValidationError('businessIssues', "Mohon pilih Tantangan Utama");
+                    if (formData.economics_businessIssues === 'Lainnya' && !formData.economics_businessIssuesOther) return handleValidationError('businessIssues', "Mohon lengkapi Tantangan Utama lainnya");
 
-                    if (!formData.economics_businessNeeds || formData.economics_businessNeeds.length === 0) return handleValidationError('businessNeeds', "Mohon pilih Dukungan yang Dibutuhkan");
-                    if (formData.economics_businessNeeds.includes('Lainnya') && !formData.economics_businessNeedsOther) return handleValidationError('businessNeeds', "Mohon lengkapi Dukungan lainnya");
+                    if (!formData.economics_businessNeeds) return handleValidationError('businessNeeds', "Mohon pilih Dukungan yang Dibutuhkan");
+                    if (formData.economics_businessNeeds === 'Lainnya' && !formData.economics_businessNeedsOther) return handleValidationError('businessNeeds', "Mohon lengkapi Dukungan lainnya");
 
                     if (!formData.economics_businessSharing) return handleValidationError('businessSharing', "Mohon pilih Kesediaan Berbagi Ilmu");
 
-                    if (!formData.economics_businessTraining || formData.economics_businessTraining.length === 0) return handleValidationError('businessTraining', "Mohon pilih Minat Pelatihan");
-                    if (formData.economics_businessTraining.includes('Lainnya') && !formData.economics_businessTrainingOther) return handleValidationError('businessTraining', "Mohon lengkapi Minat Pelatihan lainnya");
+                    if (!formData.economics_businessTraining) return handleValidationError('businessTraining', "Mohon pilih Minat Pelatihan");
+                    if (formData.economics_businessTraining === 'Lainnya' && !formData.economics_businessTrainingOther) return handleValidationError('businessTraining', "Mohon lengkapi Minat Pelatihan lainnya");
                 }
 
                 // Validate Home & Assets
@@ -315,7 +336,7 @@ const FormPage = () => {
                 }
 
                 if (!formData.economics_landStatus) return handleValidationError('landStatus', "Mohon pilih Status Kepemilikan Tanah");
-                if (!formData.economics_waterSource) return handleValidationError('waterSource', "Mohon pilih Sumber Air Minum Utama");
+                if (!formData.economics_waterSource || formData.economics_waterSource.length === 0) return handleValidationError('waterSource', "Mohon pilih Sumber Air Minum Utama");
 
                 if (formData.economics_electricity_capacities.length === 0) {
                     return handleValidationError('electricity_capacities', "Mohon pilih minimal satu Daya Listrik Terpasang");

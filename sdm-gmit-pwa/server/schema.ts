@@ -74,6 +74,7 @@ export const congregants = mysqlTable("congregants", {
     familyMembersNonBaptized: int("family_members_non_baptized"),
     familyMembersNonSidi: int("family_members_non_sidi"),
     familyMembersNonSidiNames: json("family_members_non_sidi_names"), // string[]
+    familyMembersNonBaptizedNames: json("family_members_non_baptized_names"), // string[]
 
     // Step 2: Diakonia
     diakoniaRecipient: varchar("diakonia_recipient", { length: 10 }),
@@ -120,8 +121,12 @@ export const congregants = mysqlTable("congregants", {
     // Step 5: Economics — Occupation & Income
     economicsHeadOccupation: varchar("economics_head_occupation", { length: 100 }),
     economicsHeadOccupationOther: varchar("economics_head_occupation_other", { length: 100 }),
+    economicsHeadIncomeRange: varchar("economics_head_income_range", { length: 50 }),
+    economicsHeadIncomeRangeDetailed: varchar("economics_head_income_range_detailed", { length: 50 }),
     economicsSpouseOccupation: varchar("economics_spouse_occupation", { length: 100 }),
     economicsSpouseOccupationOther: varchar("economics_spouse_occupation_other", { length: 100 }),
+    economicsSpouseIncomeRange: varchar("economics_spouse_income_range", { length: 50 }),
+    economicsSpouseIncomeRangeDetailed: varchar("economics_spouse_income_range_detailed", { length: 50 }),
     economicsIncomeRange: varchar("economics_income_range", { length: 50 }),
     economicsIncomeRangeDetailed: varchar("economics_income_range_detailed", { length: 50 }),
 
@@ -153,12 +158,12 @@ export const congregants = mysqlTable("congregants", {
     economicsBusinessMarketing: json("economics_business_marketing"), // string[]
     economicsBusinessMarketingOther: varchar("economics_business_marketing_other", { length: 100 }),
     economicsBusinessMarketArea: varchar("economics_business_market_area", { length: 100 }),
-    economicsBusinessIssues: json("economics_business_issues"), // string[]
+    economicsBusinessIssues: varchar("economics_business_issues", { length: 255 }),
     economicsBusinessIssuesOther: varchar("economics_business_issues_other", { length: 100 }),
-    economicsBusinessNeeds: json("economics_business_needs"), // string[]
+    economicsBusinessNeeds: varchar("economics_business_needs", { length: 255 }),
     economicsBusinessNeedsOther: varchar("economics_business_needs_other", { length: 100 }),
     economicsBusinessSharing: varchar("economics_business_sharing", { length: 10 }),
-    economicsBusinessTraining: json("economics_business_training"), // string[]
+    economicsBusinessTraining: varchar("economics_business_training", { length: 255 }),
     economicsBusinessTrainingOther: varchar("economics_business_training_other", { length: 100 }),
 
     // Step 5: Home & Assets
@@ -176,7 +181,7 @@ export const congregants = mysqlTable("congregants", {
     economicsAssetInternetQty: int("economics_asset_internet_qty").default(0),
     economicsAssetLahanQty: int("economics_asset_lahan_qty").default(0),
     economicsLandStatus: varchar("economics_land_status", { length: 50 }),
-    economicsWaterSource: varchar("economics_water_source", { length: 50 }),
+    economicsWaterSource: json("economics_water_source"),
     economicsElectricityCapacities: json("economics_electricity_capacities"), // string[]
     economicsElectricity450Qty: int("economics_electricity_450_qty").default(0),
     economicsElectricity900Qty: int("economics_electricity_900_qty").default(0),

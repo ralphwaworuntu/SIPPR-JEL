@@ -404,13 +404,13 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                                 {member.economics_businessIssues?.length > 0 && (
                                                     <div className="p-3 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20">
                                                         <span className="block text-[10px] uppercase font-bold text-red-600 dark:text-red-400 mb-2">Tantangan Usaha</span>
-                                                        <TagList items={member.economics_businessIssues} color="red" />
+                                                        <TagList items={[member.economics_businessIssues].filter(Boolean)} color="red" />
                                                     </div>
                                                 )}
                                                 {member.economics_businessNeeds?.length > 0 && (
                                                     <div className="p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
                                                         <span className="block text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-2">Kebutuhan Dukungan</span>
-                                                        <TagList items={member.economics_businessNeeds} color="blue" />
+                                                        <TagList items={[member.economics_businessNeeds].filter(Boolean)} color="blue" />
                                                     </div>
                                                 )}
                                             </div>
@@ -428,7 +428,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                                 {member.economics_businessTraining?.length > 0 && (
                                                     <div className="pt-1 border-t border-emerald-100/50 dark:border-emerald-800/30">
                                                         <span className="text-[10px] block font-medium text-emerald-700/70 mb-1">Topik Pelatihan Diminati:</span>
-                                                        <TagList items={member.economics_businessTraining} color="green" />
+                                                        <TagList items={[member.economics_businessTraining].filter(Boolean)} color="green" />
                                                     </div>
                                                 )}
                                             </div>

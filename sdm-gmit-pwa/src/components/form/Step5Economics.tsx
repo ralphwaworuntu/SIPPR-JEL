@@ -46,6 +46,22 @@ const detailedIncomeRanges = [
     '> Rp 20.000.000'
 ];
 
+const getIncomeNumericValues = (range: string, detailed: string) => {
+    if (range === '≥ Rp 5.000.000') {
+        if (detailed === 'Rp 5.000.000 - 10.000.000') return { min: 5000000, max: 10000000 };
+        if (detailed === 'Rp 10.000.000 - 20.000.000') return { min: 10000000, max: 20000000 };
+        if (detailed === '> Rp 20.000.000') return { min: 20000000, max: Infinity };
+        return { min: 5000000, max: Infinity };
+    }
+    if (range === '< Rp 500.000') return { min: 0, max: 499999 };
+    if (range === 'Rp 500.000 - 999.000') return { min: 500000, max: 999000 };
+    if (range === 'Rp 1.000.000 - 1.999.000') return { min: 1000000, max: 1999000 };
+    if (range === 'Rp 2.000.000 - 2.999.000') return { min: 2000000, max: 2999000 };
+    if (range === 'Rp 3.000.000 - 3.999.000') return { min: 3000000, max: 3999000 };
+    if (range === 'Rp 4.000.000 - 4.999.000') return { min: 4000000, max: 4999000 };
+    return { min: 0, max: 0 };
+};
+
 const selectClass = "w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white hover:border-primary/40 focus:border-primary focus:ring-4 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.2)] outline-none transition-all duration-300 appearance-none text-sm";
 
 const CountSelect = ({ id, value, onChange, max = 20, startFrom = 0, placeholder = 'Pilih...', required = false }: {
@@ -145,13 +161,13 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     }, [data.economics_businessMarketing]);
 
     useEffect(() => {
-        if (data.economics_businessIssues.includes('Lainnya') && businessIssuesOtherRef.current) {
+        if (data.economics_businessIssues === 'Lainnya' && businessIssuesOtherRef.current) {
             businessIssuesOtherRef.current.focus();
         }
     }, [data.economics_businessIssues]);
 
     useEffect(() => {
-        if (data.economics_businessTraining.includes('Lainnya') && businessTrainingOtherRef.current) {
+        if (data.economics_businessTraining === 'Lainnya' && businessTrainingOtherRef.current) {
             businessTrainingOtherRef.current.focus();
         }
     }, [data.economics_businessTraining]);
@@ -163,12 +179,46 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     }, [data.economics_spouseOccupation]);
 
     useEffect(() => {
-        if (data.economics_incomeRange !== '≥ Rp 5.000.000') {
-            if (data.economics_incomeRangeDetailed) {
-                update({ economics_incomeRangeDetailed: '' });
+        const head = getIncomeNumericValues(data.economics_headIncomeRange || '', data.economics_headIncomeRangeDetailed || '');
+        const spouse = getIncomeNumericValues(data.economics_spouseIncomeRange || '', data.economics_spouseIncomeRangeDetailed || '');
+
+        const totalMin = head.min + spouse.min;
+
+        let inferredRange = '';
+        let inferredDetailed = '';
+        if (totalMin >= 20000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = '> Rp 20.000.000'; }
+        else if (totalMin >= 10000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = 'Rp 10.000.000 - 20.000.000'; }
+        else if (totalMin >= 5000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = 'Rp 5.000.000 - 10.000.000'; }
+        else if (totalMin >= 4000000) { inferredRange = 'Rp 4.000.000 - 4.999.000'; }
+        else if (totalMin >= 3000000) { inferredRange = 'Rp 3.000.000 - 3.999.000'; }
+        else if (totalMin >= 2000000) { inferredRange = 'Rp 2.000.000 - 2.999.000'; }
+        else if (totalMin >= 1000000) { inferredRange = 'Rp 1.000.000 - 1.999.000'; }
+        else if (totalMin >= 500000) { inferredRange = 'Rp 500.000 - 999.000'; }
+        else if (totalMin >= 0 && (data.economics_headIncomeRange || data.economics_spouseIncomeRange)) { inferredRange = '< Rp 500.000'; }
+
+        if (data.economics_incomeRange !== inferredRange || data.economics_incomeRangeDetailed !== inferredDetailed) {
+            update({ economics_incomeRange: inferredRange, economics_incomeRangeDetailed: inferredDetailed });
+        }
+    }, [
+        data.economics_headIncomeRange, data.economics_headIncomeRangeDetailed,
+        data.economics_spouseIncomeRange, data.economics_spouseIncomeRangeDetailed
+    ]);
+
+    useEffect(() => {
+        if (data.economics_headIncomeRange !== '≥ Rp 5.000.000') {
+            if (data.economics_headIncomeRangeDetailed) {
+                update({ economics_headIncomeRangeDetailed: '' });
             }
         }
-    }, [data.economics_incomeRange]);
+    }, [data.economics_headIncomeRange]);
+
+    useEffect(() => {
+        if (data.economics_spouseIncomeRange !== '≥ Rp 5.000.000') {
+            if (data.economics_spouseIncomeRangeDetailed) {
+                update({ economics_spouseIncomeRangeDetailed: '' });
+            }
+        }
+    }, [data.economics_spouseIncomeRange]);
 
     return (
         <div className="space-y-8 animate-fadeIn">
@@ -212,6 +262,32 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 )}
             </div>
 
+            {/* Range Pendapatan Kepala Keluarga */}
+            <div className="space-y-4" id="headIncomeRange">
+                <SectionHeader title="Range Pendapatan Utama Kepala Keluarga (per bulan)" tooltipText="Pendapatan utama dari pekerjaan kepala keluarga." />
+                <FormSelect
+                    id="headIncomeRange"
+                    options={incomeRanges}
+                    value={data.economics_headIncomeRange}
+                    onChange={(val) => update({ economics_headIncomeRange: val })}
+                    placeholder="Pilih Range Pendapatan..."
+                    required={true}
+                />
+                {data.economics_headIncomeRange === '≥ Rp 5.000.000' && (
+                    <div className="animate-fadeIn mt-4 pl-4 border-l-2 border-primary/20 space-y-2">
+                        <SectionHeader title="Detail Range Pendapatan Kepala Keluarga (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan kepala keluarga di atas 5 juta." />
+                        <FormSelect
+                            id="headIncomeRangeDetailed"
+                            options={detailedIncomeRanges}
+                            value={data.economics_headIncomeRangeDetailed || ''}
+                            onChange={(val) => update({ economics_headIncomeRangeDetailed: val })}
+                            placeholder="Pilih Detail Pendapatan..."
+                            required={true}
+                        />
+                    </div>
+                )}
+            </div>
+
             {/* 2. Pekerjaan Utama Istri */}
             <div className="space-y-4" id="spouseOccupation">
                 <SectionHeader title="Pekerjaan Utama Istri/Suami" description="Opsional / Jika ada" tooltipText="Pilih pekerjaan pasangan jika ada." />
@@ -239,30 +315,44 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 )}
             </div>
 
-            {/* 3. Range Pendapatan */}
-            <div className="space-y-4" id="incomeRange">
-                <SectionHeader title="Range Pendapatan Rumah Tangga (per bulan)" tooltipText="Akumulasi pendapatan seluruh anggota keluarga dalam satu bulan." />
+            {/* Range Pendapatan Istri/Suami */}
+            <div className="space-y-4" id="spouseIncomeRange">
+                <SectionHeader title="Range Pendapatan Utama Istri/Suami (per bulan)" tooltipText="Pendapatan utama dari pekerjaan istri/suami." description="Kosongkan jika tidak ada" />
                 <FormSelect
-                    id="incomeRange"
+                    id="spouseIncomeRange"
                     options={incomeRanges}
-                    value={data.economics_incomeRange}
-                    onChange={(val) => update({ economics_incomeRange: val })}
+                    value={data.economics_spouseIncomeRange}
+                    onChange={(val) => update({ economics_spouseIncomeRange: val })}
                     placeholder="Pilih Range Pendapatan..."
-                    required={true}
+                    required={false}
                 />
-                {data.economics_incomeRange === '≥ Rp 5.000.000' && (
+                {data.economics_spouseIncomeRange === '≥ Rp 5.000.000' && (
                     <div className="animate-fadeIn mt-4 pl-4 border-l-2 border-primary/20 space-y-2">
-                        <SectionHeader title="Detail Range Pendapatan (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan di atas 5 juta." />
+                        <SectionHeader title="Detail Range Pendapatan Istri/Suami (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan istri/suami di atas 5 juta." />
                         <FormSelect
-                            id="incomeRangeDetailed"
+                            id="spouseIncomeRangeDetailed"
                             options={detailedIncomeRanges}
-                            value={data.economics_incomeRangeDetailed || ''}
-                            onChange={(val) => update({ economics_incomeRangeDetailed: val })}
+                            value={data.economics_spouseIncomeRangeDetailed || ''}
+                            onChange={(val) => update({ economics_spouseIncomeRangeDetailed: val })}
                             placeholder="Pilih Detail Pendapatan..."
-                            required={true}
+                            required={false}
                         />
                     </div>
                 )}
+            </div>
+
+            {/* 3. Range Pendapatan Keseluruhan (Auto) */}
+            <div className="bg-slate-50 dark:bg-slate-800/20 p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+                <div>
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Total Range Pendapatan Rumah Tangga</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Total estimasi range pendapatan per bulan</p>
+                </div>
+                <div className="text-2xl font-black text-slate-900 dark:text-primary transition-colors duration-300">
+                    {data.economics_incomeRange === '≥ Rp 5.000.000' && data.economics_incomeRangeDetailed
+                        ? data.economics_incomeRangeDetailed
+                        : (data.economics_incomeRange || "-")}
+                </div>
             </div>
 
             {/* 4. Estimasi Pengeluaran Rumah Tangga */}
@@ -598,7 +688,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
                             {/* Tantangan Utama */}
                             <div className="space-y-2">
-                                <FormMultiSelect
+                                <FormSelect
                                     label="Tantangan utama usaha"
                                     id="businessIssues"
                                     options={['Modal', 'Bahan baku', 'Pemasaran', 'Manajemen', 'Tenaga kerja', 'Legalitas', 'Teknologi digital', 'Lainnya']}
@@ -608,7 +698,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     required={true}
                                     tooltipText="Kendala yang paling sering dihadapi."
                                 />
-                                {data.economics_businessIssues.includes('Lainnya') && (
+                                {data.economics_businessIssues === 'Lainnya' && (
                                     <div className="mt-2 animate-fadeIn">
                                         <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Tantangan Lainnya:</label>
                                         <input
@@ -624,8 +714,8 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             </div>
 
                             {/* Dukungan Dibutuhkan */}
-                            <FormMultiSelect
-                                label="Dukungan yang dibutuhkan saat ini"
+                            <FormSelect
+                                label="Dukungan utama yang dibutuhkan saat ini"
                                 id="businessNeeds"
                                 options={['Tambahan modal', 'Pelatihan skill', 'Peralatan produksi', 'Izin usaha/Sertifikasi', 'Akses pasar', 'Pendampingan usaha']}
                                 value={data.economics_businessNeeds}
@@ -650,7 +740,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
 
                             {/* Minat Pelatihan */}
                             <div className="space-y-2">
-                                <FormMultiSelect
+                                <FormSelect
                                     label="Minat mengikuti pelatihan kewirausahaan"
                                     id="businessTraining"
                                     options={['Manajemen Usaha', 'Digital Marketing', 'Lainnya']}
@@ -660,7 +750,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                                     required={true}
                                     tooltipText="Jenis pelatihan yang diinginkan."
                                 />
-                                {data.economics_businessTraining.includes('Lainnya') && (
+                                {data.economics_businessTraining === 'Lainnya' && (
                                     <div className="mt-2 animate-fadeIn">
                                         <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Minat Lainnya:</label>
                                         <input
@@ -872,7 +962,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     />
 
                     {/* Jenis Sumber Air Minum */}
-                    <FormSelect
+                    <FormMultiSelect
                         label="Jenis sumber air minum utama"
                         id="waterSource"
                         options={['Air Kemasan/Isi Ulang', 'PDAM', 'Sumur Gali/Pompa']}

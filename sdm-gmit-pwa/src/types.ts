@@ -43,6 +43,7 @@ export interface FormData {
     familyMembersNonBaptized: string;
     familyMembersNonSidi: string;
     familyMembersNonSidiNames: string[];
+    familyMembersNonBaptizedNames: string[];
 
     // Step 2: Diakonia
     diakonia_recipient: 'Ya' | 'Tidak' | '';
@@ -90,8 +91,12 @@ export interface FormData {
     // Step 5: Economics
     economics_headOccupation: string;
     economics_headOccupationOther: string;
+    economics_headIncomeRange: string;
+    economics_headIncomeRangeDetailed?: string;
     economics_spouseOccupation: string;
     economics_spouseOccupationOther: string;
+    economics_spouseIncomeRange: string;
+    economics_spouseIncomeRangeDetailed?: string;
     economics_incomeRange: string;
     economics_incomeRangeDetailed?: string; // Optional detailed range if >= 5jt
 
@@ -125,12 +130,12 @@ export interface FormData {
     economics_businessMarketing: string[];
     economics_businessMarketingOther: string;
     economics_businessMarketArea: string;
-    economics_businessIssues: string[];
+    economics_businessIssues: string;
     economics_businessIssuesOther: string;
-    economics_businessNeeds: string[];
+    economics_businessNeeds: string;
     economics_businessNeedsOther: string;
     economics_businessSharing: 'Ya' | 'Tidak' | '';
-    economics_businessTraining: string[];
+    economics_businessTraining: string;
     economics_businessTrainingOther: string;
 
     // Step 5: Home & Asset Ownership
@@ -148,7 +153,7 @@ export interface FormData {
     economics_asset_internet_qty: number;
     economics_asset_lahan_qty: number;
     economics_landStatus: string;
-    economics_waterSource: string;
+    economics_waterSource: string[];
     economics_electricity_capacities: string[];
     economics_electricity_450_qty: number;
     economics_electricity_900_qty: number;
@@ -209,6 +214,7 @@ export const initialFormData: FormData = {
     familyMembersNonBaptized: '',
     familyMembersNonSidi: '',
     familyMembersNonSidiNames: [],
+    familyMembersNonBaptizedNames: [],
     diakonia_recipient: '',
     diakonia_year: '',
     diakonia_type: '',
@@ -246,8 +252,12 @@ export const initialFormData: FormData = {
     // Step 5: Economics
     economics_headOccupation: '',
     economics_headOccupationOther: '',
+    economics_headIncomeRange: '',
+    economics_headIncomeRangeDetailed: '',
     economics_spouseOccupation: '',
     economics_spouseOccupationOther: '',
+    economics_spouseIncomeRange: '',
+    economics_spouseIncomeRangeDetailed: '',
     economics_incomeRange: '',
     economics_incomeRangeDetailed: '',
 
@@ -281,12 +291,12 @@ export const initialFormData: FormData = {
     economics_businessMarketing: [],
     economics_businessMarketingOther: '',
     economics_businessMarketArea: '',
-    economics_businessIssues: [],
+    economics_businessIssues: '',
     economics_businessIssuesOther: '',
-    economics_businessNeeds: [],
+    economics_businessNeeds: '',
     economics_businessNeedsOther: '',
     economics_businessSharing: '',
-    economics_businessTraining: [],
+    economics_businessTraining: '',
     economics_businessTrainingOther: '',
 
     // Step 5: Home & Asset Ownership
@@ -304,7 +314,7 @@ export const initialFormData: FormData = {
     economics_asset_internet_qty: 0,
     economics_asset_lahan_qty: 0,
     economics_landStatus: '',
-    economics_waterSource: '',
+    economics_waterSource: [],
     economics_electricity_capacities: [],
     economics_electricity_450_qty: 0,
     economics_electricity_900_qty: 0,

@@ -66,6 +66,7 @@ export interface Member {
     familyMembersNonBaptized?: number;
     familyMembersNonSidi?: number;
     familyMembersNonSidiNames?: string[];
+    familyMembersNonBaptizedNames?: string[];
 
     // Step 2: Diakonia
     diakonia_recipient?: string;
@@ -96,8 +97,12 @@ export interface Member {
     // Step 5: Economics
     economics_headOccupation?: string;
     economics_headOccupationOther?: string;
+    economics_headIncomeRange?: string;
+    economics_headIncomeRangeDetailed?: string;
     economics_spouseOccupation?: string;
     economics_spouseOccupationOther?: string;
+    economics_spouseIncomeRange?: string;
+    economics_spouseIncomeRangeDetailed?: string;
     economics_incomeRange?: string;
     economics_incomeRangeDetailed?: string;
     economics_expense_food?: number;
@@ -125,12 +130,12 @@ export interface Member {
     economics_businessMarketing?: string[];
     economics_businessMarketingOther?: string;
     economics_businessMarketArea?: string;
-    economics_businessIssues?: string[];
+    economics_businessIssues?: string;
     economics_businessIssuesOther?: string;
-    economics_businessNeeds?: string[];
+    economics_businessNeeds?: string;
     economics_businessNeedsOther?: string;
     economics_businessSharing?: string;
-    economics_businessTraining?: string[];
+    economics_businessTraining?: string;
     economics_businessTrainingOther?: string;
 
     // Step 5: Home & Assets
@@ -148,7 +153,7 @@ export interface Member {
     economics_asset_internet_qty?: number;
     economics_asset_lahan_qty?: number;
     economics_landStatus?: string;
-    economics_waterSource?: string;
+    economics_waterSource?: string[];
     economics_electricity_capacities?: string[];
     economics_electricity_450_qty?: number;
     economics_electricity_900_qty?: number;

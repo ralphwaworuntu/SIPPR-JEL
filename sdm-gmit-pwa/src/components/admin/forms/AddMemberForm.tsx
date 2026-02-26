@@ -90,6 +90,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         familyMembersNonBaptized: initialData?.familyMembersNonBaptized || 0,
         familyMembersNonSidi: initialData?.familyMembersNonSidi || 0,
         familyMembersNonSidiNames: Array.isArray(initialData?.familyMembersNonSidiNames) ? initialData.familyMembersNonSidiNames : [],
+        familyMembersNonBaptizedNames: Array.isArray(initialData?.familyMembersNonBaptizedNames) ? initialData.familyMembersNonBaptizedNames : [],
 
         // Step 2: Diakonia & Professional
         diakonia_recipient: initialData?.diakonia_recipient || '',
@@ -146,8 +147,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         // Step 5: Economics & Assets (fully expanded)
         economics_headOccupation: initialData?.economics_headOccupation || '',
         economics_headOccupationOther: initialData?.economics_headOccupationOther || '',
+        economics_headIncomeRange: initialData?.economics_headIncomeRange || '',
+        economics_headIncomeRangeDetailed: initialData?.economics_headIncomeRangeDetailed || '',
         economics_spouseOccupation: initialData?.economics_spouseOccupation || '',
         economics_spouseOccupationOther: initialData?.economics_spouseOccupationOther || '',
+        economics_spouseIncomeRange: initialData?.economics_spouseIncomeRange || '',
+        economics_spouseIncomeRangeDetailed: initialData?.economics_spouseIncomeRangeDetailed || '',
         economics_incomeRange: initialData?.economics_incomeRange || '',
         economics_incomeRangeDetailed: initialData?.economics_incomeRangeDetailed || '',
 
@@ -175,12 +180,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         economics_businessMarketing: Array.isArray(initialData?.economics_businessMarketing) ? initialData.economics_businessMarketing : [],
         economics_businessMarketingOther: initialData?.economics_businessMarketingOther || '',
         economics_businessMarketArea: initialData?.economics_businessMarketArea || '',
-        economics_businessIssues: Array.isArray(initialData?.economics_businessIssues) ? initialData.economics_businessIssues : [],
+        economics_businessIssues: initialData?.economics_businessIssues || '',
         economics_businessIssuesOther: initialData?.economics_businessIssuesOther || '',
-        economics_businessNeeds: Array.isArray(initialData?.economics_businessNeeds) ? initialData.economics_businessNeeds : [],
+        economics_businessNeeds: initialData?.economics_businessNeeds || '',
         economics_businessNeedsOther: initialData?.economics_businessNeedsOther || '',
         economics_businessSharing: initialData?.economics_businessSharing || '',
-        economics_businessTraining: Array.isArray(initialData?.economics_businessTraining) ? initialData.economics_businessTraining : [],
+        economics_businessTraining: initialData?.economics_businessTraining || '',
         economics_businessTrainingOther: initialData?.economics_businessTrainingOther || '',
 
         economics_houseStatus: initialData?.economics_houseStatus || '',
@@ -197,7 +202,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         economics_asset_internet_qty: initialData?.economics_asset_internet_qty || 0,
         economics_asset_lahan_qty: initialData?.economics_asset_lahan_qty || 0,
         economics_landStatus: initialData?.economics_landStatus || '',
-        economics_waterSource: initialData?.economics_waterSource || '',
+        economics_waterSource: Array.isArray(initialData?.economics_waterSource) ? initialData.economics_waterSource : [],
         economics_electricity_capacities: Array.isArray(initialData?.economics_electricity_capacities) ? initialData.economics_electricity_capacities : [],
         economics_electricity_450_qty: initialData?.economics_electricity_450_qty || 0,
         economics_electricity_900_qty: initialData?.economics_electricity_900_qty || 0,
@@ -298,7 +303,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     familyMembersSidiFemale: 0,
                     familyMembersNonBaptized: 0,
                     familyMembersNonSidi: 0,
-                    familyMembersNonSidiNames: []
+                    familyMembersNonSidiNames: [],
+                    familyMembersNonBaptizedNames: []
                 };
             }
             if (name === 'familyMembersSidi') {
@@ -320,6 +326,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     }
                 }
                 return updates;
+            }
+            if (name === 'familyMembersNonBaptized') {
+                return {
+                    ...prev,
+                    familyMembersNonBaptized: val,
+                    familyMembersNonBaptizedNames: Array.from({ length: val }, (_, i) => (prev.familyMembersNonBaptizedNames || [])[i] || '')
+                };
             }
             return { ...prev, [name]: val };
         });
@@ -364,6 +377,20 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 } else {
                     for (let i = 0; i < nonSidiCount; i++) {
                         if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const nonBaptizedCount = Number(formData.familyMembersNonBaptized) || 0;
+            if (nonBaptizedCount > 0) {
+                if (!formData.familyMembersNonBaptizedNames || formData.familyMembersNonBaptizedNames.length !== nonBaptizedCount) {
+                    isValid = false;
+                } else {
+                    for (let i = 0; i < nonBaptizedCount; i++) {
+                        if (!formData.familyMembersNonBaptizedNames[i] || formData.familyMembersNonBaptizedNames[i].trim() === '') {
                             isValid = false;
                             break;
                         }
@@ -458,13 +485,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 else if (!formData.economics_businessMarketing || formData.economics_businessMarketing.length === 0) { toast.error("Mohon pilih Cara Pemasaran Utama"); isValid = false; }
                 else if (formData.economics_businessMarketing.includes('Lainnya') && !formData.economics_businessMarketingOther) { toast.error("Mohon lengkapi Cara Pemasaran lainnya"); isValid = false; }
                 else if (!formData.economics_businessMarketArea) { toast.error("Mohon pilih Wilayah Pemasaran"); isValid = false; }
-                else if (!formData.economics_businessIssues || formData.economics_businessIssues.length === 0) { toast.error("Mohon pilih Tantangan Utama"); isValid = false; }
-                else if (formData.economics_businessIssues.includes('Lainnya') && !formData.economics_businessIssuesOther) { toast.error("Mohon lengkapi Tantangan Utama lainnya"); isValid = false; }
-                else if (!formData.economics_businessNeeds || formData.economics_businessNeeds.length === 0) { toast.error("Mohon pilih Dukungan yang Dibutuhkan"); isValid = false; }
-                else if (formData.economics_businessNeeds.includes('Lainnya') && !formData.economics_businessNeedsOther) { toast.error("Mohon lengkapi Dukungan lainnya"); isValid = false; }
+                else if (!formData.economics_businessIssues) { toast.error("Mohon pilih Tantangan Utama"); isValid = false; }
+                else if (formData.economics_businessIssues === 'Lainnya' && !formData.economics_businessIssuesOther) { toast.error("Mohon lengkapi Tantangan Utama lainnya"); isValid = false; }
+                else if (!formData.economics_businessNeeds) { toast.error("Mohon pilih Dukungan yang Dibutuhkan"); isValid = false; }
+                else if (formData.economics_businessNeeds === 'Lainnya' && !formData.economics_businessNeedsOther) { toast.error("Mohon lengkapi Dukungan lainnya"); isValid = false; }
                 else if (!formData.economics_businessSharing) { toast.error("Mohon pilih Kesediaan Berbagi Ilmu"); isValid = false; }
-                else if (!formData.economics_businessTraining || formData.economics_businessTraining.length === 0) { toast.error("Mohon pilih Minat Pelatihan"); isValid = false; }
-                else if (formData.economics_businessTraining.includes('Lainnya') && !formData.economics_businessTrainingOther) { toast.error("Mohon lengkapi Minat Pelatihan lainnya"); isValid = false; }
+                else if (!formData.economics_businessTraining) { toast.error("Mohon pilih Minat Pelatihan"); isValid = false; }
+                else if (formData.economics_businessTraining === 'Lainnya' && !formData.economics_businessTrainingOther) { toast.error("Mohon lengkapi Minat Pelatihan lainnya"); isValid = false; }
             }
 
             // Home / Asset Check (only check if business valid or not present)
@@ -474,7 +501,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 else if (formData.economics_houseType === 'Permanen' && !formData.economics_houseIMB) { toast.error("Mohon pilih Status IMB"); isValid = false; }
                 else if (!formData.economics_hasAssets) { toast.error("Mohon pilih Kepemilikan Aset (Ya/Tidak ada)"); isValid = false; }
                 else if (!formData.economics_landStatus) { toast.error("Mohon pilih Status Kepemilikan Tanah"); isValid = false; }
-                else if (!formData.economics_waterSource) { toast.error("Mohon pilih Sumber Air Minum Utama"); isValid = false; }
+                else if (!formData.economics_waterSource || formData.economics_waterSource.length === 0) { toast.error("Mohon pilih Sumber Air Minum Utama"); isValid = false; }
                 else if (!formData.economics_electricity_capacities || formData.economics_electricity_capacities.length === 0) { toast.error("Mohon pilih minimal satu Daya Listrik Terpasang"); isValid = false; }
                 else if (formData.economics_electricity_capacities.length > 0) {
                     for (const cap of formData.economics_electricity_capacities) {
@@ -598,6 +625,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             familyMembersNonBaptized: formData.familyMembersNonBaptized,
             familyMembersNonSidi: Math.max(0, formData.familyMembers - formData.familyMembersSidi),
             familyMembersNonSidiNames: formData.familyMembersNonSidiNames,
+            familyMembersNonBaptizedNames: formData.familyMembersNonBaptizedNames,
             diakonia_recipient: formData.diakonia_recipient,
             diakonia_year: formData.diakonia_year,
             diakonia_type: formData.diakonia_type,
@@ -624,8 +652,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             // Step 5
             economics_headOccupation: formData.economics_headOccupation,
             economics_headOccupationOther: formData.economics_headOccupationOther,
+            economics_headIncomeRange: formData.economics_headIncomeRange,
+            economics_headIncomeRangeDetailed: formData.economics_headIncomeRangeDetailed,
             economics_spouseOccupation: formData.economics_spouseOccupation,
             economics_spouseOccupationOther: formData.economics_spouseOccupationOther,
+            economics_spouseIncomeRange: formData.economics_spouseIncomeRange,
+            economics_spouseIncomeRangeDetailed: formData.economics_spouseIncomeRangeDetailed,
             economics_incomeRange: formData.economics_incomeRange,
             economics_incomeRangeDetailed: formData.economics_incomeRangeDetailed,
             economics_expense_food: formData.economics_expense_food,
@@ -1006,6 +1038,42 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                         const newNames = [...(formData.familyMembersNonSidiNames || [])];
                                                         newNames[idx] = e.target.value;
                                                         setFormData({ ...formData, familyMembersNonSidiNames: newNames });
+                                                    }}
+                                                    placeholder={`Masukkan Nama Anggota ${idx + 1}`}
+                                                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
+                                                    required
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {formData.familyMembersNonBaptized > 0 && (
+                                <div className="mt-6 p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-700/30 rounded-2xl animate-fadeIn shadow-sm">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                            <span className="material-symbols-outlined text-sm">water_drop</span>
+                                        </div>
+                                        <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                                            Nama Anggota Belum Baptis
+                                        </h4>
+                                    </div>
+                                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
+                                        Silakan masukkan nama lengkap anggota keluarga yang belum di Baptis.
+                                    </p>
+
+                                    <div className="space-y-3">
+                                        {Array.from({ length: formData.familyMembersNonBaptized || 0 }).map((_, idx) => (
+                                            <div key={`non-baptized-${idx}`} className="relative flex flex-col gap-1.5">
+                                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
+                                                <input
+                                                    type="text"
+                                                    value={formData.familyMembersNonBaptizedNames?.[idx] || ''}
+                                                    onChange={(e) => {
+                                                        const newNames = [...(formData.familyMembersNonBaptizedNames || [])];
+                                                        newNames[idx] = e.target.value;
+                                                        setFormData({ ...formData, familyMembersNonBaptizedNames: newNames });
                                                     }}
                                                     placeholder={`Masukkan Nama Anggota ${idx + 1}`}
                                                     className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
