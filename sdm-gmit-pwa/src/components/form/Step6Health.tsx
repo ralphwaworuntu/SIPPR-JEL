@@ -95,7 +95,7 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                 <SectionHeader title="Apakah ada anggota keluarga yang mengalami sakit dalam 30 hari terakhir?" tooltipText="Pilih kondisi kesehatan terbaru anggota keluarga dalam sebulan terakhir." />
                 <FormRadioGroup
                     name="health_sick30Days"
-                    options={['Ya, rawat inap', 'Ya, rawat jalan', 'Tidak ada']}
+                    options={['Ya, dan berobat jalan', 'Ya, dan rawat inap', 'Tidak ada']}
                     value={data.health_sick30Days}
                     onChange={(val) => update({ health_sick30Days: val })}
                     columns={3}
@@ -142,18 +142,6 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                 )}
             </div>
 
-            {/* 4. BPJS Kesehatan */}
-            <div className="space-y-4">
-                <SectionHeader title="Apakah memiliki BPJS Kesehatan?" tooltipText="Kartu jaminan kesehatan nasional dan asuransi lain yang masih aktif." />
-                <FormRadioGroup
-                    name="health_hasBPJS"
-                    options={['Ya', 'Tidak']}
-                    value={data.health_hasBPJS}
-                    onChange={(val) => update({ health_hasBPJS: val })}
-                    columns={2}
-                />
-            </div>
-
             {/* 5. Pengobatan Teratur */}
             <div className="space-y-4">
                 <SectionHeader title="Apakah mendapat pengobatan yang teratur dari Fasilitas Kesehatan?" tooltipText="Rutin periksa atau disuntik/minum obat dari fasilitas kesehatan formal/puskesmas/terapis." />
@@ -164,6 +152,42 @@ const Step6Health: React.FC<StepProps> = ({ data, update }) => {
                     onChange={(val) => update({ health_regularTreatment: val })}
                     columns={2}
                 />
+            </div>
+
+            {/* 4. BPJS Kesehatan */}
+            <div className="space-y-4">
+                <SectionHeader title="Apakah Kepala Keluarga dan semua anggota keluarga memiliki BPJS Kesehatan?" tooltipText="Kartu jaminan kesehatan nasional dan asuransi lain yang masih aktif." />
+                <div className="space-y-4">
+                    <FormRadioGroup
+                        name="health_hasBPJS"
+                        options={['Ya', 'Tidak']}
+                        value={data.health_hasBPJS}
+                        onChange={(val) => {
+                            if (val === 'Ya') {
+                                update({ health_hasBPJS: val as 'Ya' | 'Tidak', health_bpjsNonParticipants: '' });
+                            } else {
+                                update({ health_hasBPJS: val as 'Ya' | 'Tidak' });
+                            }
+                        }}
+                        columns={2}
+                    />
+
+                    {data.health_hasBPJS === 'Tidak' && (
+                        <div className="animate-fadeIn pl-4 border-l-2 border-primary/20 pt-2">
+                            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                                Tuliskan nama anggota keluarga yang BELUM memiliki BPJS Kesehatan <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="health_bpjsNonParticipants"
+                                value={data.health_bpjsNonParticipants || ''}
+                                onChange={(e) => update({ health_bpjsNonParticipants: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white min-h-[100px] resize-y"
+                                placeholder="Contoh:&#10;1. Budi Santoso&#10;2. Siti Aminah"
+                                required
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* 6. BPJS Ketenagakerjaan */}

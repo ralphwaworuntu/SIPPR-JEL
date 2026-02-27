@@ -26,6 +26,8 @@ export interface FormData {
     maritalStatus: string;
     marriageDate: string;
     marriageType: string[];
+    baptismStatus: 'Sudah' | 'Belum' | '';
+    sidiStatus: 'Sudah' | 'Belum' | '';
     phone: string;
     address: string;
     city: string;
@@ -87,6 +89,7 @@ export interface FormData {
     education_working: number;
     education_hasScholarship: 'Ya' | 'Tidak' | '';
     education_scholarshipType: string;
+    education_scholarshipTypeOther: string;
 
     // Step 5: Economics
     economics_headOccupation: string;
@@ -107,6 +110,8 @@ export interface FormData {
     economics_expense_loan: number;
     economics_expense_education: number;
     economics_expense_other: number;
+    economics_expense_unexpected: number;
+    economics_expense_worship: number;
 
     // Step 5: Business Ownership
     economics_hasBusiness: 'Ya' | 'Tidak' | '';
@@ -168,6 +173,7 @@ export interface FormData {
     health_chronicDisease: string[];
     health_chronicDiseaseOther: string;
     health_hasBPJS: string;
+    health_bpjsNonParticipants: string;
     health_regularTreatment: string;
     health_hasBPJSKetenagakerjaan: string;
     health_socialAssistance: string;
@@ -197,6 +203,8 @@ export const initialFormData: FormData = {
     maritalStatus: '',
     marriageDate: '',
     marriageType: [],
+    baptismStatus: '',
+    sidiStatus: '',
     phone: '',
     address: '',
     city: '',
@@ -248,6 +256,7 @@ export const initialFormData: FormData = {
     education_working: 0,
     education_hasScholarship: '',
     education_scholarshipType: '',
+    education_scholarshipTypeOther: '',
 
     // Step 5: Economics
     economics_headOccupation: '',
@@ -268,6 +277,8 @@ export const initialFormData: FormData = {
     economics_expense_loan: 0,
     economics_expense_education: 0,
     economics_expense_other: 0,
+    economics_expense_unexpected: 0,
+    economics_expense_worship: 0,
 
     // Step 5: Business Ownership
     economics_hasBusiness: '',
@@ -329,6 +340,7 @@ export const initialFormData: FormData = {
     health_chronicDisease: [],
     health_chronicDiseaseOther: '',
     health_hasBPJS: '',
+    health_bpjsNonParticipants: '',
     health_regularTreatment: '',
     health_hasBPJSKetenagakerjaan: '',
     health_socialAssistance: '',

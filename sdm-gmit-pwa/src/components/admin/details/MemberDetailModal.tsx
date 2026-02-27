@@ -104,7 +104,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
         toast.success("Kartu Anggota berhasil didownload");
     };
 
-    const totalExpense = (member.economics_expense_food || 0) + (member.economics_expense_utilities || 0) + (member.economics_expense_education || 0) + (member.economics_expense_other || 0);
+    const totalExpense = (member.economics_expense_food || 0) + (member.economics_expense_utilities || 0) + (member.economics_expense_education || 0) + (member.economics_expense_nonPanganII || 0) + (member.economics_expense_loan || 0) + (member.economics_expense_unexpected || 0) + (member.economics_expense_worship || 0) + (member.economics_expense_other || 0);
 
     return (
         <div className="flex flex-col animate-fade-in-up h-full max-h-full min-h-0">
@@ -149,6 +149,10 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <DetailRow label="Jenis Kelamin" value={member.gender} />
                             <DetailRow label="Tanggal Lahir" value={member.birthDate} />
                             <DetailRow label="Usia" value={(calculateAge(member.birthDate) || '-') + " Tahun"} />
+                            <DetailRow label="Gol. Darah" value={member.bloodType} />
+                            <DetailRow label="Status Menikah" value={member.maritalStatus === 'Kawin' && member.marriageDate ? `Kawin (${member.marriageDate})` : member.maritalStatus} />
+                            <DetailRow label="Status Baptis" value={member.baptismStatus} />
+                            <DetailRow label="Status Sidi" value={member.sidiStatus} />
                             <DetailRow label="Nomor Telepon / WA" value={member.phone ? `+62 ${member.phone}` : '-'} />
                             <DetailRow label="Lingkungan" value={member.lingkungan} />
                             <DetailRow label="Rayon" value={member.rayon} />
@@ -156,6 +160,9 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <div className="flex flex-col gap-1.5 bg-white dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 mt-2">
                                 <span className="text-[10px] uppercase font-bold text-slate-400">Alamat Lengkap</span>
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{member.address || "-"}</span>
+                                {(member.city || member.district || member.subdistrict) && (
+                                    <span className="text-xs text-slate-500 font-medium">{[member.subdistrict, member.district, member.city].filter(Boolean).join(', ')}</span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -335,8 +342,15 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                     </div>
                                 </div>
                             )}
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
+                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2 space-y-3">
                                 <DetailRow label="Anak Sudah Bekerja" value={`${member.education_working || 0} Orang`} />
+                                {member.education_hasScholarship === 'Ya' ? (
+                                    <div className="p-2 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20">
+                                        <DetailRow label="Penerima Beasiswa" value={`Ya - ${member.education_scholarshipType === 'Beasiswa Lainnya' ? member.education_scholarshipTypeOther : member.education_scholarshipType}`} />
+                                    </div>
+                                ) : (
+                                    <DetailRow label="Penerima Beasiswa" value="Tidak" />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -364,6 +378,10 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                         <DetailRow label="Pengeluaran Pangan" value={member.economics_expense_food ? `Rp ${member.economics_expense_food.toLocaleString()}` : "-"} />
                                         <DetailRow label="Pengeluaran Utilitas" value={member.economics_expense_utilities ? `Rp ${member.economics_expense_utilities.toLocaleString()}` : "-"} />
                                         <DetailRow label="Pengeluaran Pendidikan" value={member.economics_expense_education ? `Rp ${member.economics_expense_education.toLocaleString()}` : "-"} />
+                                        <DetailRow label="Pengeluaran Non-Pangan II" value={member.economics_expense_nonPanganII ? `Rp ${member.economics_expense_nonPanganII.toLocaleString()}` : "-"} />
+                                        <DetailRow label="Cicilan/Utang" value={member.economics_expense_loan ? `Rp ${member.economics_expense_loan.toLocaleString()}` : "-"} />
+                                        <DetailRow label="Aktivitas Peribadatan" value={member.economics_expense_worship ? `Rp ${member.economics_expense_worship.toLocaleString()}` : "-"} />
+                                        <DetailRow label="Biaya Tak Terduga" value={member.economics_expense_unexpected ? `Rp ${member.economics_expense_unexpected.toLocaleString()}` : "-"} />
                                         <DetailRow label="Pengeluaran Lainnya" value={member.economics_expense_other ? `Rp ${member.economics_expense_other.toLocaleString()}` : "-"} />
                                         {member.economics_electricity_total_cost > 0 && <DetailRow label="Biaya Listrik" value={`Rp ${member.economics_electricity_total_cost.toLocaleString()}`} />}
                                     </div>
@@ -483,6 +501,12 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <DetailRow label="Sakit 30 Hari Terakhir" value={member.health_sick30Days} />
                             <DetailRow label="Pengobatan Teratur" value={member.health_regularTreatment} />
                             <DetailRow label="BPJS Kesehatan" value={member.health_hasBPJS} />
+                            {member.health_hasBPJS === 'Tidak' && member.health_bpjsNonParticipants && (
+                                <div className="ml-4 pl-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-1 mt-1 text-slate-500 mb-2">
+                                    <div className="text-[10px] uppercase font-bold text-red-500 dark:text-red-400">Anggota Tanpa BPJS:</div>
+                                    <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{member.health_bpjsNonParticipants}</span>
+                                </div>
+                            )}
                             <DetailRow label="BPJS Naker" value={member.health_hasBPJSKetenagakerjaan} />
                             <DetailRow label="Bantuan Sosial" value={member.health_socialAssistance} />
 

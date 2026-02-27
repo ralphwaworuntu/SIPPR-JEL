@@ -50,7 +50,16 @@ export interface Member {
     contributionTypes: string[];
     gender: "Laki-laki" | "Perempuan";
     birthDate: string; // YYYY-MM-DD
+    bloodType?: string;
+    maritalStatus?: string;
+    marriageDate?: string;
+    marriageType?: string[];
+    baptismStatus?: 'Sudah' | 'Belum' | '';
+    sidiStatus?: 'Sudah' | 'Belum' | '';
     statusGerejawi?: string;
+    city?: string;
+    district?: string;
+    subdistrict?: string;
     createdAt: string; // ISO Date String
 
     // Step 1: Identity extras
@@ -93,6 +102,9 @@ export interface Member {
     education_unemployed_sma?: number;
     education_unemployed_university?: number;
     education_working?: number;
+    education_hasScholarship?: string;
+    education_scholarshipType?: string;
+    education_scholarshipTypeOther?: string;
 
     // Step 5: Economics
     economics_headOccupation?: string;
@@ -107,8 +119,12 @@ export interface Member {
     economics_incomeRangeDetailed?: string;
     economics_expense_food?: number;
     economics_expense_utilities?: number;
+    economics_expense_nonPanganII?: number;
+    economics_expense_loan?: number;
     economics_expense_education?: number;
     economics_expense_other?: number;
+    economics_expense_unexpected?: number;
+    economics_expense_worship?: number;
     economics_hasBusiness?: string;
     economics_businessName?: string;
     economics_businessType?: string;
@@ -168,6 +184,7 @@ export interface Member {
     health_chronicDisease?: string[];
     health_chronicDiseaseOther?: string;
     health_hasBPJS?: string;
+    health_bpjsNonParticipants?: string;
     health_regularTreatment?: string;
     health_hasBPJSKetenagakerjaan?: string;
     health_socialAssistance?: string;

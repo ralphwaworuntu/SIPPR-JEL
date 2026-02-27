@@ -19,10 +19,10 @@ const TOTAL_STEPS = 6;
 const STEP_TITLES: Record<number, string> = {
     1: 'Data Umum',
     2: 'Informasi Keluarga',
-    3: 'Profesi & Pelayanan',
-    4: 'Pendidikan',
-    5: 'Ekonomi & Aset Keluarga',
-    6: 'Kesehatan',
+    3: 'Pendidikan',
+    4: 'Kesehatan',
+    5: 'Profesi & Pelayanan',
+    6: 'Ekonomi & Aset Keluarga',
 };
 
 // Reusable form field components
@@ -74,8 +74,17 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         fullName: initialData?.name || '',
         gender: initialData?.gender || '',
         dateOfBirth: initialData?.birthDate || '',
+        bloodType: initialData?.bloodType || '',
+        maritalStatus: initialData?.maritalStatus || '',
+        marriageDate: initialData?.marriageDate || '',
+        marriageType: Array.isArray(initialData?.marriageType) ? initialData.marriageType : [],
+        baptismStatus: initialData?.baptismStatus || '',
+        sidiStatus: initialData?.sidiStatus || '',
         phone: initialData?.phone || '',
         address: initialData?.address || '',
+        city: initialData?.city || '',
+        district: initialData?.district || '',
+        subdistrict: initialData?.subdistrict || '',
         lingkungan: initialData?.lingkungan || '',
         rayon: initialData?.rayon || '',
         kkNumber: initialData?.kkNumber || '',
@@ -143,6 +152,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         education_unemployed_sma: initialData?.education_unemployed_sma || 0,
         education_unemployed_university: initialData?.education_unemployed_university || 0,
         education_working: initialData?.education_working || 0,
+        education_hasScholarship: initialData?.education_hasScholarship || '',
+        education_scholarshipType: initialData?.education_scholarshipType || '',
+        education_scholarshipTypeOther: initialData?.education_scholarshipTypeOther || '',
 
         // Step 5: Economics & Assets (fully expanded)
         economics_headOccupation: initialData?.economics_headOccupation || '',
@@ -158,9 +170,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
         economics_expense_food: initialData?.economics_expense_food || 0,
         economics_expense_utilities: initialData?.economics_expense_utilities || 0,
+        economics_expense_nonPanganII: initialData?.economics_expense_nonPanganII || 0,
+        economics_expense_loan: initialData?.economics_expense_loan || 0,
         economics_expense_education: initialData?.economics_expense_education || 0,
         economics_expense_other: initialData?.economics_expense_other || 0,
-
+        economics_expense_unexpected: initialData?.economics_expense_unexpected || 0,
+        economics_expense_worship: initialData?.economics_expense_worship || 0,
         economics_hasBusiness: initialData?.economics_hasBusiness || '',
         economics_businessName: initialData?.economics_businessName || '',
         economics_businessType: initialData?.economics_businessType || '',
@@ -217,6 +232,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         health_chronicDisease: Array.isArray(initialData?.health_chronicDisease) ? initialData.health_chronicDisease : [],
         health_chronicDiseaseOther: initialData?.health_chronicDiseaseOther || '',
         health_hasBPJS: initialData?.health_hasBPJS || '',
+        health_bpjsNonParticipants: initialData?.health_bpjsNonParticipants || '',
         health_regularTreatment: initialData?.health_regularTreatment || '',
         health_hasBPJSKetenagakerjaan: initialData?.health_hasBPJSKetenagakerjaan || '',
         health_socialAssistance: initialData?.health_socialAssistance || '',
@@ -399,7 +415,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             }
 
             if (!isValid) toast.error("Ada ketidaksesuaian data jumlah / nama anggota yang wajib diisi!");
-        } else if (currentStep === 3) {
+        } else if (currentStep === 5) {
             const members = formData.professionalFamilyMembers || [];
             let step3Error = "";
             if (members.length === 0) {
@@ -435,7 +451,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 setErrors(newErrors);
                 return false;
             }
-        } else if (currentStep === 4) {
+        } else if (currentStep === 3) {
             if (!formData.education_schoolingStatus) {
                 toast.error("Mohon pilih status anak usia sekolah (7-18 tahun)");
                 isValid = false;
@@ -451,17 +467,21 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     isValid = false;
                 }
             }
-        } else if (currentStep === 5) {
+        } else if (currentStep === 6) {
             if (!formData.economics_headOccupation) { toast.error("Mohon pilih Pekerjaan Utama Kepala Keluarga"); isValid = false; }
             else if (formData.economics_headOccupation === 'Lainnya' && !formData.economics_headOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Kepala Keluarga Lainnya"); isValid = false; }
             else if (formData.economics_spouseOccupation === 'Lainnya' && !formData.economics_spouseOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Istri Lainnya"); isValid = false; }
             else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga"); isValid = false; }
-            else if (formData.economics_incomeRange === '≥ Rp 5.000.000' && !formData.economics_incomeRangeDetailed) { toast.error("Mohon pilih Detail Range Pendapatan"); isValid = false; }
+            else if (formData.economics_incomeRange === '≥ Rp 6.500.000' && !formData.economics_incomeRangeDetailed) { toast.error("Mohon pilih Detail Range Pendapatan"); isValid = false; }
             else if (
                 (formData.economics_expense_food < 0) ||
                 (formData.economics_expense_utilities < 0) ||
+                (formData.economics_expense_nonPanganII < 0) ||
+                (formData.economics_expense_loan < 0) ||
                 (formData.economics_expense_education < 0) ||
-                (formData.economics_expense_other < 0)
+                (formData.economics_expense_other < 0) ||
+                (formData.economics_expense_unexpected < 0) ||
+                (formData.economics_expense_worship < 0)
             ) {
                 toast.error("Pengeluaran tidak boleh negatif"); isValid = false;
             }
@@ -597,8 +617,17 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             name: formData.fullName,
             gender: formData.gender as "Laki-laki" | "Perempuan",
             birthDate: formData.dateOfBirth,
+            bloodType: formData.bloodType,
+            maritalStatus: formData.maritalStatus,
+            marriageDate: formData.marriageDate,
+            marriageType: formData.marriageType,
+            baptismStatus: formData.baptismStatus,
+            sidiStatus: formData.sidiStatus,
             phone: formData.phone,
             address: formData.address,
+            city: formData.city,
+            district: formData.district,
+            subdistrict: formData.subdistrict,
             lingkungan: formData.lingkungan,
             rayon: formData.rayon,
             job: formData.jobCategory,
@@ -649,6 +678,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             education_unemployed_sma: formData.education_unemployed_sma,
             education_unemployed_university: formData.education_unemployed_university,
             education_working: formData.education_working,
+            education_hasScholarship: formData.education_hasScholarship,
+            education_scholarshipType: formData.education_scholarshipType === 'Beasiswa Lainnya' ? formData.education_scholarshipTypeOther : formData.education_scholarshipType,
             // Step 5
             economics_headOccupation: formData.economics_headOccupation,
             economics_headOccupationOther: formData.economics_headOccupationOther,
@@ -662,8 +693,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             economics_incomeRangeDetailed: formData.economics_incomeRangeDetailed,
             economics_expense_food: formData.economics_expense_food,
             economics_expense_utilities: formData.economics_expense_utilities,
+            economics_expense_nonPanganII: formData.economics_expense_nonPanganII,
+            economics_expense_loan: formData.economics_expense_loan,
             economics_expense_education: formData.economics_expense_education,
             economics_expense_other: formData.economics_expense_other,
+            economics_expense_unexpected: formData.economics_expense_unexpected,
+            economics_expense_worship: formData.economics_expense_worship,
             economics_hasBusiness: formData.economics_hasBusiness,
             economics_businessName: formData.economics_businessName,
             economics_businessType: formData.economics_businessType,
@@ -718,6 +753,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             health_chronicDisease: formData.health_chronicDisease,
             health_chronicDiseaseOther: formData.health_chronicDiseaseOther,
             health_hasBPJS: formData.health_hasBPJS,
+            health_bpjsNonParticipants: formData.health_bpjsNonParticipants,
             health_regularTreatment: formData.health_regularTreatment,
             health_hasBPJSKetenagakerjaan: formData.health_hasBPJSKetenagakerjaan,
             health_socialAssistance: formData.health_socialAssistance,
@@ -867,6 +903,26 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             <FormLabel required>Usia</FormLabel>
                             <input value={calculateAge(formData.dateOfBirth) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
                         </div>
+                        <div className="col-span-2">
+                            {selectInput('bloodType', 'Golongan Darah', ['A', 'B', 'AB', 'O', 'Tidak Tahu'], false)}
+                        </div>
+                        <div className="col-span-2">
+                            {selectInput('maritalStatus', 'Status Pernikahan', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'], true)}
+                        </div>
+                        {formData.maritalStatus === 'Kawin' && (
+                            <>
+                                <div className="col-span-2">
+                                    <FormLabel>Tanggal Pernikahan</FormLabel>
+                                    <input type="date" name="marriageDate" value={formData.marriageDate} onChange={handleChange} className={inputClass(!!errors.marriageDate)} />
+                                </div>
+                            </>
+                        )}
+                        <div className="col-span-2">
+                            {selectInput('baptismStatus', 'Status Baptis', ['Sudah', 'Belum'], true)}
+                        </div>
+                        <div className="col-span-2">
+                            {selectInput('sidiStatus', 'Status Sidi', ['Sudah', 'Belum'], true)}
+                        </div>
                         <div className="col-span-2 flex flex-col">
                             <FormLabel required>Nomor Telepon/ WhatsApp Aktif</FormLabel>
                             <div className="relative">
@@ -928,6 +984,18 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 </div>
                             )}
                             <ErrorMsg msg={errors.address} />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                            <FormLabel>Kota/Kabupaten</FormLabel>
+                            <input name="city" value={formData.city} onChange={handleChange} className={inputClass(!!errors.city)} placeholder="Contoh: Kota Kupang" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                            <FormLabel>Kecamatan</FormLabel>
+                            <input name="district" value={formData.district} onChange={handleChange} className={inputClass(!!errors.district)} placeholder="Contoh: Oebobo" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                            <FormLabel>Kelurahan</FormLabel>
+                            <input name="subdistrict" value={formData.subdistrict} onChange={handleChange} className={inputClass(!!errors.subdistrict)} placeholder="Contoh: Liliba" />
                         </div>
                     </div>
                 )}
@@ -1109,8 +1177,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                         </div>
                     );
                 })()}
-                {/* Step 3: Profesi & Pelayanan */}
-                {step === 3 && (
+                {/* Step 5: Profesi & Pelayanan */}
+                {step === 5 && (
                     <div className="space-y-6 animate-fade-in">
                         <SectionDivider title="Data Anggota Keluarga Profesional" />
 
@@ -1608,8 +1676,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     </div>
                 )}
 
-                {/* Step 4: Education (Children) */}
-                {step === 4 && (
+                {/* Step 3: Education (Children) */}
+                {step === 3 && (
                     <div className="space-y-8 animate-fade-in border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-6 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none" />
 
@@ -1880,11 +1948,62 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 />
                             </div>
                         </div>
+
+                        {/* Question 6: Scholarship */}
+                        <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+                            <FormLabel required>Apakah ada anggota keluarga yang menerima beasiswa pendidikan?</FormLabel>
+                            <div className="flex gap-4">
+                                {['Ya', 'Tidak'].map((opt) => (
+                                    <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="education_hasScholarship"
+                                            value={opt}
+                                            checked={formData.education_hasScholarship === opt}
+                                            onChange={(e) => setFormData({ ...formData, education_hasScholarship: e.target.value, education_scholarshipType: '', education_scholarshipTypeOther: '' })}
+                                            className="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 dark:bg-slate-700 dark:border-slate-600"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {formData.education_hasScholarship === 'Ya' && (
+                                <div className="space-y-4 pl-4 border-l-2 border-primary/20 animate-fade-in">
+                                    <div className="flex flex-col gap-2">
+                                        <FormLabel required>Jenis Beasiswa</FormLabel>
+                                        <select
+                                            value={formData.education_scholarshipType || ''}
+                                            onChange={(e) => setFormData({ ...formData, education_scholarshipType: e.target.value })}
+                                            className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm transition-all"
+                                        >
+                                            <option value="">Pilih Jenis Beasiswa</option>
+                                            {['PIP (Jalur Reguler/Sekolah)', 'PIP (Jalur Aspirasi/DPR)', 'KIP Kuliah', 'Beasiswa Pemda', 'Beasiswa Swasta', 'Beasiswa Lainnya'].map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {formData.education_scholarshipType === 'Beasiswa Lainnya' && (
+                                        <div className="flex flex-col gap-2 animate-fade-in">
+                                            <FormLabel required>Sebutkan Jenis Beasiswa Lainnya</FormLabel>
+                                            <input
+                                                type="text"
+                                                value={formData.education_scholarshipTypeOther || ''}
+                                                onChange={(e) => setFormData({ ...formData, education_scholarshipTypeOther: e.target.value })}
+                                                placeholder="Sebutkan jenis beasiswa..."
+                                                className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm transition-all"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
-                {/* Step 5: Economics & Assets */}
-                {step === 5 && (
+                {/* Step 6: Economics & Assets */}
+                {step === 6 && (
                     <div className="w-full">
                         <Step5Economics
                             data={formData as any}
@@ -1894,8 +2013,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     </div>
                 )}
 
-                {/* Step 6: Health */}
-                {step === 6 && (
+                {/* Step 4: Health */}
+                {step === 4 && (
                     <div className="w-full">
                         <Step6Health
                             data={formData as any}

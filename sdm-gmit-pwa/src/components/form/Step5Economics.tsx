@@ -32,33 +32,35 @@ const occupationOptions = [
 
 const incomeRanges = [
     '< Rp 500.000',
-    'Rp 500.000 - 999.000',
-    'Rp 1.000.000 - 1.999.000',
-    'Rp 2.000.000 - 2.999.000',
-    'Rp 3.000.000 - 3.999.000',
-    'Rp 4.000.000 - 4.999.000',
-    '≥ Rp 5.000.000'
+    'Rp 500.000 - 600.000',
+    'Rp 600.000 - 750.000',
+    'Rp 750.000 - 1.100.000',
+    'Rp 1.100.000 - 1.800.000',
+    'Rp 1.800.000 - 2.800.000',
+    'Rp 2.800.000 - 4.000.000',
+    'Rp 4.000.000 - 6.500.000',
+    '≥ Rp 6.500.000'
 ];
 
 const detailedIncomeRanges = [
-    'Rp 5.000.000 - 10.000.000',
-    'Rp 10.000.000 - 20.000.000',
-    '> Rp 20.000.000'
+    'Rp 6.500.000 - 12.000.000',
+    '> Rp 12.000.000'
 ];
 
 const getIncomeNumericValues = (range: string, detailed: string) => {
-    if (range === '≥ Rp 5.000.000') {
-        if (detailed === 'Rp 5.000.000 - 10.000.000') return { min: 5000000, max: 10000000 };
-        if (detailed === 'Rp 10.000.000 - 20.000.000') return { min: 10000000, max: 20000000 };
-        if (detailed === '> Rp 20.000.000') return { min: 20000000, max: Infinity };
-        return { min: 5000000, max: Infinity };
+    if (range === '≥ Rp 6.500.000') {
+        if (detailed === 'Rp 6.500.000 - 12.000.000') return { min: 6500000, max: 12000000 };
+        if (detailed === '> Rp 12.000.000') return { min: 12000000, max: Infinity };
+        return { min: 6500000, max: Infinity };
     }
     if (range === '< Rp 500.000') return { min: 0, max: 499999 };
-    if (range === 'Rp 500.000 - 999.000') return { min: 500000, max: 999000 };
-    if (range === 'Rp 1.000.000 - 1.999.000') return { min: 1000000, max: 1999000 };
-    if (range === 'Rp 2.000.000 - 2.999.000') return { min: 2000000, max: 2999000 };
-    if (range === 'Rp 3.000.000 - 3.999.000') return { min: 3000000, max: 3999000 };
-    if (range === 'Rp 4.000.000 - 4.999.000') return { min: 4000000, max: 4999000 };
+    if (range === 'Rp 500.000 - 600.000') return { min: 500000, max: 600000 };
+    if (range === 'Rp 600.000 - 750.000') return { min: 600000, max: 750000 };
+    if (range === 'Rp 750.000 - 1.100.000') return { min: 750000, max: 1100000 };
+    if (range === 'Rp 1.100.000 - 1.800.000') return { min: 1100000, max: 1800000 };
+    if (range === 'Rp 1.800.000 - 2.800.000') return { min: 1800000, max: 2800000 };
+    if (range === 'Rp 2.800.000 - 4.000.000') return { min: 2800000, max: 4000000 };
+    if (range === 'Rp 4.000.000 - 6.500.000') return { min: 4000000, max: 6500000 };
     return { min: 0, max: 0 };
 };
 
@@ -182,19 +184,23 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
         const head = getIncomeNumericValues(data.economics_headIncomeRange || '', data.economics_headIncomeRangeDetailed || '');
         const spouse = getIncomeNumericValues(data.economics_spouseIncomeRange || '', data.economics_spouseIncomeRangeDetailed || '');
 
-        const totalMin = head.min + spouse.min;
+        const maxHead = head.max === Infinity ? head.min * 1.5 : head.max;
+        const maxSpouse = spouse.max === Infinity ? spouse.min * 1.5 : spouse.max;
+
+        const totalMid = ((head.min + maxHead) / 2) + ((spouse.min + maxSpouse) / 2);
 
         let inferredRange = '';
         let inferredDetailed = '';
-        if (totalMin >= 20000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = '> Rp 20.000.000'; }
-        else if (totalMin >= 10000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = 'Rp 10.000.000 - 20.000.000'; }
-        else if (totalMin >= 5000000) { inferredRange = '≥ Rp 5.000.000'; inferredDetailed = 'Rp 5.000.000 - 10.000.000'; }
-        else if (totalMin >= 4000000) { inferredRange = 'Rp 4.000.000 - 4.999.000'; }
-        else if (totalMin >= 3000000) { inferredRange = 'Rp 3.000.000 - 3.999.000'; }
-        else if (totalMin >= 2000000) { inferredRange = 'Rp 2.000.000 - 2.999.000'; }
-        else if (totalMin >= 1000000) { inferredRange = 'Rp 1.000.000 - 1.999.000'; }
-        else if (totalMin >= 500000) { inferredRange = 'Rp 500.000 - 999.000'; }
-        else if (totalMin >= 0 && (data.economics_headIncomeRange || data.economics_spouseIncomeRange)) { inferredRange = '< Rp 500.000'; }
+        if (totalMid >= 12000000) { inferredRange = '≥ Rp 6.500.000'; inferredDetailed = '> Rp 12.000.000'; }
+        else if (totalMid >= 6500000) { inferredRange = '≥ Rp 6.500.000'; inferredDetailed = 'Rp 6.500.000 - 12.000.000'; }
+        else if (totalMid >= 4000000) { inferredRange = 'Rp 4.000.000 - 6.500.000'; }
+        else if (totalMid >= 2800000) { inferredRange = 'Rp 2.800.000 - 4.000.000'; }
+        else if (totalMid >= 1800000) { inferredRange = 'Rp 1.800.000 - 2.800.000'; }
+        else if (totalMid >= 1100000) { inferredRange = 'Rp 1.100.000 - 1.800.000'; }
+        else if (totalMid >= 750000) { inferredRange = 'Rp 750.000 - 1.100.000'; }
+        else if (totalMid >= 600000) { inferredRange = 'Rp 600.000 - 750.000'; }
+        else if (totalMid >= 500000) { inferredRange = 'Rp 500.000 - 600.000'; }
+        else if (totalMid >= 0 && (data.economics_headIncomeRange || data.economics_spouseIncomeRange)) { inferredRange = '< Rp 500.000'; }
 
         if (data.economics_incomeRange !== inferredRange || data.economics_incomeRangeDetailed !== inferredDetailed) {
             update({ economics_incomeRange: inferredRange, economics_incomeRangeDetailed: inferredDetailed });
@@ -205,7 +211,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     ]);
 
     useEffect(() => {
-        if (data.economics_headIncomeRange !== '≥ Rp 5.000.000') {
+        if (data.economics_headIncomeRange !== '≥ Rp 6.500.000') {
             if (data.economics_headIncomeRangeDetailed) {
                 update({ economics_headIncomeRangeDetailed: '' });
             }
@@ -213,7 +219,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     }, [data.economics_headIncomeRange]);
 
     useEffect(() => {
-        if (data.economics_spouseIncomeRange !== '≥ Rp 5.000.000') {
+        if (data.economics_spouseIncomeRange !== '≥ Rp 6.500.000') {
             if (data.economics_spouseIncomeRangeDetailed) {
                 update({ economics_spouseIncomeRangeDetailed: '' });
             }
@@ -273,9 +279,9 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     placeholder="Pilih Range Pendapatan..."
                     required={true}
                 />
-                {data.economics_headIncomeRange === '≥ Rp 5.000.000' && (
+                {data.economics_headIncomeRange === '≥ Rp 6.500.000' && (
                     <div className="animate-fadeIn mt-4 pl-4 border-l-2 border-primary/20 space-y-2">
-                        <SectionHeader title="Detail Range Pendapatan Kepala Keluarga (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan kepala keluarga di atas 5 juta." />
+                        <SectionHeader title="Detail Range Pendapatan Kepala Keluarga (≥ Rp 6.500.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan kepala keluarga di atas 6,5 juta." />
                         <FormSelect
                             id="headIncomeRangeDetailed"
                             options={detailedIncomeRanges}
@@ -326,9 +332,9 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     placeholder="Pilih Range Pendapatan..."
                     required={false}
                 />
-                {data.economics_spouseIncomeRange === '≥ Rp 5.000.000' && (
+                {data.economics_spouseIncomeRange === '≥ Rp 6.500.000' && (
                     <div className="animate-fadeIn mt-4 pl-4 border-l-2 border-primary/20 space-y-2">
-                        <SectionHeader title="Detail Range Pendapatan Istri/Suami (≥ Rp 5.000.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan istri/suami di atas 5 juta." />
+                        <SectionHeader title="Detail Range Pendapatan Istri/Suami (≥ Rp 6.500.000)" icon="tune" tooltipText="Pilih detail range untuk pendapatan istri/suami di atas 6,5 juta." />
                         <FormSelect
                             id="spouseIncomeRangeDetailed"
                             options={detailedIncomeRanges}
@@ -349,7 +355,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                     <p className="text-sm text-slate-500 dark:text-slate-400">Total estimasi range pendapatan per bulan</p>
                 </div>
                 <div className="text-2xl font-black text-slate-900 dark:text-primary transition-colors duration-300">
-                    {data.economics_incomeRange === '≥ Rp 5.000.000' && data.economics_incomeRangeDetailed
+                    {data.economics_incomeRange === '≥ Rp 6.500.000' && data.economics_incomeRangeDetailed
                         ? data.economics_incomeRangeDetailed
                         : (data.economics_incomeRange || "-")}
                 </div>
@@ -366,21 +372,21 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2 relative z-10">
                         <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
-                            Konsumsi Pangan <span className="text-xs font-normal text-slate-500">(Beras, Lauk-pauk, Minyak, dsb)</span><span className="text-red-500">*</span> <FormTooltip text="Estimasi biaya makan minum sehari-hari." />
+                            Konsumsi Pangan <span className="text-xs font-normal text-slate-500">(Beras, Lauk-pauk, Minyak, dll)</span><span className="text-red-500">*</span> <FormTooltip text="Estimasi biaya makan minum sehari-hari." />
                         </label>
                         <FormatRupiah value={data.economics_expense_food} onChange={(val) => update({ economics_expense_food: val })} required={true} />
                     </div>
 
                     <div className="flex flex-col gap-2 relative z-10">
                         <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
-                            Kebutuhan Dasar Non-Pangan I <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, Pulsa)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya operasional rumah tangga rutin." />
+                            Kebutuhan Dasar Non-Pangan 1 <span className="text-xs font-normal text-slate-500">(Listrik, Air, BBM, dll)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya operasional rumah tangga rutin." />
                         </label>
                         <FormatRupiah value={data.economics_expense_utilities} onChange={(val) => update({ economics_expense_utilities: val })} required={true} />
                     </div>
 
                     <div className="flex flex-col gap-2 relative z-10">
                         <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
-                            Kebutuhan Dasar Non-Pangan II <span className="text-xs font-normal text-slate-500">(Rokok, Sirih Pinang, dsb)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya konsumsi tambahan di luar kebutuhan pokok." />
+                            Kebutuhan Dasar Non-Pangan 2 <span className="text-xs font-normal text-slate-500">(Rokok, Sirih Pinang, Pulsa, Paket Data, dll)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya konsumsi tambahan di luar kebutuhan pokok." />
                         </label>
                         <FormatRupiah value={data.economics_expense_nonPanganII} onChange={(val) => update({ economics_expense_nonPanganII: val })} required={true} />
                     </div>
@@ -405,25 +411,107 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                         </label>
                         <FormatRupiah value={data.economics_expense_other} onChange={(val) => update({ economics_expense_other: val })} required={true} />
                     </div>
+
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Kebutuhan Tak Terduga <span className="text-xs font-normal text-slate-500">(Kumpul keluarga, Dukacita, Sumbangan lainnya, dll)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya transportasi, pakaian, atau hiburan." />
+                        </label>
+                        <FormatRupiah value={data.economics_expense_unexpected} onChange={(val) => update({ economics_expense_unexpected: val })} required={true} />
+                    </div>
+
+                    <div className="flex flex-col gap-2 relative z-10">
+                        <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                            Kebutuhan Peribadatan <span className="text-xs font-normal text-slate-500">(Kumpul keluarga, Dukacita, Sumbangan lainnya, dll)</span><span className="text-red-500">*</span> <FormTooltip text="Biaya transportasi, pakaian, atau hiburan." />
+                        </label>
+                        <FormatRupiah value={data.economics_expense_worship} onChange={(val) => update({ economics_expense_worship: val })} required={true} />
+                    </div>
                 </div>
 
-                {/* Total Pengeluaran */}
-                <div className="bg-slate-50 dark:bg-slate-800/20 p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
-                    <div>
-                        <h4 className="text-lg font-bold text-slate-900 dark:text-white">Total Pengeluaran Rumah Tangga</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Total estimasi pengeluaran per bulan</p>
+                <div className="space-y-4">
+                    {/* Total Pengeluaran */}
+                    <div className="bg-slate-50 dark:bg-slate-800/20 p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+                        <div>
+                            <h4 className="text-lg font-bold text-slate-900 dark:text-white">Total Pengeluaran Rumah Tangga</h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Total estimasi pengeluaran per bulan</p>
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 dark:text-primary transition-colors duration-300">
+                            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
+                                (data.economics_expense_food || 0) +
+                                (data.economics_expense_utilities || 0) +
+                                (data.economics_expense_nonPanganII || 0) +
+                                (data.economics_expense_loan || 0) +
+                                (data.economics_expense_education || 0) +
+                                (data.economics_expense_other || 0) +
+                                (data.economics_expense_unexpected || 0) +
+                                (data.economics_expense_worship || 0)
+                            )}
+                        </div>
                     </div>
-                    <div className="text-3xl font-black text-slate-900 dark:text-primary transition-colors duration-300">
-                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(
-                            (data.economics_expense_food || 0) +
+
+                    {/* Sisa Pendapatan */}
+                    {(() => {
+                        const totalExpenses = (data.economics_expense_food || 0) +
                             (data.economics_expense_utilities || 0) +
                             (data.economics_expense_nonPanganII || 0) +
                             (data.economics_expense_loan || 0) +
                             (data.economics_expense_education || 0) +
-                            (data.economics_expense_other || 0)
-                        )}
-                    </div>
+                            (data.economics_expense_other || 0) +
+                            (data.economics_expense_unexpected || 0) +
+                            (data.economics_expense_worship || 0);
+
+                        const incomeStr = data.economics_incomeRange === '≥ Rp 6.500.000' && data.economics_incomeRangeDetailed ? data.economics_incomeRangeDetailed : (data.economics_incomeRange || '');
+                        const parsedIncome = getIncomeNumericValues(data.economics_incomeRange || '', data.economics_incomeRangeDetailed || '');
+
+                        if (!parsedIncome || (parsedIncome.min === 0 && parsedIncome.max === 0 && incomeStr !== '< Rp 500.000')) {
+                            return (
+                                <div className="bg-slate-50 dark:bg-slate-800/20 p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-slate-300"></div>
+                                    <div>
+                                        <h4 className="text-lg font-bold text-slate-900 dark:text-white">Sisa Pendapatan Rumah Tangga</h4>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">Selisih total pendapatan dan pengeluaran</p>
+                                    </div>
+                                    <div className="text-3xl font-black text-slate-400">-</div>
+                                </div>
+                            );
+                        }
+
+                        const minRemain = parsedIncome.min - totalExpenses;
+                        const maxRemain = parsedIncome.max - totalExpenses;
+                        const format = (v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v);
+
+                        let displayStr = '';
+                        let isNegative = maxRemain < 0;
+                        let isWarning = minRemain < 0 && maxRemain >= 0;
+
+                        if (parsedIncome.max === Infinity) {
+                            displayStr = `> ${format(minRemain)}`;
+                            isNegative = minRemain < 0;
+                            isWarning = false;
+                        } else {
+                            displayStr = `${format(minRemain)} s/d ${format(maxRemain)}`;
+                        }
+
+                        const textColorClass = isNegative ? 'text-red-500' : isWarning ? 'text-amber-500' : 'text-emerald-500';
+                        const bgColorClass = isNegative ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-emerald-500';
+
+                        return (
+                            <div className="bg-slate-50 dark:bg-slate-800/20 p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+                                <div className={`absolute top-0 left-0 w-1.5 h-full ${bgColorClass}`}></div>
+                                <div>
+                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Sisa Pendapatan Rumah Tangga</h4>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                        Selisih total pendapatan dan pengeluaran
+                                        {isNegative && <FormTooltip text="Peringatan: Total pengeluaran melebihi batas maksimal estimasi pendapatan keluarga." />}
+                                        {isWarning && <FormTooltip text="Perhatian: Total pengeluaran mungkin melebihi pendapatan tergantung nominal aslinya." />}
+                                    </p>
+                                </div>
+                                <div className={`text-2xl md:text-3xl font-black transition-colors duration-300 ${textColorClass}`}>
+                                    {displayStr}
+                                </div>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 

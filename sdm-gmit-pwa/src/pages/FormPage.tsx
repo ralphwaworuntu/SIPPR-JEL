@@ -154,7 +154,7 @@ const FormPage = () => {
                 }
 
                 return true;
-            case 3:
+            case 5:
                 if (formData.professionalFamilyMembers && formData.professionalFamilyMembers.length > 0) {
                     const filledMembers = formData.professionalFamilyMembers.filter(m => m.name.trim() !== '' || m.workplace !== '' || m.position !== '');
                     for (let i = 0; i < filledMembers.length; i++) {
@@ -178,7 +178,7 @@ const FormPage = () => {
                     }
                 }
                 return true;
-            case 4:
+            case 3:
                 // 1. Wajib isi status sekolah
                 if (!formData.education_schoolingStatus) return handleValidationError('schoolingStatus', "Mohon pilih status sekolah anak");
 
@@ -220,8 +220,16 @@ const FormPage = () => {
                     return handleValidationError('education_dropout_tk_paud', "Jumlah anak tidak boleh negatif");
                 }
 
+                // 4. Validasi beasiswa lainnya
+                if (formData.education_hasScholarship === 'Ya') {
+                    if (!formData.education_scholarshipType) return handleValidationError('education_scholarshipType', "Mohon pilih jenis beasiswa");
+                    if (formData.education_scholarshipType === 'Beasiswa Lainnya' && !formData.education_scholarshipTypeOther) {
+                        return handleValidationError('education_scholarshipTypeOther', "Mohon isi jenis beasiswa lainnya");
+                    }
+                }
+
                 return true;
-            case 5:
+            case 6:
                 if (!formData.economics_headOccupation) return handleValidationError('headOccupation', "Mohon pilih Pekerjaan Utama Kepala Keluarga");
                 if (formData.economics_headOccupation === 'Lainnya' && !formData.economics_headOccupationOther) {
                     return handleValidationError('headOccupationOther', "Mohon lengkapi Pekerjaan Utama Kepala Keluarga yang dipilih Lainnya");
@@ -232,18 +240,16 @@ const FormPage = () => {
                 }
 
                 if (!formData.economics_headIncomeRange) return handleValidationError('headIncomeRange', "Mohon pilih Range Pendapatan Utama Kepala Keluarga");
-                if (formData.economics_headIncomeRange === '≥ Rp 5.000.000' && !formData.economics_headIncomeRangeDetailed) {
+                if (formData.economics_headIncomeRange === '≥ Rp 6.500.000' && !formData.economics_headIncomeRangeDetailed) {
                     return handleValidationError('headIncomeRangeDetailed', "Mohon pilih Detail Range Pendapatan Kepala Keluarga");
                 }
 
-                if (formData.economics_spouseIncomeRange === '≥ Rp 5.000.000' && !formData.economics_spouseIncomeRangeDetailed) {
+                if (formData.economics_spouseIncomeRange === '≥ Rp 6.500.000' && !formData.economics_spouseIncomeRangeDetailed) {
                     return handleValidationError('spouseIncomeRangeDetailed', "Mohon pilih Detail Range Pendapatan Istri/Suami");
                 }
 
-                if (!formData.economics_incomeRange) return handleValidationError('incomeRange', "Mohon pilih Range Pendapatan Rumah Tangga");
-
-                // Validate detailed income range if >= 5jt
-                if (formData.economics_incomeRange === '≥ Rp 5.000.000' && !formData.economics_incomeRangeDetailed) {
+                if (!formData.economics_incomeRange) return handleValidationError('headIncomeRange', "Range Pendapatan Keseluruhan belum terhitung");
+                if (formData.economics_incomeRange === '≥ Rp 6.500.000' && !formData.economics_incomeRangeDetailed) {
                     return handleValidationError('incomeRangeDetailed', "Mohon pilih Detail Range Pendapatan");
                 }
 
@@ -251,8 +257,12 @@ const FormPage = () => {
                 if (
                     (formData.economics_expense_food < 0) ||
                     (formData.economics_expense_utilities < 0) ||
+                    (formData.economics_expense_nonPanganII < 0) ||
+                    (formData.economics_expense_loan < 0) ||
                     (formData.economics_expense_education < 0) ||
-                    (formData.economics_expense_other < 0)
+                    (formData.economics_expense_other < 0) ||
+                    (formData.economics_expense_unexpected < 0) ||
+                    (formData.economics_expense_worship < 0)
                 ) {
                     return handleValidationError('economics_expense_food', "Pengeluaran tidak boleh negatif");
                 }
@@ -355,7 +365,7 @@ const FormPage = () => {
                 }
 
                 return true;
-            case 6:
+            case 4:
                 if (!formData.health_sick30Days) return handleValidationError('health_sick30Days', "Mohon pilih status Sakit 30 Hari Terakhir");
                 if (!formData.health_chronicSick) return handleValidationError('health_chronicSick', "Mohon pilih status Sakit Menahun");
 
@@ -365,6 +375,7 @@ const FormPage = () => {
                 }
 
                 if (!formData.health_hasBPJS) return handleValidationError('health_hasBPJS', "Mohon pilih Status BPJS Kesehatan");
+                if (formData.health_hasBPJS === 'Tidak' && !formData.health_bpjsNonParticipants) return handleValidationError('health_bpjsNonParticipants', "Mohon sebutkan nama anggota keluarga yang belum memiliki BPJS Kesehatan");
                 if (!formData.health_regularTreatment) return handleValidationError('health_regularTreatment', "Mohon pilih Status Pengobatan Teratur");
                 if (!formData.health_hasBPJSKetenagakerjaan) return handleValidationError('health_hasBPJSKetenagakerjaan', "Mohon pilih Status BPJS Ketenagakerjaan");
                 if (!formData.health_socialAssistance) return handleValidationError('health_socialAssistance', "Mohon pilih Jenis Bantuan Sosial");
@@ -423,11 +434,11 @@ const FormPage = () => {
     const getStepCompletionMessage = (completedStep: number): string => {
         switch (completedStep) {
             case 1: return "✅ Data identitas lengkap! Lanjut ke data keluarga...";
-            case 2: return "👨‍👩‍👧‍👦 Info keluarga tersimpan! Sekarang profesi...";
-            case 3: return "💼 Data profesi berhasil! Sudah setengah jalan 💪";
-            case 4: return "🎓 Pendidikan tercatat! Tinggal 2 langkah lagi...";
-            case 5: return "💰 Ekonomi selesai! Langkah terakhir sebelum kirim!";
-            case 6: return "🏥 Kesehatan lengkap! Periksa & kirim data Anda ✅";
+            case 2: return "👨‍👩‍👧‍👦 Info keluarga tersimpan! Lanjut ke pendidikan...";
+            case 3: return "🎓 Pendidikan tercatat! Lanjut ke kesehatan...";
+            case 4: return "🏥 Data kesehatan lengkap! Sudah lebih dari setengah jalan 💪";
+            case 5: return "💼 Data profesi berhasil! Tinggal 1 langkah lagi...";
+            case 6: return "💰 Ekonomi selesai! Periksa & kirim data Anda ✅";
             default: return "";
         }
     };
@@ -514,10 +525,10 @@ const FormPage = () => {
             switch (step) {
                 case 1: return <Step1Identity data={formData} update={updateFormData} goToStep={goToStep} />;
                 case 2: return <Step2Professional data={formData} update={updateFormData} goToStep={goToStep} />;
-                case 3: return <Step3Commitment data={formData} update={updateFormData} goToStep={goToStep} />;
-                case 4: return <Step4Education data={formData} update={updateFormData} goToStep={goToStep} />;
-                case 5: return <Step5Economics data={formData} update={updateFormData} goToStep={goToStep} />;
-                case 6: return <Step6Health data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 3: return <Step4Education data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 4: return <Step6Health data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 5: return <Step3Commitment data={formData} update={updateFormData} goToStep={goToStep} />;
+                case 6: return <Step5Economics data={formData} update={updateFormData} goToStep={goToStep} />;
                 case 7: return <Step7Consent data={formData} update={updateFormData} goToStep={goToStep} />;
                 default: return <Step1Identity data={formData} update={updateFormData} goToStep={goToStep} />;
             }
@@ -558,10 +569,10 @@ const FormPage = () => {
     const stepConfig = [
         { key: 1, title: "DATA UMUM", icon: "person", label: "Identitas" },
         { key: 2, title: "INFORMASI KELUARGA", icon: "groups", label: "Keluarga" },
-        { key: 3, title: "PROFESI & PELAYANAN", icon: "volunteer_activism", label: "Pelayanan" },
-        { key: 4, title: "PENDIDIKAN", icon: "school", label: "Pendidikan" },
-        { key: 5, title: "EKONOMI & ASET", icon: "paid", label: "Ekonomi" },
-        { key: 6, title: "KESEHATAN", icon: "medical_services", label: "Kesehatan" },
+        { key: 3, title: "PENDIDIKAN", icon: "school", label: "Pendidikan" },
+        { key: 4, title: "KESEHATAN", icon: "medical_services", label: "Kesehatan" },
+        { key: 5, title: "PROFESI & PELAYANAN", icon: "volunteer_activism", label: "Pelayanan" },
+        { key: 6, title: "EKONOMI & ASET", icon: "paid", label: "Ekonomi" },
         { key: 7, title: "VALIDASI DATA", icon: "verified_user", label: "Validasi" },
     ];
 
@@ -569,10 +580,10 @@ const FormPage = () => {
         switch (stepNum) {
             case 1: return "Terdapat 7 langkah pengisian data — dimulai dari data umum 🙏";
             case 2: return "Langkah 2 dari 7 — informasi anggota keluarga.";
-            case 3: return "Langkah 3 dari 7 — data profesi & pelayanan.";
-            case 4: return "Sudah 4 dari 7 langkah — luar biasa! 💪";
-            case 5: return "Langkah 5 dari 7 — data ekonomi keluarga 💰";
-            case 6: return "Langkah 6 dari 7 — informasi kesehatan keluarga.";
+            case 3: return "Langkah 3 dari 7 — data pendidikan anak.";
+            case 4: return "Sudah 4 dari 7 langkah — informasi kesehatan 🏥";
+            case 5: return "Langkah 5 dari 7 — data profesi & pelayanan 💼";
+            case 6: return "Langkah 6 dari 7 — data ekonomi keluarga 💰";
             case 7: return "Terakhir! Periksa dengan teliti & kirim ✅";
             default: return "";
         }

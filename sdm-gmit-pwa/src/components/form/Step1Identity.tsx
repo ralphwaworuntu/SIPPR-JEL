@@ -4,6 +4,7 @@ import { checkDuplicateName } from '../../lib/validation';
 import FormInput from '../ui/FormInput';
 import FormSelect from '../ui/FormSelect';
 import FormMultiSelect from '../ui/FormMultiSelect';
+import FormRadioGroup from '../ui/FormRadioGroup';
 import { FormTooltip } from '../ui/FormTooltip';
 
 interface StepProps {
@@ -177,7 +178,6 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         }}
                         type="tel"
                         placeholder="16 Digit Nomor KK"
-                        required
                         tooltipText="Masukkan 16 digit Nomor Kartu Keluarga yang tertera pada bagian atas KK Anda."
                     />
                     {data.kkNumber && data.kkNumber.length > 0 && data.kkNumber.length < 16 && (
@@ -206,8 +206,8 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         }}
                         type="tel"
                         placeholder="16 Digit NIK"
-                        required
                         tooltipText="Masukkan 16 digit Nomor Induk Kependudukan (NIK) sesuai dengan e-KTP."
+                        required
                     />
                     {data.nik && data.nik.length > 0 && data.nik.length < 16 && (
                         <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -255,7 +255,6 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     options={['Laki-laki', 'Perempuan']}
                     placeholder="Pilih Jenis Kelamin"
                     required
-                    tooltipText="Pilih jenis kelamin."
                 />
 
                 {/* Date of Birth */}
@@ -312,6 +311,30 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     placeholder="Pilih Golongan Darah"
                     required
                     tooltipText="Pilih golongan darah sesuai dengan data medis atau e-KTP."
+                />
+
+                {/* Baptism Status */}
+                <FormRadioGroup
+                    label="Status Baptis"
+                    name="baptismStatus"
+                    value={data.baptismStatus}
+                    onChange={(val) => update({ baptismStatus: val as any })}
+                    options={['Sudah', 'Belum']}
+                    columns={2}
+                    required
+                    tooltipText="Pilih apakah sudah dibaptis atau belum."
+                />
+
+                {/* Sidi Status */}
+                <FormRadioGroup
+                    label="Status Sidi"
+                    name="sidiStatus"
+                    value={data.sidiStatus}
+                    onChange={(val) => update({ sidiStatus: val as any })}
+                    options={['Sudah', 'Belum']}
+                    columns={2}
+                    required
+                    tooltipText="Pilih apakah sudah sidi atau belum."
                 />
 
                 {/* Marital Status */}
@@ -376,7 +399,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                             id="marriageType"
                             value={data.marriageType}
                             onChange={(val) => update({ marriageType: val })}
-                            options={['Nikah adat', 'Nikah gereja', 'Nikah catatan sipil', 'Nikah dinas']}
+                            options={['Nikah Adat', 'Nikah Gereja', 'Nikah Catatan Sipil', 'Nikah Dinas']}
                             placeholder="Pilih Jenis Pernikahan (Bisa >1)"
                             required
                             tooltipText="Pilih satu atau lebih jenis pernikahan yang diakui."
@@ -390,7 +413,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     id="educationLevel"
                     value={data.educationLevel}
                     onChange={(val) => update({ educationLevel: val })}
-                    options={['Tidak tamat SD', 'SD/Sederajat', 'SMP/Sederajat', 'SMA/SMK/Sederajat', 'D1', 'D2', 'D3', 'D4/S1', 'S1', 'S2', 'S3']}
+                    options={['Tidak Tamat SD', 'SD', 'SMP/Sederajat', 'SMA/Sederajat', 'D I', 'D II', 'D III', 'D IV/S1', 'S1', 'S2', 'S3']}
                     placeholder="Pilih Tingkat Pendidikan"
                     required
                     tooltipText="Pendidikan terakhir yang telah ditamatkan."
@@ -466,7 +489,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                         <FormTooltip text="Masukkan alamat domisili saat ini, lengkap dengan RT/RW, dan jalan/gang. Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002." />
                     </label>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                        Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002, Kel. Liliba, Kec. Oebobo, Kota Kupang.
+                        Contoh: Jl. Kiu Leu No. 1, RT.001/RW.002
                     </span>
                 </div>
                 <textarea

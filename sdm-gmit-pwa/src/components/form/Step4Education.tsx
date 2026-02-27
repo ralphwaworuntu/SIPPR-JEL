@@ -306,7 +306,7 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
                 <SectionHeader title="Penerima Beasiswa:" tooltipText="Apakah ada anggota keluarga yang sedang menerima beasiswa pendidikan?" />
                 <div className="max-w-md space-y-4">
                     <FormRadioGroup
-                        label="Apakah saat ini sedang menerima beasiswa?"
+                        label="Apakah ada anak sekolah/kuliah yang penerima beasiswa dari pemerintah?"
                         id="education_hasScholarship"
                         name="education_hasScholarship"
                         options={['Ya', 'Tidak']}
@@ -318,21 +318,43 @@ const Step4Education: React.FC<StepProps> = ({ data, update }) => {
                                 update({ education_hasScholarship: val as 'Ya' | 'Tidak' });
                             }
                         }}
-                        tooltipText="Pilih Ya jika ada anggota keluarga yang sedang menerima beasiswa."
+                        tooltipText="Pilih Ya jika ada anggota keluarga yang sedang menerima beasiswa pemerintah."
                     />
 
                     {data.education_hasScholarship === 'Ya' && (
-                        <div className="animate-fadeIn pl-4 border-l-2 border-primary/20">
+                        <div className="animate-fadeIn pl-4 border-l-2 border-primary/20 space-y-4">
                             <FormSelect
                                 label="Jenis Beasiswa"
                                 id="education_scholarshipType"
                                 value={data.education_scholarshipType || ''}
-                                onChange={(val) => update({ education_scholarshipType: val })}
-                                options={['LPDP', 'PIP', 'KIP']}
+                                onChange={(val) => {
+                                    if (val !== 'Beasiswa Lainnya') {
+                                        update({ education_scholarshipType: val, education_scholarshipTypeOther: '' });
+                                    } else {
+                                        update({ education_scholarshipType: val });
+                                    }
+                                }}
+                                options={['PIP (Jalur Reguler/Sekolah)', 'PIP (Jalur Aspirasi/DPR)', 'KIP Kuliah', 'Beasiswa Pemda', 'Beasiswa Swasta', 'Beasiswa Lainnya']}
                                 placeholder="Pilih Jenis Beasiswa"
                                 required
                                 tooltipText="Pilih jenis beasiswa yang diterima."
                             />
+                            {data.education_scholarshipType === 'Beasiswa Lainnya' && (
+                                <div className="animate-fadeIn">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">
+                                        Jenis Beasiswa Lainnya <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="education_scholarshipTypeOther"
+                                        value={data.education_scholarshipTypeOther || ''}
+                                        onChange={(e) => update({ education_scholarshipTypeOther: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white"
+                                        placeholder="Tuliskan jenis beasiswa lainnya..."
+                                        required
+                                    />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
