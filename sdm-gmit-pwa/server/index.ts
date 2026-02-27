@@ -434,6 +434,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         familyMembersSidiMale: safeInt(data.familyMembersSidiMale),
         familyMembersSidiFemale: safeInt(data.familyMembersSidiFemale),
         familyMembersNonBaptized: safeInt(data.familyMembersNonBaptized),
+        familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
         familyMembersNonSidiNames: data.familyMembersNonSidiNames || [],
         familyMembersNonBaptizedNames: data.familyMembersNonBaptizedNames || [],
 
