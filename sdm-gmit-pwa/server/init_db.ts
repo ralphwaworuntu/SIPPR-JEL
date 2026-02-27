@@ -151,8 +151,6 @@ async function initDb() {
         health_disability_sensory JSON,
         health_disability_sensory_other VARCHAR(100),
         health_disability_double BOOLEAN DEFAULT FALSE,
-        latitude VARCHAR(50),
-        longitude VARCHAR(50),
         status VARCHAR(20) DEFAULT 'PENDING',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

@@ -144,8 +144,6 @@ const mapCongregantToMember = (c: any) => ({
     lingkungan: c.lingkungan || "-",
     rayon: c.rayon || "-",
     address: c.address || "-",
-    latitude: c.latitude || null,
-    longitude: c.longitude || null,
     phone: c.phone || "-",
     educationLevel: c.educationLevel || "-",
     major: c.major || "-",
@@ -579,8 +577,6 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         healthDisabilityDouble: data.health_disabilityDouble || false,
 
         // Geo
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
         status: isAdmin ? (data.status || 'VALIDATED') : 'PENDING',
     };
 };
@@ -1155,10 +1151,6 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     healthHasDisability: row["Disabilitas"] || "Tidak",
                     healthDisabilityPhysical: safeJSON(row["Daftar Disabilitas"]),
                     marriageDate: safeDateForDB(row["Tanggal Pernikahan"]),
-
-                    // Geolocation
-                    latitude: row["Latitude"] || "-10.1633",
-                    longitude: row["Longitude"] || "123.6083",
 
                     status: 'VALIDATED'
                 }));

@@ -263,20 +263,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "latitude": {
-          "name": "latitude",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "longitude": {
-          "name": "longitude",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "status": {
           "name": "status",
           "type": "varchar(20)",

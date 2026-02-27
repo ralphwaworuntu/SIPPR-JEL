@@ -108,6 +108,7 @@ const LandingPage = () => {
                     <nav className="hidden lg:flex items-center gap-8">
                         {[
                             { name: 'Beranda', href: '#' },
+                            { name: 'Cek Status', href: '/status' },
                             { name: 'Statistik', href: '#stats' },
                             { name: 'Tentang', href: '#tentang' },
                             { name: 'Fitur', href: '#fitur' },
@@ -155,6 +156,7 @@ const LandingPage = () => {
                         <nav className="flex flex-col p-4">
                             {[
                                 { name: 'Beranda', href: '#' },
+                                { name: 'Cek Status', href: '/status' },
                                 { name: 'Statistik', href: '#stats' },
                                 { name: 'Tentang', href: '#tentang' },
                                 { name: 'Fitur', href: '#fitur' },

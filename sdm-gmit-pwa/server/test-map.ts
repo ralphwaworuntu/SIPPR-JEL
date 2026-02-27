@@ -20,8 +20,6 @@ const mapCongregantToMember = (c: any) => ({
     lingkungan: c.lingkungan || "-",
     rayon: c.rayon || "-",
     address: c.address || "-",
-    latitude: c.latitude || null,
-    longitude: c.longitude || null,
     phone: c.phone || "-",
     educationLevel: c.educationLevel || "-",
     major: c.major || "-",

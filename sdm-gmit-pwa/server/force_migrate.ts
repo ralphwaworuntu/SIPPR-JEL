@@ -25,8 +25,6 @@ async function forceMigrate() {
             "ALTER TABLE congregants ADD COLUMN years_of_experience INT DEFAULT 0 AFTER company_name",
             "ALTER TABLE congregants ADD COLUMN interest_areas JSON AFTER willingness_to_serve",
             "ALTER TABLE congregants ADD COLUMN contribution_types JSON AFTER interest_areas",
-            "ALTER TABLE congregants ADD COLUMN latitude VARCHAR(50) AFTER contribution_types",
-            "ALTER TABLE congregants ADD COLUMN longitude VARCHAR(50) AFTER latitude"
         ];
 
         for (const cmd of commands) {

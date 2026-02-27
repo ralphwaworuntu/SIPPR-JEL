@@ -32,8 +32,6 @@ const testData = {
     willingnessToServe: "Aktif",
     interestAreas: ["Teknologi", "Pendidikan"],
     contributionTypes: ["Tenaga Ahli", "Relawan"],
-    latitude: -10.1772,
-    longitude: 123.6070
 };
 
 async function verifyPersistence() {
@@ -67,9 +65,6 @@ async function verifyPersistence() {
 
                 const contributions = JSON.parse(member.contribution_types);
                 console.log("Contributions Logic Match:", Array.isArray(contributions) && contributions.includes("Relawan"));
-
-                console.log("Latitude Match:", member.latitude === testData.latitude.toString());
-                console.log("Longitude Match:", member.longitude === testData.longitude.toString());
 
                 console.log("\nFULL PERSISTENCE VERIFIED!");
             } else {

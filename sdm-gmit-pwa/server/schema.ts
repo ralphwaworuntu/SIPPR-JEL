@@ -229,9 +229,6 @@ export const congregants = mysqlTable("congregants", {
     healthDisabilityDouble: boolean("health_disability_double").default(false),
 
     // Geolocation
-    latitude: varchar("latitude", { length: 50 }),
-    longitude: varchar("longitude", { length: 50 }),
-
     status: varchar("status", { length: 20 }).default('PENDING'), // PENDING, VALIDATED
 
     createdAt: timestamp("created_at").defaultNow(),

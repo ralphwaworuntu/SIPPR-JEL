@@ -35,8 +35,6 @@ CREATE TABLE `congregants` (
 	`willingness_to_serve` varchar(50),
 	`interest_areas` json,
 	`contribution_types` json,
-	`latitude` varchar(50),
-	`longitude` varchar(50),
 	`status` varchar(20) DEFAULT 'PENDING',
 	`created_at` timestamp DEFAULT (now()),
 	`updated_at` timestamp DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,

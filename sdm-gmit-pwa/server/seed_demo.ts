@@ -17,7 +17,6 @@ async function seed() {
             gender: isMale ? "Laki-laki" : "Perempuan",
             dateOfBirth: new Date(1960 + Math.floor(Math.random() * 40), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)).toISOString().split('T')[0],
             phone: "0812" + Math.floor(Math.random() * 100000000).toString().padStart(8, '0'),
-            sector: `Sektor ${Math.floor(Math.random() * 9) + 1}`,
             lingkungan: `Lingkungan ${Math.floor(Math.random() * 5) + 1}`,
             rayon: `Rayon ${['Timur', 'Selatan', 'Barat', 'Utara'][Math.floor(Math.random() * 4)]}`,
             address: `Jalan ${['W.J Lementik', 'T.A. Pello', 'Skanto', 'Frans Seda'][Math.floor(Math.random() * 4)]} No. ${Math.floor(Math.random() * 100)}`,
@@ -31,8 +30,6 @@ async function seed() {
             willingnessToServe: ["Aktif", "On-demand", "Not-available"][Math.floor(Math.random() * 3)],
             interestAreas: ["Pelayanan Kaum Bapak", "Pelayanan Perempuan", "Pemuda", "Anak SM"][Math.floor(Math.random() * 4)],
             contributionTypes: ["Berkhotbah", "Sumbangan Material", "Pikirk Tenaga"].slice(0, Math.floor(Math.random() * 3) + 1),
-            latitude: (-10.1585 + (Math.random() - 0.5) * 0.1).toString(), // Koordinat Kupang
-            longitude: (123.6069 + (Math.random() - 0.5) * 0.1).toString(),
             status: ["PENDING", "VALIDATED"][Math.floor(Math.random() * 2)]
         });
     }

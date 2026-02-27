@@ -858,62 +858,6 @@ const AdminDashboard = () => {
                     <ChartCard title="Distribusi Lingkungan" subtitle="Jumlah KK per Lingkungan" icon="location_on" iconColor="#10b981" data={lingkunganData} />
                     <ChartCard title="Distribusi Rayon" subtitle="Jumlah KK per Rayon" icon="grid_view" iconColor="#f59e0b" data={rayonData} />
                 </div>
-
-                <div className="mt-6 md:mt-8 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                    <div className="p-5 md:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h3 className="font-bold text-base md:text-lg text-slate-900 dark:text-white">Alamat & Lokasi Jemaat</h3>
-                            <p className="text-[10px] md:text-xs text-slate-500">Daftar alamat lengkap yang dapat difilter</p>
-                        </div>
-                        <div className="flex gap-2">
-                            <select
-                                value={tableFilter.rayon}
-                                onChange={e => setTableFilter(f => ({ ...f, rayon: e.target.value }))}
-                                className="text-[10px] md:text-xs bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-2 md:px-3 py-2 font-bold focus:ring-2 focus:ring-primary/20"
-                            >
-                                <option value="">Semua Rayon</option>
-                                {Object.keys(stats?.distributions?.rayon || {}).map(r => <option key={r} value={r}>{r}</option>)}
-                            </select>
-                            <select
-                                value={tableFilter.lingkungan}
-                                onChange={e => setTableFilter(f => ({ ...f, lingkungan: e.target.value }))}
-                                className="text-[10px] md:text-xs bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-2 md:px-3 py-2 font-bold focus:ring-2 focus:ring-primary/20"
-                            >
-                                <option value="">Semua Lingkungan</option>
-                                {Object.keys(stats?.distributions?.lingkungan || {}).map(l => <option key={l} value={l}>{l}</option>)}
-                            </select>
-                        </div>
-                    </div>
-                    <div className="overflow-x-auto custom-scrollbar">
-                        <table className="w-full text-left text-xs md:text-sm">
-                            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-bold">
-                                <tr>
-                                    <th className="px-4 md:px-6 py-3 md:py-4">Nama</th>
-                                    <th className="px-4 md:px-6 py-3 md:py-4">Rayon/Ling</th>
-                                    <th className="hidden md:table-cell px-4 md:px-6 py-3 md:py-4">Alamat</th>
-                                    <th className="px-4 md:px-6 py-3 md:py-4 text-right md:text-left">Telepon</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                {addressTableData.slice(0, 8).map(m => (
-                                    <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-4 md:px-6 py-3 md:py-4 font-bold text-slate-700 dark:text-slate-200 truncate max-w-[120px] md:max-w-none">{m.name}</td>
-                                        <td className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-medium whitespace-nowrap">
-                                            R: {m.rayon} / L: {m.lingkungan}
-                                        </td>
-                                        <td className="hidden md:table-cell px-4 md:px-6 py-3 md:py-4 text-xs text-slate-500 max-w-xs truncate">{m.address}</td>
-                                        <td className="px-4 md:px-6 py-3 md:py-4 text-[10px] md:text-xs font-bold text-primary text-right md:text-left">{m.phone}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {addressTableData.length > 8 && (
-                        <div className="p-3 md:p-4 text-center border-t border-slate-100 dark:border-slate-800 bg-slate-50/30">
-                            <button onClick={() => navigate('/admin/members')} className="text-[10px] md:text-xs font-black text-primary hover:underline uppercase tracking-widest">Lihat Selengkapnya ({addressTableData.length - 8} data)</button>
-                        </div>
-                    )}
-                </div>
             </div>
         ),
         keluarga: (
@@ -932,54 +876,6 @@ const AdminDashboard = () => {
                     <ChartCard title="Domisili Jemaat" subtitle="Rasio Menetap vs Diaspora" icon="home_pin" iconColor="#10b981" data={residencyData} />
                     <ChartCard title="Penerima Diakonia" subtitle="KK penerima bantuan gereja" icon="handshake" iconColor="#f59e0b" data={diakoniaData} />
                     <ChartCard title="Tren Diakonia" subtitle="Penerima dari tahun ke tahun" icon="trending_up" iconColor="#6366f1" data={diakoniaTrendData} />
-                </div>
-
-                {/* Candidate List Filter */}
-                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-8">
-                    <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50">
-                        <div>
-                            <h4 className="text-lg font-bold text-slate-900 dark:text-white">Daftar Calon Baptis / Sidi</h4>
-                            <p className="text-xs text-slate-500 font-medium">Otomatis menyaring anggota keluarga dengan data sakramen kosong</p>
-                        </div>
-                        <div className="px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase tracking-widest">{candidates.length} JIWA</div>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-white dark:bg-slate-900">
-                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Nama Kepala Keluarga</th>
-                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Baptis</th>
-                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Sidi</th>
-                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                {candidates.slice(0, 5).map(m => (
-                                    <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-slate-700 dark:text-slate-200">{m.name}</td>
-                                        <td className="px-4 md:px-8 py-4 md:py-5">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${Number(m.familyMembersNonBaptized) > 0 ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                                                {m.familyMembersNonBaptized || 0} Jiwa
-                                            </span>
-                                        </td>
-                                        <td className="px-4 md:px-8 py-4 md:py-5">
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${Number(m.familyMembersNonSidi) > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
-                                                {m.familyMembersNonSidi || 0} Jiwa
-                                            </span>
-                                        </td>
-                                        <td className="px-4 md:px-8 py-4 md:py-5 text-right">
-                                            <button
-                                                onClick={() => setSelectedFamilyForDiakonia(m)}
-                                                className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
-                                            >
-                                                Cek Riwayat
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         ),
@@ -1046,119 +942,6 @@ const AdminDashboard = () => {
                             <div className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-primary/60"></span><span className="text-[9px] font-bold text-slate-400 uppercase">Lvl 2</span></div>
                             <div className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-primary"></span><span className="text-[9px] font-bold text-slate-400 uppercase">Lvl 3</span></div>
                         </div>
-                    </div>
-                </div>
-
-                {/* 3. Expert filtering & Table */}
-                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                    <div className="p-8 border-b border-slate-100 dark:border-slate-800">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                            <div>
-                                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Daftar Tenaga Ahli</h3>
-                                <p className="text-xs text-slate-500 font-medium mt-1">Saring personil untuk kebutuhan kegiatan jemaat</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black text-primary bg-primary/10 px-4 py-1.5 rounded-full uppercase tracking-widest">{profAnalytics.filteredExperts.length} HASIL</span>
-                            </div>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Keahlian</label>
-                                <select
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all"
-                                    value={profFilter.skill}
-                                    onChange={(e) => setProfFilter({ ...profFilter, skill: e.target.value })}
-                                >
-                                    <option value="">Semua Kategori</option>
-                                    {profAnalytics.uniqueSkills.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Level</label>
-                                <select
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all"
-                                    value={profFilter.level}
-                                    onChange={(e) => setProfFilter({ ...profFilter, level: e.target.value })}
-                                >
-                                    <option value="">Semua Level</option>
-                                    <option value="1">Level 1 (Dasar)</option>
-                                    <option value="2">Level 2 (Menengah)</option>
-                                    <option value="3">Level 3 (Mahir)</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kesediaan</label>
-                                <select
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all"
-                                    value={profFilter.willingness}
-                                    onChange={(e) => setProfFilter({ ...profFilter, willingness: e.target.value })}
-                                >
-                                    <option value="">Semua Status</option>
-                                    <option value="Ya">Bersedia Melayani</option>
-                                    <option value="Tidak">Belum Bersedia</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Bentuk Kontribusi</label>
-                                <select
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 text-xs font-bold focus:ring-2 ring-primary/20 transition-all"
-                                    value={profFilter.contribution}
-                                    onChange={(e) => setProfFilter({ ...profFilter, contribution: e.target.value })}
-                                >
-                                    <option value="">Semua Kontribusi</option>
-                                    <option value="Tenaga">Tenaga</option>
-                                    <option value="Pikiran">Pikiran</option>
-                                    <option value="Waktu">Waktu</option>
-                                    <option value="Dana">Dana</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="overflow-x-auto h-[400px] overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900 shadow-sm shadow-slate-100 dark:shadow-slate-800">
-                                <tr>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Nama Lengkap</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Profesi / Keahlian</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Jabatan / Posisi</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Lvl</th>
-                                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Kontak</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                {profAnalytics.filteredExperts.map((p) => (
-                                    <tr key={p.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-8 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-slate-900 dark:text-white uppercase tracking-tight">{p.name}</span>
-                                                {p.isHead && <span className="text-[8px] font-black text-primary uppercase mt-0.5">Kepala Keluarga</span>}
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase">{p.category}</span>
-                                        </td>
-                                        <td className="px-8 py-5 text-xs font-medium text-slate-500">{p.jobTitle}</td>
-                                        <td className="px-8 py-5">
-                                            <span className={`size-6 rounded-lg flex items-center justify-center text-[10px] font-black ${p.level === '3' ? 'bg-primary text-white' :
-                                                p.level === '2' ? 'bg-primary/20 text-primary' :
-                                                    'bg-slate-100 text-slate-400'
-                                                }`}>
-                                                {p.level}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right font-black text-primary text-xs">{p.phone || '-'}</td>
-                                    </tr>
-                                ))}
-                                {profAnalytics.filteredExperts.length === 0 && (
-                                    <tr>
-                                        <td colSpan={5} className="px-8 py-20 text-center text-slate-400 italic font-medium">Tidak ada tenaga ahli yang cocok dengan kriteria filter tersebut.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -1266,7 +1049,7 @@ const AdminDashboard = () => {
                 <div className="space-y-8 animate-fade-in-up pb-10">
                     <div className="grid grid-cols-12 gap-4 md:gap-8 items-stretch">
                         {/* 1. Dashboard Header - Compact & Informative */}
-                        <div className="col-span-12 lg:col-span-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6 bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative">
+                        <div className="col-span-12 flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6 bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32"></div>
                             <div className="relative z-10 flex-1">
                                 <div className="flex items-center justify-between gap-4">
@@ -1288,27 +1071,11 @@ const AdminDashboard = () => {
                                         Tambah Jemaat
                                     </button>
                                 </div>
-                                <div className="relative group w-full">
-                                    <select
-                                        value={activeTab}
-                                        onChange={(e) => setActiveTab(e.target.value as TabKey)}
-                                        className="w-full h-14 pl-8 pr-12 rounded-2xl bg-slate-900 dark:bg-emerald-500/10 border-2 border-slate-800 dark:border-emerald-500/20 text-[10px] font-black tracking-widest uppercase appearance-none cursor-pointer focus:ring-4 focus:ring-emerald-500/10 transition-all text-white dark:text-emerald-400"
-                                    >
-                                        <option value="semua">📊 Ringkasan Umum</option>
-                                        <option value="identitas">👤 Identitas</option>
-                                        <option value="keluarga">👨‍👩‍👧‍👦 Keluarga</option>
-                                        <option value="profesional">💼 Profesi</option>
-                                        <option value="pendidikan">🎓 Pendidikan</option>
-                                        <option value="ekonomi">💰 Ekonomi</option>
-                                        <option value="kesehatan">🏥 Kesehatan</option>
-                                    </select>
-                                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">unfold_more</span>
-                                </div>
                             </div>
                         </div>
 
                         {/* Global Filters */}
-                        <div className="col-span-12 flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-sm">
+                        <div className="col-span-12 lg:col-span-8 flex flex-col sm:flex-row items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-sm h-full">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <span className="material-symbols-outlined text-primary">filter_alt</span>
                                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Filter Global:</span>
@@ -1346,10 +1113,10 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* 2. Quick Mini Metrics */}
-                        <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
+                        <div className="col-span-12 lg:col-span-4">
                             <div
                                 onClick={() => setShowRecentModal(true)}
-                                className="bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative group flex flex-col justify-center transition-all hover:border-emerald-500/30 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/5 active:scale-95"
+                                className="bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative group flex flex-col justify-center transition-all hover:border-emerald-500/30 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/5 active:scale-95 h-full"
                             >
                                 <div className="absolute top-0 right-0 p-5 opacity-10 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 text-emerald-500">
                                     <span className="material-symbols-outlined text-4xl">trending_up</span>
@@ -1368,239 +1135,17 @@ const AdminDashboard = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="bg-[#051c14] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-emerald-900 shadow-card relative overflow-hidden group flex flex-col justify-center transition-all hover:shadow-emerald-500/10">
-                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full group-hover:bg-emerald-500/20 transition-all duration-700"></div>
-                                <div className="relative z-10 overflow-hidden h-[80px]">
-                                    <div className="transition-all duration-1000 ease-[cubic-bezier(0.23, 1, 0.32, 1)]" style={{ transform: `translateY(-${miniMetricIndex * 80}px)` }}>
-                                        {/* Slide 1: Siap Melayani */}
-                                        <div className="h-[80px] flex flex-col justify-center">
-                                            <p className="text-[9px] font-black text-emerald-400/40 uppercase tracking-[0.2em] mb-1">Siap Melayani</p>
-                                            <div className="flex items-center gap-3">
-                                                <h4 className="text-3xl font-black text-white tracking-tight">{stats?.volunteerCount || 0}</h4>
-                                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full uppercase">Anggota</span>
-                                            </div>
-                                        </div>
-                                        {/* Slide 2: Tenaga Ahli */}
-                                        <div className="h-[80px] flex flex-col justify-center">
-                                            <p className="text-[9px] font-black text-emerald-400/40 uppercase tracking-[0.2em] mb-1">Tenaga Ahli</p>
-                                            <div className="flex items-center gap-3">
-                                                <h4 className="text-3xl font-black text-white tracking-tight">{stats?.professionalCount || 0}</h4>
-                                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full uppercase">Total</span>
-                                            </div>
-                                        </div>
-                                        {/* Slide 3: Ketersediaan Skill */}
-                                        <div className="h-[80px] flex flex-col justify-center">
-                                            <p className="text-[9px] font-black text-emerald-400/40 uppercase tracking-[0.2em] mb-1">Ketersediaan Skill</p>
-                                            <div className="flex items-center gap-3">
-                                                <h4 className="text-3xl font-black text-white tracking-tight">{stats?.activeSkills || 0}</h4>
-                                                <span className="text-[8px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full uppercase">Keahlian</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-1.5 mt-2 relative z-10">
-                                    {[0, 1, 2].map((i) => (
-                                        <div
-                                            key={i}
-                                            className={`h-1.5 rounded-full transition-all duration-700 ${miniMetricIndex === i ? 'w-8 bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)]' : 'size-1.5 bg-emerald-500/20'}`}
-                                        ></div>
-                                    ))}
-                                </div>
-                                <div className="absolute top-4 right-4 opacity-20 text-emerald-500 transition-all duration-500">
-                                    <span className="material-symbols-outlined text-xl">
-                                        {miniMetricIndex === 0 ? 'volunteer_activism' : miniMetricIndex === 1 ? 'school' : 'psychology'}
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
                     {/* 3. Metric Row - Dense & Colorful Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-                        <MetricCard title="Data Umum" value={stats?.total || 0} subValue="Unit basis data utama" trend="" gradient="bg-gradient-to-br from-[#064e1c] to-[#0a8a32]" icon="family_restroom" onClick={() => setActiveTab('identitas')} />
-                        <MetricCard title="Data Keluarga" value={stats?.totalSouls || 0} subValue="Informasi anggota keluarga" trend="" gradient="bg-gradient-to-br from-blue-600 to-indigo-600" icon="groups" onClick={() => setActiveTab('keluarga')} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <MetricCard title="Data Umum Keluarga" value={stats?.total || 0} subValue="Unit basis data utama" trend="" gradient="bg-gradient-to-br from-[#064e1c] to-[#0a8a32]" icon="family_restroom" onClick={() => setActiveTab('identitas')} />
+                        <MetricCard title="Data Anggota Keluarga" value={stats?.totalSouls || 0} subValue="Informasi anggota keluarga" trend="" gradient="bg-gradient-to-br from-blue-600 to-indigo-600" icon="groups" onClick={() => setActiveTab('keluarga')} />
                         <MetricCard title="Profesi & Pelayanan" value={stats?.professionalCount || 0} subValue="Tenaga ahli & pelayan" trend="" gradient="bg-gradient-to-br from-orange-500 to-amber-600" icon="engineering" onClick={() => setActiveTab('profesional')} />
                         <MetricCard title="Pendidikan" value={stats?.educationCount || 0} subValue="Data pendidikan keluarga" trend="" gradient="bg-gradient-to-br from-teal-500 to-cyan-600" icon="auto_stories" onClick={() => setActiveTab('pendidikan')} />
                         <MetricCard title="Ekonomi & Aset" value={stats?.total || 0} subValue="Ekonomi & Aset Keluarga" trend="" gradient="bg-gradient-to-br from-violet-600 to-purple-700" icon="account_balance_wallet" onClick={() => setActiveTab('ekonomi')} />
                         <MetricCard title="Kesehatan" value={stats?.total || 0} subValue="Data Kesehatan Keluarga" trend="" gradient="bg-gradient-to-br from-rose-500 to-pink-600" icon="health_and_safety" onClick={() => setActiveTab('kesehatan')} />
-                    </div>
-
-                    {/* 5. Professional & Geolocation Analytics Matrix */}
-                    <div className="space-y-8">
-                        {/* Quick Insight Grid - Truly Real-Time & Data-Driven */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <QuickInsight
-                                title="Pendidikan"
-                                value={`${schoolingStatusData.data[0] || 0} Pelajar`}
-                                label="Belajar Aktif"
-                                icon="school"
-                                color="#3b82f6"
-                                progress={stats?.totalSouls ? Math.round(((schoolingStatusData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Pendidikan')}
-                            />
-                            <QuickInsight
-                                title="Ekonomi"
-                                value={`${businessData.data[0] || 0} Unit`}
-                                label="Usaha Lokal"
-                                icon="storefront"
-                                color="#f59e0b"
-                                progress={stats?.total ? Math.round(((businessData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Ekonomi')}
-                            />
-                            <QuickInsight
-                                title="Kesehatan"
-                                value={`${bpjsData.data[0] || 0} Peserta`}
-                                label="Cakupan BPJS"
-                                icon="health_and_safety"
-                                color="#ef4444"
-                                progress={stats?.total ? Math.round(((bpjsData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Kesehatan')}
-                            />
-                            <QuickInsight
-                                title="Pelayanan"
-                                value={`${(willingnessData.data[0] || 0) + (willingnessData.data[1] || 0)} Jiwa`}
-                                label="Siap Melayani"
-                                icon="volunteer_activism"
-                                color="#10b981"
-                                progress={stats?.total ? Math.round((((willingnessData.data[0] || 0) + (willingnessData.data[1] || 0)) / stats.total) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Profesi %26 Pelayanan')}
-                            />
-                            <QuickInsight
-                                title="Sakramen"
-                                value={`${sakramenData.data[0] || 0} Jiwa`}
-                                label="Sudah Baptis"
-                                icon="water_drop"
-                                color="#0ea5e9"
-                                progress={stats?.totalSouls ? Math.round(((sakramenData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Keluarga %26 Diakonia')}
-                            />
-                            <QuickInsight
-                                title="Sidi"
-                                value={`${stats?.totalSidi || 0} Jiwa`}
-                                label="Anggota Sidi"
-                                icon="verified"
-                                color="#8b5cf6"
-                                progress={stats?.totalSouls ? Math.round(((stats?.totalSidi || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Keluarga %26 Diakonia')}
-                            />
-                            <QuickInsight
-                                title="Wilayah"
-                                value={`${residencyData.data[0] || 0} Jiwa`}
-                                label="Domisili Kupang"
-                                icon="location_on"
-                                color="#f43f5e"
-                                progress={stats?.totalSouls ? Math.round(((residencyData.data[0] || 0) / stats.totalSouls) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Identitas')}
-                            />
-                            <QuickInsight
-                                title="Sosial"
-                                value={`${socialAssistData.data[0] || 0} KK`}
-                                label="Penerima Bansos"
-                                icon="handshake"
-                                color="#ec4899"
-                                progress={stats?.total ? Math.round(((socialAssistData.data[0] || 0) / stats.total) * 100) : 0}
-                                onClick={() => navigate('/admin/members?tab=Kesehatan')}
-                            />
-                        </div>
-                    </div>
-
-                    {/* 6. Form Category Deep Dive Grid - Master Summary */}
-                    <div className="mt-8 border-t border-slate-100 dark:border-white/5 pt-12">
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Matriks Wawasan Jemaat</h3>
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Pandangan holistik semua atribut jemaat</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-12">
-                            {/* 1. Academic Snapshot */}
-                            <ChartCard
-                                title="Tingkat Pendidikan"
-                                subtitle="Tahap pendidikan saat ini"
-                                icon="stairs"
-                                iconColor="#3b82f6"
-                                data={schoolLevelData}
-                                className="h-[400px]"
-                            />
-
-                            {/* 2. Economy - Income */}
-                            <ChartCard
-                                title="Pendapatan Keluarga"
-                                subtitle="Rata-rata bulanan (IDR)"
-                                icon="payments"
-                                iconColor="#34d399"
-                                data={incomeData}
-                                className="h-[400px]"
-                            />
-
-                            {/* 3. Health - Chronic */}
-                            <ChartCard
-                                title="Ketahanan Kesehatan"
-                                subtitle="Status penyakit kronis"
-                                icon="monitor_heart"
-                                iconColor="#ef4444"
-                                data={chronicData}
-                                className="h-[400px]"
-                            />
-
-                            {/* 4. Identity - Residency */}
-                            <ChartCard
-                                title="Status Domisili"
-                                subtitle="Rasio Menetap vs Diaspora"
-                                icon="home_pin"
-                                iconColor="#10b981"
-                                data={residencyData}
-                                className="h-[400px]"
-                            />
-
-                            {/* 5. Geographic Distribution */}
-                            <ChartCard
-                                title="Sebaran Rayon"
-                                subtitle="Distribusi KK Per Rayon"
-                                icon="map"
-                                iconColor="#064e1c"
-                                className="h-[400px]"
-                                data={{
-                                    ...rayonData,
-                                    colors: rayonData.labels.map((_, i) => ['#064e1c', '#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'][i % 6])
-                                }}
-                            />
-
-                            {/* 6. Data Integrity */}
-                            <ChartCard
-                                title="Integritas Sakramen"
-                                subtitle="Kelengkapan Profil Baptis"
-                                icon="verified"
-                                iconColor="#059669"
-                                className="h-[400px]"
-                                data={{
-                                    ...sakramenData,
-                                    totalLabel: 'VALID',
-                                    colors: ['#064e1c', '#f1f5f9']
-                                }}
-                            />
-
-                            {/* 7. Gender Composition */}
-                            <ChartCard
-                                title="Komposisi Gender"
-                                subtitle="Proporsi Jiwa Jemaat"
-                                icon="wc"
-                                iconColor="#6366f1"
-                                className="h-[400px]"
-                                data={genderData}
-                            />
-
-                            {/* 8. Service Commitment */}
-                            <ChartCard
-                                title="Minat Pelayanan"
-                                subtitle="Kesiapan Melayani"
-                                icon="volunteer_activism"
-                                iconColor="#10b981"
-                                className="h-[400px]"
-                                data={willingnessData}
-                            />
-                        </div>
                     </div>
                 </div>
             );
@@ -1864,5 +1409,4 @@ const AdminDashboard = () => {
         </AdminLayout>
     );
 };
-
 export default AdminDashboard;

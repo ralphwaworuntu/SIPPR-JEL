@@ -33,8 +33,6 @@ export interface Member {
     id: string;
     name: string;
     address?: string;
-    latitude?: number | null;
-    longitude?: number | null;
     phone?: string;
     lingkungan: string;
     rayon: string;

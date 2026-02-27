@@ -28,7 +28,7 @@ async function inspectAndTest() {
             "sector", "lingkungan", "rayon", "address",
             "education_level", "major", "job_category", "job_title", "company_name", "years_of_experience",
             "skills", "willingness_to_serve", "interest_areas", "contribution_types",
-            "latitude", "longitude", "status", "created_at", "updated_at"
+            "status", "created_at", "updated_at"
         ];
 
         const missing = expected.filter(c => !dbCols.includes(c));

@@ -246,10 +246,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         health_disabilityMentalOther: initialData?.health_disabilityMentalOther || '',
         health_disabilitySensory: Array.isArray(initialData?.health_disabilitySensory) ? initialData.health_disabilitySensory : [],
         health_disabilitySensoryOther: initialData?.health_disabilitySensoryOther || '',
-
-        // Geo
-        latitude: initialData?.latitude || -10.1772,
-        longitude: initialData?.longitude || 123.6070,
     });
 
     const calculateAge = (dob: string) => {
