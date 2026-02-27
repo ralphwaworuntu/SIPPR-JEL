@@ -56,12 +56,21 @@ export const congregants = mysqlTable("congregants", {
     // Step 1: Identity — New fields
     kkNumber: varchar("kk_number", { length: 20 }),
     nik: varchar("nik", { length: 20 }),
+    bloodType: varchar("blood_type", { length: 10 }),
+    maritalStatus: varchar("marital_status", { length: 50 }),
+    marriageDate: date("marriage_date"),
+    marriageType: json("marriage_type"), // string[]
+    baptismStatus: varchar("baptism_status", { length: 50 }),
+    sidiStatus: varchar("sidi_status", { length: 50 }),
 
     // Church Details
     lingkungan: varchar("lingkungan", { length: 50 }),
     rayon: varchar("rayon", { length: 50 }),
 
     address: text("address"),
+    city: varchar("city", { length: 100 }),
+    district: varchar("district", { length: 100 }),
+    subdistrict: varchar("subdistrict", { length: 100 }),
 
     // Step 1: Family Members
     familyMembers: int("family_members"),
@@ -117,6 +126,9 @@ export const congregants = mysqlTable("congregants", {
     educationUnemployedSma: int("education_unemployed_sma").default(0),
     educationUnemployedUniversity: int("education_unemployed_university").default(0),
     educationWorking: int("education_working").default(0),
+    educationHasScholarship: varchar("education_has_scholarship", { length: 10 }),
+    educationScholarshipType: varchar("education_scholarship_type", { length: 100 }),
+    educationScholarshipTypeOther: varchar("education_scholarship_type_other", { length: 100 }),
 
     // Step 5: Economics — Occupation & Income
     economicsHeadOccupation: varchar("economics_head_occupation", { length: 100 }),
@@ -133,8 +145,12 @@ export const congregants = mysqlTable("congregants", {
     // Step 5: Household Expenses
     economicsExpenseFood: int("economics_expense_food").default(0),
     economicsExpenseUtilities: int("economics_expense_utilities").default(0),
+    economicsExpenseNonPanganII: int("economics_expense_non_pangan_ii").default(0),
+    economicsExpenseLoan: int("economics_expense_loan").default(0),
     economicsExpenseEducation: int("economics_expense_education").default(0),
     economicsExpenseOther: int("economics_expense_other").default(0),
+    economicsExpenseUnexpected: int("economics_expense_unexpected").default(0),
+    economicsExpenseWorship: int("economics_expense_worship").default(0),
 
     // Step 5: Business Ownership
     economicsHasBusiness: varchar("economics_has_business", { length: 10 }),
@@ -196,6 +212,7 @@ export const congregants = mysqlTable("congregants", {
     healthChronicDisease: json("health_chronic_disease"), // string[]
     healthChronicDiseaseOther: varchar("health_chronic_disease_other", { length: 100 }),
     healthHasBPJS: varchar("health_has_bpjs", { length: 20 }),
+    healthBpjsNonParticipants: text("health_bpjs_non_participants"),
     healthRegularTreatment: varchar("health_regular_treatment", { length: 10 }),
     healthHasBPJSKetenagakerjaan: varchar("health_has_bpjs_ketenagakerjaan", { length: 20 }),
     healthSocialAssistance: varchar("health_social_assistance", { length: 50 }),
