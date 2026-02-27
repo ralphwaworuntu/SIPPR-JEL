@@ -9,9 +9,16 @@ import { congregants, notifications, enumerators, pendamping, user, account } fr
 import * as dotenv from "dotenv";
 
 dotenv.config();
+const path = require('path');
+const multer = require('multer');
+const csv = require('csv-parser');
+// const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = 3000;
+
+console.log('Backend server starting...');
+console.log('Port:', PORT);
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -633,12 +640,13 @@ app.delete("/api/members/:id", async (req, res) => {
 app.get("/api/dashboard/stats", async (req, res) => {
     try {
         const { rayon, lingkungan } = req.query;
-
         // Base where condition based on filters
-        const baseWhere = and(
-            rayon ? eq(congregants.rayon, rayon as string) : undefined,
-            lingkungan ? eq(congregants.lingkungan, lingkungan as string) : undefined
-        );
+        const filters = [];
+        if (rayon && rayon !== 'Semua') filters.push(eq(congregants.rayon, rayon as string));
+        if (lingkungan && lingkungan !== 'Semua') filters.push(eq(congregants.lingkungan, lingkungan as string));
+        const baseWhere = filters.length > 0 ? and(...filters) : undefined;
+
+        console.log(`[Stats] Fetching dashboard stats for Rayon: ${rayon || 'Semua'}, Lingkungan: ${lingkungan || 'Semua'}`);
 
         // Parallel queries for performance
         const [totalRes, soulsRes, genderRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes, diakoniaRes, economicsRes, healthRes] = await Promise.all([
@@ -654,26 +662,26 @@ app.get("/api/dashboard/stats", async (req, res) => {
             }).from(congregants),
 
             // 2. Gender of Head
-            db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.gender),
+            db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.gender),
 
             // 4. Willingness Distribution
-            db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.willingnessToServe),
+            db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.willingnessToServe),
 
             // 5. Education Distribution
-            db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.educationLevel),
+            db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.educationLevel),
             // 6. Skills (Get all skills to parse and sum)
-            db.select({ skills: congregants.skills }).from(congregants),
+            db.select({ skills: congregants.skills }).from(congregants).where(baseWhere),
 
             // 7. Professional Count (Filter out non-working categories)
             db.select({ count: sql<number>`count(*)` })
                 .from(congregants)
-                .where(notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-'])),
+                .where(and(baseWhere, notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-']))),
 
             // 8. Lingkungan Distribution
-            db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.lingkungan),
+            db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.lingkungan),
 
             // 9. Rayon Distribution
-            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).groupBy(congregants.rayon),
+            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.rayon),
 
             // 10. Education Summary (All Child Data)
             db.select({
@@ -859,7 +867,7 @@ app.get("/api/dashboard/stats", async (req, res) => {
         const professionalCount = professionalRes[0]?.count || 0;
 
         // 8. Professional Family Members Count
-        const profFamilyRes = await db.select({ pfm: congregants.professionalFamilyMembers }).from(congregants);
+        const profFamilyRes = await db.select({ pfm: congregants.professionalFamilyMembers }).from(congregants).where(baseWhere);
         let professionalFamilyCount = 0;
         profFamilyRes.forEach(row => {
             try {
@@ -908,10 +916,6 @@ app.get("/api/dashboard/stats", async (req, res) => {
     }
 });
 
-import multer from "multer";
-import fs from "fs";
-import csv from "csv-parser";
-
 const upload = multer({ dest: "uploads/" });
 
 // 6. Bulk Import CSV
@@ -923,7 +927,7 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
     }
 
     const results: any[] = [];
-    fs.createReadStream(file.path)
+    require('fs').createReadStream(file.path)
         .pipe(csv())
         .on('data', (data: any) => results.push(data))
         .on('end', async () => {
@@ -1035,7 +1039,7 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     await db.insert(congregants).values(insertData);
                 }
 
-                fs.unlinkSync(file.path);
+                require('fs').unlinkSync(file.path);
                 res.json({ success: true, count: insertData.length });
             } catch (error) {
                 console.error("Import error:", error);
