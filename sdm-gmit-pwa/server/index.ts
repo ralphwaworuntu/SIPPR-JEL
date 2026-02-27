@@ -1,4 +1,4 @@
-import { notInArray, sql } from "drizzle-orm";
+import { eq, like, and, desc, count, notInArray, sql } from "drizzle-orm";
 import express from "express";
 import cors from "cors";
 import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
@@ -7,11 +7,12 @@ import { auth } from "./auth";
 import { db } from "./db";
 import { congregants, notifications, enumerators, pendamping, user, account, visits } from "./schema";
 import * as dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+import multer from "multer";
+import csv from "csv-parser";
 
 dotenv.config();
-const path = require('path');
-const multer = require('multer');
-const csv = require('csv-parser');
 // const bcrypt = require('bcryptjs');
 
 const app = express();
@@ -61,7 +62,7 @@ const requireAuth = async (req: express.Request, res: express.Response, next: ex
         next();
     } catch (error) {
         console.error("Auth Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error: "Internal Server Error", details: error instanceof Error ? error.message : String(error) });
     }
 };
 
@@ -77,6 +78,15 @@ app.get("/", (req, res) => {
     res.send("SDM GMIT Server is Running (MySQL)");
 });
 
+app.get("/api/health", async (req, res) => {
+    try {
+        await db.execute(sql`SELECT 1`);
+        res.json({ status: "ok", database: "connected" });
+    } catch (error: any) {
+        res.status(500).json({ status: "error", database: "disconnected", error: error.message });
+    }
+});
+
 // API Routes
 
 const safeParseJSON = (data: any, fallback: any = []) => {
@@ -88,6 +98,43 @@ const safeParseJSON = (data: any, fallback: any = []) => {
         if (data.trim() !== '') return [data];
         return fallback;
     }
+};
+
+const safeISOString = (date: any) => {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString();
+};
+
+const safeDateOnlyString = (date: any) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split('T')[0];
+};
+
+const safeDateForDB = (date: any) => {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString().split('T')[0];
+};
+
+const safeString = (val: any) => {
+    if (val === undefined || val === null) return null;
+    if (Array.isArray(val)) {
+        const joined = val.filter(Boolean).join(', ');
+        return joined === '' ? null : joined;
+    }
+    const str = String(val).trim();
+    return str === '' ? null : str;
+};
+
+const safeInt = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const n = parseInt(val);
+    return isNaN(n) ? 0 : n;
 };
 
 // Helper to map DB congregant to Frontend Member
@@ -111,8 +158,8 @@ const mapCongregantToMember = (c: any) => ({
     interestAreas: safeParseJSON(c.interestAreas),
     contributionTypes: safeParseJSON(c.contributionTypes),
     gender: c.gender || "Laki-laki",
-    birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
-    createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+    birthDate: safeDateOnlyString(c.dateOfBirth),
+    createdAt: safeISOString(c.createdAt) || new Date().toISOString(),
     registrationStatus: c.status || 'PENDING',
 
     // Step 1: Identity extras
@@ -120,7 +167,7 @@ const mapCongregantToMember = (c: any) => ({
     nik: c.nik || "",
     bloodType: c.bloodType || "",
     maritalStatus: c.maritalStatus || "",
-    marriageDate: c.marriageDate ? new Date(c.marriageDate).toISOString().split('T')[0] : "",
+    marriageDate: safeDateOnlyString(c.marriageDate),
     marriageType: safeParseJSON(c.marriageType),
     baptismStatus: c.baptismStatus || "",
     sidiStatus: c.sidiStatus || "",
@@ -259,8 +306,6 @@ const mapCongregantToMember = (c: any) => ({
     health_disabilityDouble: c.healthDisabilityDouble || false,
 });
 
-import { eq, like, and, desc, count } from "drizzle-orm";
-
 // 1. GET Members (with Search, Filter & optional Pagination)
 app.get("/api/members", async (req, res) => {
     try {
@@ -298,8 +343,12 @@ app.get("/api/members", async (req, res) => {
             res.json(result.map(mapCongregantToMember));
         }
     } catch (error: any) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to fetch members", details: error?.message || error });
+        console.error("GET /api/members error:", error);
+        res.status(500).json({
+            error: "Failed to fetch members",
+            details: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+        });
     }
 });
 
@@ -353,16 +402,13 @@ app.get("/api/family-members", async (req, res) => {
 
 // Helper: Build congregant values from request body (shared by admin & public routes)
 const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
-    const jsonStringify = (val: any) => val ? JSON.stringify(val) : JSON.stringify([]);
-    const safeInt = (val: any) => {
-        const n = parseInt(val);
-        return isNaN(n) ? 0 : n;
-    };
+    // Note: Drizzle json() columns handle serialization automatically. 
+    // Do NOT use JSON.stringify() on them.
 
     return {
-        fullName: data.name || data.fullName,
+        fullName: data.fullName || data.name,
         gender: data.gender,
-        dateOfBirth: (data.birthDate || data.dateOfBirth) ? new Date(data.birthDate || data.dateOfBirth) : null,
+        dateOfBirth: safeDateForDB(data.birthDate || data.dateOfBirth),
         phone: data.phone,
         address: data.address,
         lingkungan: data.lingkungan,
@@ -373,8 +419,8 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         nik: data.nik || null,
         bloodType: data.bloodType || null,
         maritalStatus: data.maritalStatus || null,
-        marriageDate: data.marriageDate ? new Date(data.marriageDate) : null,
-        marriageType: jsonStringify(data.marriageType),
+        marriageDate: safeDateForDB(data.marriageDate),
+        marriageType: data.marriageType || [],
         baptismStatus: data.baptismStatus || null,
         sidiStatus: data.sidiStatus || null,
         city: data.city || null,
@@ -388,8 +434,8 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         familyMembersSidiMale: safeInt(data.familyMembersSidiMale),
         familyMembersSidiFemale: safeInt(data.familyMembersSidiFemale),
         familyMembersNonBaptized: safeInt(data.familyMembersNonBaptized),
-        familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
-        familyMembersNonSidiNames: jsonStringify(data.familyMembersNonSidiNames),
+        familyMembersNonSidiNames: data.familyMembersNonSidiNames || [],
+        familyMembersNonBaptizedNames: data.familyMembersNonBaptizedNames || [],
 
         // Step 2: Diakonia
         diakoniaRecipient: data.diakonia_recipient || null,
@@ -403,15 +449,15 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         jobTitle: data.jobTitle,
         companyName: data.companyName,
         yearsOfExperience: safeInt(data.yearsOfExperience),
-        skills: jsonStringify(data.skills),
+        skills: data.skills || [],
 
         // Commitment
         willingnessToServe: data.willingnessToServe,
-        interestAreas: jsonStringify(data.interestAreas),
-        contributionTypes: jsonStringify(data.contributionTypes),
+        interestAreas: data.interestAreas || [],
+        contributionTypes: data.contributionTypes || [],
 
         // Step 3: Professional Family Members
-        professionalFamilyMembers: jsonStringify(data.professionalFamilyMembers),
+        professionalFamilyMembers: data.professionalFamilyMembers || [],
 
         // Step 4: Education (Children)
         educationSchoolingStatus: data.education_schoolingStatus || null,
@@ -471,20 +517,20 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         economicsBusinessCapital: safeInt(data.economics_businessCapital),
         economicsBusinessCapitalSource: data.economics_businessCapitalSource || null,
         economicsBusinessCapitalSourceOther: data.economics_businessCapitalSourceOther || null,
-        economicsBusinessPermit: jsonStringify(data.economics_businessPermit),
+        economicsBusinessPermit: data.economics_businessPermit || [],
         economicsBusinessPermitOther: data.economics_businessPermitOther || null,
         economicsBusinessTurnover: data.economics_businessTurnover || null,
         economicsBusinessTurnoverValue: safeInt(data.economics_businessTurnoverValue),
-        economicsBusinessMarketing: jsonStringify(data.economics_businessMarketing),
+        economicsBusinessMarketing: data.economics_businessMarketing || [],
         economicsBusinessMarketingOther: data.economics_businessMarketingOther || null,
         economicsBusinessMarketArea: data.economics_businessMarketArea || null,
-        economicsBusinessIssues: data.economics_businessIssues || null,
-        economicsBusinessIssuesOther: data.economics_businessIssuesOther || null,
-        economicsBusinessNeeds: data.economics_businessNeeds || null,
-        economicsBusinessNeedsOther: data.economics_businessNeedsOther || null,
-        economicsBusinessSharing: data.economics_businessSharing || null,
-        economicsBusinessTraining: data.economics_businessTraining || null,
-        economicsBusinessTrainingOther: data.economics_businessTrainingOther || null,
+        economicsBusinessIssues: safeString(data.economics_businessIssues),
+        economicsBusinessIssuesOther: safeString(data.economics_businessIssuesOther),
+        economicsBusinessNeeds: safeString(data.economics_businessNeeds),
+        economicsBusinessNeedsOther: safeString(data.economics_businessNeedsOther),
+        economicsBusinessSharing: safeString(data.economics_businessSharing),
+        economicsBusinessTraining: safeString(data.economics_businessTraining),
+        economicsBusinessTrainingOther: safeString(data.economics_businessTrainingOther),
 
         // Step 5: Home & Assets
         economicsHouseStatus: data.economics_houseStatus || null,
@@ -492,7 +538,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         economicsHouseIMB: data.economics_houseIMB || null,
         economicsHasAssets: data.economics_hasAssets || null,
         economicsTotalAssets: safeInt(data.economics_totalAssets),
-        economicsAssets: jsonStringify(data.economics_assets),
+        economicsAssets: data.economics_assets || [],
         economicsAssetMotorQty: safeInt(data.economics_asset_motor_qty),
         economicsAssetMobilQty: safeInt(data.economics_asset_mobil_qty),
         economicsAssetKulkasQty: safeInt(data.economics_asset_kulkas_qty),
@@ -501,8 +547,8 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         economicsAssetInternetQty: safeInt(data.economics_asset_internet_qty),
         economicsAssetLahanQty: safeInt(data.economics_asset_lahan_qty),
         economicsLandStatus: data.economics_landStatus || null,
-        economicsWaterSource: jsonStringify(data.economics_waterSource),
-        economicsElectricityCapacities: jsonStringify(data.economics_electricity_capacities),
+        economicsWaterSource: data.economics_waterSource || [],
+        economicsElectricityCapacities: data.economics_electricity_capacities || [],
         economicsElectricity450Qty: safeInt(data.economics_electricity_450_qty),
         economicsElectricity900Qty: safeInt(data.economics_electricity_900_qty),
         economicsElectricity1200Qty: safeInt(data.economics_electricity_1200_qty),
@@ -513,7 +559,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         // Step 6: Health
         healthSick30Days: data.health_sick30Days || null,
         healthChronicSick: data.health_chronicSick || null,
-        healthChronicDisease: jsonStringify(data.health_chronicDisease),
+        healthChronicDisease: data.health_chronicDisease || [],
         healthChronicDiseaseOther: data.health_chronicDiseaseOther || null,
         healthHasBPJS: data.health_hasBPJS || null,
         healthBpjsNonParticipants: data.health_bpjsNonParticipants || null,
@@ -521,28 +567,53 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan || null,
         healthSocialAssistance: data.health_socialAssistance || null,
         healthHasDisability: data.health_hasDisability || null,
-        healthDisabilityPhysical: jsonStringify(data.health_disabilityPhysical),
+        healthDisabilityPhysical: data.health_disabilityPhysical || [],
         healthDisabilityPhysicalOther: data.health_disabilityPhysicalOther || null,
-        healthDisabilityIntellectual: jsonStringify(data.health_disabilityIntellectual),
+        healthDisabilityIntellectual: data.health_disabilityIntellectual || [],
         healthDisabilityIntellectualOther: data.health_disabilityIntellectualOther || null,
-        healthDisabilityMental: jsonStringify(data.health_disabilityMental),
+        healthDisabilityMental: data.health_disabilityMental || [],
         healthDisabilityMentalOther: data.health_disabilityMentalOther || null,
-        healthDisabilitySensory: jsonStringify(data.health_disabilitySensory),
+        healthDisabilitySensory: data.health_disabilitySensory || [],
         healthDisabilitySensoryOther: data.health_disabilitySensoryOther || null,
         healthDisabilityDouble: data.health_disabilityDouble || false,
 
         // Geo
-        latitude: data.latitude?.toString(),
-        longitude: data.longitude?.toString(),
-        status: isAdmin ? 'VALIDATED' : 'PENDING'
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        status: isAdmin ? (data.status || 'VALIDATED') : 'PENDING',
     };
+};
+
+// Helper: Clean data before inserting into DB
+// This ensures empty strings are converted to null for optional fields
+const cleanCongregantData = (data: any) => {
+    const cleanedData: any = {};
+    for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+            const value = data[key];
+            // Convert empty strings to null, but keep 0 as 0
+            if (typeof value === 'string' && value.trim() === '') {
+                cleanedData[key] = null;
+            } else if (Array.isArray(value) && value.length === 0) {
+                // Convert empty arrays to null for JSON columns if they are optional
+                // This might need more specific handling depending on schema,
+                // but for now, general empty array to null conversion.
+                cleanedData[key] = null;
+            }
+            else {
+                cleanedData[key] = value;
+            }
+        }
+    }
+    return cleanedData;
 };
 
 // 2. POST Member (Admin)
 app.post("/api/members", async (req, res) => {
     try {
         const data = req.body;
-        await db.insert(congregants).values(buildCongregantValues(data, true));
+        const values = cleanCongregantData(buildCongregantValues(data, true));
+        await db.insert(congregants).values(values);
         res.status(201).json({ success: true });
     } catch (error) {
         console.error(error);
@@ -554,9 +625,10 @@ app.post("/api/members", async (req, res) => {
 app.post("/api/congregants", async (req, res) => {
     try {
         const data = req.body;
-        console.log("New Registration Attempt:", data.fullName);
+        console.log("New Registration Attempt:", data.fullName || data.name);
 
-        const [result] = await db.insert(congregants).values(buildCongregantValues(data, false));
+        const values = cleanCongregantData(buildCongregantValues(data, false));
+        const [result] = await db.insert(congregants).values(values);
 
         console.log("Registration Successful:", data.fullName, "ID:", result.insertId);
         res.status(201).json({ success: true, message: "Pendaftaran berhasil", id: result.insertId });
@@ -993,11 +1065,11 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                 };
 
                 const safeJSON = (val: any) => {
-                    if (!val) return JSON.stringify([]);
+                    if (!val) return [];
                     if (typeof val === 'string' && val.includes(';')) {
-                        return JSON.stringify(val.split(';').map(s => s.trim()).filter(Boolean));
+                        return val.split(';').map(s => s.trim()).filter(Boolean);
                     }
-                    return JSON.stringify([val]);
+                    return [val];
                 };
 
                 // Enhanced mapping for all fields
@@ -1006,8 +1078,7 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     nik: row["NIK"] || null,
                     fullName: row["Nama Lengkap Kepala Keluarga"] || row["Nama"] || row["Name"] || "Tanpa Nama",
                     gender: row["Jenis Kelamin"] || "Laki-laki",
-                    dateOfBirth: row["Tanggal Lahir"] ? new Date(row["Tanggal Lahir"]) : null,
-                    age: row["Usia"] || null,
+                    dateOfBirth: safeDateForDB(row["Tanggal Lahir"]),
                     phone: row["Nomor Telepon/ WhatsApp Aktif"] || null,
                     lingkungan: row["Lingkungan"] || "-",
                     rayon: row["Rayon"] || "-",
@@ -1070,7 +1141,7 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     economicsBusinessType: row["Jenis Usaha"] || null,
                     economicsHouseStatus: row["Status Rumah"] || null,
                     economicsHouseType: row["Jenis Rumah"] || null,
-                    economicsWaterSource: row["Sumber Air"] || null,
+                    economicsWaterSource: safeJSON(row["Sumber Air"]),
                     economicsAssets: safeJSON(row["Daftar Aset"]),
 
                     // Health
@@ -1082,6 +1153,7 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     healthSocialAssistance: row["Bantuan Sosial"] || "Tidak",
                     healthHasDisability: row["Disabilitas"] || "Tidak",
                     healthDisabilityPhysical: safeJSON(row["Daftar Disabilitas"]),
+                    marriageDate: safeDateForDB(row["Tanggal Pernikahan"]),
 
                     // Geolocation
                     latitude: row["Latitude"] || "-10.1633",

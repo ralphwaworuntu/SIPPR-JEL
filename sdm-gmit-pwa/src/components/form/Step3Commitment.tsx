@@ -30,7 +30,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
         if (!data.professionalFamilyMembers || data.professionalFamilyMembers.length === 0) {
             update({
                 professionalFamilyMembers: [{
-                    name: '',
+                    name: data.fullName || '',
                     hasProfessionalSkill: '',
                     skillType: '',
                     skillLevel: '',
@@ -55,6 +55,18 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
         }
         prevLength.current = currentLength;
     }, [data.professionalFamilyMembers]);
+
+    // Sync first member name with data.fullName
+    useEffect(() => {
+        if (data.professionalFamilyMembers?.length > 0 && data.fullName) {
+            const first = data.professionalFamilyMembers[0];
+            if (first.name !== data.fullName) {
+                const newList = [...data.professionalFamilyMembers];
+                newList[0] = { ...newList[0], name: data.fullName };
+                update({ professionalFamilyMembers: newList });
+            }
+        }
+    }, [data.fullName]);
 
     const handleAddSkill = (index: number) => {
         const input = skillInputs[index]?.trim();
@@ -128,20 +140,22 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                         <span className="material-symbols-outlined text-[18px]">edit</span>
                                         Edit
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            const newList = [...data.professionalFamilyMembers];
-                                            newList.splice(index, 1);
-                                            update({ professionalFamilyMembers: newList });
-                                            if (editingIndex === index) setEditingIndex(null);
-                                            else if (editingIndex !== null && editingIndex > index) setEditingIndex(editingIndex - 1);
-                                        }}
-                                        className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 transition-colors"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                                        Hapus
-                                    </button>
+                                    {index !== 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const newList = [...data.professionalFamilyMembers];
+                                                newList.splice(index, 1);
+                                                update({ professionalFamilyMembers: newList });
+                                                if (editingIndex === index) setEditingIndex(null);
+                                                else if (editingIndex !== null && editingIndex > index) setEditingIndex(editingIndex - 1);
+                                            }}
+                                            className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1 transition-colors"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                                            Hapus
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -153,18 +167,26 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                 {/* Identity & Work Section */}
                                 <div className="space-y-4">
                                     <div className="flex flex-col gap-2 relative z-10">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Nama Anggota Keluarga<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Masukkan nama lengkap anggota keluarga." /></label>
-                                        <input
-                                            className={inputClass}
-                                            placeholder="Nama Lengkap"
-                                            type="text"
-                                            value={member.name}
-                                            onChange={(e) => {
-                                                const newList = [...data.professionalFamilyMembers];
-                                                newList[index].name = e.target.value;
-                                                update({ professionalFamilyMembers: newList });
-                                            }}
-                                        />
+                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
+                                            {index === 0 ? 'Nama Kepala Keluarga' : 'Nama Anggota Keluarga'}
+                                            <span className="text-red-500 ml-1 mt-0">*</span>
+                                            <FormTooltip text={index === 0 ? "Nama Kepala Keluarga otomatis terisi dari Step 1." : "Masukkan nama lengkap anggota keluarga."} />
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                className={`${inputClass} ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50 border-dashed cursor-not-allowed opacity-80' : ''}`}
+                                                placeholder="Nama Lengkap"
+                                                type="text"
+                                                value={member.name}
+                                                readOnly={index === 0}
+                                                onChange={(e) => {
+                                                    if (index === 0) return;
+                                                    const newList = [...data.professionalFamilyMembers];
+                                                    newList[index].name = e.target.value;
+                                                    update({ professionalFamilyMembers: newList });
+                                                }}
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -386,9 +408,9 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                     }}
                                                 >
                                                     <option value="">Pilih Tingkat Keahlian...</option>
-                                                    <option value="1">Dasar - Memahami teori/dasar, perlu bimbingan untuk praktik.</option>
-                                                    <option value="2">Menengah - Mampu mengerjakan secara mandiri dengan hasil yang baik.</option>
-                                                    <option value="3">Mahir - Sangat ahli, profesional di bidangnya, atau mampu mengajar dan melatih orang lain.</option>
+                                                    <option value="Dasar">Dasar - Memahami teori/dasar, perlu bimbingan untuk praktik.</option>
+                                                    <option value="Menengah">Menengah - Mampu mengerjakan secara mandiri dengan hasil yang baik.</option>
+                                                    <option value="Mahir">Mahir - Sangat ahli, profesional di bidangnya, atau mampu mengajar dan melatih orang lain.</option>
                                                 </select>
                                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                                             </div>

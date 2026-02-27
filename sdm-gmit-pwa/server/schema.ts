@@ -51,7 +51,7 @@ export const congregants = mysqlTable("congregants", {
     id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
     fullName: varchar("full_name", { length: 255 }).notNull(),
     gender: varchar("gender", { length: 20 }), // Laki-laki / Perempuan
-    dateOfBirth: date("date_of_birth"),
+    dateOfBirth: date("date_of_birth", { mode: 'string' }),
     phone: varchar("phone", { length: 20 }),
 
     // Step 1: Identity — New fields
@@ -59,7 +59,7 @@ export const congregants = mysqlTable("congregants", {
     nik: varchar("nik", { length: 20 }),
     bloodType: varchar("blood_type", { length: 10 }),
     maritalStatus: varchar("marital_status", { length: 50 }),
-    marriageDate: date("marriage_date"),
+    marriageDate: date("marriage_date", { mode: 'string' }),
     marriageType: json("marriage_type"), // string[]
     baptismStatus: varchar("baptism_status", { length: 50 }),
     sidiStatus: varchar("sidi_status", { length: 50 }),

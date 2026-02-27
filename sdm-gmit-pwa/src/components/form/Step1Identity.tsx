@@ -226,7 +226,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
                 {/* Full Name */}
                 <div className="flex flex-col relative">
                     <FormInput
-                        label="Nama Kepala Keluarga"
+                        label="Nama Lengkap Kepala Keluarga"
                         id="fullName"
                         value={data.fullName}
                         onChange={(val) => {
@@ -339,7 +339,7 @@ const Step1Identity = ({ data, update }: StepProps) => {
 
                 {/* Marital Status */}
                 <FormSelect
-                    label="Status Nikah"
+                    label="Status Pernikahan"
                     id="maritalStatus"
                     value={data.maritalStatus}
                     onChange={(val) => update({ maritalStatus: val })}

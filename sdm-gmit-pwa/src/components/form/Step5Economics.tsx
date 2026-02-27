@@ -118,6 +118,7 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
     const businessPermitOtherRef = useRef<HTMLInputElement>(null);
     const businessMarketingOtherRef = useRef<HTMLInputElement>(null);
     const businessIssuesOtherRef = useRef<HTMLInputElement>(null);
+    const businessNeedsOtherRef = useRef<HTMLInputElement>(null);
     const businessTrainingOtherRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -167,6 +168,12 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
             businessIssuesOtherRef.current.focus();
         }
     }, [data.economics_businessIssues]);
+
+    useEffect(() => {
+        if (data.economics_businessNeeds === 'Lainnya' && businessNeedsOtherRef.current) {
+            businessNeedsOtherRef.current.focus();
+        }
+    }, [data.economics_businessNeeds]);
 
     useEffect(() => {
         if (data.economics_businessTraining === 'Lainnya' && businessTrainingOtherRef.current) {
@@ -679,6 +686,14 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             <FormatRupiah value={data.economics_businessCapital} onChange={(val) => update({ economics_businessCapital: val })} required={true} />
                         </div>
 
+                        {/* Omzet Per Bulan */}
+                        <div className="flex flex-col gap-2 relative z-10">
+                            <label className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-1 z-10">
+                                Rata-rata Omzet Per Bulan <span className="text-red-500">*</span> <FormTooltip text="Perkiraan rata-rata omzet (pendapatan kotor) per bulan." />
+                            </label>
+                            <FormatRupiah value={data.economics_businessTurnoverValue || 0} onChange={(val) => update({ economics_businessTurnoverValue: val })} required={true} />
+                        </div>
+
                         {/* Sumber Modal */}
                         <div className="space-y-2">
                             <FormSelect
@@ -802,16 +817,31 @@ const Step5Economics: React.FC<StepProps> = ({ data, update }) => {
                             </div>
 
                             {/* Dukungan Dibutuhkan */}
-                            <FormSelect
-                                label="Dukungan utama yang dibutuhkan saat ini"
-                                id="businessNeeds"
-                                options={['Tambahan modal', 'Pelatihan skill', 'Peralatan produksi', 'Izin usaha/Sertifikasi', 'Akses pasar', 'Pendampingan usaha']}
-                                value={data.economics_businessNeeds}
-                                onChange={(val) => update({ economics_businessNeeds: val })}
-                                placeholder="Pilih Dukungan (Bisa > 1)..."
-                                required={true}
-                                tooltipText="Bantuan yang paling diharapkan untuk mengembangkan usaha."
-                            />
+                            <div className="space-y-2">
+                                <FormSelect
+                                    label="Dukungan utama yang dibutuhkan saat ini"
+                                    id="businessNeeds"
+                                    options={['Tambahan modal', 'Pelatihan skill', 'Peralatan produksi', 'Izin usaha/Sertifikasi', 'Akses pasar', 'Pendampingan usaha', 'Lainnya']}
+                                    value={data.economics_businessNeeds}
+                                    onChange={(val) => update({ economics_businessNeeds: val })}
+                                    placeholder="Pilih Dukungan (Bisa > 1)..."
+                                    required={true}
+                                    tooltipText="Bantuan yang paling diharapkan untuk mengembangkan usaha."
+                                />
+                                {data.economics_businessNeeds === 'Lainnya' && (
+                                    <div className="mt-2 animate-fadeIn">
+                                        <label className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-1 block">Sebutkan Dukungan Lainnya:</label>
+                                        <input
+                                            ref={businessNeedsOtherRef}
+                                            type="text"
+                                            className={otherInputClass}
+                                            placeholder="Sebutkan dukungan..."
+                                            value={data.economics_businessNeedsOther}
+                                            onChange={(e) => update({ economics_businessNeedsOther: e.target.value })}
+                                        />
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Pengetahuan Berbagi */}
                             <FormRadioGroup
