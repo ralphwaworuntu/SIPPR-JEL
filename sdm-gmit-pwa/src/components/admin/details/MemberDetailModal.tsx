@@ -145,11 +145,11 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                         <div className="mt-4 space-y-3">
                             <DetailRow label="Nomor Kartu Keluarga" value={member.kkNumber} />
                             <DetailRow label="NIK" value={member.nik} />
-                            <DetailRow label="Nama Lengkap" value={member.name} />
+                            <DetailRow label="Nama Lengkap Kepala Keluarga" value={member.name} />
                             <DetailRow label="Jenis Kelamin" value={member.gender} />
                             <DetailRow label="Tanggal Lahir" value={member.birthDate} />
                             <DetailRow label="Usia" value={(calculateAge(member.birthDate) || '-') + " Tahun"} />
-                            <DetailRow label="Gol. Darah" value={member.bloodType} />
+                            <DetailRow label="Golongan Darah" value={member.bloodType} />
                             <DetailRow label="Status Menikah" value={member.maritalStatus === 'Kawin' && member.marriageDate ? `Kawin (${member.marriageDate})` : member.maritalStatus} />
                             <DetailRow label="Status Baptis" value={member.baptismStatus} />
                             <DetailRow label="Status Sidi" value={member.sidiStatus} />

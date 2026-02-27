@@ -30,8 +30,6 @@ async function migrate() {
     const alterQueries = [
         "ALTER TABLE congregants ADD COLUMN IF NOT EXISTS interest_areas JSON AFTER willingness_to_serve",
         "ALTER TABLE congregants ADD COLUMN IF NOT EXISTS contribution_types JSON AFTER interest_areas",
-        "ALTER TABLE congregants ADD COLUMN IF NOT EXISTS latitude VARCHAR(50) AFTER contribution_types",
-        "ALTER TABLE congregants ADD COLUMN IF NOT EXISTS longitude VARCHAR(50) AFTER latitude"
     ];
 
     for (const query of alterQueries) {
