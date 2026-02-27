@@ -44,20 +44,21 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
     const isSidiFieldsFilled = data.familyMembersSidi && data.familyMembersSidiMale && data.familyMembersSidiFemale;
     const isSidiCountValid = !isSidiFieldsFilled || (parseInt(data.familyMembersSidiMale) + parseInt(data.familyMembersSidiFemale) === totalSidi);
 
-    // Auto calculate non-Sidi members
+    // Auto calculate non-Sidi members (totalMembers + 1 for KK - totalSidi)
     useEffect(() => {
         if (data.familyMembers) {
             const updates: Partial<FormData> = {};
-            const calculatedNonSidi = Math.max(0, totalMembers - totalSidi).toString();
+            const totalWithKK = totalMembers + 1; // +1 untuk Kepala Keluarga
+            const calculatedNonSidi = Math.max(0, totalWithKK - totalSidi).toString();
 
             if (data.familyMembersNonSidi !== calculatedNonSidi) {
                 updates.familyMembersNonSidi = calculatedNonSidi;
 
-                // Adjust array size for Non Sidi Names
+                // Trim names array if it exceeds non-sidi count (names are manually managed)
                 const nonSidiCount = parseInt(calculatedNonSidi) || 0;
                 const currentNames = data.familyMembersNonSidiNames || [];
-                if (currentNames.length !== nonSidiCount) {
-                    updates.familyMembersNonSidiNames = Array.from({ length: nonSidiCount }, (_, i) => currentNames[i] || '');
+                if (currentNames.length > nonSidiCount) {
+                    updates.familyMembersNonSidiNames = currentNames.slice(0, nonSidiCount);
                 }
             }
 
@@ -95,7 +96,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 1. Jumlah Anggota Keluarga */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Keluarga" description="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga di Luar Kota Kupang" tooltipText="Masukkan total jumlah anggota keluarga (termasuk KK) sesuai Kartu Keluarga." />
+                <SectionHeader title="Jumlah Anggota Keluarga" description="Termasuk Kepala Keluarga. Tidak termasuk anggota keluarga di luar Kota Kupang." tooltipText="Masukkan total jumlah anggota keluarga termasuk Kepala Keluarga yang tinggal serumah di Kota Kupang." />
                 <div className="flex flex-col gap-4">
                     <div className="max-w-[200px] flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anggota Keluarga <FormTooltip text="Berapa total anggota keluarga Anda di rumah ini?" /></label>
@@ -167,7 +168,7 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 3. Sidi Members */}
             <div className="space-y-4">
-                <SectionHeader title="Jumlah Anggota Sidi dalam rumah saat ini" tooltipText="Berapa orang dalam KK ini yang sudah Sidi." />
+                <SectionHeader title="Jumlah Anggota Sidi dalam rumah saat ini" description="Termasuk Kepala Keluarga. Tidak termasuk anggota keluarga di luar Kota Kupang." tooltipText="Berapa orang dalam KK ini yang sudah Sidi." />
                 <div className="flex flex-col gap-4">
                     <div className="max-w-[200px] flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 flex items-center z-10">Total Anggota Sidi <FormTooltip text="Total anggota Sidi di keluarga ini." /></label>
@@ -222,47 +223,94 @@ const Step2Professional: React.FC<StepProps> = ({ data, update }) => {
 
             {/* 4. Not Sidi */}
             <div className="space-y-4 z-10 relative">
-                <SectionHeader title="Anggota Keluarga usia 18 tahun ke atas yang belum Sidi" tooltipText="Jumlah anggota yang belum Sidi (kalkulasi otomatis berdasarkan total anggota yang tidak Sidi dikurangi anggota sekolah minggu/yang belum Baptis jika ada secara logis, atau hanya menampilkan sisa belum sidi secara umum)." />
+                <SectionHeader title="Anggota Keluarga yang Belum Sidi" tooltipText="Jumlah anggota keluarga yang belum mengikuti Sidi (kalkulasi otomatis: Total Anggota - Total Sidi). Termasuk anak yang sudah dibaptis namun belum cukup umur Sidi maupun anggota dewasa yang belum Sidi." />
                 <div className="max-w-[300px]">
                     <div className="w-full h-12 px-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
                         {data.familyMembersNonSidi || '0'} Orang
                     </div>
                 </div>
 
-                {/* Dynamic Name Fields for Non Sidi */}
+                {/* Question: Ada anggota 18+ belum Sidi? */}
                 {parseInt(data.familyMembersNonSidi || '0') > 0 && (
-                    <div className="mt-4 p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4 max-w-2xl">
-                        <div className="flex items-center gap-2 mb-2">
-                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
-                                <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
-                            </div>
-                            <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
-                                Nama Anggota Belum Sidi
-                            </h4>
-                        </div>
-                        <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
-                            Silakan masukkan nama lengkap anggota keluarga usia 18 tahun ke atas yang belum mengikuti Sidi.
-                        </p>
+                    <div className="mt-4 space-y-4">
+                        <SectionHeader title="Apakah ada anggota keluarga usia 18 tahun ke atas yang belum Sidi?" tooltipText="Pilih Ya jika ada anggota keluarga berusia 18 tahun ke atas yang belum mengikuti Sidi." />
+                        <FormRadioGroup
+                            name="hasNonSidiAdult18"
+                            id="hasNonSidiAdult18"
+                            options={['Ya', 'Tidak']}
+                            value={data.hasNonSidiAdult18}
+                            onChange={(val) => {
+                                update({ hasNonSidiAdult18: val as 'Ya' | 'Tidak' });
+                                if (val === 'Tidak') {
+                                    update({ hasNonSidiAdult18: 'Tidak', familyMembersNonSidiNames: [] });
+                                }
+                            }}
+                            columns={2}
+                        />
 
-                        <div className="space-y-3">
-                            {Array.from({ length: parseInt(data.familyMembersNonSidi || '0') }).map((_, idx) => (
-                                <div key={`non-sidi-${idx}`} className="relative flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
-                                    <input
-                                        type="text"
-                                        value={data.familyMembersNonSidiNames?.[idx] || ''}
-                                        onChange={(e) => {
-                                            const newNames = [...(data.familyMembersNonSidiNames || [])];
-                                            newNames[idx] = e.target.value;
+                        {/* Manual Name Fields for 18+ Non Sidi Members */}
+                        {data.hasNonSidiAdult18 === 'Ya' && (
+                            <div className="p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4 max-w-2xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
+                                        <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
+                                    </div>
+                                    <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
+                                        Nama Anggota Usia 18+ yang Belum Sidi
+                                    </h4>
+                                </div>
+                                <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
+                                    Silakan masukkan nama anggota keluarga <strong>usia 18 tahun ke atas</strong> yang belum mengikuti Sidi. Klik tombol "Tambah" untuk menambahkan nama.
+                                </p>
+
+                                <div className="space-y-3">
+                                    {(data.familyMembersNonSidiNames || []).map((name, idx) => (
+                                        <div key={`non-sidi-${idx}`} className="relative flex flex-col gap-1.5">
+                                            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={name}
+                                                    onChange={(e) => {
+                                                        const newNames = [...(data.familyMembersNonSidiNames || [])];
+                                                        newNames[idx] = e.target.value;
+                                                        update({ familyMembersNonSidiNames: newNames });
+                                                    }}
+                                                    placeholder={`Masukkan Nama Anggota ${idx + 1}`}
+                                                    className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newNames = [...(data.familyMembersNonSidiNames || [])];
+                                                        newNames.splice(idx, 1);
+                                                        update({ familyMembersNonSidiNames: newNames });
+                                                    }}
+                                                    className="shrink-0 size-11 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all flex items-center justify-center"
+                                                    title="Hapus"
+                                                >
+                                                    <span className="material-symbols-outlined text-lg">close</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {(data.familyMembersNonSidiNames || []).length < parseInt(data.familyMembersNonSidi || '0') && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newNames = [...(data.familyMembersNonSidiNames || []), ''];
                                             update({ familyMembersNonSidiNames: newNames });
                                         }}
-                                        placeholder={`Masukkan Nama Anggota ${idx + 1}`}
-                                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 dark:focus:border-amber-500 transition-all shadow-sm"
-                                        required
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-100 dark:bg-amber-800/30 border border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 text-xs font-bold hover:bg-amber-200 dark:hover:bg-amber-800/50 transition-all"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">add</span>
+                                        Tambah Nama Anggota 18+ Belum Sidi
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

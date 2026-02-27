@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 import { AdminLayout } from '../../components/layouts/AdminLayout';
 
 interface Pendamping {
@@ -447,7 +445,14 @@ export default function PendampingPage() {
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="text-sm text-slate-500">Terdaftar</div>
                                     <div className="col-span-2 text-sm font-medium text-slate-900 dark:text-white">
-                                        {selectedItem.createdAt ? format(new Date(selectedItem.createdAt), 'dd MMMM yyyy HH:mm', { locale: id }) : '-'}
+                                        {selectedItem.createdAt ? new Date(selectedItem.createdAt).toLocaleString('id-ID', {
+                                            day: '2-digit',
+                                            month: 'long',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false
+                                        }).replace(/\./g, ':') : '-'}
                                     </div>
                                 </div>
                             </div>

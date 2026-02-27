@@ -123,12 +123,15 @@ const FormPage = () => {
 
                 const nonSidiCount = parseInt(formData.familyMembersNonSidi || '0');
                 if (nonSidiCount > 0) {
-                    if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length !== nonSidiCount) {
-                        return handleValidationError('familyMembersNonSidiNames', "Mohon lengkapi seluruh Nama Anggota Belum Sidi");
-                    }
-                    for (let i = 0; i < nonSidiCount; i++) {
-                        if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
-                            return handleValidationError('familyMembersNonSidiNames', `Mohon isi Nama Anggota Belum Sidi ke-${i + 1}`);
+                    if (!formData.hasNonSidiAdult18) return handleValidationError('hasNonSidiAdult18', "Mohon pilih apakah ada anggota usia 18+ yang belum Sidi");
+                    if (formData.hasNonSidiAdult18 === 'Ya') {
+                        if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length === 0) {
+                            return handleValidationError('hasNonSidiAdult18', "Mohon tambahkan minimal satu Nama Anggota 18+ Belum Sidi");
+                        }
+                        for (let i = 0; i < formData.familyMembersNonSidiNames.length; i++) {
+                            if (!formData.familyMembersNonSidiNames[i] || formData.familyMembersNonSidiNames[i].trim() === '') {
+                                return handleValidationError('hasNonSidiAdult18', `Mohon isi Nama Anggota Belum Sidi ke-${i + 1}`);
+                            }
                         }
                     }
                 }

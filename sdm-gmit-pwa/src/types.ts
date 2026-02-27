@@ -44,6 +44,7 @@ export interface FormData {
     familyMembersSidiFemale: string;
     familyMembersNonBaptized: string;
     familyMembersNonSidi: string;
+    hasNonSidiAdult18: 'Ya' | 'Tidak' | '';
     familyMembersNonSidiNames: string[];
     familyMembersNonBaptizedNames: string[];
 
@@ -221,6 +222,7 @@ export const initialFormData: FormData = {
     familyMembersSidiFemale: '',
     familyMembersNonBaptized: '',
     familyMembersNonSidi: '',
+    hasNonSidiAdult18: '',
     familyMembersNonSidiNames: [],
     familyMembersNonBaptizedNames: [],
     diakonia_recipient: '',

@@ -110,12 +110,38 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <LabelValue label="Tanggal Lahir" value={formatDate(data.dateOfBirth)} />
                             <LabelValue label="Usia" value={`${calculateAge(data.dateOfBirth)} Tahun`} />
 
+
+                            <div className="col-span-full h-px bg-blue-100 dark:bg-white/5 my-1"></div>
+                            <LabelValue label="Golongan Darah" value={data.bloodType} />
+                            <LabelValue label="Status Baptis" value={data.baptismStatus} />
+                            <LabelValue label="Status Sidi" value={data.sidiStatus} />
+                            <LabelValue label="Status Pernikahan" value={data.maritalStatus} />
+                            {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(data.maritalStatus) && (
+                                <>
+                                    <LabelValue label="Tanggal Pernikahan" value={formatDate(data.marriageDate || '')} />
+                                    <LabelValue label="Usia Pernikahan" value={`${calculateAge(data.marriageDate)} Tahun`} />
+                                    <LabelValue label="Jenis Pernikahan" value={
+                                        data.marriageType && data.marriageType.length > 0
+                                            ? data.marriageType.length === 1
+                                                ? data.marriageType[0]
+                                                : data.marriageType.length === 2
+                                                    ? `${data.marriageType[0]} dan ${data.marriageType[1]}`
+                                                    : `${data.marriageType.slice(0, -1).join(', ')}, dan ${data.marriageType[data.marriageType.length - 1]}`
+                                            : '-'
+                                    } />
+                                </>
+                            )}
+                            <LabelValue label="Pendidikan Terakhir" value={data.educationLevel} />
+
                             <div className="col-span-full h-px bg-blue-100 dark:bg-white/5 my-1"></div>
 
                             <LabelValue label="Nomor Telepon/ WhatsApp Aktif" value={data.phone ? `+62${data.phone}` : '-'} />
                             <LabelValue label="Lingkungan" value={data.lingkungan} />
                             <LabelValue label="Rayon" value={data.rayon} />
                             <LabelValue label="Alamat Lengkap" value={data.address} fullWidth />
+                            <LabelValue label="Kelurahan / Desa" value={data.subdistrict} />
+                            <LabelValue label="Kecamatan" value={data.district} />
+                            <LabelValue label="Kota / Kabupaten" value={data.city} />
                         </div>
                     </SummaryCard>
                 </div>
@@ -137,9 +163,11 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <LabelValue label="Belum Sidi" value={data.familyMembersNonSidi || '0'} />
                             <LabelValue label="Belum Baptis" value={data.familyMembersNonBaptized || '0'} />
 
+                            <LabelValue label="Penerima Diakonia" value={data.diakonia_recipient} />
+
                             {data.diakonia_recipient === 'Ya' && (
                                 <div className="col-span-full bg-indigo-50/50 dark:bg-white/5 p-4 rounded-xl border border-indigo-100 dark:border-white/5 mt-2">
-                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400 block mb-2">Penerima Diakonia</span>
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400 block mb-2">Detail Diakonia</span>
                                     <div className="grid grid-cols-3 gap-4">
                                         <LabelValue label="Tahun Penerimaan" value={data.diakonia_year} />
                                         <LabelValue label="Jenis Diakonia" value={data.diakonia_type} />
@@ -149,10 +177,32 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
 
                             {parseInt(data.familyMembersNonSidi || '0') > 0 && (
                                 <div className="col-span-full bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-700/30 mt-2">
-                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 block mb-2">Nama Anggota Belum Sidi</span>
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-amber-600 dark:text-amber-400 block mb-2">Anggota Usia 18+ Belum Sidi</span>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex gap-2 text-sm text-gray-800 dark:text-gray-200">
+                                            <span className="font-semibold">Ada anggota usia 18+ yang belum Sidi?</span>
+                                            <span>{data.hasNonSidiAdult18 || '-'}</span>
+                                        </div>
+                                        {data.hasNonSidiAdult18 === 'Ya' && (
+                                            <div className="mt-2 pt-2 border-t border-amber-100 dark:border-amber-800/30 flex flex-col gap-1">
+                                                <span className="text-[10px] font-bold text-amber-800 dark:text-amber-200 uppercase mb-1">Daftar Nama:</span>
+                                                {data.familyMembersNonSidiNames?.map((name, idx) => (
+                                                    <span key={idx} className="text-sm text-gray-800 dark:text-gray-200 font-medium ml-2">
+                                                        {idx + 1}. {name || '-'}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {parseInt(data.familyMembersNonBaptized || '0') > 0 && (
+                                <div className="col-span-full bg-orange-50/50 dark:bg-orange-900/10 p-4 rounded-xl border border-orange-100 dark:border-orange-700/30 mt-2">
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-orange-600 dark:text-orange-400 block mb-2">Nama Anggota Belum Baptis</span>
                                     <div className="flex flex-col gap-1">
-                                        {data.familyMembersNonSidiNames?.map((name, idx) => (
-                                            <span key={idx} className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                        {data.familyMembersNonBaptizedNames?.map((name, idx) => (
+                                            <span key={idx} className="text-sm text-gray-800 dark:text-gray-200 font-medium ml-2">
                                                 {idx + 1}. {name || '-'}
                                             </span>
                                         ))}
@@ -220,6 +270,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                 <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' ? (data.health_chronicDisease.map(d => d === 'Lainnya' ? `Lainnya (${data.health_chronicDiseaseOther})` : d).join(', ')) : 'Tidak'} />
                                 <LabelValue label="BPJS Kesehatan" value={data.health_hasBPJS === 'Tidak' && data.health_bpjsNonParticipants ? <span>Tidak<div className="text-xs text-red-600 dark:text-red-400 mt-1 whitespace-pre-wrap font-medium">{data.health_bpjsNonParticipants}</div></span> : data.health_hasBPJS} />
                                 <LabelValue label="BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan} />
+                                <LabelValue label="Berobat Teratur" value={data.health_regularTreatment === 'Lainnya' ? data.health_regularTreatmentOther : data.health_regularTreatment} />
                                 <LabelValue label="Bantuan Sosial" value={data.health_socialAssistance} />
                             </div>
 
@@ -308,13 +359,18 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <LabelValue label="Pekerjaan Utama Kepala Keluarga" value={data.economics_headOccupation === 'Lainnya' ? data.economics_headOccupationOther : data.economics_headOccupation} />
                                     <LabelValue label="Pekerjaan Istri" value={data.economics_spouseOccupation === 'Lainnya' ? data.economics_spouseOccupationOther : (data.economics_spouseOccupation || '-')} />
-                                    <LabelValue label="Range Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} fullWidth={true} />
+                                    <LabelValue label="Pendapatan KK" value={`${data.economics_headIncomeRange || '-'} ${data.economics_headIncomeRangeDetailed ? `(${data.economics_headIncomeRangeDetailed})` : ''}`} />
+                                    <LabelValue label="Pendapatan Istri" value={data.economics_spouseOccupation && data.economics_spouseOccupation !== 'Ibu Rumah Tangga/Tidak Bekerja' ? `${data.economics_spouseIncomeRange || '-'} ${data.economics_spouseIncomeRangeDetailed ? `(${data.economics_spouseIncomeRangeDetailed})` : ''}` : '-'} />
+                                    <LabelValue label="Total Estimasi Pendapatan" value={`${data.economics_incomeRange} ${data.economics_incomeRangeDetailed ? `(${data.economics_incomeRangeDetailed})` : ''}`} fullWidth={true} />
 
                                     <div className="col-span-full h-px bg-slate-100 dark:bg-white/10 my-1"></div>
 
                                     <LabelValue label="Status Rumah" value={`${data.economics_houseStatus} (${data.economics_houseType})`} />
+                                    {data.economics_houseType === 'Permanen' && (
+                                        <LabelValue label="Status IMB" value={data.economics_houseIMB} />
+                                    )}
                                     <LabelValue label="Status Tanah" value={data.economics_landStatus} />
-                                    <LabelValue label="Sumber Air" value={data.economics_waterSource} />
+                                    <LabelValue label="Sumber Air" value={Array.isArray(data.economics_waterSource) ? data.economics_waterSource.join(', ') : data.economics_waterSource} />
                                     <LabelValue label="Biaya Listrik" value={formatCurrency(data.economics_electricity_total_cost)} />
 
                                     <div className="col-span-full">
@@ -367,6 +423,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                             <LabelValue label="Nama Usaha" value={data.economics_businessName} />
                                             <div className="grid grid-cols-2 gap-4">
                                                 <LabelValue label="Jenis" value={data.economics_businessType === 'Lainnya' ? data.economics_businessTypeOther : data.economics_businessType} />
+                                                <LabelValue label="Status Usaha" value={data.economics_businessStatus === 'Lainnya' ? data.economics_businessStatusOther : data.economics_businessStatus} />
                                                 <LabelValue label="Lama Usaha" value={data.economics_businessDuration} />
                                                 <LabelValue label="Lokasi" value={data.economics_businessLocation} />
                                                 <LabelValue label="Karyawan" value={data.economics_businessEmployeeCount} />
@@ -374,9 +431,12 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                             <LabelValue label="Modal" value={`${formatCurrency(data.economics_businessCapital)} (${data.economics_businessCapitalSource})`} />
                                             <LabelValue label="Omzet/Bulan" value={data.economics_businessTurnover} />
                                             <div className="pt-2 border-t border-dashed border-emerald-100 dark:border-white/10 space-y-3">
-                                                <LabelValue label="Pemasaran" value={`${Array.isArray(data.economics_businessMarketing) ? data.economics_businessMarketing.join(', ') : data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
-                                                <LabelValue label="Kendala Utama" value={Array.isArray(data.economics_businessIssues) ? data.economics_businessIssues.join(', ') : data.economics_businessIssues} />
-                                                <LabelValue label="Kebutuhan Dukungan" value={Array.isArray(data.economics_businessNeeds) ? data.economics_businessNeeds.join(', ') : data.economics_businessNeeds} />
+                                                <LabelValue label="Izin Usaha" value={Array.isArray(data.economics_businessPermit) ? data.economics_businessPermit.map(p => p === 'Lainnya' ? `Lainnya (${data.economics_businessPermitOther})` : p).join(', ') : data.economics_businessPermit} />
+                                                <LabelValue label="Pemasaran" value={`${Array.isArray(data.economics_businessMarketing) ? data.economics_businessMarketing.map(m => m === 'Lainnya' ? `Lainnya (${data.economics_businessMarketingOther})` : m).join(', ') : data.economics_businessMarketing} (${data.economics_businessMarketArea})`} />
+                                                <LabelValue label="Kendala Utama" value={Array.isArray(data.economics_businessIssues) ? data.economics_businessIssues.map(i => i === 'Lainnya' ? `Lainnya (${data.economics_businessIssuesOther})` : i).join(', ') : data.economics_businessIssues} />
+                                                <LabelValue label="Kebutuhan Dukungan" value={Array.isArray(data.economics_businessNeeds) ? data.economics_businessNeeds.map(n => n === 'Lainnya' ? `Lainnya (${data.economics_businessNeedsOther})` : n).join(', ') : data.economics_businessNeeds} />
+                                                <LabelValue label="Kesediaan Berbagi Ilmu" value={data.economics_businessSharing} />
+                                                <LabelValue label="Minat Pelatihan" value={data.economics_businessTraining === 'Lainnya' ? data.economics_businessTrainingOther : data.economics_businessTraining} />
                                             </div>
                                         </div>
                                     ) : (
