@@ -49,6 +49,18 @@ const SuccessStep = ({ formData, registrationId }: SuccessStepProps) => {
         : `REG-XXXX`;
 
     const handleSaveProof = async () => {
+        // Fetch Ketua Lingkungan name
+        let ketuaLingkungan = '';
+        if (formData.lingkungan) {
+            try {
+                const resp = await fetch(`/api/pendamping-by-lingkungan/${formData.lingkungan}`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    ketuaLingkungan = data.name || '';
+                }
+            } catch { /* ignore */ }
+        }
+
         const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
         const margin = 20;
@@ -214,10 +226,10 @@ const SuccessStep = ({ formData, registrationId }: SuccessStepProps) => {
         doc.setFont('helvetica', 'normal');
         doc.text('Mengetahui,', rightX, y - 30);
         doc.setFont('helvetica', 'bold');
-        doc.text('..............................', rightX, y);
+        doc.text(ketuaLingkungan || '..............................', rightX, y);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.text('Ketua Rayon / Lingkungan', rightX, y + 5);
+        doc.text(`Ketua Lingkungan ${formData.lingkungan || ''}`, rightX, y + 5);
 
         // --- Footer ---
         y = doc.internal.pageSize.getHeight() - 15;

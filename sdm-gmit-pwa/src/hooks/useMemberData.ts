@@ -60,6 +60,7 @@ export interface Member {
     city?: string;
     district?: string;
     subdistrict?: string;
+    registrationStatus?: string; // PENDING | VALIDATED
     createdAt: string; // ISO Date String
 
     // Step 1: Identity extras
@@ -512,6 +513,14 @@ export const useMemberData = () => {
         },
     });
 
+    const verifyMutation = useMutation({
+        mutationFn: ({ id, status }: { id: string; status: string }) =>
+            apiClient.put(`/members/${id}/verify`, { status }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['members'] });
+        },
+    });
+
     return {
         members,
         setMembers,
@@ -532,6 +541,7 @@ export const useMemberData = () => {
         addMutation,
         updateMutation,
         deleteMutation,
-        importMutation
+        importMutation,
+        verifyMutation
     };
 };

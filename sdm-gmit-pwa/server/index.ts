@@ -5,7 +5,7 @@ import { toNodeHandler, fromNodeHeaders } from "better-auth/node";
 import rateLimit from "express-rate-limit";
 import { auth } from "./auth";
 import { db } from "./db";
-import { congregants, notifications, enumerators, pendamping, user, account } from "./schema";
+import { congregants, notifications, enumerators, pendamping, user, account, visits } from "./schema";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -106,6 +106,7 @@ const mapCongregantToMember = (c: any) => ({
     gender: c.gender || "Laki-laki",
     birthDate: c.dateOfBirth ? new Date(c.dateOfBirth).toISOString().split('T')[0] : "",
     createdAt: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+    registrationStatus: c.status || 'PENDING',
 
     // Step 1: Identity extras
     kkNumber: c.kkNumber || "",
@@ -581,6 +582,19 @@ app.get("/api/congregants/:id/status", async (req, res) => {
         }
 
         const r = result[0];
+
+        // Look up pendamping (Ketua Lingkungan) by lingkungan
+        let ketuaLingkungan = '';
+        if (r.lingkungan) {
+            const pendampingResult = await db.select({ name: pendamping.name })
+                .from(pendamping)
+                .where(eq(pendamping.lingkungan, r.lingkungan))
+                .limit(1);
+            if (pendampingResult.length > 0) {
+                ketuaLingkungan = pendampingResult[0].name;
+            }
+        }
+
         res.json({
             id: r.id,
             displayId: `REG-${r.id.toString().padStart(4, '0')}`,
@@ -590,12 +604,53 @@ app.get("/api/congregants/:id/status", async (req, res) => {
             rayon: r.rayon,
             phone: r.phone,
             status: r.status,
+            ketuaLingkungan,
             createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : null,
             updatedAt: r.updatedAt ? new Date(r.updatedAt).toISOString() : null,
         });
     } catch (error) {
         console.error("Status Check Error:", error);
         res.status(500).json({ error: "Gagal mengambil status registrasi" });
+    }
+});
+
+// Get pendamping name by lingkungan (public, for PDF generation)
+app.get("/api/pendamping-by-lingkungan/:lingkungan", async (req, res) => {
+    try {
+        const { lingkungan } = req.params;
+        const result = await db.select({ name: pendamping.name })
+            .from(pendamping)
+            .where(eq(pendamping.lingkungan, lingkungan))
+            .limit(1);
+        if (result.length === 0) {
+            return res.json({ name: '' });
+        }
+        res.json({ name: result[0].name });
+    } catch (error) {
+        console.error("Failed to get pendamping by lingkungan:", error);
+        res.json({ name: '' });
+    }
+});
+
+// Verify/Reject a member's registration status
+app.put("/api/members/:id/verify", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['PENDING', 'VALIDATED'].includes(status)) {
+            return res.status(400).json({ error: "Status must be 'PENDING' or 'VALIDATED'" });
+        }
+
+        await db.update(congregants).set({
+            status,
+            updatedAt: new Date()
+        }).where(eq(congregants.id, Number(id)));
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to verify member:", error);
+        res.status(500).json({ error: "Failed to verify member" });
     }
 });
 
@@ -1096,6 +1151,27 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 });
 
 // ----------------------------------------------------
+// User Role Endpoint
+// ----------------------------------------------------
+
+app.get("/api/user/role", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+        const userData = await db.select().from(user).where(eq(user.id, session.user.id));
+        if (userData.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json({ role: userData[0].role || 'admin', name: userData[0].name });
+    } catch (error) {
+        console.error("Failed to get user role:", error);
+        res.status(500).json({ error: "Failed to get user role" });
+    }
+});
+
+// ----------------------------------------------------
 // User Credential Management
 // ----------------------------------------------------
 
@@ -1132,6 +1208,10 @@ app.post("/api/credentials", async (req, res) => {
             if (!signUpResult || !signUpResult.user) {
                 return res.status(500).json({ error: "Gagal membuat akun" });
             }
+
+            // Set role based on entityType
+            const role = entityType === 'enumerator' ? 'enumerator' : entityType === 'pendamping' ? 'pendamping' : 'admin';
+            await db.update(user).set({ role }).where(eq(user.id, signUpResult.user.id));
         }
 
         // Store plain text credentials in enumerator/pendamping table
@@ -1185,9 +1265,13 @@ app.post("/api/enumerators", async (req, res) => {
             try {
                 const existingUser = await db.select().from(user).where(eq(user.email, loginEmail));
                 if (existingUser.length === 0) {
-                    await auth.api.signUpEmail({
+                    const signUpResult = await auth.api.signUpEmail({
                         body: { email: loginEmail, password: loginPassword, name }
                     });
+                    // Set role to enumerator
+                    if (signUpResult?.user) {
+                        await db.update(user).set({ role: 'enumerator' }).where(eq(user.id, signUpResult.user.id));
+                    }
                 }
             } catch (authError) {
                 console.error("Failed to create auth account for enumerator:", authError);
@@ -1204,7 +1288,21 @@ app.post("/api/enumerators", async (req, res) => {
 app.get("/api/enumerators", async (req, res) => {
     try {
         const result = await db.select().from(enumerators).orderBy(desc(enumerators.createdAt));
-        res.json(result);
+
+        // Get valid visit counts per enumerator
+        const visitCounts = await db.select({
+            enumeratorId: visits.enumeratorId,
+            validCount: count()
+        }).from(visits).where(eq(visits.status, 'valid')).groupBy(visits.enumeratorId);
+
+        const countMap = Object.fromEntries(visitCounts.map(v => [v.enumeratorId, v.validCount]));
+
+        const enriched = result.map(e => ({
+            ...e,
+            validVisitCount: countMap[e.id] || 0
+        }));
+
+        res.json(enriched);
     } catch (error) {
         console.error("Failed to fetch enumerators:", error);
         res.status(500).json({ error: "Failed to fetch enumerators" });
@@ -1257,9 +1355,13 @@ app.post("/api/pendamping", async (req, res) => {
             try {
                 const existingUser = await db.select().from(user).where(eq(user.email, loginEmail));
                 if (existingUser.length === 0) {
-                    await auth.api.signUpEmail({
+                    const signUpResult = await auth.api.signUpEmail({
                         body: { email: loginEmail, password: loginPassword, name }
                     });
+                    // Set role to pendamping
+                    if (signUpResult?.user) {
+                        await db.update(user).set({ role: 'pendamping' }).where(eq(user.id, signUpResult.user.id));
+                    }
                 }
             } catch (authError) {
                 console.error("Failed to create auth account for pendamping:", authError);
@@ -1311,6 +1413,311 @@ app.delete("/api/pendamping/:id", async (req, res) => {
     } catch (error) {
         console.error("Failed to delete pendamping:", error);
         res.status(500).json({ error: "Failed to delete pendamping" });
+    }
+});
+
+// ----------------------------------------------------
+// Enumerator Visit Endpoints
+// ----------------------------------------------------
+
+// Configure multer for visit photos
+const visitPhotoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = "uploads/visits";
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const ext = file.originalname.split('.').pop();
+        cb(null, `visit_${Date.now()}.${ext}`);
+    }
+});
+const visitUpload = multer({ storage: visitPhotoStorage });
+
+// Serve uploaded visit photos
+app.use("/uploads/visits", express.static("uploads/visits"));
+
+// Get current enumerator info by session
+app.get("/api/enumerator/me", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        // Find enumerator matching the user's email
+        const enumeratorData = await db.select().from(enumerators).where(eq(enumerators.loginEmail, session.user.email));
+        if (enumeratorData.length === 0) {
+            return res.status(404).json({ error: "Enumerator not found" });
+        }
+
+        res.json({
+            ...enumeratorData[0],
+            userName: session.user.name
+        });
+    } catch (error) {
+        console.error("Failed to get enumerator info:", error);
+        res.status(500).json({ error: "Failed to get enumerator info" });
+    }
+});
+
+// Get families (congregants) in the enumerator's lingkungan
+app.get("/api/enumerator/families", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const enumeratorData = await db.select().from(enumerators).where(eq(enumerators.loginEmail, session.user.email));
+        if (enumeratorData.length === 0) {
+            return res.status(404).json({ error: "Enumerator not found" });
+        }
+
+        const lingkungan = enumeratorData[0].lingkungan;
+
+        // Get IDs of families already visited by ANY enumerator
+        const visitedFamilies = await db.select({ congregantId: visits.congregantId }).from(visits);
+        const visitedIds = visitedFamilies.map(v => v.congregantId);
+
+        // Get families in this lingkungan, excluding already visited ones
+        let familyQuery = db.select({
+            id: congregants.id,
+            fullName: congregants.fullName,
+            address: congregants.address,
+            lingkungan: congregants.lingkungan,
+            rayon: congregants.rayon
+        }).from(congregants).where(
+            visitedIds.length > 0
+                ? and(eq(congregants.lingkungan, lingkungan), notInArray(congregants.id, visitedIds))
+                : eq(congregants.lingkungan, lingkungan)
+        );
+
+        const families = await familyQuery;
+
+        res.json(families);
+    } catch (error) {
+        console.error("Failed to get families:", error);
+        res.status(500).json({ error: "Failed to get families" });
+    }
+});
+
+// Get visits for the current enumerator
+app.get("/api/enumerator/visits", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const enumeratorData = await db.select().from(enumerators).where(eq(enumerators.loginEmail, session.user.email));
+        if (enumeratorData.length === 0) {
+            return res.status(404).json({ error: "Enumerator not found" });
+        }
+
+        const visitList = await db.select().from(visits)
+            .where(eq(visits.enumeratorId, enumeratorData[0].id))
+            .orderBy(desc(visits.createdAt));
+
+        res.json(visitList);
+    } catch (error) {
+        console.error("Failed to get visits:", error);
+        res.status(500).json({ error: "Failed to get visits" });
+    }
+});
+
+// Submit a new visit
+app.post("/api/enumerator/visits", visitUpload.single("photo"), async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const enumeratorData = await db.select().from(enumerators).where(eq(enumerators.loginEmail, session.user.email));
+        if (enumeratorData.length === 0) {
+            return res.status(404).json({ error: "Enumerator not found" });
+        }
+
+        const { congregantId, congregantName, notes } = req.body;
+        const file = (req as any).file;
+        const photoUrl = file ? `/uploads/visits/${file.filename}` : null;
+
+        await db.insert(visits).values({
+            enumeratorId: enumeratorData[0].id,
+            congregantId: Number(congregantId),
+            congregantName,
+            photoUrl,
+            notes: notes || null
+        });
+
+        res.json({ success: true, message: "Kunjungan berhasil disimpan" });
+    } catch (error) {
+        console.error("Failed to create visit:", error);
+        res.status(500).json({ error: "Failed to create visit" });
+    }
+});
+
+// Delete a visit
+app.delete("/api/enumerator/visits/:id", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const { id } = req.params;
+        await db.delete(visits).where(eq(visits.id, Number(id)));
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to delete visit:", error);
+        res.status(500).json({ error: "Failed to delete visit" });
+    }
+});
+
+// ----------------------------------------------------
+// Pendamping Dashboard Endpoints
+// ----------------------------------------------------
+
+// Get current pendamping info by session
+app.get("/api/pendamping/me", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const pendampingData = await db.select().from(pendamping).where(eq(pendamping.loginEmail, session.user.email));
+        if (pendampingData.length === 0) {
+            return res.status(404).json({ error: "Pendamping not found" });
+        }
+
+        res.json({
+            ...pendampingData[0],
+            userName: session.user.name
+        });
+    } catch (error) {
+        console.error("Failed to get pendamping info:", error);
+        res.status(500).json({ error: "Failed to get pendamping info" });
+    }
+});
+
+// Get pendamping stats
+app.get("/api/pendamping/stats", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const pendampingData = await db.select().from(pendamping).where(eq(pendamping.loginEmail, session.user.email));
+        if (pendampingData.length === 0) {
+            return res.status(404).json({ error: "Pendamping not found" });
+        }
+
+        const ling = pendampingData[0].lingkungan;
+
+        // Count families in this lingkungan
+        const familyResult = await db.select({ total: count() }).from(congregants).where(eq(congregants.lingkungan, ling));
+        const familyCount = familyResult[0]?.total || 0;
+
+        // Count enumerators in this lingkungan
+        const enumResult = await db.select({ total: count() }).from(enumerators).where(eq(enumerators.lingkungan, ling));
+        const enumeratorCount = enumResult[0]?.total || 0;
+
+        // Get enumerator IDs in this lingkungan
+        const enumIds = await db.select({ id: enumerators.id }).from(enumerators).where(eq(enumerators.lingkungan, ling));
+        const enumIdList = enumIds.map(e => e.id);
+
+        // Count visited families (unique congregants from visits by enumerators in this lingkungan)
+        let visitedCount = 0;
+        if (enumIdList.length > 0) {
+            const visitedResult = await db.selectDistinct({ congregantId: visits.congregantId })
+                .from(visits)
+                .where(sql`${visits.enumeratorId} IN (${sql.join(enumIdList.map(id => sql`${id}`), sql`, `)})`);
+            visitedCount = visitedResult.length;
+        }
+
+        const unvisitedCount = familyCount - visitedCount;
+
+        res.json({
+            familyCount,
+            enumeratorCount,
+            visitedCount,
+            unvisitedCount: Math.max(0, unvisitedCount)
+        });
+    } catch (error) {
+        console.error("Failed to get pendamping stats:", error);
+        res.status(500).json({ error: "Failed to get pendamping stats" });
+    }
+});
+
+// Get all visits in the pendamping's lingkungan (with enumerator name)
+app.get("/api/pendamping/visits", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const pendampingData = await db.select().from(pendamping).where(eq(pendamping.loginEmail, session.user.email));
+        if (pendampingData.length === 0) {
+            return res.status(404).json({ error: "Pendamping not found" });
+        }
+
+        const ling = pendampingData[0].lingkungan;
+
+        // Get enumerator IDs in this lingkungan
+        const enumList = await db.select({ id: enumerators.id, name: enumerators.name }).from(enumerators).where(eq(enumerators.lingkungan, ling));
+        const enumIdList = enumList.map(e => e.id);
+
+        if (enumIdList.length === 0) {
+            return res.json([]);
+        }
+
+        // Get all visits from these enumerators
+        const visitList = await db.select().from(visits)
+            .where(sql`${visits.enumeratorId} IN (${sql.join(enumIdList.map(id => sql`${id}`), sql`, `)})`)
+            .orderBy(desc(visits.createdAt));
+
+        // Map enumerator names
+        const enumMap = Object.fromEntries(enumList.map(e => [e.id, e.name]));
+        const result = visitList.map(v => ({
+            ...v,
+            enumeratorName: enumMap[v.enumeratorId] || 'Unknown'
+        }));
+
+        res.json(result);
+    } catch (error) {
+        console.error("Failed to get pendamping visits:", error);
+        res.status(500).json({ error: "Failed to get pendamping visits" });
+    }
+});
+
+// Validate a visit (set status to valid/invalid)
+app.put("/api/pendamping/visits/:id/validate", async (req, res) => {
+    try {
+        const session = await auth.api.getSession({ headers: req.headers as any });
+        if (!session?.user) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const { id } = req.params;
+        const { status, rejectionReason } = req.body;
+
+        if (!['valid', 'invalid'].includes(status)) {
+            return res.status(400).json({ error: "Status must be 'valid' or 'invalid'" });
+        }
+
+        await db.update(visits).set({
+            status,
+            rejectionReason: status === 'invalid' ? rejectionReason : null
+        }).where(eq(visits.id, Number(id)));
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Failed to validate visit:", error);
+        res.status(500).json({ error: "Failed to validate visit" });
     }
 });
 
