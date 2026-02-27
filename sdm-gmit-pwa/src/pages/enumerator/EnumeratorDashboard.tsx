@@ -131,16 +131,16 @@ export default function EnumeratorDashboard() {
         <EnumeratorLayout title="Dashboard Enumerator">
             <div className="space-y-6">
                 {/* Welcome Card */}
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-8 text-white shadow-lg shadow-emerald-500/20">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="size-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <span className="material-symbols-outlined text-3xl">waving_hand</span>
+                <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 md:p-8 text-white shadow-lg shadow-emerald-500/20">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                        <div className="size-11 md:size-14 bg-white/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                            <span className="material-symbols-outlined text-2xl md:text-3xl">waving_hand</span>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black">
+                            <h1 className="text-xl md:text-2xl font-black">
                                 Selamat Datang, {enumeratorInfo?.name || 'Enumerator'}!
                             </h1>
-                            <p className="text-emerald-100 mt-1">
+                            <p className="text-emerald-100 mt-0.5 md:mt-1 text-sm">
                                 Lingkungan {enumeratorInfo?.lingkungan || '-'} • Rayon {enumeratorInfo?.rayon || '-'} — GMIT Emaus Liliba
                             </p>
                         </div>

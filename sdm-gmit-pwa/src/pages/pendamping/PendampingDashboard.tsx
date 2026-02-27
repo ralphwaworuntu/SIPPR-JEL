@@ -100,16 +100,16 @@ export default function PendampingDashboard() {
         <PendampingLayout title="Dashboard Pendamping">
             <div className="space-y-6">
                 {/* Welcome Banner */}
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white shadow-lg shadow-blue-500/20">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="size-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <span className="material-symbols-outlined text-3xl">waving_hand</span>
+                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 md:p-8 text-white shadow-lg shadow-blue-500/20">
+                    <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+                        <div className="size-11 md:size-14 bg-white/20 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                            <span className="material-symbols-outlined text-2xl md:text-3xl">waving_hand</span>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black">
+                            <h1 className="text-xl md:text-2xl font-black">
                                 Selamat Datang, {info?.name || 'Pendamping'}!
                             </h1>
-                            <p className="text-blue-100 mt-1">
+                            <p className="text-blue-100 mt-0.5 md:mt-1 text-sm">
                                 Lingkungan {info?.lingkungan || '-'} — GMIT Emaus Liliba
                             </p>
                         </div>
@@ -165,7 +165,8 @@ export default function PendampingDashboard() {
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="w-full">
+                            {/* Desktop Table */}
+                            <table className="w-full hidden md:table">
                                 <thead>
                                     <tr className="border-b border-slate-100 dark:border-slate-800">
                                         <th className="text-left px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">No</th>
@@ -255,6 +256,47 @@ export default function PendampingDashboard() {
                                     ))}
                                 </tbody>
                             </table>
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                                {visitList.map((visit, index) => (
+                                    <div key={visit.id} className="p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-900 dark:text-white">{visit.congregantName}</p>
+                                                <p className="text-xs text-slate-500">oleh {visit.enumeratorName} • {formatDate(visit.createdAt)}</p>
+                                            </div>
+                                            {visit.status === 'valid' ? (
+                                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span className="material-symbols-outlined text-xs">check_circle</span>Valid</span>
+                                            ) : visit.status === 'invalid' ? (
+                                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200"><span className="material-symbols-outlined text-xs">cancel</span>Invalid</span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span className="material-symbols-outlined text-xs">schedule</span>Menunggu</span>
+                                            )}
+                                        </div>
+                                        {visit.notes && <p className="text-xs text-slate-500 line-clamp-2">{visit.notes}</p>}
+                                        {visit.photoUrl && (
+                                            <img
+                                                src={`${API}${visit.photoUrl}`}
+                                                alt="Bukti"
+                                                className="w-full h-32 rounded-lg object-cover border border-slate-200 dark:border-slate-700 cursor-pointer"
+                                                onClick={() => setPreviewPhoto(`${API}${visit.photoUrl}`)}
+                                            />
+                                        )}
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => validateMutation.mutate({ id: visit.id, status: 'valid' })}
+                                                disabled={visit.status === 'valid' || validateMutation.isPending}
+                                                className="flex-1 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors disabled:opacity-30"
+                                            >Validasi</button>
+                                            <button
+                                                onClick={() => { setValidateTarget(visit); setInvalidReason(''); }}
+                                                disabled={validateMutation.isPending}
+                                                className="flex-1 py-1.5 text-xs font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-30"
+                                            >Tidak Valid</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

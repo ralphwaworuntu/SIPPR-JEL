@@ -1,0 +1,126 @@
+﻿diff --git a/sdm-gmit-pwa/server/index.ts b/sdm-gmit-pwa/server/index.ts
+index e924d8e..2b86592 100644
+--- a/sdm-gmit-pwa/server/index.ts
++++ b/sdm-gmit-pwa/server/index.ts
+@@ -149,8 +149,12 @@ const mapCongregantToMember = (c: any) => ({
+     // Step 5: Economics
+     economics_headOccupation: c.economicsHeadOccupation || "",
+     economics_headOccupationOther: c.economicsHeadOccupationOther || "",
++    economics_headIncomeRange: c.economicsHeadIncomeRange || "",
++    economics_headIncomeRangeDetailed: c.economicsHeadIncomeRangeDetailed || "",
+     economics_spouseOccupation: c.economicsSpouseOccupation || "",
+     economics_spouseOccupationOther: c.economicsSpouseOccupationOther || "",
++    economics_spouseIncomeRange: c.economicsSpouseIncomeRange || "",
++    economics_spouseIncomeRangeDetailed: c.economicsSpouseIncomeRangeDetailed || "",
+     economics_incomeRange: c.economicsIncomeRange || "",
+     economics_incomeRangeDetailed: c.economicsIncomeRangeDetailed || "",
+     economics_expense_food: c.economicsExpenseFood || 0,
+@@ -178,12 +182,12 @@ const mapCongregantToMember = (c: any) => ({
+     economics_businessMarketing: safeParseJSON(c.economicsBusinessMarketing),
+     economics_businessMarketingOther: c.economicsBusinessMarketingOther || "",
+     economics_businessMarketArea: c.economicsBusinessMarketArea || "",
+-    economics_businessIssues: safeParseJSON(c.economicsBusinessIssues),
++    economics_businessIssues: c.economicsBusinessIssues || "",
+     economics_businessIssuesOther: c.economicsBusinessIssuesOther || "",
+-    economics_businessNeeds: safeParseJSON(c.economicsBusinessNeeds),
++    economics_businessNeeds: c.economicsBusinessNeeds || "",
+     economics_businessNeedsOther: c.economicsBusinessNeedsOther || "",
+     economics_businessSharing: c.economicsBusinessSharing || "",
+-    economics_businessTraining: safeParseJSON(c.economicsBusinessTraining),
++    economics_businessTraining: c.economicsBusinessTraining || "",
+     economics_businessTrainingOther: c.economicsBusinessTrainingOther || "",
+     economics_houseStatus: c.economicsHouseStatus || "",
+     economics_houseType: c.economicsHouseType || "",
+@@ -199,7 +203,7 @@ const mapCongregantToMember = (c: any) => ({
+     economics_asset_internet_qty: c.economicsAssetInternetQty || 0,
+     economics_asset_lahan_qty: c.economicsAssetLahanQty || 0,
+     economics_landStatus: c.economicsLandStatus || "",
+-    economics_waterSource: c.economicsWaterSource || "",
++    economics_waterSource: safeParseJSON(c.economicsWaterSource),
+     economics_electricity_capacities: safeParseJSON(c.economicsElectricityCapacities),
+     economics_electricity_450_qty: c.economicsElectricity450Qty || 0,
+     economics_electricity_900_qty: c.economicsElectricity900Qty || 0,
+@@ -394,8 +398,12 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
+         // Step 5: Economics ÔÇö Occupation & Income
+         economicsHeadOccupation: data.economics_headOccupation || null,
+         economicsHeadOccupationOther: data.economics_headOccupationOther || null,
++        economicsHeadIncomeRange: data.economics_headIncomeRange || null,
++        economicsHeadIncomeRangeDetailed: data.economics_headIncomeRangeDetailed || null,
+         economicsSpouseOccupation: data.economics_spouseOccupation || null,
+         economicsSpouseOccupationOther: data.economics_spouseOccupationOther || null,
++        economicsSpouseIncomeRange: data.economics_spouseIncomeRange || null,
++        economicsSpouseIncomeRangeDetailed: data.economics_spouseIncomeRangeDetailed || null,
+         economicsIncomeRange: data.economics_incomeRange || null,
+         economicsIncomeRangeDetailed: data.economics_incomeRangeDetailed || null,
+ 
+@@ -427,12 +435,12 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
+         economicsBusinessMarketing: jsonStringify(data.economics_businessMarketing),
+         economicsBusinessMarketingOther: data.economics_businessMarketingOther || null,
+         economicsBusinessMarketArea: data.economics_businessMarketArea || null,
+-        economicsBusinessIssues: jsonStringify(data.economics_businessIssues),
++        economicsBusinessIssues: data.economics_businessIssues || null,
+         economicsBusinessIssuesOther: data.economics_businessIssuesOther || null,
+-        economicsBusinessNeeds: jsonStringify(data.economics_businessNeeds),
++        economicsBusinessNeeds: data.economics_businessNeeds || null,
+         economicsBusinessNeedsOther: data.economics_businessNeedsOther || null,
+         economicsBusinessSharing: data.economics_businessSharing || null,
+-        economicsBusinessTraining: jsonStringify(data.economics_businessTraining),
++        economicsBusinessTraining: data.economics_businessTraining || null,
+         economicsBusinessTrainingOther: data.economics_businessTrainingOther || null,
+ 
+         // Step 5: Home & Assets
+@@ -450,7 +458,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
+         economicsAssetInternetQty: safeInt(data.economics_asset_internet_qty),
+         economicsAssetLahanQty: safeInt(data.economics_asset_lahan_qty),
+         economicsLandStatus: data.economics_landStatus || null,
+-        economicsWaterSource: data.economics_waterSource || null,
++        economicsWaterSource: jsonStringify(data.economics_waterSource),
+         economicsElectricityCapacities: jsonStringify(data.economics_electricity_capacities),
+         economicsElectricity450Qty: safeInt(data.economics_electricity_450_qty),
+         economicsElectricity900Qty: safeInt(data.economics_electricity_900_qty),
+@@ -713,7 +721,14 @@ app.get("/api/dashboard/stats", async (req, res) => {
+         const waterSourceCount: Record<string, number> = {};
+ 
+         economicsRes.forEach(e => {
+-            if (e.waterSource) waterSourceCount[e.waterSource] = (waterSourceCount[e.waterSource] || 0) + 1;
++            if (e.waterSource) {
++                try {
++                    const parsed = typeof e.waterSource === 'string' ? JSON.parse(e.waterSource) : e.waterSource;
++                    if (Array.isArray(parsed)) {
++                        parsed.forEach(w => { waterSourceCount[w] = (waterSourceCount[w] || 0) + 1; });
++                    }
++                } catch (err) { }
++            }
+ 
+             // Assets
+             if (e.assets) {
+@@ -728,26 +743,9 @@ app.get("/api/dashboard/stats", async (req, res) => {
+             if (e.businessType) {
+                 if (e.businessTurnover) businessTurnoverCount[e.businessTurnover] = (businessTurnoverCount[e.businessTurnover] || 0) + 1;
+ 
+-                try {
+-                    const parsedIssues = typeof e.businessIssues === 'string' ? JSON.parse(e.businessIssues) : e.businessIssues;
+-                    if (Array.isArray(parsedIssues)) {
+-                        parsedIssues.forEach(i => { businessIssuesCount[i] = (businessIssuesCount[i] || 0) + 1; });
+-                    }
+-                } catch (err) { }
+-
+-                try {
+-                    const parsedTraining = typeof e.businessTraining === 'string' ? JSON.parse(e.businessTraining) : e.businessTraining;
+-                    if (Array.isArray(parsedTraining)) {
+-                        parsedTraining.forEach(t => { businessTrainingCount[t] = (businessTrainingCount[t] || 0) + 1; });
+-                    }
+-                } catch (err) { }
+-
+-                try {
+-                    const parsedNeeds = typeof e.businessNeeds === 'string' ? JSON.parse(e.businessNeeds) : e.businessNeeds;
+-                    if (Array.isArray(parsedNeeds)) {
+-                        parsedNeeds.forEach(t => { businessNeedsCount[t] = (businessNeedsCount[t] || 0) + 1; });
+-                    }
+-                } catch (err) { }
++                if (e.businessIssues) businessIssuesCount[e.businessIssues] = (businessIssuesCount[e.businessIssues] || 0) + 1;
++                if (e.businessTraining) businessTrainingCount[e.businessTraining] = (businessTrainingCount[e.businessTraining] || 0) + 1;
++                if (e.businessNeeds) businessNeedsCount[e.businessNeeds] = (businessNeedsCount[e.businessNeeds] || 0) + 1;
+             }
+         });
+ 

@@ -947,27 +947,27 @@ const AdminDashboard = () => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-white dark:bg-slate-900">
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Nama Kepala Keluarga</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Baptis</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Sidi</th>
-                                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Aksi</th>
+                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Nama Kepala Keluarga</th>
+                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Baptis</th>
+                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Kebutuhan Sidi</th>
+                                    <th className="px-4 md:px-8 py-3 md:py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
                                 {candidates.slice(0, 5).map(m => (
                                     <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td className="px-8 py-5 font-bold text-slate-700 dark:text-slate-200">{m.name}</td>
-                                        <td className="px-8 py-5">
+                                        <td className="px-4 md:px-8 py-4 md:py-5 font-bold text-slate-700 dark:text-slate-200">{m.name}</td>
+                                        <td className="px-4 md:px-8 py-4 md:py-5">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${Number(m.familyMembersNonBaptized) > 0 ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
                                                 {m.familyMembersNonBaptized || 0} Jiwa
                                             </span>
                                         </td>
-                                        <td className="px-8 py-5">
+                                        <td className="px-4 md:px-8 py-4 md:py-5">
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${Number(m.familyMembersNonSidi) > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
                                                 {m.familyMembersNonSidi || 0} Jiwa
                                             </span>
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        <td className="px-4 md:px-8 py-4 md:py-5 text-right">
                                             <button
                                                 onClick={() => setSelectedFamilyForDiakonia(m)}
                                                 className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest"
@@ -1264,13 +1264,13 @@ const AdminDashboard = () => {
         if (activeTab === 'semua') {
             return (
                 <div className="space-y-8 animate-fade-in-up pb-10">
-                    <div className="grid grid-cols-12 gap-8 items-stretch">
+                    <div className="grid grid-cols-12 gap-4 md:gap-8 items-stretch">
                         {/* 1. Dashboard Header - Compact & Informative */}
-                        <div className="col-span-12 lg:col-span-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative">
+                        <div className="col-span-12 lg:col-span-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 md:gap-6 bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32"></div>
                             <div className="relative z-10 flex-1">
                                 <div className="flex items-center justify-between gap-4">
-                                    <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-tight">
+                                    <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter leading-tight">
                                         Halo, {profile?.firstName || user?.name || 'Admin'}! ⛪
                                     </h2>
                                 </div>
@@ -1282,7 +1282,7 @@ const AdminDashboard = () => {
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => navigate('/admin/members?action=add')}
-                                        className="flex-1 h-14 px-8 bg-[#064e1c] text-white font-black text-[11px] uppercase tracking-widest rounded-2xl shadow-2xl shadow-emerald-900/20 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap"
+                                        className="flex-1 h-12 md:h-14 px-4 md:px-8 bg-[#064e1c] text-white font-black text-[10px] md:text-[11px] uppercase tracking-widest rounded-xl md:rounded-2xl shadow-2xl shadow-emerald-900/20 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2 md:gap-3 whitespace-nowrap"
                                     >
                                         <span className="material-symbols-outlined text-lg">person_add</span>
                                         Tambah Jemaat
@@ -1349,7 +1349,7 @@ const AdminDashboard = () => {
                         <div className="col-span-12 lg:col-span-4 grid grid-cols-2 gap-4">
                             <div
                                 onClick={() => setShowRecentModal(true)}
-                                className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative group flex flex-col justify-center transition-all hover:border-emerald-500/30 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/5 active:scale-95"
+                                className="bg-white dark:bg-slate-900 p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-100 dark:border-white/5 shadow-card overflow-hidden relative group flex flex-col justify-center transition-all hover:border-emerald-500/30 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/5 active:scale-95"
                             >
                                 <div className="absolute top-0 right-0 p-5 opacity-10 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 text-emerald-500">
                                     <span className="material-symbols-outlined text-4xl">trending_up</span>
@@ -1368,7 +1368,7 @@ const AdminDashboard = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="bg-[#051c14] p-8 rounded-[2rem] border border-emerald-900 shadow-card relative overflow-hidden group flex flex-col justify-center transition-all hover:shadow-emerald-500/10">
+                            <div className="bg-[#051c14] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-emerald-900 shadow-card relative overflow-hidden group flex flex-col justify-center transition-all hover:shadow-emerald-500/10">
                                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full group-hover:bg-emerald-500/20 transition-all duration-700"></div>
                                 <div className="relative z-10 overflow-hidden h-[80px]">
                                     <div className="transition-all duration-1000 ease-[cubic-bezier(0.23, 1, 0.32, 1)]" style={{ transform: `translateY(-${miniMetricIndex * 80}px)` }}>
