@@ -32,7 +32,8 @@ const AdminMemberData = () => {
         stats,
         isLoading,
         deleteMutation,
-        importMutation
+        importMutation,
+        verifyMutation
     } = useMemberData();
 
     // UI State
@@ -566,6 +567,7 @@ const AdminMemberData = () => {
                                                         case 'Kesehatan': cols = [...baseCols, { label: "Sakit 30 Hari", key: "health_sick30Days", width: "min-w-[100px]" }, { label: "Sakit Kronis", key: "health_chronicSick", width: "min-w-[100px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "Berobat Rutin", key: "health_regularTreatment", width: "min-w-[100px]" }, { label: "BPJS JKN", key: "health_hasBPJS", width: "min-w-[100px]" }, { label: "BPJS Naker", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[100px]" }, { label: "Bansos", key: "health_socialAssistance", width: "min-w-[100px]" }]; break;
                                                         default: cols = baseCols;
                                                     }
+                                                    cols.push({ label: "Status", key: "registrationStatus", width: "w-28" });
                                                     cols.push({ label: "Kelengkapan", key: "name", width: "w-20" }); // Metric column
                                                     return cols.map((col: any) => (
                                                         <th
@@ -713,8 +715,49 @@ const AdminMemberData = () => {
                                                                 return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
                                                             })()}
                                                         </td>
+                                                        <td className="px-6 py-4">
+                                                            {member.registrationStatus === 'VALIDATED' ? (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
+                                                                    <span className="material-symbols-outlined text-xs">verified</span>
+                                                                    VALID
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
+                                                                    <span className="material-symbols-outlined text-xs">schedule</span>
+                                                                    PENDING
+                                                                </span>
+                                                            )}
+                                                        </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        const newStatus = member.registrationStatus === 'VALIDATED' ? 'PENDING' : 'VALIDATED';
+                                                                        setConfirmDialog({
+                                                                            isOpen: true,
+                                                                            title: newStatus === 'VALIDATED' ? 'Verifikasi Registrasi' : 'Batalkan Verifikasi',
+                                                                            message: newStatus === 'VALIDATED'
+                                                                                ? `Apakah Anda yakin ingin memverifikasi data ${member.name}?`
+                                                                                : `Apakah Anda yakin ingin membatalkan verifikasi data ${member.name}?`,
+                                                                            variant: newStatus === 'VALIDATED' ? 'info' : 'warning',
+                                                                            action: async () => {
+                                                                                try {
+                                                                                    await verifyMutation.mutateAsync({ id: member.id, status: newStatus });
+                                                                                    toast.success(newStatus === 'VALIDATED' ? 'Data berhasil diverifikasi' : 'Verifikasi dibatalkan');
+                                                                                } catch (error) {
+                                                                                    toast.error('Gagal mengubah status verifikasi');
+                                                                                } finally {
+                                                                                    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }}
+                                                                    className={`size-8 rounded-lg flex items-center justify-center transition-colors tooltip ${member.registrationStatus === 'VALIDATED' ? 'text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600' : 'text-amber-500 hover:bg-amber-50 hover:text-amber-600'}`}
+                                                                    title={member.registrationStatus === 'VALIDATED' ? 'Batalkan Verifikasi' : 'Verifikasi'}
+                                                                >
+                                                                    <span className="material-symbols-outlined text-lg">{member.registrationStatus === 'VALIDATED' ? 'verified' : 'task_alt'}</span>
+                                                                </button>
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import logoGmitUrl from '../assets/logo-gmit.png';
 
 interface RegistrationStatus {
     id: number;
@@ -11,7 +13,8 @@ interface RegistrationStatus {
     lingkungan: string;
     rayon: string;
     phone: string;
-    status: string; // 'PENDING' | 'VALIDATED'
+    status: string;
+    ketuaLingkungan: string;
     createdAt: string | null;
     updatedAt: string | null;
 }
@@ -77,6 +80,220 @@ const StatusPage = () => {
     };
 
     const isValidated = result?.status === 'VALIDATED';
+
+    const handleDownloadPDF = async () => {
+        if (!result) return;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+        let y = 20;
+
+        // Load logo
+        try {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject();
+                img.src = logoGmitUrl;
+            });
+            const logoSize = 20;
+            doc.addImage(img, 'PNG', (pageWidth - logoSize) / 2, y, logoSize, logoSize);
+            y += logoSize + 4;
+        } catch {
+            y += 5;
+        }
+
+        // Header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('GEREJA MASEHI INJILI DI TIMOR', pageWidth / 2, y, { align: 'center' });
+        y += 7;
+        doc.setFontSize(12);
+        doc.text('Jemaat Emaus Liliba', pageWidth / 2, y, { align: 'center' });
+        y += 6;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Bukti Pendaftaran Pendataan Jemaat 2026', pageWidth / 2, y, { align: 'center' });
+        y += 4;
+
+        // Divider
+        doc.setDrawColor(50, 50, 50);
+        doc.setLineWidth(0.8);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
+
+        // Registration ID
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 100, 100);
+        doc.text('ID REGISTRASI', margin, y);
+        y += 6;
+        doc.setFontSize(18);
+        doc.setTextColor(30, 30, 30);
+        doc.text(result.displayId, margin, y);
+        y += 10;
+
+        // Status Badge — dynamic based on current status
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        if (isValidated) {
+            const statusText = 'STATUS: TERVALIDASI';
+            doc.setFillColor(209, 250, 229); // emerald-100
+            doc.setDrawColor(16, 185, 129);
+            const badgeWidth = doc.getTextWidth(statusText) + 10;
+            doc.roundedRect(margin, y - 4, badgeWidth, 8, 2, 2, 'FD');
+            doc.setTextColor(5, 150, 105); // emerald-700
+            doc.text(statusText, margin + 5, y + 1);
+        } else {
+            const statusText = 'STATUS: MENUNGGU VERIFIKASI ADMIN';
+            doc.setFillColor(255, 243, 205); // amber-100
+            doc.setDrawColor(217, 175, 50);
+            const badgeWidth = doc.getTextWidth(statusText) + 10;
+            doc.roundedRect(margin, y - 4, badgeWidth, 8, 2, 2, 'FD');
+            doc.setTextColor(146, 106, 7); // amber-700
+            doc.text(statusText, margin + 5, y + 1);
+        }
+        y += 14;
+
+        // Personal Data
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Data Pendaftar', margin, y);
+        y += 2;
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 7;
+
+        const dataRows = [
+            ['Nama Lengkap (KK)', result.fullName || '-'],
+            ['Nomor Kartu Keluarga', result.kkNumber || '-'],
+            ['Lingkungan / Rayon', `Lingkungan ${result.lingkungan || '-'} / Rayon ${result.rayon || '-'}`],
+            ['No. Telepon / WA', result.phone || '-'],
+        ];
+
+        doc.setFontSize(9);
+        for (const [label, value] of dataRows) {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(120, 120, 120);
+            doc.text(label, margin, y);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text(value, 75, y);
+            y += 7;
+        }
+        y += 5;
+
+        // Timeline
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Status Proses', margin, y);
+        y += 2;
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 8;
+
+        doc.setFontSize(9);
+        // Step 1: Data Terkirim
+        doc.setFillColor(16, 185, 129);
+        doc.circle(margin + 3, y - 1.5, 2.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(5, 150, 105);
+        doc.text('Data Terkirim', margin + 10, y);
+        if (result.createdAt) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text(formatDate(result.createdAt), margin + 10, y + 4);
+            doc.setFontSize(9);
+        }
+        y += 10;
+
+        // Step 2: Verifikasi
+        if (isValidated) {
+            doc.setFillColor(16, 185, 129);
+            doc.circle(margin + 3, y - 1.5, 2.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(5, 150, 105);
+            doc.text('Diverifikasi Admin', margin + 10, y);
+            if (result.updatedAt) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.text(formatDate(result.updatedAt), margin + 10, y + 4);
+                doc.setFontSize(9);
+            }
+        } else {
+            doc.setFillColor(245, 158, 11);
+            doc.circle(margin + 3, y - 1.5, 2.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(146, 106, 7);
+            doc.text('Proses Verifikasi Admin (Maks. 1x24 jam)', margin + 10, y);
+        }
+        y += 10;
+
+        // Step 3: Masuk Database
+        if (isValidated) {
+            doc.setFillColor(16, 185, 129);
+            doc.circle(margin + 3, y - 1.5, 2.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(5, 150, 105);
+        } else {
+            doc.setFillColor(200, 200, 200);
+            doc.circle(margin + 3, y - 1.5, 2.5, 'F');
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(150, 150, 150);
+        }
+        doc.text('Tervalidasi & Masuk Database', margin + 10, y);
+        if (isValidated && result.updatedAt) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(5, 150, 105);
+            doc.text(formatDate(result.updatedAt), margin + 10, y + 4);
+            doc.setFontSize(9);
+        }
+        y += 15;
+
+        // Signature Area
+        const now = new Date();
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        const dateStr = `Kupang, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+        doc.setTextColor(30, 30, 30);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(dateStr, margin, y);
+        y += 25;
+        doc.setFont('helvetica', 'bold');
+        doc.text(result.fullName || '..............................', margin, y);
+        y += 5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text('Kepala Keluarga', margin, y);
+
+        const rightX = pageWidth - margin - 50;
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Mengetahui,', rightX, y - 30);
+        doc.setFont('helvetica', 'bold');
+        doc.text(result.ketuaLingkungan || '..............................', rightX, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text(`Ketua Lingkungan ${result.lingkungan || ''}`, rightX, y + 5);
+
+        // Footer
+        y = doc.internal.pageSize.getHeight() - 15;
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 5;
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Dokumen ini digenerate secara otomatis oleh sistem SIPPR GMIT Jemaat Emaus Liliba.', pageWidth / 2, y, { align: 'center' });
+
+        doc.save(`Bukti-Pendaftaran-${result.displayId}.pdf`);
+    };
 
     const formatDate = (dateStr: string | null) => {
         if (!dateStr) return '-';
@@ -283,6 +500,18 @@ const StatusPage = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Download PDF Button */}
+                                    <button
+                                        onClick={handleDownloadPDF}
+                                        className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${isValidated
+                                            ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600 shadow-lg shadow-emerald-500/25'
+                                            : 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white hover:from-indigo-600 hover:to-blue-600 shadow-lg shadow-indigo-500/25'
+                                            }`}
+                                    >
+                                        <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+                                        Unduh Bukti Pendaftaran (PDF)
+                                    </button>
 
                                     {/* Validated Success Message */}
                                     {isValidated && (

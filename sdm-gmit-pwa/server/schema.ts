@@ -6,6 +6,7 @@ export const user = mysqlTable("user", {
     email: varchar("email", { length: 255 }).notNull().unique(),
     emailVerified: boolean("emailVerified").notNull(),
     image: text("image"),
+    role: varchar("role", { length: 20 }).default("admin"),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
     updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull()
 });
@@ -270,4 +271,16 @@ export const pendamping = mysqlTable("pendamping", {
     loginPassword: varchar("login_password", { length: 255 }),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow(),
+});
+
+export const visits = mysqlTable("visits", {
+    id: bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey(),
+    enumeratorId: bigint("enumerator_id", { mode: 'number', unsigned: true }).notNull(),
+    congregantId: bigint("congregant_id", { mode: 'number', unsigned: true }).notNull(),
+    congregantName: varchar("congregant_name", { length: 255 }).notNull(),
+    photoUrl: varchar("photo_url", { length: 500 }),
+    notes: text("notes"),
+    status: varchar("status", { length: 20 }).default("pending"),
+    rejectionReason: text("rejection_reason"),
+    createdAt: timestamp("created_at").defaultNow(),
 });

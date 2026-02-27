@@ -16,8 +16,6 @@ const LoginPage = () => {
         setLoading(true);
         setError('');
 
-
-
         try {
             // Attempt Real Login
             await signIn.email({
@@ -25,7 +23,7 @@ const LoginPage = () => {
                 password,
             }, {
                 onSuccess: () => {
-                    navigate('/admin');
+                    navigate('/auth-redirect');
                 },
                 onError: (ctx) => {
                     console.error("Login Error Context:", ctx);

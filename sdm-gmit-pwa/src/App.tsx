@@ -7,6 +7,7 @@ import StatusPage from './pages/StatusPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import SeedUser from './pages/SeedUser';
+import AuthRedirect from './pages/AuthRedirect';
 import { Toaster } from './components/ui/Toast';
 import { OfflineBanner } from './components/ui/OfflineBanner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -24,6 +25,11 @@ const AdminNotifications = React.lazy(() => import('./pages/AdminNotifications')
 const AdminProfile = React.lazy(() => import('./pages/AdminProfile'));
 const EnumeratorPage = React.lazy(() => import('./pages/admin/EnumeratorPage'));
 const PendampingPage = React.lazy(() => import('./pages/admin/PendampingPage'));
+
+// Lazy Load Role-Based Dashboard Pages
+const EnumeratorDashboard = React.lazy(() => import('./pages/enumerator/EnumeratorDashboard'));
+const EnumeratorVisits = React.lazy(() => import('./pages/enumerator/EnumeratorVisits'));
+const PendampingDashboard = React.lazy(() => import('./pages/pendamping/PendampingDashboard'));
 
 // Loading Fallback Component
 const PageLoader = () => (
@@ -81,6 +87,7 @@ const AppContent = () => {
         <Route path="/status" element={<StatusPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/seed-user" element={<SeedUser />} />
+        <Route path="/auth-redirect" element={<AuthRedirect />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={
@@ -127,6 +134,25 @@ const AppContent = () => {
         <Route path="/admin/profile" element={
           <ProtectedRoute>
             <AdminProfile />
+          </ProtectedRoute>
+        } />
+
+        {/* Enumerator Routes */}
+        <Route path="/enumerator" element={
+          <ProtectedRoute>
+            <EnumeratorDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/enumerator/visits" element={
+          <ProtectedRoute>
+            <EnumeratorVisits />
+          </ProtectedRoute>
+        } />
+
+        {/* Pendamping Routes */}
+        <Route path="/pendamping" element={
+          <ProtectedRoute>
+            <PendampingDashboard />
           </ProtectedRoute>
         } />
 

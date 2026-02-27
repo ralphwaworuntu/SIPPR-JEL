@@ -14,6 +14,7 @@ interface Enumerator {
     whatsapp: string;
     loginEmail: string | null;
     loginPassword: string | null;
+    validVisitCount: number;
     createdAt: string;
 }
 
@@ -164,7 +165,7 @@ export default function EnumeratorPage() {
                                         <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">{item.name}</td>
                                         <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.rayon}</td>
                                         <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.lingkungan}</td>
-                                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.familyCount} Keluarga</td>
+                                        <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.validVisitCount || 0} Keluarga</td>
                                         <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{item.whatsapp || '-'}</td>
                                         <td className="px-6 py-4 flex items-center justify-end gap-2">
                                             <button
