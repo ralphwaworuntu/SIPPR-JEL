@@ -325,17 +325,19 @@ const Step1Identity = ({ data, update }: StepProps) => {
                     tooltipText="Pilih apakah sudah dibaptis atau belum."
                 />
 
-                {/* Sidi Status */}
-                <FormRadioGroup
-                    label="Status Sidi"
-                    name="sidiStatus"
-                    value={data.sidiStatus}
-                    onChange={(val) => update({ sidiStatus: val as any })}
-                    options={['Sudah', 'Belum']}
-                    columns={2}
-                    required
-                    tooltipText="Pilih apakah sudah sidi atau belum."
-                />
+                {/* Sidi Status - Only show if Baptized */}
+                {data.baptismStatus === 'Sudah' && (
+                    <FormRadioGroup
+                        label="Status Sidi"
+                        name="sidiStatus"
+                        value={data.sidiStatus}
+                        onChange={(val) => update({ sidiStatus: val as any })}
+                        options={['Sudah', 'Belum']}
+                        columns={2}
+                        required
+                        tooltipText="Pilih apakah sudah sidi atau belum."
+                    />
+                )}
 
                 {/* Marital Status */}
                 <FormSelect

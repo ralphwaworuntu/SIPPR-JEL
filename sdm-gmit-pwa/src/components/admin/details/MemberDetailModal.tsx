@@ -150,7 +150,13 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <DetailRow label="Tanggal Lahir" value={member.birthDate} />
                             <DetailRow label="Usia" value={(calculateAge(member.birthDate) || '-') + " Tahun"} />
                             <DetailRow label="Golongan Darah" value={member.bloodType} />
-                            <DetailRow label="Status Menikah" value={member.maritalStatus === 'Kawin' && member.marriageDate ? `Kawin (${member.marriageDate})` : member.maritalStatus} />
+                            <DetailRow label="Status Nikah" value={member.maritalStatus === 'Sudah Nikah' && member.marriageDate ? `Sudah Nikah (${member.marriageDate})` : member.maritalStatus} />
+                            {member.maritalStatus === 'Sudah Nikah' && (
+                                <>
+                                    <DetailRow label="Usia Pernikahan" value={(calculateAge(member.marriageDate) || '-') + " Tahun"} />
+                                    <DetailRow label="Jenis Pernikahan" value={Array.isArray(member.marriageType) ? member.marriageType.join(', ') : (member.marriageType || '-')} />
+                                </>
+                            )}
                             <DetailRow label="Status Baptis" value={member.baptismStatus} />
                             <DetailRow label="Status Sidi" value={member.sidiStatus} />
                             <DetailRow label="Nomor Telepon / WA" value={member.phone ? `+62 ${member.phone}` : '-'} />

@@ -260,6 +260,18 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         return `${age} Tahun`;
     };
 
+    const calculateMarriageDuration = (marriageDate: string) => {
+        if (!marriageDate) return '';
+        const today = new Date();
+        const start = new Date(marriageDate);
+        let years = today.getFullYear() - start.getFullYear();
+        const m = today.getMonth() - start.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < start.getDate())) {
+            years--;
+        }
+        return `${years} Tahun`;
+    };
+
     const lingkunganRayonMap: Record<string, number[]> = {
         '1': [1, 2, 17],
         '2': [12, 13, 16],
@@ -829,6 +841,38 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         </div>
     );
 
+    const multiSelectInput = (name: string, label: string, options: string[], required?: boolean) => {
+        const currentValues = (formData as any)[name] || [];
+        const toggleOption = (opt: string) => {
+            const newValues = currentValues.includes(opt)
+                ? currentValues.filter((v: string) => v !== opt)
+                : [...currentValues, opt];
+            setFormData(prev => ({ ...prev, [name]: newValues }));
+        };
+
+        return (
+            <div className="col-span-2">
+                <FormLabel required={required}>{label}</FormLabel>
+                <div className="flex flex-wrap gap-2">
+                    {options.map(opt => (
+                        <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleOption(opt)}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold border-2 transition-all ${currentValues.includes(opt)
+                                ? 'bg-primary border-primary text-white shadow-md shadow-primary/20 scale-[1.02]'
+                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-primary/40'
+                                }`}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+                <ErrorMsg msg={errors[name]} />
+            </div>
+        );
+    };
+
     return (
         <div className="flex flex-col gap-6">
             {/* Progress Header */}
@@ -849,7 +893,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 {step === 1 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
                         <div className="col-span-2 flex flex-col">
-                            <FormLabel required>Nomor Kartu Keluarga</FormLabel>
+                            <FormLabel>Nomor Kartu Keluarga</FormLabel>
                             <input name="kkNumber" value={formData.kkNumber} onChange={handleChange} className={inputClass(!!errors.kkNumber)} maxLength={16} placeholder="16 Digit Nomor Kartu Keluarga" />
                             {formData.kkNumber && formData.kkNumber.length > 0 && formData.kkNumber.length < 16 && (
                                 <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -900,24 +944,34 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             <input value={calculateAge(formData.dateOfBirth) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
                         </div>
                         <div className="col-span-2">
-                            {selectInput('bloodType', 'Golongan Darah', ['A', 'B', 'AB', 'O', 'Tidak Tahu'], false)}
+                            {selectInput('bloodType', 'Golongan Darah', ['A', 'B', 'AB', 'O'], false)}
                         </div>
                         <div className="col-span-2">
-                            {selectInput('maritalStatus', 'Status Pernikahan', ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'], true)}
+                            {selectInput('baptismStatus', 'Status Baptis', ['Sudah', 'Belum'], true)}
                         </div>
-                        {formData.maritalStatus === 'Kawin' && (
+                        {formData.baptismStatus === 'Sudah' && (
+                            <div className="col-span-2">
+                                {selectInput('sidiStatus', 'Status Sidi', ['Sudah', 'Belum'], true)}
+                            </div>
+                        )}
+                        <div className="col-span-2">
+                            {selectInput('maritalStatus', 'Status Pernikahan', ['Belum Nikah', 'Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'], true)}
+                        </div>
+                        {formData.maritalStatus === 'Sudah Nikah' && (
                             <>
                                 <div className="col-span-2">
                                     <FormLabel>Tanggal Pernikahan</FormLabel>
                                     <input type="date" name="marriageDate" value={formData.marriageDate} onChange={handleChange} className={inputClass(!!errors.marriageDate)} />
                                 </div>
+                                <div className="col-span-2">
+                                    <FormLabel>Usia Pernikahan</FormLabel>
+                                    <input value={calculateMarriageDuration(formData.marriageDate) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
+                                </div>
                             </>
                         )}
+                        {multiSelectInput('marriageType', 'Jenis Pernikahan', ['Nikah Adat', 'Nikah Gereja', 'Nikah Catatan Sipil', 'Nikah Dinas'], true)}
                         <div className="col-span-2">
-                            {selectInput('baptismStatus', 'Status Baptis', ['Sudah', 'Belum'], true)}
-                        </div>
-                        <div className="col-span-2">
-                            {selectInput('sidiStatus', 'Status Sidi', ['Sudah', 'Belum'], true)}
+                            {selectInput('educationLevel', 'Jenjang Pendidikan', ['SD', 'SMP', 'SMA', 'S1', 'S2', 'S3'], true)}
                         </div>
                         <div className="col-span-2 flex flex-col">
                             <FormLabel required>Nomor Telepon/ WhatsApp Aktif</FormLabel>

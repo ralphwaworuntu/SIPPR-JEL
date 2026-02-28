@@ -76,8 +76,8 @@ const ChartCard = ({ title, subtitle, icon, iconColor, data, className = "" }: {
                         <span className="material-symbols-outlined text-2xl filled">{icon}</span>
                     </div>
                     <div className="min-w-0 pr-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 truncate">{subtitle}</p>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white leading-none tracking-tight truncate">{title}</h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{subtitle}</p>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white leading-none tracking-tight">{title}</h3>
                     </div>
                 </div>
                 <div className="flex bg-slate-50 dark:bg-white/5 rounded-xl p-1 shrink-0">
@@ -113,7 +113,7 @@ const ChartCard = ({ title, subtitle, icon, iconColor, data, className = "" }: {
                             <tbody>
                                 {data.labels.map((label, idx) => (
                                     <tr key={label} className="group/row bg-slate-50/80 dark:bg-white/5 rounded-xl transition-all">
-                                        <td className="py-2.5 pl-3 font-bold text-slate-600 dark:text-slate-400 truncate max-w-[120px] rounded-l-xl border-l-4" style={{ borderColor: isEmpty ? '#f1f5f9' : data.colors[idx] }}>{label}</td>
+                                        <td className="py-2.5 pl-3 font-bold text-slate-600 dark:text-slate-400 rounded-l-xl border-l-4" style={{ borderColor: isEmpty ? '#f1f5f9' : data.colors[idx] }}>{label}</td>
                                         <td className="py-2.5 text-right text-slate-900 dark:text-white font-black pr-3 rounded-r-xl">{data.data[idx]}</td>
                                     </tr>
                                 ))}
@@ -125,14 +125,13 @@ const ChartCard = ({ title, subtitle, icon, iconColor, data, className = "" }: {
 
             {viewType === 'chart' && !isEmpty && (
                 <div className="mt-6 pt-6 border-t border-slate-50 dark:border-white/5 shrink-0 overflow-x-auto custom-scrollbar-h">
-                    <div className="flex gap-4 pb-2">
-                        {data.labels.slice(0, 4).map((l, i) => (
+                    <div className="flex flex-wrap gap-4 pb-2">
+                        {data.labels.map((l, i) => (
                             <div key={l} className="flex items-center gap-2 whitespace-nowrap">
-                                <div className="size-2 rounded-full" style={{ backgroundColor: data.colors[i] }}></div>
+                                <div className="size-2 rounded-full" style={{ backgroundColor: data.colors[i % data.colors.length] }}></div>
                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">{l}</span>
                             </div>
                         ))}
-                        {data.labels.length > 4 && <span className="text-[9px] font-black text-slate-300 uppercase">+{data.labels.length - 4} LAINNYA</span>}
                     </div>
                 </div>
             )}
@@ -176,33 +175,8 @@ const MetricCard = ({ title, value, subValue, trend, gradient, icon, onClick }: 
     </div>
 );
 
-const QuickInsight = ({ title, value, label, icon, color, progress, onClick }: { title: string; value: string | number; label: string; icon: string; color: string; progress?: number; onClick?: () => void }) => (
-    <div
-        onClick={onClick}
-        className={`bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 p-6 rounded-[2.5rem] shadow-card group transition-all duration-500 ${onClick ? 'cursor-pointer hover:scale-[1.02] hover:-translate-y-1' : ''}`}
-    >
-        <div className="flex items-center gap-4 mb-5">
-            <div className={`size-12 rounded-2xl flex items-center justify-center text-white shadow-lg`} style={{ backgroundColor: color }}>
-                <span className="material-symbols-outlined text-2xl">{icon}</span>
-            </div>
-            <div className="min-w-0 pr-2">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 truncate">{title}</p>
-                <h5 className="text-xl font-black text-slate-900 dark:text-white leading-none truncate">{value}</h5>
-            </div>
-        </div>
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">{label}</span>
-                {progress !== undefined && <span className="text-[10px] font-black" style={{ color }}>{progress}%</span>}
-            </div>
-            {progress !== undefined && (
-                <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${progress}%`, backgroundColor: color }}></div>
-                </div>
-            )}
-        </div>
-    </div>
-);
+
+
 
 
 
@@ -246,7 +220,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState<TabKey>('semua');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFamilyForDiakonia, setSelectedFamilyForDiakonia] = useState<Member | null>(null);
-    const [miniMetricIndex, setMiniMetricIndex] = useState(0);
+
     const [showRecentModal, setShowRecentModal] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -284,12 +258,7 @@ const AdminDashboard = () => {
 
 
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setMiniMetricIndex(prev => (prev + 1) % 3);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, []);
+
 
 
     useEffect(() => {
@@ -302,8 +271,7 @@ const AdminDashboard = () => {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
-    const [tableFilter, setTableFilter] = useState({ rayon: '', lingkungan: '' });
-    const [profFilter, setProfFilter] = useState({ skill: '', level: '', willingness: '', contribution: '' });
+
 
     const user = session?.user;
 
@@ -329,14 +297,7 @@ const AdminDashboard = () => {
         });
     }, [members, searchQuery]);
 
-    const addressTableData = useMemo(() => {
-        if (!members) return [];
-        return members.filter(m => {
-            const rMatch = !tableFilter.rayon || m.rayon === tableFilter.rayon;
-            const lMatch = !tableFilter.lingkungan || m.lingkungan === tableFilter.lingkungan;
-            return rMatch && lMatch;
-        });
-    }, [members, tableFilter]);
+
 
     // ─────────────────────────────
     // CHART DATA PER CATEGORY
@@ -463,9 +424,7 @@ const AdminDashboard = () => {
     }, [members]);
 
 
-    const candidates = useMemo(() => {
-        return members.filter(m => (Number(m.familyMembersNonBaptized) || 0) > 0 || (Number(m.familyMembersNonSidi) || 0) > 0);
-    }, [members]);
+
 
     const profAnalytics = useMemo(() => {
         const profs: any[] = [];
@@ -556,14 +515,8 @@ const AdminDashboard = () => {
             levels[cat] = counts;
         });
 
-        // Final Expert List based on filters
-        const filteredExperts = profs.filter(p => {
-            const sMatch = !profFilter.skill || p.category === profFilter.skill;
-            const lMatch = !profFilter.level || p.level === profFilter.level;
-            const wMatch = !profFilter.willingness || (profFilter.willingness === 'Ya' ? p.willingness : !p.willingness);
-            const cMatch = !profFilter.contribution || p.contributions.includes(profFilter.contribution);
-            return sMatch && lMatch && wMatch && cMatch;
-        });
+        // Final Expert List
+        const filteredExperts = profs;
 
         return {
             allProfs: profs,
@@ -575,7 +528,7 @@ const AdminDashboard = () => {
             filteredExperts,
             uniqueSkills: Object.keys(skillCats).sort()
         };
-    }, [members, profFilter]);
+    }, [members]);
 
     // Tab: Komitmen
     const willingnessData = useMemo<ChartDataPoints>(() => {
@@ -742,18 +695,7 @@ const AdminDashboard = () => {
         };
     }, [members]);
 
-    const socialAssistData = useMemo<ChartDataPoints>(() => {
-        const s: Record<string, number> = {};
-        members.forEach(m => {
-            if (m.health_socialAssistance && m.health_socialAssistance !== '-') s[m.health_socialAssistance] = (s[m.health_socialAssistance] || 0) + 1;
-        });
-        return {
-            labels: Object.keys(s),
-            data: Object.values(s),
-            colors: ['#8b5cf6', '#cbd5e1'],
-            type: 'doughnut'
-        };
-    }, [members]);
+
 
     const workingChildrenCount = useMemo(() => members.reduce((acc, m) => acc + (Number(m.education_working) || 0), 0), [members]);
 
@@ -851,7 +793,7 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Data Umum Keluarga</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" : "grid grid-cols-1 gap-6"}>
                     <CountCard title="Total Kepala Keluarga" subtitle="Kepala Keluarga terdaftar" value={stats?.total || 0} icon="home" gradient="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400" />
                     <CountCard title="Total Jemaat" subtitle="Jumlah anggota keluarga" value={stats?.totalSouls || 0} icon="groups" gradient="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400" />
                     <ChartCard title="Rasio Gender" subtitle="Distribusi L/P anggota keluarga" icon="transgender" iconColor="#3b82f6" data={genderData} />
@@ -870,7 +812,7 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Informasi Anggota Keluarga</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6" : "grid grid-cols-1 gap-6 mb-6"}>
                     <ChartCard title="Progress Sakramen" subtitle="Status Baptis Jemaat" icon="water_drop" iconColor="#3b82f6" data={sakramenData} />
                     <ChartCard title="Komposisi Sidi" subtitle="Distribusi L/P Sidi" icon="diversity_1" iconColor="#ec4899" data={sidiCompositionData} />
                     <ChartCard title="Domisili Jemaat" subtitle="Rasio Menetap vs Diaspora" icon="home_pin" iconColor="#10b981" data={residencyData} />
@@ -891,7 +833,7 @@ const AdminDashboard = () => {
                 )}
 
                 {/* 1. Top Scorecards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" : "grid grid-cols-1 gap-6 mb-8"}>
                     <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
                         <div className="absolute right-0 bottom-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                             <span className="material-symbols-outlined text-8xl text-primary">volunteer_activism</span>
@@ -910,7 +852,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* 2. Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8" : "grid grid-cols-1 gap-6 mb-8"}>
                     <ChartCard title="Peta Kontribusi" subtitle="Distribusi bentuk kontribusi" icon="volunteer_activism" iconColor="#6366f1" data={profAnalytics.contributionChart} />
                     <ChartCard title="Top 5 Kategori Keahlian" subtitle="Bidang utama jemaat" icon="award_star" iconColor="#f59e0b" data={profAnalytics.topSkillsChart} />
 
@@ -956,7 +898,7 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Komitmen Pelayanan</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" : "grid grid-cols-1 gap-6"}>
                     <ChartCard title="Minat Pelayanan" subtitle="Kesediaan kepala keluarga" icon="person_check" iconColor="#10b981" data={willingnessData} />
                     <ChartCard title="Area Pelayanan" subtitle="Bidang minat (aggregated)" icon="interests" iconColor="#a78bfa" data={interestAreasData} />
                     <ChartCard title="Bentuk Kontribusi" subtitle="Jenis kontribusi (aggregated)" icon="card_giftcard" iconColor="#f472b6" data={contributionData} />
@@ -973,7 +915,7 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Pendidikan Anak</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" : "grid grid-cols-1 gap-6"}>
                     <ChartCard title="Status Sekolah Anak" subtitle="KK dengan anak sekolah" icon="school" iconColor="#10b981" data={schoolingStatusData} />
                     <ChartCard title="Anak Bersekolah" subtitle="Total anak per jenjang" icon="stairs" iconColor="#3b82f6" data={schoolLevelData} />
                     <ChartCard title="Putus Sekolah" subtitle="Total anak putus sekolah" icon="error" iconColor="#f43f5e" data={dropoutData} />
@@ -991,14 +933,14 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Ekonomi & Aset</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" : "grid grid-cols-1 gap-6"}>
                     <ChartCard title="Pendapatan (KK)" subtitle="Range pendapatan rumah tangga" icon="payments" iconColor="#34d399" data={incomeData} />
                     <ChartCard title="Status Rumah" subtitle="Kepemilikan rumah keluarga" icon="house" iconColor="#60a5fa" data={houseStatusData} />
                     <ChartCard title="Sumber Air" subtitle="Fasilitas sumber air primer" icon="water_drop" iconColor="#0ea5e9" data={waterSourceData} />
                     <ChartCard title="Kepemilikan Usaha" subtitle="Punya usaha produktif?" icon="storefront" iconColor="#4ade80" data={businessData} />
                 </div>
                 {businessData.data[0] > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                    <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6" : "grid grid-cols-1 gap-6 mt-6"}>
                         <ChartCard title="Aset Dominan" subtitle="Kepemilikan aset tertinggi" icon="diamond" iconColor="#10b981" data={assetsData} />
                         <ChartCard title="Omset Usaha" subtitle="Rentang omset bulanan UMKM" icon="trending_up" iconColor="#3b82f6" data={turnoverData} />
                         <ChartCard title="Kendala Usaha" subtitle="Top 5 Kendala UMKM" icon="warning" iconColor="#f43f5e" data={businessIssuesData} />
@@ -1017,13 +959,13 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Kesehatan & Disabilitas</h3>
                     </div>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" : "grid grid-cols-1 gap-6"}>
                     <ChartCard title="Cakupan BPJS" subtitle="Status kepesertaan KK" icon="medical_services" iconColor="#10b981" data={bpjsData} />
                     <ChartCard title="Penyakit Kronis" subtitle="KK dengan riwayat kronis" icon="monitor_heart" iconColor="#ef4444" data={chronicData} />
                     <CountCard title="Sakit Berlanjut" subtitle="30 Hari Terakhir" value={stats?.sick30DaysCount || 0} icon="sick" gradient="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400" />
                     <CountCard title="Pengobatan Rutin" subtitle="Sedang terapi/obat" value={stats?.regularTreatmentCount || 0} icon="medication" gradient="bg-gradient-to-br from-indigo-500/10 to-blue-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                <div className={activeTab === 'semua' ? "grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6" : "grid grid-cols-1 gap-6 mt-6"}>
                     <ChartCard title="Jenis Disabilitas" subtitle="Kategori Disabilitas (Semua)" icon="accessible_forward" iconColor="#3b82f6" data={disabilitiesDistributionData} />
                     <ChartCard title="Top 5 Penyakit Kronis" subtitle="Penyakit Dominan (Semua)" icon="coronavirus" iconColor="#ef4444" data={chronicsDistributionData} />
                 </div>
