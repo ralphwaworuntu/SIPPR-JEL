@@ -284,7 +284,7 @@ const AdminMemberData = () => {
 
             return [
                 // Step 1
-                esc(m.kkNumber), esc(m.nik), esc(m.name), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate), esc(m.bloodType), esc(m.baptismStatus), esc(m.sidiStatus), esc(m.maritalStatus), esc(m.marriageDate || ''), calculateAge(m.marriageDate) || '-', esc(arrStr(m.marriageType)), esc(m.educationLevel || '-'), esc(m.phone), esc(m.lingkungan), esc(m.rayon), esc(m.address), esc(m.city), esc(m.district), esc(m.subdistrict),
+                esc(m.kkNumber), esc(m.nik), esc(m.name), esc(m.gender), esc(m.birthDate), calculateAge(m.birthDate || ''), esc(m.bloodType), esc(m.baptismStatus), esc(m.sidiStatus), esc(m.maritalStatus), esc(m.marriageDate || ''), calculateAge(m.marriageDate || '') || '-', esc(arrStr(m.marriageType)), esc(m.educationLevel || '-'), esc(m.phone), esc(m.lingkungan), esc(m.rayon), esc(m.address), esc(m.city), esc(m.district), esc(m.subdistrict),
                 // Step 2
                 m.familyMembers || 0, m.familyMembersMale || 0, m.familyMembersFemale || 0, m.familyMembersOutside || 0, m.familyMembersSidi || 0, m.familyMembersSidiMale || 0, m.familyMembersSidiFemale || 0, m.familyMembersNonSidi || 0, m.familyMembersNonBaptized || 0, esc(m.diakonia_recipient), esc(m.diakonia_year), esc(m.diakonia_type),
                 // Step 3
