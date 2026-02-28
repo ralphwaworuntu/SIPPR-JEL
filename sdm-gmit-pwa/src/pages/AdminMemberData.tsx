@@ -48,7 +48,7 @@ const AdminMemberData = () => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-    const [tableTab, setTableTab] = useState<'Identitas' | 'Keluarga & Diakonia' | 'Profesi & Pelayanan' | 'Pendidikan' | 'Ekonomi' | 'Kesehatan'>('Identitas');
+    const [tableTab, setTableTab] = useState<'Umum Kepala Keluarga' | 'Umum Anggota Keluarga' | 'Profesi & Pelayanan' | 'Pendidikan' | 'Ekonomi' | 'Kesehatan'>('Umum Kepala Keluarga');
     const [bulkEditField, setBulkEditField] = useState<keyof Member | ''>('');
     const [bulkEditValue, setBulkEditValue] = useState('');
 
@@ -327,7 +327,7 @@ const AdminMemberData = () => {
                                 <span className="material-symbols-outlined text-xl text-white font-icon">upload_file</span>
                                 Import Data
                             </button>
-                            <div className="flex z-[50]">
+                            <div className="relative z-[60]">
                                 <ExportDropdown members={filteredMembers} onExportCSV={handleExportCSV} buttonClassName="flex items-center gap-2 px-5 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all active:scale-95" />
                             </div>
                             <button onClick={() => { setIsEditMode(false); setIsAddModalOpen(true); }} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-primary text-slate-900 font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all active:scale-95">
@@ -524,8 +524,8 @@ const AdminMemberData = () => {
                                         className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/50"
                                     >
                                         <option value="Semua">Semua</option>
-                                        <option value="Lengkap">Valid / Lengkap (&ge;80%)</option>
-                                        <option value="Belum Lengkap">Belum Lengkap</option>
+                                        <option value="Valid">Valid / Lengkap (&ge;80%)</option>
+                                        <option value="Pending">Belum Lengkap</option>
                                     </select>
                                 </div>
                             </div>
@@ -534,7 +534,7 @@ const AdminMemberData = () => {
 
                     {/* Table View Tabs */}
                     <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-none pb-1">
-                        {['Identitas', 'Keluarga & Diakonia', 'Profesi & Pelayanan', 'Pendidikan', 'Ekonomi', 'Kesehatan'].map((tab) => (
+                        {['Umum Kepala Keluarga', 'Umum Anggota Keluarga', 'Pendidikan', 'Kesehatan', 'Profesi & Pelayanan', 'Ekonomi'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setTableTab(tab as any)}
@@ -565,20 +565,181 @@ const AdminMemberData = () => {
                                                     />
                                                 </th>
                                                 {(() => {
-                                                    const baseCols = [
-                                                        { label: "Nama Lengkap", key: "name", width: "min-w-[250px]" },
-                                                        { label: "Lingkungan", key: "lingkungan", width: "min-w-[100px]" },
-                                                        { label: "Rayon", key: "rayon", width: "min-w-[100px]" }
-                                                    ];
                                                     let cols: any[] = [];
+                                                    const baseCols = [
+                                                        { label: "ID", key: "id", width: "w-24" }
+                                                    ];
+
                                                     switch (tableTab) {
-                                                        case 'Identitas': cols = [...baseCols, { label: "No. KK", key: "kkNumber", width: "min-w-[150px]" }, { label: "NIK", key: "nik", width: "min-w-[150px]" }, { label: "Usia", key: "birthDate", width: "w-20" }, { label: "Gol. Darah", key: "bloodType", width: "w-20" }, { label: "Status Nikah", key: "maritalStatus", width: "min-w-[100px]" }, { label: "Baptis", key: "baptismStatus", width: "w-20" }, { label: "Sidi", key: "sidiStatus", width: "w-20" }, { label: "Telepon", key: "phone", width: "min-w-[120px]" }, { label: "Anggota (KK)", key: "familyMembers", width: "w-24" }, { label: "Kota", key: "city", width: "min-w-[100px]" }, { label: "Alamat", key: "address", width: "min-w-[200px]" }]; break;
-                                                        case 'Keluarga & Diakonia': cols = [...baseCols, { label: "L", key: "familyMembersMale", width: "w-16" }, { label: "P", key: "familyMembersFemale", width: "w-16" }, { label: "Luar Kupang", key: "familyMembersOutside", width: "w-24" }, { label: "Sidi", key: "familyMembersSidi", width: "w-20" }, { label: "Sidi L", key: "familyMembersSidiMale", width: "w-20" }, { label: "Sidi P", key: "familyMembersSidiFemale", width: "w-20" }, { label: "Belum Baptis", key: "familyMembersNonBaptized", width: "w-24" }, { label: "Belum Sidi", key: "familyMembersNonSidi", width: "w-24" }, { label: "Nama Blm Sidi", key: "familyMembersNonSidiNames", width: "min-w-[150px]" }, { label: "Nama Blm Baptis", key: "familyMembersNonBaptizedNames", width: "min-w-[150px]" }, { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[130px]" }]; break;
-                                                        case 'Profesi & Pelayanan': cols = [...baseCols, { label: "Pendidikan", key: "educationLevel", width: "min-w-[120px]" }, { label: "Jurusan", key: "major", width: "min-w-[120px]" }, { label: "Pekerjaan", key: "jobCategory", width: "min-w-[150px]" }, { label: "Jabatan", key: "jobTitle", width: "min-w-[150px]" }, { label: "Tempat Kerja", key: "companyName", width: "min-w-[150px]" }, { label: "Keahlian", key: "skills", width: "min-w-[200px]" }, { label: "Status Relawan", key: "willingnessToServe", width: "min-w-[130px]" }]; break;
-                                                        case 'Pendidikan': cols = [...baseCols, { label: "Status Sekolah", key: "education_schoolingStatus", width: "min-w-[150px]" }, { label: "Total Bersekolah", key: "education_inSchool_sd", width: "min-w-[130px]" }, { label: "Total Putus Sekolah", key: "education_dropout_sd", width: "min-w-[150px]" }, { label: "Total Tidak Sekolah", key: "education_unemployed_sd", width: "min-w-[150px]" }, { label: "Total Bekerja", key: "education_working", width: "min-w-[100px]" }, { label: "Beasiswa", key: "education_hasScholarship", width: "min-w-[100px]" }, { label: "Jenis Beasiswa", key: "education_scholarshipType", width: "min-w-[130px]" }]; break;
-                                                        case 'Ekonomi': cols = [...baseCols, { label: "Pekerjaan KK", key: "economics_headOccupation", width: "min-w-[150px]" }, { label: "Pend. KK", key: "economics_headIncomeRange", width: "min-w-[120px]" }, { label: "Pek. Pasangan", key: "economics_spouseOccupation", width: "min-w-[150px]" }, { label: "Pend. Pasangan", key: "economics_spouseIncomeRange", width: "min-w-[120px]" }, { label: "Pendapatan RT", key: "economics_incomeRange", width: "min-w-[130px]" }, { label: "Total Pengeluaran", key: "economics_expense_food", width: "min-w-[150px]" }, { label: "Usaha UMKM", key: "economics_hasBusiness", width: "min-w-[120px]" }, { label: "Nama Usaha", key: "economics_businessName", width: "min-w-[130px]" }, { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[110px]" }, { label: "IMB", key: "economics_houseIMB", width: "w-20" }, { label: "Sumber Air", key: "economics_waterSource", width: "min-w-[120px]" }]; break;
-                                                        case 'Kesehatan': cols = [...baseCols, { label: "Sakit 30 Hari", key: "health_sick30Days", width: "min-w-[100px]" }, { label: "Sakit Kronis", key: "health_chronicSick", width: "min-w-[100px]" }, { label: "Penyakit Kronis", key: "health_chronicDisease", width: "min-w-[150px]" }, { label: "Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" }, { label: "Jenis Disabilitas", key: "health_disabilityPhysical", width: "min-w-[150px]" }, { label: "Berobat Rutin", key: "health_regularTreatment", width: "min-w-[100px]" }, { label: "BPJS JKN", key: "health_hasBPJS", width: "min-w-[100px]" }, { label: "Non-Peserta BPJS", key: "health_bpjsNonParticipants", width: "min-w-[120px]" }, { label: "BPJS Naker", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[100px]" }, { label: "Bansos", key: "health_socialAssistance", width: "min-w-[100px]" }]; break;
-                                                        default: cols = baseCols;
+                                                        case 'Umum Kepala Keluarga':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nomor Kartu Keluarga", key: "kkNumber", width: "min-w-[150px]" },
+                                                                { label: "NIK", key: "nik", width: "min-w-[150px]" },
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "Jenis Kelamin", key: "gender", width: "w-16" },
+                                                                { label: "Usia", key: "birthDate", width: "w-20" },
+                                                                { label: "Gol. Darah", key: "bloodType", width: "w-20" },
+                                                                { label: "Status Baptis", key: "baptismStatus", width: "w-20" },
+                                                                { label: "Status Sidi", key: "sidiStatus", width: "w-20" },
+                                                                { label: "Status Pernikahan", key: "maritalStatus", width: "min-w-[100px]" },
+                                                                { label: "Tanggal Pernikahan", key: "marriageDate", width: "min-w-[100px]" },
+                                                                { label: "Usia Pernikahan", key: "marriageDate", width: "min-w-[100px]" },
+                                                                { label: "Jenis Pernikahan", key: "marriageType", width: "min-w-[100px]" },
+                                                                { label: "Pendidikan Terakhir", key: "educationLevel", width: "min-w-[120px]" },
+                                                                { label: "Nomor Telepon/ WhatsApp Aktif", key: "phone", width: "min-w-[120px]" },
+                                                                { label: "Lingkungan", key: "lingkungan", width: "w-28" },
+                                                                { label: "Rayon", key: "rayon", width: "w-28" },
+                                                                { label: "Alamat Lengkap", key: "address", width: "min-w-[200px]" },
+                                                                { label: "Kota/Kabupaten", key: "city", width: "min-w-[120px]" },
+                                                                { label: "Kecamatan", key: "district", width: "min-w-[120px]" },
+                                                                { label: "Kelurahan/Desa", key: "subdistrict", width: "min-w-[120px]" }
+                                                            ];
+                                                            break;
+                                                        case 'Umum Anggota Keluarga':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "Jumlah Anggota Keluarga di Kota Kupang", key: "familyMembersCount", width: "w-16" },
+                                                                { label: "L", key: "familyMembersMale", width: "w-16" },
+                                                                { label: "P", key: "familyMembersFemale", width: "w-16" },
+                                                                { label: "Jumlah Anggota Keluarga di Luar Kota Kupang", key: "familyMembersOutsideCount", width: "w-16" },
+                                                                { label: "L", key: "familyMembersOutsideMale", width: "w-16" },
+                                                                { label: "P", key: "familyMembersOutsideFemale", width: "w-16" },
+                                                                { label: "Jumlah Anggota Sidi", key: "familyMembersSidi", width: "w-20" },
+                                                                { label: "Sidi L", key: "familyMembersSidiMale", width: "w-20" },
+                                                                { label: "Sidi P", key: "familyMembersSidiFemale", width: "w-20" },
+                                                                { label: "Jumlah Anggota Belum Sidi", key: "familyMembersNonSidi", width: "w-24" },
+                                                                { label: "Anggota Keluarga Usia 18 Tahun Ke Atas Yang Belum Sidi", key: "familyMembersNonSidiCount", width: "min-w-[150px]" },
+                                                                { label: "Nama Anggota Keluarga Usia 18 Tahun Ke Atas Yang Belum Sidi", key: "familyMembersNonSidiNames", width: "min-w-[150px]" },
+                                                                { label: "Jumlah Anggota Keluarga 0 Tahun Ke Atas Yang Belum Baptis", key: "familyMembersNonBaptized", width: "w-24" },
+                                                                { label: "Nama Anggota Keluarga 0 Tahun Ke Atas Yang Belum Baptis", key: "familyMembersNonBaptizedNames", width: "min-w-[150px]" },
+                                                                { label: "Diakonia", key: "diakonia_recipient", width: "min-w-[130px]" },
+                                                                { label: "Tahun Penerimaan", key: "diakonia_year", width: "min-w-[130px]" },
+                                                                { label: "Jenis Diakonia", key: "diakonia_type", width: "min-w-[130px]" },
+                                                            ];
+                                                            break;
+                                                        case 'Pendidikan':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "L/P", key: "gender", width: "w-16" },
+                                                                { label: "Status Anak Sekolah (7-18 Tahun)", key: "education_schoolingStatus", width: "min-w-[150px]" },
+                                                                { label: "Jumlah Anak Usia 7-18 Tahun", key: "education_inSchool_tk_paud", width: "min-w-[130px]" },
+                                                                { label: "TK/PAUD", key: "education_inSchool_tk_paud", width: "min-w-[130px]" },
+                                                                { label: "SD", key: "education_inSchool_sd", width: "min-w-[130px]" },
+                                                                { label: "SMP", key: "education_inSchool_smp", width: "min-w-[130px]" },
+                                                                { label: "SMA/SMK", key: "education_inSchool_sma_smk", width: "min-w-[130px]" },
+                                                                { label: "Perguruan Tinggi", key: "education_inSchool_university", width: "min-w-[130px]" },
+                                                                { label: "Total Anak Putus Sekolah", key: "education_dropout_tk_paud", width: "min-w-[150px]" },
+                                                                { label: "SD", key: "education_dropout_sd", width: "min-w-[130px]" },
+                                                                { label: "SMP", key: "education_dropout_smp", width: "min-w-[130px]" },
+                                                                { label: "SMA/SMK", key: "education_dropout_sma_smk", width: "min-w-[130px]" },
+                                                                { label: "Perguruan Tinggi", key: "education_dropout_university", width: "min-w-[130px]" },
+                                                                { label: "Total Anak Tamat Sekolah Belum Bekerja", key: "education_notWorking", width: "min-w-[100px]" },
+                                                                { label: "SD", key: "education_notWorking_sd", width: "min-w-[130px]" },
+                                                                { label: "SMP", key: "education_notWorking_smp", width: "min-w-[130px]" },
+                                                                { label: "SMA/SMK", key: "education_notWorking_sma_smk", width: "min-w-[130px]" },
+                                                                { label: "Perguruan Tinggi", key: "education_notWorking_university", width: "min-w-[130px]" },
+                                                                { label: "Total Anak Sudah Bekerja", key: "education_working", width: "min-w-[100px]" },
+                                                                { label: "Beasiswa", key: "education_hasScholarship", width: "min-w-[100px]" },
+                                                                { label: "Penerima Beasiswa Dari Pemerintah", key: "education_scholarship_government", width: "min-w-[130px]" },
+                                                                { label: "Jenis Beasiswa", key: "education_scholarshipType", width: "min-w-[130px]" }
+                                                            ];
+                                                            break;
+                                                        case 'Kesehatan':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "L/P", key: "gender", width: "w-16" },
+                                                                { label: "Anggota Keluarga Sakit 30 Hari Terakhir", key: "health_sick30Days", width: "min-w-[100px]" },
+                                                                { label: "Anggota Keluarga Sakit Menahun", key: "health_sickYearly", width: "min-w-[100px]" },
+                                                                { label: "Pengobatan Teratur Dari Fasilitas Kesehatan", key: "health_regularTreatment", width: "min-w-[150px]" },
+                                                                { label: "BPJS Kesehatan", key: "health_hasBPJS", width: "min-w-[100px]" },
+                                                                { label: "Non-Peserta BPJS Kesehatan", key: "health_bpjsNonParticipants", width: "min-w-[120px]" },
+                                                                { label: "BPJS Ketenagakerjaan", key: "health_hasBPJSKetenagakerjaan", width: "min-w-[100px]" },
+                                                                { label: "Jenis Bantuan Sosial", key: "health_socialAssistance", width: "min-w-[100px]" },
+                                                                { label: "Anggota Keluarga Penyandang Disabilitas", key: "health_hasDisability", width: "min-w-[100px]" },
+                                                                { label: "Disabilitas Fisik", key: "health_disability_physical", width: "min-w-[150px]" },
+                                                                { label: "Disabilitas Intelektual", key: "health_disability_intellectual", width: "min-w-[150px]" },
+                                                                { label: "Disabilitas Mental", key: "health_disability_mental", width: "min-w-[150px]" },
+                                                                { label: "Disabilitas Sensorik", key: "health_disability_sensory", width: "min-w-[150px]" },
+                                                                { label: "Disabilitas Ganda", key: "health_disability_multiple", width: "min-w-[150px]" }
+                                                            ];
+                                                            break;
+                                                        case 'Profesi & Pelayanan':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "L/P", key: "gender", width: "w-16" },
+                                                                { label: "Nama Kepala Keluarga", key: "name", width: "min-w-[150px]" },
+                                                                { label: "Tempat Kerja/Instansi", key: "workplace", width: "min-w-[180px]" },
+                                                                { label: "Jabatan Saat Ini", key: "position", width: "min-w-[150px]" },
+                                                                { label: "Lama Bekerja", key: "yearsExperience", width: "min-w-[120px]" },
+                                                                { label: "Keahlian Spesifik", key: "specificSkills", width: "min-w-[180px]" },
+                                                                { label: "Memilki Keahlian Profesional", key: "hasProfessionalSkill", width: "min-w-[150px]" },
+                                                                { label: "Jenis Keahlian Utama", key: "skillType", width: "min-w-[150px]" },
+                                                                { label: "Tingkat Keahlian", key: "skillLevel", width: "min-w-[150px]" },
+                                                                { label: "Terlibat Dalam Pelayanan", key: "churchServiceInterest", width: "min-w-[180px]" },
+                                                                { label: "Bidang Minat Pelayanan", key: "serviceInterestArea", width: "min-w-[180px]" },
+                                                                { label: "Bentuk Kontribusi", key: "contributionForm", width: "min-w-[180px]" },
+                                                                { label: "Persetujuan Bergabung Komunitas", key: "communityConsent", width: "min-w-[150px]" }
+                                                            ];
+                                                            break;
+                                                        case 'Ekonomi':
+                                                            cols = [
+                                                                ...baseCols,
+                                                                { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
+                                                                { label: "L/P", key: "gender", width: "w-16" },
+                                                                { label: "Pekerjaan Utama Kepala Keluarga", key: "economics_headOccupation", width: "min-w-[150px]" },
+                                                                { label: "Pendapatan Utama Kepala Keluarga", key: "economics_headIncomeRange", width: "min-w-[120px]" },
+                                                                { label: "Pekerjaan Utama Istri/Suami", key: "economics_spouseOccupation", width: "min-w-[150px]" },
+                                                                { label: "Pendapatan Utama Istri/Suami", key: "economics_spouseIncomeRange", width: "min-w-[120px]" },
+                                                                { label: "Total Pendapatan Rumah Tangga", key: "economics_incomeRange", width: "min-w-[130px]" },
+                                                                { label: "Konsumsi Pangan", key: "economics_expense_food", width: "min-w-[150px]" },
+                                                                { label: "Konsumsi Dasar Non-Pangan 1", key: "economics_expense_utilities", width: "min-w-[150px]" },
+                                                                { label: "Kebutuhan Dasar Non-Pangan 2", key: "economics_expense_nonPanganII", width: "min-w-[150px]" },
+                                                                { label: "Beban Pinjaman Bank/Koperasi", key: "economics_expense_loan", width: "min-w-[150px]" },
+                                                                { label: "Pendidikan & Kesehatan", key: "economics_expense_education", width: "min-w-[150px]" },
+                                                                { label: "Kebutuhan Lainnya", key: "economics_expense_other", width: "min-w-[150px]" },
+                                                                { label: "Kebutuhan Tak Terduga", key: "economics_expense_unexpected", width: "min-w-[150px]" },
+                                                                { label: "Kebutuhan Peribadatan", key: "economics_expense_worship", width: "min-w-[150px]" },
+                                                                { label: "Total Pengeluaran Rumah Tangga", key: "economics_expense_total", width: "min-w-[150px]" },
+                                                                { label: "Sisa Pendapatan Rumah Tangga", key: "economics_income_net", width: "min-w-[150px]" },
+                                                                { label: "Usaha Ekonomi Produktif", key: "economics_hasBusiness", width: "min-w-[120px]" },
+                                                                { label: "Nama Jenis Usaha/Brand", key: "economics_businessName", width: "min-w-[150px]" },
+                                                                { label: "Jenis Usaha", key: "economics_businessType", width: "min-w-[150px]" },
+                                                                { label: "Lama Usaha Berjalan", key: "economics_businessDuration", width: "min-w-[120px]" },
+                                                                { label: "Status Usaha", key: "economics_businessStatus", width: "min-w-[120px]" },
+                                                                { label: "Lokasi Usaha", key: "economics_businessLocation", width: "min-w-[130px]" },
+                                                                { label: "Jumlah Tenaga Kerja", key: "economics_businessEmployeeCount", width: "min-w-[100px]" },
+                                                                { label: "Modal Awal Usaha", key: "economics_businessCapital", width: "min-w-[150px]" },
+                                                                { label: "Rata-rata Omset Per Bulan", key: "economics_businessTurnover", width: "min-w-[150px]" },
+                                                                { label: "Izin Usaha", key: "economics_businessPermit", width: "min-w-[150px]" },
+                                                                { label: "Cara Pemasaran Utama", key: "economics_businessMarketing", width: "min-w-[150px]" },
+                                                                { label: "Wilayah Pemasaran", key: "economics_businessMarketArea", width: "min-w-[130px]" },
+                                                                { label: "Tantangan Utama Usaha", key: "economics_businessIssues", width: "min-w-[180px]" },
+                                                                { label: "Dukungan Utama Yang Dibutuhkan Saat Ini", key: "economics_businessNeeds", width: "min-w-[180px]" },
+                                                                { label: "Kesediaan Berbagi Ilmu Berusaha", key: "economics_businessSharing", width: "min-w-[150px]" },
+                                                                { label: "Minat Mengikuti Pelatihan Kewirausahaan", key: "economics_businessTraining", width: "min-w-[150px]" },
+                                                                { label: "Status Rumah", key: "economics_houseStatus", width: "min-w-[110px]" },
+                                                                { label: "Tipe Rumah", key: "economics_houseType", width: "min-w-[110px]" },
+                                                                { label: "Memiliki Aset Transportasi/Elektronik/Lahan", key: "economics_hasAssets", width: "min-w-[130px]" },
+                                                                { label: "Motor", key: "economics_asset_motor_qty", width: "w-20" },
+                                                                { label: "Mobil", key: "economics_asset_mobil_qty", width: "w-20" },
+                                                                { label: "Kulkas", key: "economics_asset_kulkas_qty", width: "w-20" },
+                                                                { label: "Laptop/Komputer", key: "economics_asset_laptop_qty", width: "w-20" },
+                                                                { label: "Televisi", key: "economics_asset_tv_qty", width: "w-20" },
+                                                                { label: "Internet/Indihome", key: "economics_asset_internet_qty", width: "w-20" },
+                                                                { label: "Lahan Pertanian", key: "economics_asset_lahan_qty", width: "w-20" },
+                                                                { label: "Total Keseluruhan Aset", key: "economics_totalAssets", width: "min-w-[120px]" },
+                                                                { label: "Status Kepemilikan Tanah", key: "economics_landStatus", width: "min-w-[120px]" },
+                                                                { label: "Jenis Sumber Air Minum Utama", key: "economics_waterSource", width: "min-w-[150px]" },
+                                                                { label: "Daya Listrik Terpasang", key: "economics_electricity_capacities", width: "min-w-[150px]" },
+                                                            ];
+                                                            break;
+                                                        default:
+                                                            cols = [...baseCols, { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" }, { label: "L/P", key: "gender", width: "w-16" }];
                                                     }
                                                     cols.push({ label: "Status", key: "registrationStatus", width: "w-28" });
                                                     cols.push({ label: "Kelengkapan", key: "name", width: "w-20" }); // Metric column
@@ -599,7 +760,7 @@ const AdminMemberData = () => {
                                                         </th>
                                                     ));
                                                 })()}
-                                                <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider text-right">Aksi</th>
+                                                <th className="px-6 py-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase text-right">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -623,130 +784,228 @@ const AdminMemberData = () => {
                                                                 className="rounded text-primary focus:ring-primary bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
                                                             />
                                                         </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.name?.charAt(0) || '?'}</div>
-                                                                <div>
-                                                                    <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
-                                                                    <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                                                        <span>{member.id}</span>
-                                                                        <span className="size-1 rounded-full bg-slate-300"></span>
-                                                                        <span>{member.gender}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">Ling. {member.lingkungan}</span>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">Rayon {member.rayon}</span>
-                                                        </td>
-                                                        {tableTab === 'Identitas' && (
+                                                        {tableTab === 'Umum Kepala Keluarga' && (
                                                             <>
+                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500 font-bold">{member.id}</td>
                                                                 <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.kkNumber || '-'}</td>
                                                                 <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.nik || '-'}</td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.name?.charAt(0) || '?'}</div>
+                                                                        <div>
+                                                                            <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
+                                                                            <p className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Kepala Keluarga</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-6 py-4 text-xs font-bold text-slate-600 dark:text-slate-400">{member.gender === 'Laki-laki' ? 'L' : member.gender === 'Perempuan' ? 'P' : (member.gender || '-')}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{calculateAge(member.birthDate)} Thn</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.bloodType || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.maritalStatus || '-'}</td>
                                                                 <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.baptismStatus === 'Sudah' ? 'bg-green-100 text-green-600 border border-green-200' : 'text-slate-400'}`}>{member.baptismStatus || '-'}</span></td>
                                                                 <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.sidiStatus === 'Sudah' ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'text-slate-400'}`}>{member.sidiStatus || '-'}</span></td>
-                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.phone || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembers || 0} Org</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[100px]">{member.city || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.address || '-'}</td>
-                                                            </>
-                                                        )}
-                                                        {tableTab === 'Keluarga & Diakonia' && (
-                                                            <>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersMale || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersFemale || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutside || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersSidi || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400">{member.familyMembersSidiMale || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-pink-600 dark:text-pink-400">{member.familyMembersSidiFemale || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonBaptized || 0}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonSidi || 0}</td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={(member.familyMembersNonSidiNames || []).join(', ')}>{(member.familyMembersNonSidiNames || []).join(', ') || '-'}</td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={(member.familyMembersNonBaptizedNames || []).join(', ')}>{(member.familyMembersNonBaptizedNames || []).join(', ') || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm">
-                                                                    <div className="flex flex-col gap-1 items-start">
-                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'PENERIMA' : 'TIDAK'}</span>
-                                                                        {member.diakonia_recipient === 'Ya' && <span className="text-[9px] font-medium text-slate-400">{member.diakonia_type} ({member.diakonia_year})</span>}
-                                                                    </div>
-                                                                </td>
-                                                            </>
-                                                        )}
-                                                        {tableTab === 'Profesi & Pelayanan' && (
-                                                            <>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.maritalStatus || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.marriageDate ? new Date(member.marriageDate).toLocaleDateString('id-ID') : '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.marriageDate ? `${calculateAge(member.marriageDate)} Thn` : '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[120px]" title={Array.isArray(member.marriageType) ? member.marriageType.join(', ') : (member.marriageType || '-')}>{Array.isArray(member.marriageType) ? (member.marriageType.join(', ') || '-') : (member.marriageType || '-')}</td>
                                                                 <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.educationLevel || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.major || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{member.jobCategory || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.jobTitle || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.companyName || '-'}</td>
+                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500">{member.phone || '-'}</td>
                                                                 <td className="px-6 py-4">
-                                                                    <div className="flex -space-x-1 overflow-hidden">
-                                                                        {(member.skills || []).slice(0, 3).map((s: string, i: number) => (
-                                                                            <div key={i} className="inline-block size-6 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-600" title={s}>{s[0]}</div>
-                                                                        ))}
-                                                                        {(member.skills || []).length > 3 && <div className="inline-block size-6 rounded-full bg-slate-50 dark:bg-slate-800 border-2 border-white dark:border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-400">+{(member.skills || []).length - 3}</div>}
-                                                                        {(member.skills || []).length === 0 && <span className="text-sm text-slate-400">-</span>}
+                                                                    <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">Ling. {member.lingkungan}</span>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-full border border-slate-200 dark:border-slate-700">Rayon {member.rayon}</span>
+                                                                </td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[200px]">{member.address || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.city || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.district || '-'}</td>
+                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.subdistrict || '-'}</td>
+                                                            </>
+                                                        )}
+                                                        {tableTab !== 'Umum Kepala Keluarga' && (
+                                                            <>
+                                                                <td className="px-6 py-4 text-xs font-mono text-slate-500 font-bold">{member.id}</td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold border border-primary/10 group-hover:border-primary/30 transition-colors">{member.name?.charAt(0) || '?'}</div>
+                                                                        <div>
+                                                                            <p className="text-slate-900 dark:text-white text-sm font-bold">{member.name}</p>
+                                                                            <p className="text-slate-400 text-[10px] font-medium uppercase tracking-wider">Kepala Keluarga</p>
+                                                                        </div>
                                                                     </div>
                                                                 </td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'bg-green-100 text-green-600 border-green-200' : member.willingnessToServe === 'On-demand' ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>{['Aktif', 'Active', 'Ya'].includes(member.willingnessToServe || '') ? 'AKTIF' : member.willingnessToServe === 'On-demand' ? 'ON-DEMAND' : 'UMUM'}</span>
-                                                                </td>
+                                                                {tableTab !== 'Umum Anggota Keluarga' && (
+                                                                    <td className="px-6 py-4 text-xs font-bold text-slate-600 dark:text-slate-400">{member.gender === 'Laki-laki' ? 'L' : member.gender === 'Perempuan' ? 'P' : (member.gender || '-')}</td>
+                                                                )}
+                                                                {tableTab === 'Umum Anggota Keluarga' && (
+                                                                    <>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{(member.familyMembersMale || 0) + (member.familyMembersFemale || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersMale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersFemale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutside || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutsideMale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersOutsideFemale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersSidi || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400">{member.familyMembersSidiMale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-pink-600 dark:text-pink-400">{member.familyMembersSidiFemale || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonSidi || 0}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonSidiCount || 0}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.familyMembersNonSidiNames) ? member.familyMembersNonSidiNames.join(', ') : (member.familyMembersNonSidiNames || '-')}>{Array.isArray(member.familyMembersNonSidiNames) ? (member.familyMembersNonSidiNames.join(', ') || '-') : (member.familyMembersNonSidiNames || '-')}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.familyMembersNonBaptized || 0}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.familyMembersNonBaptizedNames) ? member.familyMembersNonBaptizedNames.join(', ') : (member.familyMembersNonBaptizedNames || '-')}>{Array.isArray(member.familyMembersNonBaptizedNames) ? (member.familyMembersNonBaptizedNames.join(', ') || '-') : (member.familyMembersNonBaptizedNames || '-')}</td>
+                                                                        <td className="px-6 py-4 text-sm">
+                                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.diakonia_recipient === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.diakonia_recipient === 'Ya' ? 'YA' : 'TIDAK'}</span>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.diakonia_year || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.diakonia_type || '-'}</td>
+                                                                    </>
+                                                                )}
+                                                                {tableTab === 'Pendidikan' && (
+                                                                    <>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px] font-bold">{member.education_schoolingStatus || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-emerald-600 font-bold dark:text-emerald-400">{(Number(member.education_inSchool_tk_paud || 0) + Number(member.education_inSchool_sd || 0) + Number(member.education_inSchool_smp || 0) + Number(member.education_inSchool_sma || member.education_inSchool_sma_smk || 0) + Number(member.education_inSchool_university || 0)) || '-'} Org</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_inSchool_tk_paud || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_inSchool_sd || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_inSchool_smp || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_inSchool_sma_smk || member.education_inSchool_sma || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_inSchool_university || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-red-600 font-bold dark:text-red-400 font-bold">{(Number(member.education_dropout_tk_paud || 0) + Number(member.education_dropout_sd || 0) + Number(member.education_dropout_smp || 0) + Number(member.education_dropout_sma || member.education_dropout_sma_smk || 0) + Number(member.education_dropout_university || 0)) || '-'} Org</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_dropout_sd || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_dropout_smp || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_dropout_sma_smk || member.education_dropout_sma || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_dropout_university || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-amber-600 font-bold dark:text-amber-400">{(Number(member.education_unemployed_sd || member.education_notWorking_sd || 0) + Number(member.education_unemployed_smp || member.education_notWorking_smp || 0) + Number(member.education_unemployed_sma || member.education_notWorking_sma_smk || 0) + Number(member.education_unemployed_university || member.education_notWorking_university || 0)) || '-'} Org</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_notWorking_sd || member.education_unemployed_sd || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_notWorking_smp || member.education_unemployed_smp || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_notWorking_sma_smk || member.education_unemployed_sma || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_notWorking_university || member.education_unemployed_university || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm font-bold text-slate-900 dark:text-white font-bold">{member.education_working || '0'} Org</td>
+                                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.education_hasScholarship === 'Ya' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'text-slate-400'}`}>{member.education_hasScholarship === 'Ya' ? 'YA' : '-'}</span></td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.education_scholarship_government || '-'}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[130px] font-bold">{member.education_hasScholarship === 'Ya' ? (member.education_scholarshipType || '-') : '-'}</td>
+                                                                    </>
+                                                                )}
+                                                                {tableTab === 'Kesehatan' && (
+                                                                    <>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.health_sick30Days || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm">
+                                                                            <div className="flex flex-col gap-1">
+                                                                                <span className={`px-2 py-0.5 rounded-full text-[10px] w-fit font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600 border border-red-200' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'ADA' : 'TIDAK'}</span>
+                                                                                {member.health_chronicSick === 'Ya' && <span className="text-[10px] text-slate-500 italic max-w-[150px] truncate" title={Array.isArray(member.health_chronicDisease) ? member.health_chronicDisease.join(', ') : (member.health_chronicDisease || '-')}>{Array.isArray(member.health_chronicDisease) ? (member.health_chronicDisease.join(', ') || '-') : (member.health_chronicDisease || '-')}</span>}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_regularTreatment || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.health_hasBPJS === 'PUNYA' || member.health_hasBPJS === 'Ada' || member.health_hasBPJS === 'Ya' ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'text-slate-400'}`}>{member.health_hasBPJS || '-'}</span></td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={member.health_bpjsNonParticipants || '-'}>{member.health_bpjsNonParticipants || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.health_hasBPJSKetenagakerjaan || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[130px] font-medium" title={member.health_socialAssistance || '-'}>{member.health_socialAssistance || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600 border border-amber-200' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'ADA' : 'TIDAK'}</span></td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.health_disabilityPhysical) ? member.health_disabilityPhysical.join(', ') : (member.health_disabilityPhysical || '-')}>{Array.isArray(member.health_disabilityPhysical) ? (member.health_disabilityPhysical.join(', ') || '-') : (member.health_disabilityPhysical || '-')}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.health_disabilityIntellectual) ? member.health_disabilityIntellectual.join(', ') : (member.health_disabilityIntellectual || '-')}>{Array.isArray(member.health_disabilityIntellectual) ? (member.health_disabilityIntellectual.join(', ') || '-') : (member.health_disabilityIntellectual || '-')}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.health_disabilityMental) ? member.health_disabilityMental.join(', ') : (member.health_disabilityMental || '-')}>{Array.isArray(member.health_disabilityMental) ? (member.health_disabilityMental.join(', ') || '-') : (member.health_disabilityMental || '-')}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.health_disabilitySensory) ? member.health_disabilitySensory.join(', ') : (member.health_disabilitySensory || '-')}>{Array.isArray(member.health_disabilitySensory) ? (member.health_disabilitySensory.join(', ') || '-') : (member.health_disabilitySensory || '-')}</td>
+                                                                        <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.health_disabilityDouble ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'text-slate-400'}`}>{member.health_disabilityDouble ? 'YA' : '-'}</span></td>
+                                                                    </>
+                                                                )}
+                                                                {tableTab === 'Profesi & Pelayanan' && (
+                                                                    <>
+                                                                        {(() => {
+                                                                            const profRecords = Array.isArray(member.professionalFamilyMembers) ? member.professionalFamilyMembers : [];
+                                                                            const headProf = profRecords.find((p: any) => p.name === member.name) || profRecords[0] || {};
+                                                                            return (
+                                                                                <>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{headProf.name || member.name}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{headProf.workplace || member.companyName || '-'}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{headProf.position || member.jobTitle || '-'}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{headProf.yearsExperience || member.yearsOfExperience || '0'} Thn</td>
+                                                                                    <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(headProf.specificSkills) ? headProf.specificSkills.join(', ') : (Array.isArray(member.skills) ? member.skills.join(', ') : '-')}>{Array.isArray(headProf.specificSkills) ? (headProf.specificSkills.join(', ') || '-') : (Array.isArray(member.skills) ? (member.skills.join(', ') || '-') : '-')}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-center">
+                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.hasProfessionalSkill === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{headProf.hasProfessionalSkill === 'Ya' ? 'YA' : 'TIDAK'}</span>
+                                                                                    </td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.skillType || '-'}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.skillLevel || '-'}</td>
+                                                                                    <td className="px-6 py-4 text-sm">
+                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.churchServiceInterest && headProf.churchServiceInterest !== 'Belum bersedia' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'text-slate-400'}`}>{headProf.churchServiceInterest || member.willingnessToServe || '-'}</span>
+                                                                                    </td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[130px]" title={headProf.serviceInterestArea || (Array.isArray(member.interestAreas) ? member.interestAreas.join(', ') : '-')}>{headProf.serviceInterestArea || (Array.isArray(member.interestAreas) ? (member.interestAreas.join(', ') || '-') : '-')}</td>
+                                                                                    <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(headProf.contributionForm) ? headProf.contributionForm.join(', ') : (Array.isArray(member.contributionTypes) ? member.contributionTypes.join(', ') : '-')}>{Array.isArray(headProf.contributionForm) ? (headProf.contributionForm.join(', ') || '-') : (Array.isArray(member.contributionTypes) ? (member.contributionTypes.join(', ') || '-') : '-')}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-center">
+                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.communityConsent ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'text-slate-400'}`}>{headProf.communityConsent ? 'SETUJU' : 'TIDAK'}</span>
+                                                                                    </td>
+                                                                                </>
+                                                                            );
+                                                                        })()}
+                                                                    </>
+                                                                )}
+                                                                {tableTab === 'Ekonomi' && (
+                                                                    <>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.economics_headOccupation || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm font-bold text-emerald-600 dark:text-emerald-400">{member.economics_headIncomeRange || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.economics_spouseOccupation || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm font-bold text-emerald-600 dark:text-emerald-400">{member.economics_spouseIncomeRange || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm font-bold text-blue-600 dark:text-blue-400">{member.economics_incomeRange || '-'}</td>
+                                                                        
+                                                                        {/* Expenses */}
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_food || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_utilities || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_nonPanganII || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_loan || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_education || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_other || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_unexpected || 0)}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_expense_worship || 0)}</td>
+                                                                        
+                                                                        {/* Totals */}
+                                                                        {(() => {
+                                                                            const totalExp = (member.economics_expense_food || 0) + (member.economics_expense_utilities || 0) + (member.economics_expense_nonPanganII || 0) + (member.economics_expense_loan || 0) + (member.economics_expense_education || 0) + (member.economics_expense_other || 0) + (member.economics_expense_unexpected || 0) + (member.economics_expense_worship || 0);
+                                                                            return (
+                                                                                <>
+                                                                                    <td className="px-6 py-4 text-sm font-bold text-red-600 dark:text-red-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalExp)}</td>
+                                                                                    <td className="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-400 italic">Terlampir</td>
+                                                                                </>
+                                                                            );
+                                                                        })()}
+
+                                                                        {/* Business */}
+                                                                        <td className="px-6 py-4 text-sm text-center">
+                                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.economics_hasBusiness === 'Ya' ? 'bg-amber-100 text-amber-600 border border-amber-200' : 'text-slate-400'}`}>{member.economics_hasBusiness === 'Ya' ? 'PUNYA' : 'TIDAK'}</span>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold truncate max-w-[150px]" title={member.economics_businessName || '-'}>{member.economics_businessName || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_businessType || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_businessDuration || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_businessStatus || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_businessLocation || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_businessEmployeeCount || '0'} Org</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.economics_businessCapital ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(member.economics_businessCapital) : '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-emerald-600 font-bold">{member.economics_businessTurnover || '-'}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.economics_businessPermit) ? member.economics_businessPermit.join(', ') : (member.economics_businessPermit || '-')}>{Array.isArray(member.economics_businessPermit) ? (member.economics_businessPermit.join(', ') || '-') : (member.economics_businessPermit || '-')}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.economics_businessMarketing) ? member.economics_businessMarketing.join(', ') : (member.economics_businessMarketing || '-')}>{Array.isArray(member.economics_businessMarketing) ? (member.economics_businessMarketing.join(', ') || '-') : (member.economics_businessMarketing || '-')}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_businessMarketArea || '-'}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[180px]" title={member.economics_businessIssues || '-'}>{member.economics_businessIssues || '-'}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[180px]" title={member.economics_businessNeeds || '-'}>{member.economics_businessNeeds || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium text-center">{member.economics_businessSharing || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium text-center">{member.economics_businessTraining || '-'}</td>
+                                                                        
+                                                                        {/* House & Assets */}
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseType || '-'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-center">
+                                                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.economics_hasAssets === 'Ya' ? 'bg-indigo-100 text-indigo-600 border border-indigo-200' : 'text-slate-400'}`}>{member.economics_hasAssets === 'Ya' ? 'ADA' : 'TIDAK'}</span>
+                                                                        </td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_motor_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_mobil_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_kulkas_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_laptop_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_tv_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_internet_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{member.economics_asset_lahan_qty || '0'}</td>
+                                                                        <td className="px-6 py-4 text-sm font-bold text-indigo-600">{member.economics_totalAssets || '0'} Unit</td>
+                                                                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{member.economics_landStatus || '-'}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.economics_waterSource) ? member.economics_waterSource.join(', ') : (member.economics_waterSource || '-')}>{Array.isArray(member.economics_waterSource) ? (member.economics_waterSource.join(', ') || '-') : (member.economics_waterSource || '-')}</td>
+                                                                        <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(member.economics_electricity_capacities) ? member.economics_electricity_capacities.join(', ') : (member.economics_electricity_capacities || '-')}>{Array.isArray(member.economics_electricity_capacities) ? (member.economics_electricity_capacities.join(', ') || '-') : (member.economics_electricity_capacities || '-')}</td>
+                                                                    </>
+                                                                )}
                                                             </>
                                                         )}
-                                                        {tableTab === 'Pendidikan' && (
-                                                            <>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{member.education_schoolingStatus || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-emerald-600 font-bold dark:text-emerald-400">{((member.education_inSchool_tk_paud || 0) + (member.education_inSchool_sd || 0) + (member.education_inSchool_smp || 0) + (member.education_inSchool_sma || 0) + (member.education_inSchool_university || 0)) || '-'} Org</td>
-                                                                <td className="px-6 py-4 text-sm text-red-600 font-bold dark:text-red-400">{((member.education_dropout_tk_paud || 0) + (member.education_dropout_sd || 0) + (member.education_dropout_smp || 0) + (member.education_dropout_sma || 0) + (member.education_dropout_university || 0)) || '-'} Org</td>
-                                                                <td className="px-6 py-4 text-sm text-amber-600 font-bold dark:text-amber-400">{((member.education_unemployed_sd || 0) + (member.education_unemployed_smp || 0) + (member.education_unemployed_sma || 0) + (member.education_unemployed_university || 0)) || '-'} Org</td>
-                                                                <td className="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-400">{member.education_working || '-'} Org</td>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${member.education_hasScholarship === 'Ya' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'text-slate-400'}`}>{member.education_hasScholarship === 'Ya' ? 'YA' : '-'}</span></td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[130px]">{member.education_hasScholarship === 'Ya' ? (member.education_scholarshipType || '-') : '-'}</td>
-                                                            </>
-                                                        )}
-                                                        {tableTab === 'Ekonomi' && (
-                                                            <>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_headOccupation || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_headIncomeRange || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_spouseOccupation || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm font-medium text-emerald-600">{member.economics_spouseIncomeRange || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm font-medium text-blue-600">{member.economics_incomeRange || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format((member.economics_expense_food || 0) + (member.economics_expense_utilities || 0) + (member.economics_expense_nonPanganII || 0) + (member.economics_expense_loan || 0) + (member.economics_expense_education || 0) + (member.economics_expense_other || 0) + (member.economics_expense_unexpected || 0) + (member.economics_expense_worship || 0))}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_hasBusiness === 'Ya' ? member.economics_businessType || 'Punya Usaha' : 'Tidak Ada'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[130px]">{member.economics_hasBusiness === 'Ya' ? (member.economics_businessName || '-') : '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseStatus || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.economics_houseIMB || '-'}</td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[120px]">{Array.isArray(member.economics_waterSource) ? member.economics_waterSource.join(', ') : (member.economics_waterSource || '-')}</td>
-                                                            </>
-                                                        )}
-                                                        {tableTab === 'Kesehatan' && (
-                                                            <>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_sick30Days || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_chronicSick === 'Ya' ? 'bg-red-100 text-red-600' : 'text-slate-400'}`}>{member.health_chronicSick === 'Ya' ? 'ADA' : '-'}</span></td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={(member.health_chronicDisease || []).join(', ')}>{member.health_chronicSick === 'Ya' ? ((member.health_chronicDisease || []).join(', ') || '-') : '-'}</td>
-                                                                <td className="px-6 py-4 text-sm"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${member.health_hasDisability === 'Ya' ? 'bg-amber-100 text-amber-600' : 'text-slate-400'}`}>{member.health_hasDisability === 'Ya' ? 'ADA' : '-'}</span></td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={[...(member.health_disabilityPhysical || []), ...(member.health_disabilityIntellectual || []), ...(member.health_disabilityMental || []), ...(member.health_disabilitySensory || [])].join(', ')}>{member.health_hasDisability === 'Ya' ? ([...(member.health_disabilityPhysical || []), ...(member.health_disabilityIntellectual || []), ...(member.health_disabilityMental || []), ...(member.health_disabilitySensory || [])].join(', ') || '-') : '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_regularTreatment || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJS || '-'}</td>
-                                                                <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[120px]">{member.health_bpjsNonParticipants || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_hasBPJSKetenagakerjaan || '-'}</td>
-                                                                <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{member.health_socialAssistance || '-'}</td>
-                                                            </>
-                                                        )}
-                                                        <td className="px-6 py-4">
-                                                            {(() => {
-                                                                const c = calculateCompleteness(member);
-                                                                const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
-                                                                    : c.color === 'yellow' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
-                                                                        : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
-                                                                return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
-                                                            })()}
-                                                        </td>
                                                         <td className="px-6 py-4">
                                                             {member.registrationStatus === 'VALIDATED' ? (
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
@@ -759,6 +1018,15 @@ const AdminMemberData = () => {
                                                                     PENDING
                                                                 </span>
                                                             )}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {(() => {
+                                                                const c = calculateCompleteness(member);
+                                                                const bg = c.color === 'green' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                                                                    : c.color === 'amber' ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800'
+                                                                        : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+                                                                return <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${bg}`}>{c.percent}%</span>;
+                                                            })()}
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1129,8 +1397,8 @@ const AdminMemberData = () => {
                                     Referensi Kolom Wajib (Sekilas)
                                 </div>
                                 <div className="max-h-40 overflow-y-auto p-4 text-xs text-slate-600 dark:text-slate-400 font-mono leading-relaxed bg-slate-50/50 dark:bg-slate-900/50">
-                                    <p><b>Identitas:</b> Nomor Kartu Keluarga, NIK, Nama Lengkap Kepala Keluarga, Jenis Kelamin, Tanggal Lahir, Nomor Telepon/ WhatsApp Aktif, Lingkungan, Rayon, Alamat Lengkap</p>
-                                    <p className="mt-2"><b>Keluarga:</b> Total Anggota Keluarga, Laki-laki, Perempuan, Di Luar Kota, Sudah Sidi, Sidi Laki-laki, Sidi Perempuan, Belum Baptis, Belum Sidi</p>
+                                    <p><b>Umum Kepala Keluarga:</b> Nomor Kartu Keluarga, NIK, Nama Lengkap Kepala Keluarga, Jenis Kelamin, Tanggal Lahir, Nomor Telepon/ WhatsApp Aktif, Lingkungan, Rayon, Alamat Lengkap</p>
+                                    <p className="mt-2"><b>Umum Anggota Keluarga:</b> Total Anggota Keluarga, Laki-laki, Perempuan, Di Luar Kota, Sudah Sidi, Sidi Laki-laki, Sidi Perempuan, Belum Baptis, Belum Sidi</p>
                                     <p className="mt-2"><b>Diakonia:</b> Penerima Diakonia, Tahun Diakonia, Jenis Diakonia</p>
                                     <p className="mt-2"><b>Profesional:</b> Pendidikan Terakhir, Jurusan, Kategori Pekerjaan, Jabatan, Nama Instansi, Lama Kerja (Tahun), Daftar Keahlian</p>
                                     <p className="mt-2"><b>Pelayanan:</b> Kesediaan Melayani, Minat Pelayanan, Bentuk Kontribusi</p>

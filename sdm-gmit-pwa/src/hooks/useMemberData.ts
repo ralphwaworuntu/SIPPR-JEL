@@ -75,6 +75,11 @@ export interface Member {
     familyMembersNonSidi?: number;
     familyMembersNonSidiNames?: string[];
     familyMembersNonBaptizedNames?: string[];
+    familyMembersCount?: number;
+    familyMembersOutsideCount?: number;
+    familyMembersOutsideMale?: number;
+    familyMembersOutsideFemale?: number;
+    familyMembersNonSidiCount?: number;
 
     // Step 2: Diakonia
     diakonia_recipient?: string;
@@ -104,6 +109,13 @@ export interface Member {
     education_hasScholarship?: string;
     education_scholarshipType?: string;
     education_scholarshipTypeOther?: string;
+    education_inSchool_sma_smk?: number;
+    education_dropout_sma_smk?: number;
+    education_notWorking_sd?: number;
+    education_notWorking_smp?: number;
+    education_notWorking_sma_smk?: number;
+    education_notWorking_university?: number;
+    education_scholarship_government?: string;
 
     // Step 5: Economics
     economics_headOccupation?: string;
@@ -230,8 +242,8 @@ export const calculateCompleteness = (m: Member): { percent: number; label: stri
     if (has(m.willingnessToServe)) filled++;
 
     const percent = Math.round((filled / total) * 100);
-    const label = percent >= 80 ? 'Lengkap' : percent >= 50 ? 'Sebagian' : 'Kurang';
-    const color = percent >= 80 ? 'green' : percent >= 50 ? 'yellow' : 'red';
+    const label = percent >= 80 ? 'Valid' : 'Pending';
+    const color = percent >= 80 ? 'green' : 'amber';
     return { percent, label, color };
 };
 
@@ -336,7 +348,7 @@ export const useMemberData = () => {
         if (filterCompleteness !== "Semua") {
             result = result.filter(m => {
                 const c = calculateCompleteness(m);
-                return filterCompleteness === 'Lengkap' ? c.percent >= 80 : filterCompleteness === 'Belum Lengkap' ? c.percent < 80 : true;
+                return filterCompleteness === 'Valid' ? c.percent >= 80 : filterCompleteness === 'Pending' ? c.percent < 80 : true;
             });
         }
         if (filterDisability !== "Semua") {
@@ -369,7 +381,7 @@ export const useMemberData = () => {
             });
         }
         return result;
-    }, [rawMembers, sortConfig, searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness]);
+    }, [rawMembers, sortConfig, searchTerm, filterLingkungan, filterRayon, filterGender, filterAgeCategory, filterWillingness, filterBusiness, filterCompleteness, filterDisability]);
 
     const handleSort = (key: keyof Member) => {
         let direction: 'asc' | 'desc' = 'asc';

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Step5Economics from '../../form/Step5Economics';
 import Step6Health from '../../form/Step6Health';
+import Step7Consent from '../../form/Step7Consent';
 import { toast } from '../../ui/Toast';
 import { useMemberData } from '../../../hooks/useMemberData';
 
@@ -14,7 +15,7 @@ interface AddMemberFormProps {
     initialData?: any;
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const STEP_TITLES: Record<number, string> = {
     1: 'Data Umum',
@@ -23,6 +24,7 @@ const STEP_TITLES: Record<number, string> = {
     4: 'Kesehatan',
     5: 'Profesi & Pelayanan',
     6: 'Ekonomi & Aset Keluarga',
+    7: 'Review & Persetujuan',
 };
 
 // Reusable form field components
@@ -65,7 +67,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
     const [step, setStep] = useState(1);
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [skillInputs, setSkillInputs] = useState<Record<number, string>>({});
-    const [editingIndex, setEditingIndex] = useState<number | null>(0);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const isLoading = addMutation.isPending || updateMutation.isPending;
 
@@ -117,20 +119,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         willingnessToServe: initialData?.willingnessToServe || '',
         interestAreas: Array.isArray(initialData?.interestAreas) ? initialData.interestAreas : [],
         contributionTypes: Array.isArray(initialData?.contributionTypes) ? initialData.contributionTypes : [],
-        professionalFamilyMembers: Array.isArray(initialData?.professionalFamilyMembers) ? initialData.professionalFamilyMembers : [{
-            name: '',
-            hasProfessionalSkill: '',
-            skillType: '',
-            skillLevel: '',
-            workplace: '',
-            position: '',
-            yearsExperience: '',
-            specificSkills: [],
-            churchServiceInterest: '',
-            serviceInterestArea: '',
-            contributionForm: [],
-            communityConsent: false
-        }],
+        professionalFamilyMembers: Array.isArray(initialData?.professionalFamilyMembers) ? initialData.professionalFamilyMembers : [],
+        agreedToPrivacy: false,
+        dataValidated: false,
 
         // Step 4: Education (Children)
         education_schoolingStatus: initialData?.education_schoolingStatus || '',
@@ -341,14 +332,6 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 if (val === prev.familyMembers) {
                     updates.familyMembersNonBaptized = 0;
                 }
-                const newNonSidiCount = Math.max(0, prev.familyMembers - val);
-                if (newNonSidiCount !== prev.familyMembersNonSidi) {
-                    updates.familyMembersNonSidi = newNonSidiCount;
-                    const currentNames = prev.familyMembersNonSidiNames || [];
-                    if (currentNames.length !== newNonSidiCount) {
-                        updates.familyMembersNonSidiNames = Array.from({ length: newNonSidiCount }, (_, i) => currentNames[i] || '');
-                    }
-                }
                 return updates;
             }
             if (name === 'familyMembersNonBaptized') {
@@ -371,7 +354,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
         if (currentStep === 1) {
             if (!formData.kkNumber) { newErrors.kkNumber = "Nomor Kartu Keluarga wajib diisi"; isValid = false; }
             if (!formData.nik) { newErrors.nik = "NIK wajib diisi"; isValid = false; }
-            if (!formData.fullName) { newErrors.fullName = "Nama Lengkap Kartu Keluarga wajib diisi"; isValid = false; }
+            if (!formData.fullName) { newErrors.fullName = "Nama Lengkap Kepala Keluarga wajib diisi"; isValid = false; }
             if (!formData.gender) { newErrors.gender = "Jenis kelamin wajib dipilih"; isValid = false; }
             if (!formData.dateOfBirth) { newErrors.dateOfBirth = "Tanggal lahir wajib diisi"; isValid = false; }
             if (!formData.phone) { newErrors.phone = "Nomor Telepon/ WhatsApp Aktif wajib diisi"; isValid = false; }
@@ -384,6 +367,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             const maleMembers = Number(formData.familyMembersMale) || 0;
             const femaleMembers = Number(formData.familyMembersFemale) || 0;
             if (totalMembers > 0 && maleMembers + femaleMembers !== totalMembers) {
+                toast.error("Distribusi gender anggota keluarga tidak sesuai total!");
                 isValid = false;
             }
 
@@ -391,12 +375,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             const maleSidi = Number(formData.familyMembersSidiMale) || 0;
             const femaleSidi = Number(formData.familyMembersSidiFemale) || 0;
             if (totalSidi > 0 && maleSidi + femaleSidi !== totalSidi) {
+                toast.error("Distribusi gender anggota Sidi tidak sesuai total!");
                 isValid = false;
             }
 
-            const nonSidiCount = Math.max(0, totalMembers - totalSidi);
+            const nonSidiCount = Number(formData.familyMembersNonSidi) || 0;
             if (nonSidiCount > 0) {
-                if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length !== nonSidiCount) {
+                if (!formData.familyMembersNonSidiNames || formData.familyMembersNonSidiNames.length < nonSidiCount) {
                     isValid = false;
                 } else {
                     for (let i = 0; i < nonSidiCount; i++) {
@@ -406,58 +391,24 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                         }
                     }
                 }
+                if (!isValid) toast.error("Mohon lengkapi nama anggota 18+ yang belum Sidi");
             }
 
-            const nonBaptizedCount = Number(formData.familyMembersNonBaptized) || 0;
-            if (nonBaptizedCount > 0) {
-                if (!formData.familyMembersNonBaptizedNames || formData.familyMembersNonBaptizedNames.length !== nonBaptizedCount) {
-                    isValid = false;
-                } else {
-                    for (let i = 0; i < nonBaptizedCount; i++) {
-                        if (!formData.familyMembersNonBaptizedNames[i] || formData.familyMembersNonBaptizedNames[i].trim() === '') {
-                            isValid = false;
-                            break;
+            if (isValid) {
+                const nonBaptizedCount = Number(formData.familyMembersNonBaptized) || 0;
+                if (nonBaptizedCount > 0) {
+                    if (!formData.familyMembersNonBaptizedNames || formData.familyMembersNonBaptizedNames.length < nonBaptizedCount) {
+                        isValid = false;
+                    } else {
+                        for (let i = 0; i < nonBaptizedCount; i++) {
+                            if (!formData.familyMembersNonBaptizedNames[i] || formData.familyMembersNonBaptizedNames[i].trim() === '') {
+                                isValid = false;
+                                break;
+                            }
                         }
                     }
+                    if (!isValid) toast.error("Mohon lengkapi nama anggota yang belum Baptis");
                 }
-            }
-
-            if (!isValid) toast.error("Ada ketidaksesuaian data jumlah / nama anggota yang wajib diisi!");
-        } else if (currentStep === 5) {
-            const members = formData.professionalFamilyMembers || [];
-            let step3Error = "";
-            if (members.length === 0) {
-                step3Error = "Mohon isi minimal 1 anggota keluarga profesional";
-                isValid = false;
-            } else if (editingIndex !== null) {
-                step3Error = "Mohon klik 'Simpan Anggota Ini' terlebih dahulu sebelum melanjutkan.";
-                isValid = false;
-            } else {
-                for (let i = 0; i < members.length; i++) {
-                    const member = members[i];
-                    if (!member.name) { step3Error = `Mohon isi Nama Anggota Keluarga ke-${i + 1}`; isValid = false; break; }
-                    if (!member.workplace) { step3Error = `Mohon isi Tempat Kerja/Instansi Anggota ke-${i + 1}`; isValid = false; break; }
-                    if (!member.position) { step3Error = `Mohon isi Jabatan Anggota ke-${i + 1}`; isValid = false; break; }
-                    if (!member.yearsExperience) { step3Error = `Mohon pilih Lama Bekerja Anggota ke-${i + 1}`; isValid = false; break; }
-                    if (!member.hasProfessionalSkill) { step3Error = `Mohon pilih apakah Anggota ke-${i + 1} memiliki Keahlian Profesional`; isValid = false; break; }
-
-                    if (member.hasProfessionalSkill === 'Ya') {
-                        if (!member.skillType) { step3Error = `Mohon pilih Jenis Keahlian Anggota ke-${i + 1}`; isValid = false; break; }
-                        if (!member.skillLevel) { step3Error = `Mohon pilih Tingkat Keahlian Anggota ke-${i + 1}`; isValid = false; break; }
-                    }
-
-                    if (!member.churchServiceInterest) { step3Error = `Mohon pilih Kesediaan Terlibat Pelayanan Anggota ke-${i + 1}`; isValid = false; break; }
-
-                    if (member.churchServiceInterest && member.churchServiceInterest !== 'Belum bersedia') {
-                        if (!member.serviceInterestArea) { step3Error = `Mohon pilih Bidang Minat Pelayanan Anggota ke-${i + 1}`; isValid = false; break; }
-                        if (!member.contributionForm || member.contributionForm.length === 0) { step3Error = `Mohon pilih Bentuk Kontribusi Anggota ke-${i + 1}`; isValid = false; break; }
-                    }
-                }
-            }
-            if (step3Error) {
-                toast.error(step3Error);
-                setErrors(newErrors);
-                return false;
             }
         } else if (currentStep === 3) {
             if (!formData.education_schoolingStatus) {
@@ -468,105 +419,15 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     (formData.education_inSchool_tk_paud || 0) +
                     (formData.education_inSchool_sd || 0) +
                     (formData.education_inSchool_smp || 0) +
-                    (formData.education_inSchool_sma || 0);
+                    (formData.education_inSchool_sma || 0) +
+                    (formData.education_inSchool_university || 0);
 
                 if (totalInSchool === 0) {
                     toast.error("Anda memilih 'Ya', mohon isi jumlah anak yang bersekolah (minimal 1)");
                     isValid = false;
                 }
             }
-        } else if (currentStep === 6) {
-            if (!formData.economics_headOccupation) { toast.error("Mohon pilih Pekerjaan Utama Kepala Keluarga"); isValid = false; }
-            else if (formData.economics_headOccupation === 'Lainnya' && !formData.economics_headOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Kepala Keluarga Lainnya"); isValid = false; }
-            else if (formData.economics_spouseOccupation === 'Lainnya' && !formData.economics_spouseOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Istri Lainnya"); isValid = false; }
-            else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga"); isValid = false; }
-            else if (formData.economics_incomeRange === '≥ Rp 6.500.000' && !formData.economics_incomeRangeDetailed) { toast.error("Mohon pilih Detail Range Pendapatan"); isValid = false; }
-            else if (
-                (formData.economics_expense_food < 0) ||
-                (formData.economics_expense_utilities < 0) ||
-                (formData.economics_expense_nonPanganII < 0) ||
-                (formData.economics_expense_loan < 0) ||
-                (formData.economics_expense_education < 0) ||
-                (formData.economics_expense_other < 0) ||
-                (formData.economics_expense_unexpected < 0) ||
-                (formData.economics_expense_worship < 0)
-            ) {
-                toast.error("Pengeluaran tidak boleh negatif"); isValid = false;
-            }
-            else if (!formData.economics_hasBusiness) { toast.error("Mohon pilih status kepemilikan usaha"); isValid = false; }
-            else if (formData.economics_hasBusiness === 'Ya') {
-                if (!formData.economics_businessName) { toast.error("Mohon isi Nama/Jenis Usaha"); isValid = false; }
-                else if (!formData.economics_businessType) { toast.error("Mohon pilih Jenis Usaha"); isValid = false; }
-                else if (formData.economics_businessType === 'Lainnya' && !formData.economics_businessTypeOther) { toast.error("Mohon lengkapi Jenis Usaha lainnya"); isValid = false; }
-                else if (!formData.economics_businessDuration) { toast.error("Mohon pilih Lama Usaha"); isValid = false; }
-                else if (formData.economics_businessDuration === '> 5 tahun' && !formData.economics_businessDurationYears) { toast.error("Mohon isi lama usaha dalam tahun"); isValid = false; }
-                else if (!formData.economics_businessStatus) { toast.error("Mohon pilih Status Usaha"); isValid = false; }
-                else if (formData.economics_businessStatus === 'Lainnya' && !formData.economics_businessStatusOther) { toast.error("Mohon lengkapi Status Usaha lainnya"); isValid = false; }
-                else if (!formData.economics_businessLocation) { toast.error("Mohon pilih Lokasi Usaha"); isValid = false; }
-                else if (formData.economics_businessLocation === 'Lainnya' && !formData.economics_businessLocationOther) { toast.error("Mohon lengkapi Lokasi Usaha lainnya"); isValid = false; }
-                else if (!formData.economics_businessEmployeeCount) { toast.error("Mohon pilih Jumlah Tenaga Kerja"); isValid = false; }
-                else if (formData.economics_businessCapital < 0) { toast.error("Mohon isi Modal Awal Usaha (minimal 0)"); isValid = false; }
-                else if (!formData.economics_businessCapitalSource) { toast.error("Mohon pilih Sumber Modal"); isValid = false; }
-                else if (formData.economics_businessCapitalSource === 'Lainnya' && !formData.economics_businessCapitalSourceOther) { toast.error("Mohon lengkapi Sumber Modal lainnya"); isValid = false; }
-                else if (!formData.economics_businessPermit || formData.economics_businessPermit.length === 0) { toast.error("Mohon pilih Izin Usaha"); isValid = false; }
-                else if (formData.economics_businessPermit.includes('Lainnya') && !formData.economics_businessPermitOther) { toast.error("Mohon lengkapi Izin Usaha lainnya"); isValid = false; }
-                else if (!formData.economics_businessMarketing || formData.economics_businessMarketing.length === 0) { toast.error("Mohon pilih Cara Pemasaran Utama"); isValid = false; }
-                else if (formData.economics_businessMarketing.includes('Lainnya') && !formData.economics_businessMarketingOther) { toast.error("Mohon lengkapi Cara Pemasaran lainnya"); isValid = false; }
-                else if (!formData.economics_businessMarketArea) { toast.error("Mohon pilih Wilayah Pemasaran"); isValid = false; }
-                else if (!formData.economics_businessIssues) { toast.error("Mohon pilih Tantangan Utama"); isValid = false; }
-                else if (formData.economics_businessIssues === 'Lainnya' && !formData.economics_businessIssuesOther) { toast.error("Mohon lengkapi Tantangan Utama lainnya"); isValid = false; }
-                else if (!formData.economics_businessNeeds) { toast.error("Mohon pilih Dukungan yang Dibutuhkan"); isValid = false; }
-                else if (formData.economics_businessNeeds === 'Lainnya' && !formData.economics_businessNeedsOther) { toast.error("Mohon lengkapi Dukungan lainnya"); isValid = false; }
-                else if (!formData.economics_businessSharing) { toast.error("Mohon pilih Kesediaan Berbagi Ilmu"); isValid = false; }
-                else if (!formData.economics_businessTraining) { toast.error("Mohon pilih Minat Pelatihan"); isValid = false; }
-                else if (formData.economics_businessTraining === 'Lainnya' && !formData.economics_businessTrainingOther) { toast.error("Mohon lengkapi Minat Pelatihan lainnya"); isValid = false; }
-            }
-
-            // Home / Asset Check (only check if business valid or not present)
-            if (isValid) {
-                if (!formData.economics_houseStatus) { toast.error("Mohon pilih Status Rumah"); isValid = false; }
-                else if (!formData.economics_houseType) { toast.error("Mohon pilih Tipe Rumah"); isValid = false; }
-                else if (formData.economics_houseType === 'Permanen' && !formData.economics_houseIMB) { toast.error("Mohon pilih Status IMB"); isValid = false; }
-                else if (!formData.economics_hasAssets) { toast.error("Mohon pilih Kepemilikan Aset (Ya/Tidak ada)"); isValid = false; }
-                else if (!formData.economics_landStatus) { toast.error("Mohon pilih Status Kepemilikan Tanah"); isValid = false; }
-                else if (!formData.economics_waterSource || formData.economics_waterSource.length === 0) { toast.error("Mohon pilih Sumber Air Minum Utama"); isValid = false; }
-                else if (!formData.economics_electricity_capacities || formData.economics_electricity_capacities.length === 0) { toast.error("Mohon pilih minimal satu Daya Listrik Terpasang"); isValid = false; }
-                else if (formData.economics_electricity_capacities.length > 0) {
-                    for (const cap of formData.economics_electricity_capacities) {
-                        const key = `economics_electricity_${cap.replace(/\D/g, '')}_qty` as keyof typeof formData;
-                        if (!(formData[key] as number > 0)) {
-                            toast.error(`Mohon isi jumlah meteran untuk daya ${cap}`);
-                            isValid = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (isValid && (formData.economics_electricity_total_cost === undefined || formData.economics_electricity_total_cost < 0)) { toast.error("Mohon isi Total Biaya Listrik Bulanan (minimal 0)"); isValid = false; }
-                else if (formData.economics_hasAssets === 'Ya') {
-                    if (!formData.economics_assets || formData.economics_assets.length === 0) {
-                        toast.error("Mohon isi minimal satu jumlah aset"); isValid = false;
-                    } else {
-                        const allAssetsValid = formData.economics_assets.every((asset: string) => {
-                            const m = {
-                                'Motor': 'economics_asset_motor_qty',
-                                'Mobil': 'economics_asset_mobil_qty',
-                                'Kulkas': 'economics_asset_kulkas_qty',
-                                'Laptop/Komputer': 'economics_asset_laptop_qty',
-                                'Televisi': 'economics_asset_tv_qty',
-                                'Internet/Indihome': 'economics_asset_internet_qty',
-                                'Lahan Pertanian': 'economics_asset_lahan_qty'
-                            }[asset as string];
-                            const val = m && (formData as any)[m];
-                            return val && val > 0;
-                        });
-                        if (!allAssetsValid) {
-                            toast.error(`Mohon isi jumlah masing-masing aset secara lengkap`); isValid = false;
-                        }
-                    }
-                }
-            }
-        } else if (currentStep === 6) {
+        } else if (currentStep === 4) {
             if (!formData.health_sick30Days) { toast.error("Mohon pilih status Sakit 30 Hari Terakhir"); isValid = false; }
             else if (!formData.health_chronicSick) { toast.error("Mohon pilih status Sakit Menahun"); isValid = false; }
             else if (formData.health_chronicSick === 'Ya') {
@@ -585,38 +446,69 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     const hasIntellectual = (formData.health_disabilityIntellectual?.length ?? 0) > 0;
                     const hasMental = (formData.health_disabilityMental?.length ?? 0) > 0;
                     const hasSensory = (formData.health_disabilitySensory?.length ?? 0) > 0;
-
                     const totalKategoriDipilih = (hasPhysical ? 1 : 0) + (hasIntellectual ? 1 : 0) + (hasMental ? 1 : 0) + (hasSensory ? 1 : 0);
 
-                    // 1. Validasi minimal ada data yang diisi
                     if (totalKategoriDipilih === 0) {
                         toast.error("Mohon lengkapi detail kategori disabilitas yang dipilih."); isValid = false;
-                    }
-
-                    // 2. Jika Ganda dicentang, minimal harus 2 kategori
-                    else if (formData.health_disabilityDouble && totalKategoriDipilih < 2) {
+                    } else if (formData.health_disabilityDouble && totalKategoriDipilih < 2) {
                         toast.error("Anda mencentang Disabilitas Ganda, mohon pilih minimal dua kategori disabilitas."); isValid = false;
-                    }
-
-                    // 3. Validasi isian "Lainnya" hanya pada kategori yang memang dipilih
-                    else if (hasPhysical && formData.health_disabilityPhysical.includes('Lainnya') && !formData.health_disabilityPhysicalOther) {
+                    } else if (hasPhysical && formData.health_disabilityPhysical.includes('Lainnya') && !formData.health_disabilityPhysicalOther) {
                         toast.error("Mohon lengkapi keterangan Disabilitas Fisik lainnya"); isValid = false;
-                    }
-                    else if (hasIntellectual && formData.health_disabilityIntellectual.includes('Lainnya') && !formData.health_disabilityIntellectualOther) {
+                    } else if (hasIntellectual && formData.health_disabilityIntellectual.includes('Lainnya') && !formData.health_disabilityIntellectualOther) {
                         toast.error("Mohon lengkapi keterangan Disabilitas Intelektual lainnya"); isValid = false;
-                    }
-                    else if (hasMental && formData.health_disabilityMental.includes('Lainnya') && !formData.health_disabilityMentalOther) {
+                    } else if (hasMental && formData.health_disabilityMental.includes('Lainnya') && !formData.health_disabilityMentalOther) {
                         toast.error("Mohon lengkapi keterangan Disabilitas Mental lainnya"); isValid = false;
-                    }
-                    else if (hasSensory && formData.health_disabilitySensory.includes('Lainnya') && !formData.health_disabilitySensoryOther) {
+                    } else if (hasSensory && formData.health_disabilitySensory.includes('Lainnya') && !formData.health_disabilitySensoryOther) {
                         toast.error("Mohon lengkapi keterangan Disabilitas Sensorik lainnya"); isValid = false;
                     }
                 }
             }
+        } else if (currentStep === 5) {
+            const members = formData.professionalFamilyMembers || [];
+            if (editingIndex !== null) {
+                toast.error("Mohon klik 'Simpan Anggota Ini' terlebih dahulu sebelum melanjutkan.");
+                isValid = false;
+            } else if (members.length > 0) {
+                for (let i = 0; i < members.length; i++) {
+                    const m = members[i];
+                    if (!m.name) { toast.error(`Nama Anggota ${i + 1} wajib diisi`); isValid = false; break; }
+                    if (!m.workplace) { toast.error(`Tempat Kerja Anggota ${i + 1} wajib diisi`); isValid = false; break; }
+                    if (!m.position) { toast.error(`Jabatan Anggota ${i + 1} wajib diisi`); isValid = false; break; }
+                    if (!m.yearsExperience) { toast.error(`Lama Bekerja Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+                    if (!m.churchServiceInterest) { toast.error(`Kesediaan Melayani Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+                    if (m.churchServiceInterest && m.churchServiceInterest !== 'Belum bersedia') {
+                        if (!m.serviceInterestArea) { toast.error(`Minat Pelayanan Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+                        if (!m.contributionForm || m.contributionForm.length === 0) { toast.error(`Bentuk Kontribusi Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+                    }
+                }
+            }
+        } else if (currentStep === 6) {
+            if (!formData.economics_headOccupation) { toast.error("Mohon pilih Pekerjaan Utama Kepala Keluarga"); isValid = false; }
+            else if (formData.economics_headOccupation === 'Lainnya' && !formData.economics_headOccupationOther) { toast.error("Mohon lengkapi Pekerjaan Utama Kepala Keluarga Lainnya"); isValid = false; }
+            else if (!formData.economics_incomeRange) { toast.error("Mohon pilih Range Pendapatan Rumah Tangga"); isValid = false; }
+            else if (!formData.economics_hasBusiness) { toast.error("Mohon pilih status kepemilikan usaha"); isValid = false; }
+            else if (formData.economics_hasBusiness === 'Ya') {
+                if (!formData.economics_businessName) { toast.error("Mohon isi Nama/Jenis Usaha"); isValid = false; }
+                if (!formData.economics_businessType) { toast.error("Mohon pilih Jenis Usaha"); isValid = false; }
+                if (!formData.economics_businessDuration) { toast.error("Mohon pilih Lama Usaha"); isValid = false; }
+                if (!formData.economics_businessStatus) { toast.error("Mohon pilih Status Usaha"); isValid = false; }
+                if (!formData.economics_businessLocation) { toast.error("Mohon pilih Lokasi Usaha"); isValid = false; }
+            }
+
+            if (isValid) {
+                if (!formData.economics_houseStatus) { toast.error("Mohon pilih Status Rumah"); isValid = false; }
+                if (!formData.economics_houseType) { toast.error("Mohon pilih Tipe Rumah"); isValid = false; }
+                if (!formData.economics_hasAssets) { toast.error("Mohon pilih Kepemilikan Aset"); isValid = false; }
+                if (!formData.economics_landStatus) { toast.error("Mohon pilih Status Kepemilikan Tanah"); isValid = false; }
+                if (!formData.economics_waterSource || formData.economics_waterSource.length === 0) { toast.error("Mohon pilih Sumber Air Minum Utama"); isValid = false; }
+                if (!formData.economics_electricity_capacities || formData.economics_electricity_capacities.length === 0) { toast.error("Mohon pilih minimal satu Daya Listrik Terpasang"); isValid = false; }
+            }
+        } else if (currentStep === 7) {
+            if (!formData.agreedToPrivacy) { toast.error("Mohon setujui Pernyataan Privasi untuk melanjutkan."); isValid = false; }
+            else if (!formData.dataValidated) { toast.error("Mohon konfirmasi bahwa Anda telah memvalidasi data."); isValid = false; }
         }
 
         setErrors(newErrors);
-        if (!isValid) toast.error("Mohon lengkapi data yang wajib diisi");
         return isValid;
     };
 
@@ -660,7 +552,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             familyMembersSidiMale: formData.familyMembersSidiMale,
             familyMembersSidiFemale: formData.familyMembersSidiFemale,
             familyMembersNonBaptized: formData.familyMembersNonBaptized,
-            familyMembersNonSidi: Math.max(0, formData.familyMembers - formData.familyMembersSidi),
+            familyMembersNonSidi: formData.familyMembersNonSidi,
             familyMembersNonSidiNames: formData.familyMembersNonSidiNames,
             familyMembersNonBaptizedNames: formData.familyMembersNonBaptizedNames,
             diakonia_recipient: formData.diakonia_recipient,
@@ -688,7 +580,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             education_working: formData.education_working,
             education_hasScholarship: formData.education_hasScholarship,
             education_scholarshipType: formData.education_scholarshipType === 'Beasiswa Lainnya' ? formData.education_scholarshipTypeOther : formData.education_scholarshipType,
-            // Step 5
+            // Step 6: Economics
             economics_headOccupation: formData.economics_headOccupation,
             economics_headOccupationOther: formData.economics_headOccupationOther,
             economics_headIncomeRange: formData.economics_headIncomeRange,
@@ -775,6 +667,9 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             health_disabilityMentalOther: formData.health_disabilityMentalOther,
             health_disabilitySensory: formData.health_disabilitySensory,
             health_disabilitySensoryOther: formData.health_disabilitySensoryOther,
+            professionalFamilyMembers: formData.professionalFamilyMembers,
+            agreedToPrivacy: formData.agreedToPrivacy,
+            dataValidated: formData.dataValidated,
         };
 
         if (initialData) {
@@ -1127,20 +1022,17 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             )}
 
                             <div className="col-span-1 md:col-span-2">
-                                <FormLabel>Belum Sidi (Otomatis)</FormLabel>
-                                <div className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] cursor-not-allowed text-sm font-semibold">
-                                    {Math.max(0, totalMembers - totalSidi)} Orang
-                                </div>
+                                {countSelectInput('familyMembersNonSidi', 'Anggota Keluarga Usia 18+ Belum Sidi', totalMembers)}
                             </div>
 
-                            {Math.max(0, totalMembers - totalSidi) > 0 && (
+                            {Number(formData.familyMembersNonSidi) > 0 && (
                                 <div className="col-span-1 md:col-span-2 mt-4 p-4 md:p-5 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 rounded-2xl animate-fade-in space-y-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center shrink-0">
                                             <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-sm">person_add</span>
                                         </div>
                                         <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
-                                            Nama Anggota Belum Sidi
+                                            Nama Anggota 18+ Belum Sidi
                                         </h4>
                                     </div>
                                     <p className="text-xs text-amber-700/80 dark:text-amber-400/80 leading-relaxed mb-4">
@@ -1148,7 +1040,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                     </p>
 
                                     <div className="space-y-3">
-                                        {Array.from({ length: Math.max(0, totalMembers - totalSidi) }).map((_, idx) => (
+                                        {Array.from({ length: Number(formData.familyMembersNonSidi) }).map((_, idx) => (
                                             <div key={`non-sidi-${idx}`} className="relative flex flex-col gap-1.5">
                                                 <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 ml-1">Nama Anggota {idx + 1}</label>
                                                 <input
@@ -2072,6 +1964,17 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             data={formData as any}
                             update={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
                             goToStep={() => { }}
+                        />
+                    </div>
+                )}
+
+                {/* Step 7: Review & Consent */}
+                {step === 7 && (
+                    <div className="w-full">
+                        <Step7Consent
+                            data={formData as any}
+                            update={(newData) => setFormData(prev => ({ ...prev, ...newData }))}
+                            goToStep={(s) => setStep(s)}
                         />
                     </div>
                 )}
