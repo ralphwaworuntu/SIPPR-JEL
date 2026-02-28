@@ -966,10 +966,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 <div className="col-span-2">
                                     <FormLabel>Usia Pernikahan</FormLabel>
                                     <input value={calculateMarriageDuration(formData.marriageDate) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
-                                </div>
+                                </div >
                             </>
                         )}
-                        {multiSelectInput('marriageType', 'Jenis Pernikahan', ['Nikah Adat', 'Nikah Gereja', 'Nikah Catatan Sipil', 'Nikah Dinas'], true)}
+                        {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(formData.maritalStatus) && (
+                            multiSelectInput('marriageType', 'Jenis Pernikahan', ['Nikah Adat', 'Nikah Gereja', 'Nikah Catatan Sipil', 'Nikah Dinas'], true)
+                        )}
                         <div className="col-span-2">
                             {selectInput('educationLevel', 'Jenjang Pendidikan', ['SD', 'SMP', 'SMA', 'S1', 'S2', 'S3'], true)}
                         </div>

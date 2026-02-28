@@ -158,7 +158,9 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                 </>
                             )}
                             <DetailRow label="Status Baptis" value={member.baptismStatus} />
-                            <DetailRow label="Status Sidi" value={member.sidiStatus} />
+                            {member.baptismStatus === 'Sudah' && (
+                                <DetailRow label="Status Sidi" value={member.sidiStatus} />
+                            )}
                             <DetailRow label="Nomor Telepon / WA" value={member.phone ? `+62 ${member.phone}` : '-'} />
                             <DetailRow label="Lingkungan" value={member.lingkungan} />
                             <DetailRow label="Rayon" value={member.rayon} />
@@ -466,7 +468,7 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                 <DetailRow label="Jenis Rumah" value={member.economics_houseType} />
                                 {member.economics_houseType === 'Permanen' && <DetailRow label="Status IMB" value={member.economics_houseIMB} />}
                                 <DetailRow label="Status Tanah" value={member.economics_landStatus} />
-                                <DetailRow label="Sumber Air" value={member.economics_waterSource} />
+                                <DetailRow label="Sumber Air" value={Array.isArray(member.economics_waterSource) ? member.economics_waterSource.join(', ') : (member.economics_waterSource || '-')} />
 
                                 {Array.isArray(member.economics_electricity_capacities) && member.economics_electricity_capacities.length > 0 && (
                                     <div className="mt-2">

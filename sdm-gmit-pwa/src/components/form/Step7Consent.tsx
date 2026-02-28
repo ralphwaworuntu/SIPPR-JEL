@@ -114,7 +114,9 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <div className="col-span-full h-px bg-blue-100 dark:bg-white/5 my-1"></div>
                             <LabelValue label="Golongan Darah" value={data.bloodType} />
                             <LabelValue label="Status Baptis" value={data.baptismStatus} />
-                            <LabelValue label="Status Sidi" value={data.sidiStatus} />
+                            {data.baptismStatus === 'Sudah' && (
+                                <LabelValue label="Status Sidi" value={data.sidiStatus} />
+                            )}
                             <LabelValue label="Status Pernikahan" value={data.maritalStatus} />
                             {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(data.maritalStatus) && (
                                 <>
