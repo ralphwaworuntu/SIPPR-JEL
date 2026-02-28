@@ -160,7 +160,7 @@ const AdminFamilyData = () => {
                     </div>
                     <div>
                         <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Total Anggota</p>
-                        <p className="text-3xl font-black text-slate-900">{familyMembers.length}</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white">{familyMembers.length}</p>
                     </div>
                 </div>
                 <div className="relative overflow-hidden bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -169,7 +169,7 @@ const AdminFamilyData = () => {
                     </div>
                     <div>
                         <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Siap Pelayanan</p>
-                        <p className="text-3xl font-black text-slate-900">{familyMembers.filter(m => ['Ya', 'Ya, bersedia aktif', 'Ya, bila dibutuhkan', 'Aktif', 'Active'].includes(m.churchServiceInterest)).length}</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white">{familyMembers.filter(m => ['Ya', 'Ya, bersedia aktif', 'Ya, bila dibutuhkan', 'Aktif', 'Active'].includes(m.churchServiceInterest)).length}</p>
                     </div>
                 </div>
                 <div className="relative overflow-hidden bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
@@ -178,7 +178,7 @@ const AdminFamilyData = () => {
                     </div>
                     <div>
                         <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Level Mahir (Lv 3)</p>
-                        <p className="text-3xl font-black text-slate-900">{familyMembers.filter(m => m.skillLevel === '3').length}</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white">{familyMembers.filter(m => m.skillLevel === '3').length}</p>
                     </div>
                 </div>
             </div>
@@ -319,7 +319,7 @@ const AdminFamilyData = () => {
             </div>
 
             {/* Detail Modal */}
-            {selectedMember! && (
+            {selectedMember && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSelectedMember(null)}>
                     <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
