@@ -85,6 +85,7 @@ export const congregants = mysqlTable("congregants", {
     familyMembersNonSidi: int("family_members_non_sidi"),
     familyMembersNonSidiNames: json("family_members_non_sidi_names"), // string[]
     familyMembersNonBaptizedNames: json("family_members_non_baptized_names"), // string[]
+    hasNonSidiAdult18: varchar("has_non_sidi_adult_18", { length: 10 }),
 
     // Step 2: Diakonia
     diakoniaRecipient: varchar("diakonia_recipient", { length: 10 }),
@@ -112,16 +113,19 @@ export const congregants = mysqlTable("congregants", {
 
     // Step 4: Education (Children)
     educationSchoolingStatus: varchar("education_schooling_status", { length: 50 }),
+    educationTotalInSchool: int("education_total_in_school").default(0),
     educationInSchoolTkPaud: int("education_in_school_tk_paud").default(0),
     educationInSchoolSd: int("education_in_school_sd").default(0),
     educationInSchoolSmp: int("education_in_school_smp").default(0),
     educationInSchoolSma: int("education_in_school_sma").default(0),
     educationInSchoolUniversity: int("education_in_school_university").default(0),
+    educationTotalDropout: int("education_total_dropout").default(0),
     educationDropoutTkPaud: int("education_dropout_tk_paud").default(0),
     educationDropoutSd: int("education_dropout_sd").default(0),
     educationDropoutSmp: int("education_dropout_smp").default(0),
     educationDropoutSma: int("education_dropout_sma").default(0),
     educationDropoutUniversity: int("education_dropout_university").default(0),
+    educationTotalUnemployed: int("education_total_unemployed").default(0),
     educationUnemployedSd: int("education_unemployed_sd").default(0),
     educationUnemployedSmp: int("education_unemployed_smp").default(0),
     educationUnemployedSma: int("education_unemployed_sma").default(0),
@@ -175,13 +179,13 @@ export const congregants = mysqlTable("congregants", {
     economicsBusinessMarketing: json("economics_business_marketing"), // string[]
     economicsBusinessMarketingOther: varchar("economics_business_marketing_other", { length: 100 }),
     economicsBusinessMarketArea: varchar("economics_business_market_area", { length: 100 }),
-    economicsBusinessIssues: varchar("economics_business_issues", { length: 255 }),
-    economicsBusinessIssuesOther: varchar("economics_business_issues_other", { length: 100 }),
-    economicsBusinessNeeds: varchar("economics_business_needs", { length: 255 }),
-    economicsBusinessNeedsOther: varchar("economics_business_needs_other", { length: 100 }),
+    economicsBusinessIssues: text("economics_business_issues"),
+    economicsBusinessIssuesOther: text("economics_business_issues_other"),
+    economicsBusinessNeeds: text("economics_business_needs"),
+    economicsBusinessNeedsOther: text("economics_business_needs_other"),
     economicsBusinessSharing: varchar("economics_business_sharing", { length: 10 }),
-    economicsBusinessTraining: varchar("economics_business_training", { length: 255 }),
-    economicsBusinessTrainingOther: varchar("economics_business_training_other", { length: 100 }),
+    economicsBusinessTraining: text("economics_business_training"),
+    economicsBusinessTrainingOther: text("economics_business_training_other"),
 
     // Step 5: Home & Assets
     economicsHouseStatus: varchar("economics_house_status", { length: 50 }),

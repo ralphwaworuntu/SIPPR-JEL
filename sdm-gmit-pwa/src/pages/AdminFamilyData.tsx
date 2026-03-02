@@ -177,8 +177,8 @@ const AdminFamilyData = () => {
                         <span className="material-symbols-outlined text-2xl">psychiatry</span>
                     </div>
                     <div>
-                        <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Level Mahir (Lv 3)</p>
-                        <p className="text-3xl font-black text-slate-900 dark:text-white">{familyMembers.filter(m => m.skillLevel === '3').length}</p>
+                        <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Level Mahir</p>
+                        <p className="text-3xl font-black text-slate-900 dark:text-white">{familyMembers.filter(m => m.skillLevel === 'Mahir').length}</p>
                     </div>
                 </div>
             </div>
@@ -351,7 +351,7 @@ const AdminFamilyData = () => {
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tingkat Keahlian</p>
-                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{selectedMember!.skillLevel ? `Level ${selectedMember!.skillLevel} ${selectedMember!.skillLevel === '1' ? '(Dasar)' : selectedMember!.skillLevel === '2' ? '(Menengah)' : '(Mahir)'}` : '-'}</p>
+                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{selectedMember!.skillLevel || '-'}</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Keahlian Spesifik</p>

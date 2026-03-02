@@ -159,13 +159,18 @@ const FormPage = () => {
                 return true;
             case 5:
                 if (formData.professionalFamilyMembers && formData.professionalFamilyMembers.length > 0) {
-                    const filledMembers = formData.professionalFamilyMembers.filter(m => m.name.trim() !== '' || m.workplace !== '' || m.position !== '');
+                    const filledMembers = formData.professionalFamilyMembers.filter(m => m.name.trim() !== '' || m.workStatus !== '' || m.workplace !== '' || m.position !== '');
                     for (let i = 0; i < filledMembers.length; i++) {
                         const member = filledMembers[i];
                         if (!member.name) return handleValidationError(`willingnessToServe`, `Mohon isi Nama Anggota Keluarga ke-${i + 1}`);
-                        if (!member.workplace) return handleValidationError(`willingnessToServe`, `Mohon isi Tempat Kerja Anggota ke-${i + 1}`);
-                        if (!member.position) return handleValidationError(`willingnessToServe`, `Mohon isi Jabatan Anggota ke-${i + 1}`);
-                        if (!member.yearsExperience) return handleValidationError(`willingnessToServe`, `Mohon pilih Lama Bekerja Anggota ke-${i + 1}`);
+
+                        const isJobless = ['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus || '');
+
+                        if (!isJobless) {
+                            if (!member.workplace) return handleValidationError(`willingnessToServe`, `Mohon isi Tempat Kerja Anggota ke-${i + 1}`);
+                            if (!member.position) return handleValidationError(`willingnessToServe`, `Mohon isi Jabatan Anggota ke-${i + 1}`);
+                            if (!member.yearsExperience) return handleValidationError(`willingnessToServe`, `Mohon pilih Lama Bekerja Anggota ke-${i + 1}`);
+                        }
 
                         if (!member.hasProfessionalSkill) return handleValidationError(`willingnessToServe`, `Mohon pilih apakah Anggota ke-${i + 1} memiliki Keahlian Profesional`);
 

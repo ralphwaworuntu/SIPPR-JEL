@@ -329,9 +329,14 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                             </div>
 
                                             <LabelValue label="Nama Lengkap" value={<span className="font-bold text-rose-700 dark:text-rose-300">{member.name}</span>} fullWidth />
-                                            <LabelValue label="Tempat Kerja/ Instansi" value={member.workplace} />
-                                            <LabelValue label="Jabatan Saat Ini" value={member.position} />
-                                            <LabelValue label="Lama Bekerja" value={member.yearsExperience} />
+                                            <LabelValue label="Status Pekerjaan" value={member.workStatus} />
+                                            {member.workStatus && !['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus) && (
+                                                <>
+                                                    <LabelValue label={member.workStatus === 'Pensiun' ? 'Instansi Terakhir' : 'Tempat Kerja/ Instansi'} value={member.workplace} />
+                                                    <LabelValue label={member.workStatus === 'Pensiun' ? 'Jabatan Terakhir' : 'Jabatan Saat Ini'} value={member.position} />
+                                                    <LabelValue label={member.workStatus === 'Pensiun' ? 'Total Masa Kerja' : 'Lama Bekerja'} value={member.yearsExperience} />
+                                                </>
+                                            )}
                                             <LabelValue label="Keahlian Spesifik" value={member.specificSkills?.join(', ') || '-'} />
 
                                             <div className="col-span-full h-px bg-rose-100 dark:bg-white/5 my-1"></div>

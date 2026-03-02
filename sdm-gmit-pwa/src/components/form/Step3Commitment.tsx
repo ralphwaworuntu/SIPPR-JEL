@@ -31,6 +31,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
             update({
                 professionalFamilyMembers: [{
                     name: data.fullName || '',
+                    workStatus: '',
                     hasProfessionalSkill: '',
                     skillType: '',
                     skillLevel: '',
@@ -113,13 +114,23 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                         {member.name || 'Anggota Tanpa Nama'}
                                     </h4>
                                     <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                        {(member.workplace || member.position) ? (
+                                        {member.workStatus ? (
                                             <span className="flex items-center gap-1">
                                                 <span className="material-symbols-outlined text-[16px]">work</span>
-                                                {member.position}{member.position && member.workplace ? ' di ' : ''}{member.workplace}
+                                                {['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus) ? (
+                                                    <span className="font-medium">{member.workStatus}</span>
+                                                ) : (
+                                                    <>
+                                                        {member.position}{member.position && member.workplace ? ' di ' : ''}{member.workplace}
+                                                        {!member.position && !member.workplace && <span className="italic text-amber-500 font-medium">(Data pekerjaan belum lengkap)</span>}
+                                                    </>
+                                                )}
                                             </span>
                                         ) : (
-                                            <span className="italic">Data pekerjaan belum lengkap</span>
+                                            <span className="italic text-amber-500 font-medium flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[16px]">warning</span>
+                                                Status pekerjaan belum dipilih
+                                            </span>
                                         )}
                                         {member.skillType && (
                                             <>
@@ -166,81 +177,129 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                             <div className="space-y-6">
                                 {/* Identity & Work Section */}
                                 <div className="space-y-4">
-                                    <div className="flex flex-col gap-2 relative z-10">
-                                        <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
-                                            {index === 0 ? 'Nama Kepala Keluarga' : 'Nama Anggota Keluarga'}
-                                            <span className="text-red-500 ml-1 mt-0">*</span>
-                                            <FormTooltip text={index === 0 ? "Nama Kepala Keluarga otomatis terisi dari Step 1." : "Masukkan nama lengkap anggota keluarga."} />
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                className={`${inputClass} ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50 border-dashed cursor-not-allowed opacity-80' : ''}`}
-                                                placeholder="Nama Lengkap"
-                                                type="text"
-                                                value={member.name}
-                                                readOnly={index === 0}
-                                                onChange={(e) => {
-                                                    if (index === 0) return;
-                                                    const newList = [...data.professionalFamilyMembers];
-                                                    newList[index].name = e.target.value;
-                                                    update({ professionalFamilyMembers: newList });
-                                                }}
-                                            />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-2 relative z-10">
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
+                                                {index === 0 ? 'Nama Kepala Keluarga' : 'Nama Anggota Keluarga'}
+                                                <span className="text-red-500 ml-1 mt-0">*</span>
+                                                <FormTooltip text={index === 0 ? "Nama Kepala Keluarga otomatis terisi dari Step 1." : "Masukkan nama lengkap anggota keluarga."} />
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    className={`${inputClass} ${index === 0 ? 'bg-slate-50 dark:bg-slate-800/50 border-dashed cursor-not-allowed opacity-80' : ''}`}
+                                                    placeholder="Nama Lengkap"
+                                                    type="text"
+                                                    value={member.name}
+                                                    readOnly={index === 0}
+                                                    onChange={(e) => {
+                                                        if (index === 0) return;
+                                                        const newList = [...data.professionalFamilyMembers];
+                                                        newList[index].name = e.target.value;
+                                                        update({ professionalFamilyMembers: newList });
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <div className="flex flex-col gap-2 relative z-10">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Tempat Kerja / Instansi<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Nama tempat bekerja saat ini, misal: PT Makmur." /></label>
-                                            <input
-                                                className={inputClass}
-                                                placeholder="Nama Instansi/Perusahaan"
-                                                type="text"
-                                                value={member.workplace || ''}
-                                                onChange={(e) => {
-                                                    const newList = [...data.professionalFamilyMembers];
-                                                    newList[index].workplace = e.target.value;
-                                                    update({ professionalFamilyMembers: newList });
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-2 relative z-10">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Jabatan Saat Ini<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Jabatan di tempat kerja, misal: Guru, Manajer, Staf." /></label>
-                                            <input
-                                                className={inputClass}
-                                                placeholder="Contoh: Staff, Manager"
-                                                type="text"
-                                                value={member.position || ''}
-                                                onChange={(e) => {
-                                                    const newList = [...data.professionalFamilyMembers];
-                                                    newList[index].position = e.target.value;
-                                                    update({ professionalFamilyMembers: newList });
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-2 relative z-10">
-                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Lama Bekerja<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Pilih tentang lama waktu pengalaman kerja pada profesi ini." /></label>
+                                            <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">Status Pekerjaan Saat Ini<span className="text-red-500 ml-1 mt-0">*</span> <FormTooltip text="Pilih status pekerjaan saat ini." /></label>
                                             <div className="relative">
                                                 <select
                                                     className={`${inputClass} appearance-none pr-10`}
-                                                    value={member.yearsExperience || ''}
+                                                    value={member.workStatus || ''}
                                                     onChange={(e) => {
+                                                        const val = e.target.value;
                                                         const newList = [...data.professionalFamilyMembers];
-                                                        newList[index].yearsExperience = e.target.value;
+                                                        newList[index].workStatus = val as any;
+
+                                                        // Clear workplace fields if they should be hidden
+                                                        if (['Mencari Kerja', 'Ibu Rumah Tangga'].includes(val)) {
+                                                            newList[index].workplace = '';
+                                                            newList[index].position = '';
+                                                            newList[index].yearsExperience = '';
+                                                        }
+
                                                         update({ professionalFamilyMembers: newList });
                                                     }}
                                                 >
-                                                    <option value="">Pilih Lama Bekerja...</option>
-                                                    <option value="< 1 Tahun">Kurang dari 1 Tahun</option>
-                                                    <option value="1-3 Tahun">1 - 3 Tahun</option>
-                                                    <option value="3-5 Tahun">3 - 5 Tahun</option>
-                                                    <option value="5-10 Tahun">5 - 10 Tahun</option>
-                                                    <option value="> 10 Tahun">Lebih dari 10 Tahun</option>
+                                                    <option value="">Pilih Status...</option>
+                                                    <option value="Aktif Bekerja">Aktif Bekerja</option>
+                                                    <option value="Wiraswasta">Wiraswasta / Usaha Sendiri</option>
+                                                    <option value="Pensiun">Sudah Pensiun / Purna Bakti</option>
+                                                    <option value="Mencari Kerja">Sedang Mencari Kerja</option>
+                                                    <option value="Ibu Rumah Tangga">Ibu Rumah Tangga</option>
                                                 </select>
                                                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {member.workStatus && !['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus) && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            <div className="flex flex-col gap-2 relative z-10">
+                                                <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
+                                                    {member.workStatus === 'Pensiun' ? 'Instansi Terakhir' : 'Tempat Kerja / Instansi'}
+                                                    <span className="text-red-500 ml-1 mt-0">*</span>
+                                                    <FormTooltip text={member.workStatus === 'Pensiun' ? "Nama instansi terakhir sebelum pensiun." : "Nama tempat bekerja saat ini, misal: PT Makmur."} />
+                                                </label>
+                                                <input
+                                                    className={inputClass}
+                                                    placeholder={member.workStatus === 'Pensiun' ? "Contoh: Pemkot Kupang" : "Nama Instansi/Perusahaan"}
+                                                    type="text"
+                                                    value={member.workplace || ''}
+                                                    onChange={(e) => {
+                                                        const newList = [...data.professionalFamilyMembers];
+                                                        newList[index].workplace = e.target.value;
+                                                        update({ professionalFamilyMembers: newList });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2 relative z-10">
+                                                <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
+                                                    {member.workStatus === 'Pensiun' ? 'Jabatan Terakhir' : 'Jabatan Saat Ini'}
+                                                    <span className="text-red-500 ml-1 mt-0">*</span>
+                                                    <FormTooltip text={member.workStatus === 'Pensiun' ? "Jabatan terakhir sebelum pensiun." : "Jabatan di tempat kerja, misal: Guru, Manajer, Staf."} />
+                                                </label>
+                                                <input
+                                                    className={inputClass}
+                                                    placeholder="Contoh: Staff, Manager"
+                                                    type="text"
+                                                    value={member.position || ''}
+                                                    onChange={(e) => {
+                                                        const newList = [...data.professionalFamilyMembers];
+                                                        newList[index].position = e.target.value;
+                                                        update({ professionalFamilyMembers: newList });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col gap-2 relative z-10">
+                                                <label className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center z-10">
+                                                    {member.workStatus === 'Pensiun' ? 'Total Masa Kerja' : 'Lama Bekerja'}
+                                                    <span className="text-red-500 ml-1 mt-0">*</span>
+                                                    <FormTooltip text="Pilih tentang lama waktu pengalaman kerja pada profesi ini." />
+                                                </label>
+                                                <div className="relative">
+                                                    <select
+                                                        className={`${inputClass} appearance-none pr-10`}
+                                                        value={member.yearsExperience || ''}
+                                                        onChange={(e) => {
+                                                            const newList = [...data.professionalFamilyMembers];
+                                                            newList[index].yearsExperience = e.target.value;
+                                                            update({ professionalFamilyMembers: newList });
+                                                        }}
+                                                    >
+                                                        <option value="">Pilih...</option>
+                                                        <option value="< 1 Tahun">Kurang dari 1 Tahun</option>
+                                                        <option value="1-3 Tahun">1 - 3 Tahun</option>
+                                                        <option value="3-5 Tahun">3 - 5 Tahun</option>
+                                                        <option value="5-10 Tahun">5 - 10 Tahun</option>
+                                                        <option value="> 10 Tahun">Lebih dari 10 Tahun</option>
+                                                    </select>
+                                                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Specific Skills */}
                                     <div className="flex flex-col gap-2 relative z-10">
@@ -403,7 +462,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                                                     value={member.skillLevel || ''}
                                                     onChange={(e) => {
                                                         const newList = [...data.professionalFamilyMembers];
-                                                        newList[index].skillLevel = e.target.value as '1' | '2' | '3';
+                                                        newList[index].skillLevel = e.target.value as 'Dasar' | 'Menengah' | 'Mahir';
                                                         update({ professionalFamilyMembers: newList });
                                                     }}
                                                 >
@@ -566,7 +625,7 @@ const Step3Commitment: React.FC<StepProps> = ({ data, update }) => {
                         onClick={() => {
                             const newList = [...(data.professionalFamilyMembers || [])];
                             newList.push({
-                                name: '', hasProfessionalSkill: '', skillType: '', skillLevel: '', workplace: '', position: '',
+                                name: '', workStatus: '', hasProfessionalSkill: '', skillType: '', skillLevel: '', workplace: '', position: '',
                                 yearsExperience: '', specificSkills: [], churchServiceInterest: '', serviceInterestArea: '',
                                 contributionForm: [], communityConsent: false
                             });

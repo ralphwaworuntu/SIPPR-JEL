@@ -263,12 +263,26 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                                         <span className="material-symbols-outlined text-primary text-sm">person</span> {pfm.name}
                                                     </h5>
                                                     {pfm.hasProfessionalSkill === 'Ya' && (
-                                                        <div className="flex flex-wrap text-xs text-slate-500 gap-1 mt-1 font-medium">
-                                                            <span>{pfm.position || '-'}</span>
-                                                            <span>@</span>
-                                                            <span className="text-slate-700 dark:text-slate-300">{pfm.workplace || '-'}</span>
-                                                            <span className="mx-1">•</span>
-                                                            <span className="text-primary">{pfm.yearsExperience || 0} Thn Exp</span>
+                                                        <div className="flex flex-wrap text-xs text-slate-500 gap-1 mt-1 font-medium items-center">
+                                                            <span className="text-primary font-bold">{pfm.workStatus || '-'}</span>
+                                                            {pfm.position && (
+                                                                <>
+                                                                    <span className="mx-1">•</span>
+                                                                    <span>{pfm.position}</span>
+                                                                </>
+                                                            )}
+                                                            {pfm.workplace && (
+                                                                <>
+                                                                    <span>@</span>
+                                                                    <span className="text-slate-700 dark:text-slate-300">{pfm.workplace}</span>
+                                                                </>
+                                                            )}
+                                                            {pfm.yearsExperience && (
+                                                                <>
+                                                                    <span className="mx-1">•</span>
+                                                                    <span className="text-primary">{pfm.yearsExperience} Exp</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>

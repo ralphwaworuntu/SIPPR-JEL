@@ -16,6 +16,7 @@ const safeJSONParse = (data: any) => {
 // Types moved here for reuse
 export interface ProfessionalFamilyMember {
     name: string;
+    workStatus: string;
     hasProfessionalSkill: string;
     skillType: string;
     skillLevel: string;

@@ -182,6 +182,7 @@ const mapCongregantToMember = (c: any) => ({
     familyMembersNonBaptized: c.familyMembersNonBaptized || 0,
     familyMembersNonSidi: c.familyMembersNonSidi || 0,
     familyMembersNonSidiNames: safeParseJSON(c.familyMembersNonSidiNames),
+    hasNonSidiAdult18: c.hasNonSidiAdult18 || "",
 
     // Step 2: Diakonia
     diakonia_recipient: c.diakoniaRecipient || "",
@@ -193,16 +194,19 @@ const mapCongregantToMember = (c: any) => ({
 
     // Step 4: Education (Children)
     education_schoolingStatus: c.educationSchoolingStatus || "",
+    education_totalInSchool: c.educationTotalInSchool || 0,
     education_inSchool_tk_paud: c.educationInSchoolTkPaud || 0,
     education_inSchool_sd: c.educationInSchoolSd || 0,
     education_inSchool_smp: c.educationInSchoolSmp || 0,
     education_inSchool_sma: c.educationInSchoolSma || 0,
     education_inSchool_university: c.educationInSchoolUniversity || 0,
+    education_totalDropout: c.educationTotalDropout || 0,
     education_dropout_tk_paud: c.educationDropoutTkPaud || 0,
     education_dropout_sd: c.educationDropoutSd || 0,
     education_dropout_smp: c.educationDropoutSmp || 0,
     education_dropout_sma: c.educationDropoutSma || 0,
     education_dropout_university: c.educationDropoutUniversity || 0,
+    education_totalUnemployed: c.educationTotalUnemployed || 0,
     education_unemployed_sd: c.educationUnemployedSd || 0,
     education_unemployed_smp: c.educationUnemployedSmp || 0,
     education_unemployed_sma: c.educationUnemployedSma || 0,
@@ -435,6 +439,7 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
         familyMembersNonSidiNames: data.familyMembersNonSidiNames || [],
         familyMembersNonBaptizedNames: data.familyMembersNonBaptizedNames || [],
+        hasNonSidiAdult18: data.hasNonSidiAdult18 || null,
 
         // Step 2: Diakonia
         diakoniaRecipient: data.diakonia_recipient || null,
@@ -460,16 +465,19 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
 
         // Step 4: Education (Children)
         educationSchoolingStatus: data.education_schoolingStatus || null,
+        educationTotalInSchool: safeInt(data.education_totalInSchool),
         educationInSchoolTkPaud: safeInt(data.education_inSchool_tk_paud),
         educationInSchoolSd: safeInt(data.education_inSchool_sd),
         educationInSchoolSmp: safeInt(data.education_inSchool_smp),
         educationInSchoolSma: safeInt(data.education_inSchool_sma),
         educationInSchoolUniversity: safeInt(data.education_inSchool_university),
+        educationTotalDropout: safeInt(data.education_totalDropout),
         educationDropoutTkPaud: safeInt(data.education_dropout_tk_paud),
         educationDropoutSd: safeInt(data.education_dropout_sd),
         educationDropoutSmp: safeInt(data.education_dropout_smp),
         educationDropoutSma: safeInt(data.education_dropout_sma),
         educationDropoutUniversity: safeInt(data.education_dropout_university),
+        educationTotalUnemployed: safeInt(data.education_totalUnemployed),
         educationUnemployedSd: safeInt(data.education_unemployed_sd),
         educationUnemployedSmp: safeInt(data.education_unemployed_smp),
         educationUnemployedSma: safeInt(data.education_unemployed_sma),

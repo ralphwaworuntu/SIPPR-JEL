@@ -2,9 +2,10 @@
 
 export interface ProfessionalFamilyMember {
     name: string;
+    workStatus: 'Aktif Bekerja' | 'Pensiun' | 'Wiraswasta' | 'Mencari Kerja' | 'Ibu Rumah Tangga' | 'Lainnya' | '';
     hasProfessionalSkill: 'Ya' | 'Tidak' | '';
     skillType: string;
-    skillLevel: '1' | '2' | '3' | '';
+    skillLevel: 'Dasar' | 'Menengah' | 'Mahir' | '';
     workplace: string;
     position: string;
     yearsExperience: string;

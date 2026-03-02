@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import heroBg from '../assets/hero-bg.png';
-import { Play, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 // Declare YT for TypeScript
 declare global {
@@ -138,7 +138,6 @@ export const Hero = () => {
                             className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:-translate-y-1 relative overflow-hidden group flex items-center gap-3"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-2">
-                                <Play size={20} className="fill-white" />
                                 MULAI
                                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform"></span>
                             </span>

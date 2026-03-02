@@ -472,9 +472,13 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 for (let i = 0; i < members.length; i++) {
                     const m = members[i];
                     if (!m.name) { toast.error(`Nama Anggota ${i + 1} wajib diisi`); isValid = false; break; }
-                    if (!m.workplace) { toast.error(`Tempat Kerja Anggota ${i + 1} wajib diisi`); isValid = false; break; }
-                    if (!m.position) { toast.error(`Jabatan Anggota ${i + 1} wajib diisi`); isValid = false; break; }
-                    if (!m.yearsExperience) { toast.error(`Lama Bekerja Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+
+                    const isJobless = ['Mencari Kerja', 'Ibu Rumah Tangga'].includes(m.workStatus || '');
+                    if (!isJobless) {
+                        if (!m.workplace) { toast.error(`Tempat Kerja Anggota ${i + 1} wajib diisi`); isValid = false; break; }
+                        if (!m.position) { toast.error(`Jabatan Anggota ${i + 1} wajib diisi`); isValid = false; break; }
+                        if (!m.yearsExperience) { toast.error(`Lama Bekerja Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
+                    }
                     if (!m.churchServiceInterest) { toast.error(`Kesediaan Melayani Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
                     if (m.churchServiceInterest && m.churchServiceInterest !== 'Belum bersedia') {
                         if (!m.serviceInterestArea) { toast.error(`Minat Pelayanan Anggota ${i + 1} wajib dipilih`); isValid = false; break; }
@@ -1136,13 +1140,23 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                 {member.name || 'Anggota Tanpa Nama'}
                                             </h4>
                                             <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                {(member.workplace || member.position) ? (
+                                                {member.workStatus ? (
                                                     <span className="flex items-center gap-1">
                                                         <span className="material-symbols-outlined text-[16px]">work</span>
-                                                        {member.position}{member.position && member.workplace ? ' di ' : ''}{member.workplace}
+                                                        {['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus) ? (
+                                                            <span className="font-medium">{member.workStatus}</span>
+                                                        ) : (
+                                                            <>
+                                                                {member.position}{member.position && member.workplace ? ' di ' : ''}{member.workplace}
+                                                                {!member.position && !member.workplace && <span className="italic text-amber-500 font-medium">(Data pekerjaan belum lengkap)</span>}
+                                                            </>
+                                                        )}
                                                     </span>
                                                 ) : (
-                                                    <span className="italic">Data pekerjaan belum lengkap</span>
+                                                    <span className="italic text-amber-600 font-medium flex items-center gap-1">
+                                                        <span className="material-symbols-outlined text-base">warning</span>
+                                                        Status pekerjaan belum dipilih
+                                                    </span>
                                                 )}
                                                 {member.skillType && (
                                                     <>
@@ -1202,55 +1216,86 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                 />
                                             </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div className="flex flex-col gap-2">
-                                                    <FormLabel required>Tempat Kerja / Instansi</FormLabel>
-                                                    <input
-                                                        className={inputClass()}
-                                                        placeholder="Nama Instansi/Perusahaan"
-                                                        type="text"
-                                                        value={member.workplace || ''}
-                                                        onChange={(e) => {
-                                                            const newList = [...formData.professionalFamilyMembers];
-                                                            newList[index].workplace = e.target.value;
-                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <FormLabel required>Jabatan Saat Ini</FormLabel>
-                                                    <input
-                                                        className={inputClass()}
-                                                        placeholder="Contoh: Staff, Manager"
-                                                        type="text"
-                                                        value={member.position || ''}
-                                                        onChange={(e) => {
-                                                            const newList = [...formData.professionalFamilyMembers];
-                                                            newList[index].position = e.target.value;
-                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
-                                                        }}
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <FormLabel required>Lama Bekerja</FormLabel>
-                                                    <select
-                                                        className={selectClass()}
-                                                        value={member.yearsExperience || ''}
-                                                        onChange={(e) => {
-                                                            const newList = [...formData.professionalFamilyMembers];
-                                                            newList[index].yearsExperience = e.target.value;
-                                                            setFormData({ ...formData, professionalFamilyMembers: newList });
-                                                        }}
-                                                    >
-                                                        <option value="">Pilih Lama Bekerja...</option>
-                                                        <option value="< 1 Tahun">Kurang dari 1 Tahun</option>
-                                                        <option value="1-3 Tahun">1 - 3 Tahun</option>
-                                                        <option value="3-5 Tahun">3 - 5 Tahun</option>
-                                                        <option value="5-10 Tahun">5 - 10 Tahun</option>
-                                                        <option value="> 10 Tahun">Lebih dari 10 Tahun</option>
-                                                    </select>
-                                                </div>
+                                            <div className="flex flex-col gap-2">
+                                                <FormLabel required>Status Pekerjaan Saat Ini</FormLabel>
+                                                <select
+                                                    className={selectClass()}
+                                                    value={member.workStatus || ''}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const newList = [...formData.professionalFamilyMembers];
+                                                        newList[index].workStatus = val;
+
+                                                        // Clear workplace fields if they should be hidden
+                                                        if (['Mencari Kerja', 'Ibu Rumah Tangga'].includes(val)) {
+                                                            newList[index].workplace = '';
+                                                            newList[index].position = '';
+                                                            newList[index].yearsExperience = '';
+                                                        }
+
+                                                        setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                    }}
+                                                >
+                                                    <option value="">Pilih Status...</option>
+                                                    <option value="Aktif Bekerja">Aktif Bekerja</option>
+                                                    <option value="Wiraswasta">Wiraswasta / Usaha Sendiri</option>
+                                                    <option value="Pensiun">Sudah Pensiun / Purna Bakti</option>
+                                                    <option value="Mencari Kerja">Sedang Mencari Kerja</option>
+                                                    <option value="Ibu Rumah Tangga">Ibu Rumah Tangga</option>
+                                                </select>
                                             </div>
+
+                                            {member.workStatus && !['Mencari Kerja', 'Ibu Rumah Tangga'].includes(member.workStatus) && (
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
+                                                    <div className="flex flex-col gap-2">
+                                                        <FormLabel required>{member.workStatus === 'Pensiun' ? 'Instansi Terakhir' : 'Tempat Kerja / Instansi'}</FormLabel>
+                                                        <input
+                                                            className={inputClass()}
+                                                            placeholder={member.workStatus === 'Pensiun' ? "Contoh: Pemkot Kupang" : "Nama Instansi/Perusahaan"}
+                                                            type="text"
+                                                            value={member.workplace || ''}
+                                                            onChange={(e) => {
+                                                                const newList = [...formData.professionalFamilyMembers];
+                                                                newList[index].workplace = e.target.value;
+                                                                setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col gap-2">
+                                                        <FormLabel required>{member.workStatus === 'Pensiun' ? 'Jabatan Terakhir' : 'Jabatan Saat Ini'}</FormLabel>
+                                                        <input
+                                                            className={inputClass()}
+                                                            placeholder="Contoh: Staff, Manager"
+                                                            type="text"
+                                                            value={member.position || ''}
+                                                            onChange={(e) => {
+                                                                const newList = [...formData.professionalFamilyMembers];
+                                                                newList[index].position = e.target.value;
+                                                                setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col gap-2">
+                                                        <FormLabel required>{member.workStatus === 'Pensiun' ? 'Total Masa Kerja' : 'Lama Bekerja'}</FormLabel>
+                                                        <select
+                                                            className={selectClass()}
+                                                            value={member.yearsExperience || ''}
+                                                            onChange={(e) => {
+                                                                const newList = [...formData.professionalFamilyMembers];
+                                                                newList[index].yearsExperience = e.target.value;
+                                                                setFormData({ ...formData, professionalFamilyMembers: newList });
+                                                            }}
+                                                        >
+                                                            <option value="">Pilih...</option>
+                                                            <option value="< 1 Tahun">Kurang dari 1 Tahun</option>
+                                                            <option value="1-3 Tahun">1 - 3 Tahun</option>
+                                                            <option value="3-5 Tahun">3 - 5 Tahun</option>
+                                                            <option value="5-10 Tahun">5 - 10 Tahun</option>
+                                                            <option value="> 10 Tahun">Lebih dari 10 Tahun</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             <div className="flex flex-col gap-2">
                                                 <FormLabel>Keahlian Spesifik <span className="text-xs font-normal text-slate-500 dark:text-slate-400 opacity-80">(Bisa lebih dari satu)</span></FormLabel>
