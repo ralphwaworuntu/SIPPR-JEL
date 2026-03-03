@@ -107,7 +107,7 @@ const AdminMemberData = () => {
             //Step 4
             "Sakit Dalam 30 Hari Terakhir", "Anggota Keluarga Sakit Menahun", "Pengobatan Teratur Dari Fasilitas Kesehatan", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Jenis Bantuan Sosial?", "Penyandang Disabilitas?", "Disabilitas Ganda?", "Disabilitas Fisik", "Disabilitas Intelektual", "Disabilitas Mental", "Disabilitas Sensorik",
             //Step 5
-            "Nama Kepala Keluarga", "Status Pekerjaan", "Tempat Kerja/Instansi", "Jabatan Saat Ini", "Lama Bekerja", "Keahlian Spesifik", "Memiliki Keahlian Profesional", "Jenis Keahlian Utama", "Tingkat Keahlian", "Terlibat Pelayanan", "Bidang Minat Pelayanan", "Bentuk Kontribusi", "Persetujuan Bergabung Komunitas",
+            "Nama Kepala Keluarga", "Kategori Pekerjaan", "Tempat Kerja/Instansi", "Jabatan Saat Ini", "Lama Bekerja", "Keahlian Spesifik", "Memiliki Keahlian Profesional", "Jenis Keahlian Utama", "Tingkat Keahlian", "Terlibat Pelayanan", "Bidang Minat Pelayanan", "Bentuk Kontribusi", "Persetujuan Bergabung Komunitas",
             //Step 6
             "Pekerjaan Utama Kepala Keluarga", "Pendapatan Utama Kepala Keluarga", "Pekerjaan Utama Istri/Suami", "Pendapatan Istri/Suami", "Total Range Pendapatan Per Bulan", "Konsumsi Pangan", "Kebutuhan Konsumsi Dasar Non-Pangan 1", "Kebutuhan Dasar Non-Pangan 2", "Beban Pinjaman Bank/Koperasi", "Kebutuhan Pendidikan & Kesehatan", "Kebutuhan Lainnya", "Kebutuhan Tak Terduga", "Kebutuhan Peribadatan", "Total Pengeluaran Rumah Tangga Per Bulan", "Punya Usaha Ekonomi Produktif ", "Nama JenisUsaha/Brand", "Jenis Usaha", "Lama Usaha Berjalan", "Status Usaha", "Lokasi Usaha", "Jumlah Tenaga Kerja", "Modal Awal Usaha", "Rata-rata Omset Per Bulan", "Sumber Modal Utama", "Memiliki Izin Usaha", "Cara Pemasaran Utama", "Wilayah Pemasaran", "Tantangan Utama Usaha", "Dukungan Utama Yang Dibutuhkan", "Bersedia Berbagi Ilmu Usaha", "Bersedia Pelatihan Kewirausahaan", "Status Rumah", "Tipe Rumah", "Memiliki Aset  Transportasi/ElektronikLahan", "Punya Aset?", "Motor", "Mobil", "Kulkas", "Laptop/Komputer", "TV", "Internet", "Lahan Pertanian", "Total Keseluruhan Aset", "Status Kepemilikan Tanah", "Jenis Sumber Air Minum Utama", "Daya Listrik 450", "Daya Listrik 900", "Daya Listrik 1200", "Daya Listrik 2200", "Daya Listrik 5000"
         ];
@@ -134,6 +134,10 @@ const AdminMemberData = () => {
     useEffect(() => {
         if (searchParams.get('action') === 'add') {
             setIsAddModalOpen(true);
+            // Remove action param to prevent re-trigger on re-renders
+            const url = new URL(window.location.href);
+            url.searchParams.delete('action');
+            window.history.replaceState({}, '', url.toString());
         }
 
         const tabParam = searchParams.get('tab');
@@ -254,7 +258,7 @@ const AdminMemberData = () => {
             //Step 4
             "Sakit Dalam 30 Hari Terakhir", "Anggota Keluarga Sakit Menahun", "Pengobatan Teratur Dari Fasilitas Kesehatan", "BPJS Kesehatan", "BPJS Ketenagakerjaan", "Jenis Bantuan Sosial?", "Penyandang Disabilitas?", "Disabilitas Ganda?", "Disabilitas Fisik", "Disabilitas Intelektual", "Disabilitas Mental", "Disabilitas Sensorik",
             //Step 5
-            "Nama Kepala Keluarga", "Status Pekerjaan", "Tempat Kerja/Instansi", "Jabatan Saat Ini", "Lama Bekerja", "Keahlian Spesifik", "Memiliki Keahlian Profesional", "Jenis Keahlian Utama", "Tingkat Keahlian", "Terlibat Pelayanan", "Bidang Minat Pelayanan", "Bentuk Kontribusi", "Persetujuan Bergabung Komunitas",
+            "Nama Kepala Keluarga", "Kategori Pekerjaan", "Tempat Kerja/Instansi", "Jabatan Saat Ini", "Lama Bekerja", "Keahlian Spesifik", "Memiliki Keahlian Profesional", "Jenis Keahlian Utama", "Tingkat Keahlian", "Terlibat Pelayanan", "Bidang Minat Pelayanan", "Bentuk Kontribusi", "Persetujuan Bergabung Komunitas",
             //Step 6
             "Pekerjaan Utama Kepala Keluarga", "Pendapatan Utama Kepala Keluarga", "Pekerjaan Utama Istri/Suami", "Pendapatan Istri/Suami", "Total Range Pendapatan Per Bulan", "Konsumsi Pangan", "Kebutuhan Konsumsi Dasar Non-Pangan 1", "Kebutuhan Dasar Non-Pangan 2", "Beban Pinjaman Bank/Koperasi", "Kebutuhan Pendidikan & Kesehatan", "Kebutuhan Lainnya", "Kebutuhan Tak Terduga", "Kebutuhan Peribadatan", "Total Pengeluaran Rumah Tangga Per Bulan", "Punya Usaha Ekonomi Produktif ", "Nama JenisUsaha/Brand", "Jenis Usaha", "Lama Usaha Berjalan", "Status Usaha", "Lokasi Usaha", "Jumlah Tenaga Kerja", "Modal Awal Usaha", "Rata-rata Omset Per Bulan", "Sumber Modal Utama", "Memiliki Izin Usaha", "Cara Pemasaran Utama", "Wilayah Pemasaran", "Tantangan Utama Usaha", "Dukungan Utama Yang Dibutuhkan", "Bersedia Berbagi Ilmu Usaha", "Bersedia Pelatihan Kewirausahaan", "Status Rumah", "Tipe Rumah", "Memiliki Aset  Transportasi/ElektronikLahan", "Punya Aset?", "Motor", "Mobil", "Kulkas", "Laptop/Komputer", "TV", "Internet", "Lahan Pertanian", "Total Keseluruhan Aset", "Status Kepemilikan Tanah", "Jenis Sumber Air Minum Utama", "Daya Listrik 450", "Daya Listrik 900", "Daya Listrik 1200", "Daya Listrik 2200", "Daya Listrik 5000"
         ];
@@ -327,9 +331,7 @@ const AdminMemberData = () => {
                                 <span className="material-symbols-outlined text-xl text-white font-icon">upload_file</span>
                                 Import Data
                             </button>
-                            <div className="relative z-[60]">
-                                <ExportDropdown members={filteredMembers} onExportCSV={handleExportCSV} buttonClassName="flex items-center gap-2 px-5 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all active:scale-95" />
-                            </div>
+                            <ExportDropdown members={filteredMembers} onExportCSV={handleExportCSV} buttonClassName="flex items-center gap-2 px-5 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all active:scale-95" />
                             <button onClick={() => { setIsEditMode(false); setIsAddModalOpen(true); }} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-primary text-slate-900 font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all active:scale-95">
                                 <span className="material-symbols-outlined text-xl font-icon">person_add</span>
                                 TAMBAH JEMAAT
@@ -453,7 +455,7 @@ const AdminMemberData = () => {
                         </div>
 
                         {showAdvancedFilters && (
-                            <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-fade-in-down">
+                            <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 animate-scaleIn">
                                 <div>
                                     <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Jenis Kelamin</label>
                                     <select
@@ -672,7 +674,7 @@ const AdminMemberData = () => {
                                                                 ...baseCols,
                                                                 { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
                                                                 { label: "L/P", key: "gender", width: "w-16" },
-                                                                { label: "Status Pekerjaan", key: "workStatus", width: "min-w-[130px]" },
+                                                                { label: "Kategori Pekerjaan", key: "jobCategory", width: "min-w-[150px]" },
                                                                 { label: "Tempat Kerja/Instansi", key: "workplace", width: "min-w-[180px]" },
                                                                 { label: "Jabatan Saat Ini", key: "position", width: "min-w-[150px]" },
                                                                 { label: "Lama Bekerja", key: "yearsExperience", width: "min-w-[120px]" },
@@ -915,7 +917,7 @@ const AdminMemberData = () => {
                                                                             const headProf = profRecords.find((p: any) => p.name === member.name) || profRecords[0] || {};
                                                                             return (
                                                                                 <>
-                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.workStatus || '-'}</td>
+                                                                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.jobCategory || headProf.workStatus || member.jobCategory || '-'}</td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{headProf.workplace || member.companyName || '-'}</td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">{headProf.position || member.jobTitle || '-'}</td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 font-bold">{headProf.yearsExperience || member.yearsOfExperience || '0'} Thn</td>
@@ -1331,6 +1333,7 @@ const AdminMemberData = () => {
                             if (!isDetailModalOpen) setSelectedMember(null);
                         }}
                         title={isEditMode ? "Edit Data Jemaat" : "Tambah Jemaat Baru"}
+                        maxWidth="max-w-4xl"
                     >
                         <AddMemberForm
                             onClose={() => setIsAddModalOpen(false)}
@@ -1399,13 +1402,12 @@ const AdminMemberData = () => {
                                     Referensi Kolom Wajib (Sekilas)
                                 </div>
                                 <div className="max-h-40 overflow-y-auto p-4 text-xs text-slate-600 dark:text-slate-400 font-mono leading-relaxed bg-slate-50/50 dark:bg-slate-900/50">
-                                    <p><b>Umum Kepala Keluarga:</b> Nomor Kartu Keluarga, NIK, Nama Lengkap Kepala Keluarga, Jenis Kelamin, Tanggal Lahir, Nomor Telepon/ WhatsApp Aktif, Lingkungan, Rayon, Alamat Lengkap</p>
-                                    <p className="mt-2"><b>Umum Anggota Keluarga:</b> Total Anggota Keluarga, Laki-laki, Perempuan, Di Luar Kota, Sudah Sidi, Sidi Laki-laki, Sidi Perempuan, Belum Baptis, Belum Sidi</p>
-                                    <p className="mt-2"><b>Diakonia:</b> Penerima Diakonia, Tahun Diakonia, Jenis Diakonia</p>
-                                    <p className="mt-2"><b>Profesional:</b> Pendidikan Terakhir, Jurusan, Kategori Pekerjaan, Jabatan, Nama Instansi, Lama Kerja (Tahun), Daftar Keahlian</p>
-                                    <p className="mt-2"><b>Pelayanan:</b> Kesediaan Melayani, Minat Pelayanan, Bentuk Kontribusi</p>
-                                    <p className="mt-2"><b>Pendidikan Anak:</b> Status Anak Bersekolah, TK/PAUD (Sekolah)... s/d Universitas (Putus), Anak Sudah Bekerja</p>
-                                    <p className="mt-2"><b>Ekonomi:</b> Pekerjaan KK, Pekerjaan Pasangan, Range Pendapatan, Pengeluaran Pangan... s/d Punya Usaha?, Daftar Aset</p>
+                                    <p><b>Data Umum Kepala Keluarga:</b> Nomor Kartu Keluarga, NIK, Nama Lengkap Kepala Keluarga, Jenis Kelamin, Tanggal Lahir, Usia, Golongan Darah, Status Baptis, Status Sidi, Status Pernikahan, Tanggal Nikah, Usia Pernikahan, Jenis Pernikahan, Pendidikan Terakhir, Nomor Telepon/ WhatsApp Aktif, Lingkungan, Rayon, Alamat Lengkap, Kelurahan/Desa, Kecamatan, Kabupaten/Kota</p>
+                                    <p className="mt-2"><b>Data Umum Anggota Keluarga:</b> Total Anggota Keluarga (Termasuk KK), Laki-laki, Perempuan, Total Anggota Keluarga Di Luar Kota, Jumlah Anggota Sidi, Anggota Keluarga Yang Belum Sidi, Jumlah Anggota Belum Baptis, Penerima Diakonia dari GMIT JEL, Tahun Penerimaan, Jenis Diakonia Yang Diterima</p>
+                                    <p className="mt-2"><b>Data Pendidikan Anggota Keluarga:</b> Status Anak Bersekolah, TK/PAUD (Sekolah)... s/d Universitas (Putus), Anak Sudah Bekerja</p>
+                                    <p className="mt-2"><b>Data Profesional Anggota Keluarga:</b> Pendidikan Terakhir, Jurusan, Kategori Pekerjaan, Jabatan, Nama Instansi, Lama Kerja (Tahun), Daftar Keahlian</p>
+                                    <p className="mt-2"><b>Data Pelayanan Anggota Keluarga:</b> Kesediaan Melayani, Minat Pelayanan, Bentuk Kontribusi</p>
+                                    <p className="mt-2"><b>Data Ekonomi Anggota Keluarga:</b> Pekerjaan Anggota Keluarga, Pekerjaan Pasangan, Range Pendapatan, Pengeluaran Pangan... s/d Punya Usaha?, Daftar Aset</p>
                                     <p className="mt-2 text-primary dark:text-primary">* Disarankan untuk mengunduh template CSV agar tidak ada judul kolom yang terlewat.</p>
                                 </div>
                             </div>

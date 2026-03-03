@@ -18,8 +18,8 @@ interface AddMemberFormProps {
 const TOTAL_STEPS = 7;
 
 const STEP_TITLES: Record<number, string> = {
-    1: 'Data Umum',
-    2: 'Informasi Keluarga',
+    1: 'Data Umum Kepala Keluarga',
+    2: 'Data Umum Anggota Keluarga',
     3: 'Pendidikan',
     4: 'Kesehatan',
     5: 'Profesi & Pelayanan',
@@ -361,6 +361,8 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
             if (!formData.lingkungan) { newErrors.lingkungan = "Lingkungan wajib dipilih"; isValid = false; }
             if (!formData.rayon) { newErrors.rayon = "Rayon wajib dipilih"; isValid = false; }
             if (!formData.address) { newErrors.address = "Alamat Lengkap wajib diisi"; isValid = false; }
+            if (!formData.educationLevel) { newErrors.educationLevel = "Jenjang pendidikan wajib dipilih"; isValid = false; }
+            if (!formData.maritalStatus) { newErrors.maritalStatus = "Status pernikahan wajib dipilih"; isValid = false; }
 
         } else if (currentStep === 2) {
             const totalMembers = Number(formData.familyMembers) || 0;
@@ -703,8 +705,15 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
 
     const handleNext = () => {
         if (validateStep(step)) {
-            if (step < TOTAL_STEPS) setStep(step + 1);
+            if (step < TOTAL_STEPS) {
+                setStep(step + 1);
+                // Scroll to top of the form body
+                const scrollArea = document.getElementById('form-scroll-area');
+                if (scrollArea) scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+            }
             else handleSubmit();
+        } else {
+            toast.error("Mohon lengkapi seluruh kolom yang wajib diisi pada langkah ini.");
         }
     };
 
@@ -787,12 +796,12 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                 </div>
             </div>
 
-            <div className="min-h-[400px] max-h-[55vh] overflow-y-auto custom-scrollbar pr-1">
+            <div id="form-scroll-area" className="flex-1 min-h-[450px] max-h-[60vh] md:max-h-[65vh] overflow-y-auto custom-scrollbar pr-1">
                 {/* Step 1: Identity & Family */}
                 {step === 1 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-                        <div className="col-span-2 flex flex-col">
-                            <FormLabel>Nomor Kartu Keluarga</FormLabel>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in pr-2">
+                        <div className="col-span-2 md:col-span-1 flex flex-col">
+                            <FormLabel required>Nomor Kartu Keluarga</FormLabel>
                             <input name="kkNumber" value={formData.kkNumber} onChange={handleChange} className={inputClass(!!errors.kkNumber)} maxLength={16} placeholder="16 Digit Nomor Kartu Keluarga" />
                             {formData.kkNumber && formData.kkNumber.length > 0 && formData.kkNumber.length < 16 && (
                                 <div className="flex items-center gap-1.5 mt-1.5 text-amber-600 dark:text-amber-400 animate-fadeIn">
@@ -808,7 +817,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             )}
                             <ErrorMsg msg={errors.kkNumber} />
                         </div>
-                        <div className="col-span-2 flex flex-col">
+                        <div className="col-span-2 md:col-span-1 flex flex-col">
                             <FormLabel required>NIK</FormLabel>
                             <input name="nik" value={formData.nik} onChange={handleChange} className={inputClass(!!errors.nik)} maxLength={16} placeholder="16 Digit NIK" />
                             {formData.nik && formData.nik.length > 0 && formData.nik.length < 16 && (
@@ -830,10 +839,10 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             <input name="fullName" value={formData.fullName} onChange={handleChange} className={inputClass(!!errors.fullName)} placeholder="Contoh: Heru Aldi Benu" />
                             <ErrorMsg msg={errors.fullName} />
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             {selectInput('gender', 'Jenis Kelamin', ['Laki-laki', 'Perempuan'], true)}
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             <FormLabel required>Tanggal Lahir</FormLabel>
                             <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className={inputClass(!!errors.dateOfBirth)} />
                             <ErrorMsg msg={errors.dateOfBirth} />
@@ -845,24 +854,24 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                         <div className="col-span-2">
                             {selectInput('bloodType', 'Golongan Darah', ['A', 'B', 'AB', 'O'], false)}
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             {selectInput('baptismStatus', 'Status Baptis', ['Sudah', 'Belum'], true)}
                         </div>
                         {formData.baptismStatus === 'Sudah' && (
-                            <div className="col-span-2">
+                            <div className="col-span-2 md:col-span-1">
                                 {selectInput('sidiStatus', 'Status Sidi', ['Sudah', 'Belum'], true)}
                             </div>
                         )}
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             {selectInput('maritalStatus', 'Status Pernikahan', ['Belum Nikah', 'Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'], true)}
                         </div>
                         {formData.maritalStatus === 'Sudah Nikah' && (
                             <>
-                                <div className="col-span-2">
+                                <div className="col-span-2 md:col-span-1">
                                     <FormLabel>Tanggal Pernikahan</FormLabel>
                                     <input type="date" name="marriageDate" value={formData.marriageDate} onChange={handleChange} className={inputClass(!!errors.marriageDate)} />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-2 md:col-span-1">
                                     <FormLabel>Usia Pernikahan</FormLabel>
                                     <input value={calculateMarriageDuration(formData.marriageDate) || '-'} readOnly className={`${inputClass()} bg-slate-100 dark:bg-slate-800 opacity-70 cursor-not-allowed`} />
                                 </div >
@@ -871,7 +880,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                         {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(formData.maritalStatus) && (
                             multiSelectInput('marriageType', 'Jenis Pernikahan', ['Nikah Adat', 'Nikah Gereja', 'Nikah Catatan Sipil', 'Nikah Dinas'], true)
                         )}
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             {selectInput('educationLevel', 'Jenjang Pendidikan', ['SD', 'SMP', 'SMA', 'S1', 'S2', 'S3'], true)}
                         </div>
                         <div className="col-span-2 flex flex-col">
@@ -894,7 +903,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             )}
                             <ErrorMsg msg={errors.phone} />
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             <FormLabel required>Lingkungan</FormLabel>
                             <select name="lingkungan" value={formData.lingkungan} onChange={handleChange} className={selectClass(!!errors.lingkungan)}>
                                 <option value="">Pilih Lingkungan...</option>
@@ -904,7 +913,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             </select>
                             <ErrorMsg msg={errors.lingkungan} />
                         </div>
-                        <div className="col-span-2">
+                        <div className="col-span-2 md:col-span-1">
                             <FormLabel required>Rayon</FormLabel>
                             <select name="rayon" value={formData.rayon} onChange={handleChange} className={selectClass(!!errors.rayon)} disabled={!formData.lingkungan}>
                                 <option value="">{formData.lingkungan ? "Pilih Rayon..." : "Pilih Lingkungan dahulu..."}</option>
@@ -968,15 +977,21 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                     return (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
                             <SectionDivider title="Jumlah Anggota Keluarga" subtitle="Tidak Termasuk Kepala Keluarga dan Anggota Keluarga Di Luar Kupang" />
-                            <div className="col-span-1 md:col-span-2">
+                            <div className="col-span-2 md:col-span-1">
                                 {countSelectInput('familyMembers', 'Total Anggota Keluarga')}
                             </div>
 
                             {totalMembers > 0 && (
                                 <>
-                                    {countSelectInput('familyMembersMale', 'Laki-laki', Math.max(0, totalMembers - femaleMembers))}
-                                    {countSelectInput('familyMembersFemale', 'Perempuan', Math.max(0, totalMembers - maleMembers))}
-                                    {countSelectInput('familyMembersOutside', 'Menetap di Luar Kupang', totalMembers)}
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersMale', 'Laki-laki', Math.max(0, totalMembers - femaleMembers))}
+                                    </div>
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersFemale', 'Perempuan', Math.max(0, totalMembers - maleMembers))}
+                                    </div>
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersOutside', 'Menetap di Luar Kupang', totalMembers)}
+                                    </div>
 
                                     {showFamilyValidation && (
                                         <div className="col-span-1 md:col-span-2">
@@ -997,15 +1012,21 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                             )}
 
                             <SectionDivider title="Jumlah Anggota Sidi & Baptis" />
-                            <div className="col-span-1 md:col-span-2">
+                            <div className="col-span-1 md:col-span-1">
                                 {countSelectInput('familyMembersSidi', 'Total Anggota Sidi', totalMembers)}
                             </div>
 
                             {totalSidi > 0 && (
                                 <>
-                                    {countSelectInput('familyMembersSidiMale', 'Sidi (Laki-laki)', Math.max(0, totalSidi - femaleSidi))}
-                                    {countSelectInput('familyMembersSidiFemale', 'Sidi (Perempuan)', Math.max(0, totalSidi - maleSidi))}
-                                    {countSelectInput('familyMembersNonBaptized', 'Belum Dibaptis', Math.max(0, totalMembers - totalSidi))}
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersSidiMale', 'Sidi (Laki-laki)', Math.max(0, totalSidi - femaleSidi))}
+                                    </div>
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersSidiFemale', 'Sidi (Perempuan)', Math.max(0, totalSidi - maleSidi))}
+                                    </div>
+                                    <div className="col-span-1 md:col-span-1">
+                                        {countSelectInput('familyMembersNonBaptized', 'Belum Dibaptis', Math.max(0, totalMembers - totalSidi))}
+                                    </div>
 
                                     {showSidiValidation && (
                                         <div className="col-span-1 md:col-span-2">
@@ -1225,6 +1246,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                                         const val = e.target.value;
                                                         const newList = [...formData.professionalFamilyMembers];
                                                         newList[index].workStatus = val;
+                                                        newList[index].jobCategory = val; // Sync for consistency
 
                                                         // Clear workplace fields if they should be hidden
                                                         if (['Mencari Kerja', 'Ibu Rumah Tangga'].includes(val)) {
@@ -1647,7 +1669,7 @@ export const AddMemberForm = ({ onClose, onSuccess, initialData }: AddMemberForm
                                 onClick={() => {
                                     const newList = [...(formData.professionalFamilyMembers || [])];
                                     newList.push({
-                                        name: '', hasProfessionalSkill: '', skillType: '', skillLevel: '', workplace: '', position: '',
+                                        name: '', workStatus: '', jobCategory: '', hasProfessionalSkill: '', skillType: '', skillLevel: '', workplace: '', position: '',
                                         yearsExperience: '', specificSkills: [], churchServiceInterest: '', serviceInterestArea: '',
                                         contributionForm: [], communityConsent: false
                                     });

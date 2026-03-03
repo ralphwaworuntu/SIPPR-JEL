@@ -47,7 +47,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
     return (
         <>
             {/* Sidebar */}
-            <aside className={`border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shrink-0 transition-all duration-300 fixed md:static z-40 h-full ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:w-0 md:border-r-0 md:translate-x-0 md:overflow-hidden'}`}>
+            <aside className={`border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shrink-0 transition-all duration-300 fixed md:static z-50 h-full ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:w-0 md:border-r-0 md:translate-x-0 md:overflow-hidden'}`}>
                 {/* Logo Area */}
                 <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
                     <div className="size-10 bg-primary rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center text-slate-900">
@@ -198,7 +198,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
             {/* Overlay for mobile sidebar */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-fade-in"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-fade-in"
                     onClick={onClose}
                 ></div>
             )}

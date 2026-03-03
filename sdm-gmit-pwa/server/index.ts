@@ -787,11 +787,11 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
             // 1b. Total Souls (Aggregated Family Members)
             db.select({
-                totalSouls: sql<number>`SUM(family_members)`,
+                totalSouls: sql<number>`SUM(COALESCE(family_members, 0)) + COUNT(*) + SUM(COALESCE(family_members_outside, 0))`,
                 totalMale: sql<number>`SUM(family_members_male)`,
                 totalFemale: sql<number>`SUM(family_members_female)`,
                 totalSidi: sql<number>`SUM(family_members_sidi)`
-            }).from(congregants),
+            }).from(congregants).where(baseWhere),
 
             // 2. Gender of Head
             db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.gender),
@@ -866,15 +866,18 @@ app.get("/api/dashboard/stats", async (req, res) => {
         const soulsData = soulsRes[0] || { totalSouls: 0, totalMale: 0, totalFemale: 0, totalSidi: 0 };
         const totalSouls = Number(soulsData.totalSouls) || total; // Fallback to records count if SUM is 0
 
-        // Process Gender (Overall souls if possible, else heads)
+        // Process Gender (Overall souls including heads)
         const genderCounts: Record<string, number> = {
             "Laki-laki": Number(soulsData.totalMale) || 0,
             "Perempuan": Number(soulsData.totalFemale) || 0
         };
-        // If no family data, fallback to gender of heads
-        if (genderCounts["Laki-laki"] === 0 && genderCounts["Perempuan"] === 0) {
-            genderRes.forEach(g => { if (g.gender) genderCounts[g.gender] = g.count; });
-        }
+
+        // Always add head of household gender to total
+        genderRes.forEach(g => {
+            if (g.gender) {
+                genderCounts[g.gender] = (genderCounts[g.gender] || 0) + g.count;
+            }
+        });
 
         // Process Lingkungan
         const lingkunganCounts: Record<string, number> = {};

@@ -333,7 +333,7 @@ const LandingPage = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                             {announcements.map((item, i) => (
-                                <Reveal key={i} delay={100 + i * 100}>
+                                <Reveal key={i} delay={100 + i * 100} className="h-full">
                                     <div className="relative bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full">
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500"></div>
                                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center mb-4 shadow-lg">
@@ -413,15 +413,15 @@ const LandingPage = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
                             {worshipSchedule.map((item, i) => (
-                                <Reveal key={i} delay={100 + i * 100}>
-                                    <div className="relative group bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                                <Reveal key={i} delay={100 + i * 100} className="h-full">
+                                    <div className="relative group bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full flex flex-col">
                                         {/* Gradient accent top */}
                                         <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${item.color}`}></div>
 
-                                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 shadow-lg`}>
-                                            <span className="material-symbols-outlined text-2xl text-white">{item.icon}</span>
+                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-4 shadow-lg`}>
+                                            <span className="material-symbols-outlined text-xl text-white">{item.icon}</span>
                                         </div>
-                                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">{item.title}</h3>
+                                        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{item.title}</h3>
                                         <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-1">{item.day}</p>
                                         <p className="text-sm text-slate-500 dark:text-slate-400">{item.time}</p>
                                     </div>

@@ -17,6 +17,7 @@ const safeJSONParse = (data: any) => {
 export interface ProfessionalFamilyMember {
     name: string;
     workStatus: string;
+    jobCategory?: string; // Unified with Member type
     hasProfessionalSkill: string;
     skillType: string;
     skillLevel: string;

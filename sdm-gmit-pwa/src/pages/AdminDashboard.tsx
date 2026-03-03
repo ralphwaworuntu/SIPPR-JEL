@@ -1082,7 +1082,7 @@ const AdminDashboard = () => {
 
                     {/* 3. Metric Row - Dense & Colorful Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <MetricCard title="Data Umum Keluarga" value={stats?.total || 0} subValue="Unit basis data utama" trend="" gradient="bg-gradient-to-br from-[#064e1c] to-[#0a8a32]" icon="family_restroom" onClick={() => setActiveTab('identitas')} />
+                        <MetricCard title="Data Umum Kepala Keluarga" value={stats?.total || 0} subValue="Unit basis data utama" trend="" gradient="bg-gradient-to-br from-[#064e1c] to-[#0a8a32]" icon="family_restroom" onClick={() => setActiveTab('identitas')} />
                         <MetricCard title="Data Anggota Keluarga" value={stats?.totalSouls || 0} subValue="Informasi anggota keluarga" trend="" gradient="bg-gradient-to-br from-blue-600 to-indigo-600" icon="groups" onClick={() => setActiveTab('keluarga')} />
                         <MetricCard title="Profesi & Pelayanan" value={stats?.professionalCount || 0} subValue="Tenaga ahli & pelayan" trend="" gradient="bg-gradient-to-br from-orange-500 to-amber-600" icon="engineering" onClick={() => setActiveTab('profesional')} />
                         <MetricCard title="Pendidikan" value={stats?.educationCount || 0} subValue="Data pendidikan keluarga" trend="" gradient="bg-gradient-to-br from-teal-500 to-cyan-600" icon="auto_stories" onClick={() => setActiveTab('pendidikan')} />

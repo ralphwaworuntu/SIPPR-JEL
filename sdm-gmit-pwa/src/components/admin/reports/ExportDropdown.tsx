@@ -212,9 +212,9 @@ export const ExportDropdown = ({ members, onExportCSV, buttonClassName }: Export
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative inline-block" ref={dropdownRef}>
             <button
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
                 className={buttonClassName || "px-5 h-11 hover:bg-slate-50 dark:hover:bg-slate-700/50 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-2 transition-all tooltip"}
                 title="Pilih opsi Ekspor"
             >
@@ -224,7 +224,7 @@ export const ExportDropdown = ({ members, onExportCSV, buttonClassName }: Export
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[999] animate-fade-in-down origin-top-right">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[9999] animate-scale-in origin-top-right">
                     <div className="p-3 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/80">
                         <p className="text-[10px] font-black tracking-widest uppercase text-slate-500">Master Data</p>
                     </div>
