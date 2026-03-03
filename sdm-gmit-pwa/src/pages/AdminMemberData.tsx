@@ -581,7 +581,7 @@ const AdminMemberData = () => {
                                                                 { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
                                                                 { label: "Jenis Kelamin", key: "gender", width: "w-16" },
                                                                 { label: "Usia", key: "birthDate", width: "w-20" },
-                                                                { label: "Gol. Darah", key: "bloodType", width: "w-20" },
+                                                                { label: "Golongan Darah", key: "bloodType", width: "w-20" },
                                                                 { label: "Status Baptis", key: "baptismStatus", width: "w-20" },
                                                                 { label: "Status Sidi", key: "sidiStatus", width: "w-20" },
                                                                 { label: "Status Pernikahan", key: "maritalStatus", width: "min-w-[100px]" },
@@ -674,7 +674,7 @@ const AdminMemberData = () => {
                                                                 ...baseCols,
                                                                 { label: "Nama Lengkap Kepala Keluarga", key: "name", width: "min-w-[250px]" },
                                                                 { label: "L/P", key: "gender", width: "w-16" },
-                                                                { label: "Kategori Pekerjaan", key: "jobCategory", width: "min-w-[150px]" },
+                                                                { label: "Status Pekerjaan Saat Ini", key: "jobCategory", width: "min-w-[150px]" },
                                                                 { label: "Tempat Kerja/Instansi", key: "workplace", width: "min-w-[180px]" },
                                                                 { label: "Jabatan Saat Ini", key: "position", width: "min-w-[150px]" },
                                                                 { label: "Lama Bekerja", key: "yearsExperience", width: "min-w-[120px]" },
@@ -682,10 +682,9 @@ const AdminMemberData = () => {
                                                                 { label: "Memilki Keahlian Profesional", key: "hasProfessionalSkill", width: "min-w-[150px]" },
                                                                 { label: "Jenis Keahlian Utama", key: "skillType", width: "min-w-[150px]" },
                                                                 { label: "Tingkat Keahlian", key: "skillLevel", width: "min-w-[150px]" },
-                                                                { label: "Terlibat Dalam Pelayanan", key: "churchServiceInterest", width: "min-w-[180px]" },
                                                                 { label: "Bidang Minat Pelayanan", key: "serviceInterestArea", width: "min-w-[180px]" },
                                                                 { label: "Bentuk Kontribusi", key: "contributionForm", width: "min-w-[180px]" },
-                                                                { label: "Persetujuan Bergabung Komunitas", key: "communityConsent", width: "min-w-[150px]" }
+                                                                { label: "Bergabung Komunitas", key: "communityConsent", width: "min-w-[150px]" }
                                                             ];
                                                             break;
                                                         case 'Ekonomi':
@@ -927,13 +926,10 @@ const AdminMemberData = () => {
                                                                                     </td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.skillType || '-'}</td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">{headProf.skillLevel || '-'}</td>
-                                                                                    <td className="px-6 py-4 text-sm">
-                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.churchServiceInterest && headProf.churchServiceInterest !== 'Belum bersedia' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'text-slate-400'}`}>{headProf.churchServiceInterest || member.willingnessToServe || '-'}</span>
-                                                                                    </td>
                                                                                     <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 truncate max-w-[130px]" title={headProf.serviceInterestArea || (Array.isArray(member.interestAreas) ? member.interestAreas.join(', ') : '-')}>{headProf.serviceInterestArea || (Array.isArray(member.interestAreas) ? (member.interestAreas.join(', ') || '-') : '-')}</td>
                                                                                     <td className="px-6 py-4 text-xs text-slate-500 truncate max-w-[150px]" title={Array.isArray(headProf.contributionForm) ? headProf.contributionForm.join(', ') : (Array.isArray(member.contributionTypes) ? member.contributionTypes.join(', ') : '-')}>{Array.isArray(headProf.contributionForm) ? (headProf.contributionForm.join(', ') || '-') : (Array.isArray(member.contributionTypes) ? (member.contributionTypes.join(', ') || '-') : '-')}</td>
                                                                                     <td className="px-6 py-4 text-sm text-center">
-                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.communityConsent ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'text-slate-400'}`}>{headProf.communityConsent ? 'SETUJU' : 'TIDAK'}</span>
+                                                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${headProf.communityConsent ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'text-slate-400'}`}>{headProf.communityConsent ? 'YA' : 'TIDAK'}</span>
                                                                                     </td>
                                                                                 </>
                                                                             );

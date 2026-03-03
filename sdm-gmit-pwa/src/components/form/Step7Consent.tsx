@@ -272,7 +272,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                 <LabelValue label="Sakit menahun" value={data.health_chronicSick} />
                                 <LabelValue label="Pengobatan teratur dari fasilitas kesehatan" value={data.health_regularTreatment} />
                                 <LabelValue label="Memiliki BPJS Kesehatan" value={data.health_hasBPJS === 'Tidak' && data.health_bpjsNonParticipants ? <span>Tidak<div className="text-xs text-red-600 dark:text-red-400 mt-1 whitespace-pre-wrap font-medium">{data.health_bpjsNonParticipants}</div></span> : data.health_hasBPJS} />
-                                <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' ? (data.health_chronicDisease.map(d => d === 'Lainnya' ? `Lainnya (${data.health_chronicDiseaseOther})` : d).join(', ')) : 'Tidak'} />
+                                <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' && Array.isArray(data.health_chronicDisease) ? (data.health_chronicDisease.map(d => d === 'Lainnya' ? `Lainnya (${data.health_chronicDiseaseOther})` : d).join(', ')) : 'Tidak'} />
                                 <LabelValue label="Memiliki BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan} />
                                 <LabelValue label="Jenis Bantuan Sosial" value={data.health_socialAssistance} />
                             </div>

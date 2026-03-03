@@ -307,6 +307,12 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                                     )}
                                                 </div>
                                             )}
+                                            <div className="col-span-full pt-3 mt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+                                                <span className="text-[10px] text-slate-400 font-bold uppercase">Komunitas Profesional</span>
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${pfm.communityConsent ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                    {pfm.communityConsent ? '✓ Bersedia Bergabung' : '× Belum Bergabung'}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -576,7 +582,6 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                         </div>
                     </div>
                 </div>
-
             </div> {/* Closing Scrollable Area */}
 
             {/* Actions Footer */}

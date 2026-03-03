@@ -277,17 +277,28 @@ export const useMemberData = () => {
             const response = await apiClient.get<Member[]>('/members');
             return response.data.map(m => ({
                 ...m,
-                skills: Array.isArray(m.skills)
-                    ? m.skills
-                    : (typeof m.skills === 'string'
-                        ? (m.skills as string).split(',').map(s => s.trim()).filter(Boolean)
-                        : []),
-                interestAreas: Array.isArray(m.interestAreas)
-                    ? m.interestAreas
-                    : safeJSONParse(m.interestAreas),
-                contributionTypes: Array.isArray(m.contributionTypes)
-                    ? m.contributionTypes
-                    : safeJSONParse(m.contributionTypes),
+                skills: Array.isArray(m.skills) ? m.skills : safeJSONParse(m.skills),
+                interestAreas: Array.isArray(m.interestAreas) ? m.interestAreas : safeJSONParse(m.interestAreas),
+                contributionTypes: Array.isArray(m.contributionTypes) ? m.contributionTypes : safeJSONParse(m.contributionTypes),
+                marriageType: Array.isArray(m.marriageType) ? m.marriageType : safeJSONParse(m.marriageType),
+                familyMembersNonSidiNames: Array.isArray(m.familyMembersNonSidiNames) ? m.familyMembersNonSidiNames : safeJSONParse(m.familyMembersNonSidiNames),
+                familyMembersNonBaptizedNames: Array.isArray(m.familyMembersNonBaptizedNames) ? m.familyMembersNonBaptizedNames : safeJSONParse(m.familyMembersNonBaptizedNames),
+                professionalFamilyMembers: Array.isArray(m.professionalFamilyMembers) ? m.professionalFamilyMembers.map((pf: any) => ({
+                    ...pf,
+                    specificSkills: Array.isArray(pf.specificSkills) ? pf.specificSkills : safeJSONParse(pf.specificSkills),
+                    contributionForm: Array.isArray(pf.contributionForm) ? pf.contributionForm : safeJSONParse(pf.contributionForm)
+                })) : safeJSONParse(m.professionalFamilyMembers),
+                economics_businessPermit: Array.isArray(m.economics_businessPermit) ? m.economics_businessPermit : safeJSONParse(m.economics_businessPermit),
+                economics_businessMarketing: Array.isArray(m.economics_businessMarketing) ? m.economics_businessMarketing : safeJSONParse(m.economics_businessMarketing),
+                economics_businessTraining: Array.isArray(m.economics_businessTraining) ? m.economics_businessTraining : safeJSONParse(m.economics_businessTraining),
+                economics_assets: Array.isArray(m.economics_assets) ? m.economics_assets : safeJSONParse(m.economics_assets),
+                economics_waterSource: Array.isArray(m.economics_waterSource) ? m.economics_waterSource : safeJSONParse(m.economics_waterSource),
+                economics_electricity_capacities: Array.isArray(m.economics_electricity_capacities) ? m.economics_electricity_capacities : safeJSONParse(m.economics_electricity_capacities),
+                health_chronicDisease: Array.isArray(m.health_chronicDisease) ? m.health_chronicDisease : safeJSONParse(m.health_chronicDisease),
+                health_disabilityPhysical: Array.isArray(m.health_disabilityPhysical) ? m.health_disabilityPhysical : safeJSONParse(m.health_disabilityPhysical),
+                health_disabilityIntellectual: Array.isArray(m.health_disabilityIntellectual) ? m.health_disabilityIntellectual : safeJSONParse(m.health_disabilityIntellectual),
+                health_disabilityMental: Array.isArray(m.health_disabilityMental) ? m.health_disabilityMental : safeJSONParse(m.health_disabilityMental),
+                health_disabilitySensory: Array.isArray(m.health_disabilitySensory) ? m.health_disabilitySensory : safeJSONParse(m.health_disabilitySensory),
             }));
         },
         staleTime: 1000 * 60 * 2, // 2 minutes

@@ -195,19 +195,66 @@ export const ExportDropdown = ({ members, onExportCSV, buttonClassName }: Export
         const doc = new jsPDF({ orientation: 'landscape' });
         generateHeader(doc, "Potensi & Tenaga Ahli");
 
+        // Flatten all professional family members to include everyone in the report
+        const allProfs: any[] = members.flatMap(m => {
+            const list = Array.isArray(m.professionalFamilyMembers) ? m.professionalFamilyMembers : [];
+
+            // If family has no explicit professional member entries but the KK has professional info, 
+            // include the KK as the first entry
+            if (list.length === 0 && (m.jobCategory || (m.skills && m.skills.length > 0))) {
+                return [{
+                    name: m.name,
+                    jobCategory: m.jobCategory || '-',
+                    educationLevel: m.educationLevel || '-',
+                    specificSkills: m.skills || [],
+                    churchServiceInterest: m.willingnessToServe || '-',
+                    contributionForm: m.contributionTypes || [],
+                    workStatus: '-',
+                    hasProfessionalSkill: 'Ya',
+                    skillType: '-',
+                    skillLevel: '-',
+                    workplace: m.companyName || '-',
+                    position: m.jobTitle || '-',
+                    yearsExperience: m.yearsOfExperience ? String(m.yearsOfExperience) : '-',
+                    serviceInterestArea: '-',
+                    communityConsent: false
+                }];
+            }
+
+            return list.map(pf => ({
+                name: pf.name || '-',
+                jobCategory: pf.jobCategory || pf.workStatus || '-',
+                educationLevel: m.educationLevel || '-', // KK's education context
+                specificSkills: pf.specificSkills || [],
+                churchServiceInterest: pf.churchServiceInterest || '-',
+                contributionForm: pf.contributionForm || [],
+                workStatus: pf.workStatus || '-',
+                hasProfessionalSkill: pf.hasProfessionalSkill || '-',
+                skillType: pf.skillType || '-',
+                skillLevel: pf.skillLevel || '-',
+                workplace: pf.workplace || '-',
+                position: pf.position || '-',
+                yearsExperience: pf.yearsExperience || '-',
+                serviceInterestArea: pf.serviceInterestArea || '-',
+                communityConsent: pf.communityConsent || false
+            }));
+        });
+
         autoTable(doc, {
             ...baseTableConfig,
             head: [["No", "Nama", "Pendidikan", "Profesi", "Keahlian Spesifik", "Kesediaan Melayani", "Bentuk Kontribusi"]],
-            body: members.map((m, i) => [
-                i + 1, m.name, m.educationLevel || '-', m.jobCategory || '-',
-                arrStr(m.skills).substring(0, 40) || '-', m.willingnessToServe || '-',
-                arrStr(m.contributionTypes) || '-'
+            body: allProfs.map((p, i) => [
+                i + 1, p.name || '-', p.educationLevel || '-',
+                p.jobCategory || p.workStatus || '-',
+                (Array.isArray(p.specificSkills) ? p.specificSkills.join(', ') : (p.specificSkills || '-')).substring(0, 50),
+                p.churchServiceInterest || '-',
+                (Array.isArray(p.contributionForm) ? p.contributionForm.join(', ') : (p.contributionForm || '-'))
             ]),
             startY: 40,
             columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 40 }, 4: { cellWidth: 60 } }
         });
-        doc.save(`Laporan_Pelayanan_Emaus_${new Date().toISOString().split('T')[0]}.pdf`);
-        toast.success("Laporan Pelayanan berhasil diekspor");
+        doc.save(`Laporan_Potensi_Emaus_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success("Laporan Potensi & Tenaga Ahli berhasil diekspor");
         setIsOpen(false);
     };
 
