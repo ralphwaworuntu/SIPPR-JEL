@@ -1,17 +1,7 @@
-import axios from "axios";
+import { congregants } from './schema';
 
-async function test() {
-    try {
-        const res = await axios.get("http://localhost:3000/api/dashboard/stats", {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" }
-        });
-        console.log("SUCCESS:", JSON.stringify(res.data, null, 2).substring(0, 500));
-    } catch (err: any) {
-        console.error("ERROR STATUS:", err.response?.status);
-        console.error("ERROR DATA:", err.response?.data);
-        console.error("ERROR MESSAGE:", err.message);
-    }
-}
+console.log('--- congregants schema exported keys ---');
+console.log(Object.keys(congregants).filter(k => !k.startsWith('Symbol')));
 
-test();
+console.log('Is congregants.diakonia_type undefined?:', congregants.diakonia_type === undefined);
+console.log('Is congregants.diakoniaType undefined?:', (congregants as any).diakoniaType === undefined);

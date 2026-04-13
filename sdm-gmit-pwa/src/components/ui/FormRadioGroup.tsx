@@ -112,6 +112,7 @@ const FormRadioGroup: React.FC<FormRadioGroupProps> = ({
                                 checked={isSelected}
                                 onChange={() => onChange(option)}
                                 className="sr-only"
+                                required={required}
                             />
                         </label>
                     );

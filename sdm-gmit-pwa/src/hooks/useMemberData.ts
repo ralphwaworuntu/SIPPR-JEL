@@ -118,6 +118,7 @@ export interface Member {
     education_notWorking_sma_smk?: number;
     education_notWorking_university?: number;
     education_scholarship_government?: string;
+    familyMembersDetails?: any[];
 
     // Step 5: Economics
     economics_headOccupation?: string;
@@ -197,11 +198,18 @@ export interface Member {
     health_chronicDisease?: string[];
     health_chronicDiseaseOther?: string;
     health_hasBPJS?: string;
+    health_bpjsNumber?: string;
     health_bpjsNonParticipants?: string;
     health_regularTreatment?: string;
     health_hasBPJSKetenagakerjaan?: string;
+    health_bpjsKetenagakerjaanProgram?: string;
     health_socialAssistance?: string;
+    health_isKPM?: string;
+    health_isPoorNonKPM?: string;
+    health_poorNonKPMReason?: string;
     health_hasDisability?: string;
+    health_willingToDonateBlood?: string;
+    health_willingToJoinBloodCommunity?: string;
     health_disabilityPhysical?: string[];
     health_disabilityPhysicalOther?: string;
     health_disabilityIntellectual?: string[];
@@ -283,6 +291,7 @@ export const useMemberData = () => {
                 marriageType: Array.isArray(m.marriageType) ? m.marriageType : safeJSONParse(m.marriageType),
                 familyMembersNonSidiNames: Array.isArray(m.familyMembersNonSidiNames) ? m.familyMembersNonSidiNames : safeJSONParse(m.familyMembersNonSidiNames),
                 familyMembersNonBaptizedNames: Array.isArray(m.familyMembersNonBaptizedNames) ? m.familyMembersNonBaptizedNames : safeJSONParse(m.familyMembersNonBaptizedNames),
+                familyMembersDetails: Array.isArray(m.familyMembersDetails) ? m.familyMembersDetails : safeJSONParse(m.familyMembersDetails),
                 professionalFamilyMembers: Array.isArray(m.professionalFamilyMembers) ? m.professionalFamilyMembers.map((pf: any) => ({
                     ...pf,
                     specificSkills: Array.isArray(pf.specificSkills) ? pf.specificSkills : safeJSONParse(pf.specificSkills),

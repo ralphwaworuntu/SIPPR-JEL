@@ -329,6 +329,10 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                         <SectionTitle icon="school" title="Pendidikan Anak" />
                         <div className="mt-4 space-y-3">
                             <DetailRow label="Status Anak Bersekolah" value={member.education_schoolingStatus} />
+                            <DetailRow label="Ada Anggota Putus Sekolah" value={member.education_hasDropout} />
+                            {member.education_hasDropout === 'Ya' && (
+                                <DetailRow label="Alasan Putus Sekolah" value={member.education_dropoutReason} />
+                            )}
                             {(member.education_inSchool_tk_paud > 0 || member.education_inSchool_sd > 0 || member.education_inSchool_smp > 0 || member.education_inSchool_sma > 0 || member.education_inSchool_university > 0) && (
                                 <div className="mt-2 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50">
                                     <div className="flex items-center gap-2 mb-2">
@@ -529,6 +533,12 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                             <DetailRow label="Sakit 30 Hari Terakhir" value={member.health_sick30Days} />
                             <DetailRow label="Pengobatan Teratur" value={member.health_regularTreatment} />
                             <DetailRow label="BPJS Kesehatan" value={member.health_hasBPJS} />
+                            {member.health_hasBPJS === 'Ya' && member.health_bpjsNumber && (
+                                <div className="ml-4 pl-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-1 mt-1 text-slate-500 mb-2">
+                                    <div className="text-[10px] uppercase font-bold text-emerald-500 dark:text-emerald-400">Nomor BPJS Aktif:</div>
+                                    <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{member.health_bpjsNumber}</span>
+                                </div>
+                            )}
                             {member.health_hasBPJS === 'Tidak' && member.health_bpjsNonParticipants && (
                                 <div className="ml-4 pl-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-1 mt-1 text-slate-500 mb-2">
                                     <div className="text-[10px] uppercase font-bold text-red-500 dark:text-red-400">Anggota Tanpa BPJS:</div>
@@ -536,7 +546,19 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                 </div>
                             )}
                             <DetailRow label="BPJS Naker" value={member.health_hasBPJSKetenagakerjaan} />
-                            <DetailRow label="Bantuan Sosial" value={member.health_socialAssistance} />
+                            <DetailRow label="KPM Bansos" value={member.health_isKPM} />
+                            {member.health_isKPM === 'Ya' && <DetailRow label="Jenis Bansos" value={member.health_socialAssistance} />}
+                            {member.health_isKPM === 'Tidak' && (
+                                <>
+                                    <DetailRow label="KK Miskin Non-KPM" value={member.health_isPoorNonKPM} />
+                                    {member.health_isPoorNonKPM === 'Ya' && (
+                                        <div className="ml-4 pl-2 border-l-2 border-slate-200 dark:border-slate-700 space-y-1 mt-1 text-slate-500 mb-2">
+                                            <div className="text-[10px] uppercase font-bold text-slate-500">Alasan Miskin:</div>
+                                            <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{member.health_poorNonKPMReason}</span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
 
                             <div className="border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
                                 {member.health_chronicSick === 'Ya' ? (
@@ -578,9 +600,47 @@ export const MemberDetailModal = ({ member, onClose, onEdit }: MemberDetailModal
                                         )}
                                     </div>
                                 ) : <DetailRow label="Disabilitas" value="Tidak" />}
+
+                                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <DetailRow label="Bersedia Donor Darah" value={member.health_willingToDonateBlood} />
+                                    {member.health_willingToDonateBlood === 'Ya' && (
+                                        <DetailRow label="Anggota Komunitas Donor" value={member.health_willingToJoinBloodCommunity} />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Card 7 — Daftar Anggota Keluarga (Detail) */}
+                    {Array.isArray(member.familyMembersDetails) && member.familyMembersDetails.length > 0 && (
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm lg:col-span-3 flex flex-col">
+                            <SectionTitle icon="groups" title="Daftar Anggota Keluarga (Detail)" />
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {member.familyMembersDetails.map((fmd: any, idx: number) => (
+                                    <div key={idx} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                                        <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700/50 pb-2 mb-2">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                                {idx + 1}
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold text-slate-800 dark:text-slate-100 text-sm whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">{fmd.fullName || "-"}</h5>
+                                                <p className="text-[10px] text-slate-500 font-bold uppercase">{fmd.relationship === 'Lainnya' ? fmd.relationshipOther : fmd.relationship}</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <DetailRow label="NIK" value={fmd.nik} />
+                                            <DetailRow label="Gender" value={fmd.gender} />
+                                            <DetailRow label="Lahir" value={fmd.birthPlace && fmd.dateOfBirth ? `${fmd.birthPlace}, ${fmd.dateOfBirth}` : (fmd.birthPlace || fmd.dateOfBirth || "-")} />
+                                            <DetailRow label="Agama" value={fmd.religion} />
+                                            <DetailRow label="Darah" value={fmd.bloodType} />
+                                            <DetailRow label="Pendidikan" value={fmd.lastEducation} />
+                                            <DetailRow label="Pekerjaan" value={fmd.occupation === 'Lainnya' ? fmd.occupationOther : fmd.occupation} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div> {/* Closing Scrollable Area */}
 

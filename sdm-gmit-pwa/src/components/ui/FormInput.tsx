@@ -100,6 +100,7 @@ const FormInput: React.FC<FormInputProps> = ({
                     placeholder={placeholder}
                     readOnly={readOnly}
                     onBlur={onBlur}
+                    required={required}
                 />
             </div>
             {error && (

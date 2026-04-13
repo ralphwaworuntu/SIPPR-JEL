@@ -1,4 +1,23 @@
-
+export interface FamilyMemberDetail {
+    nik: string;
+    fullName: string;
+    gender: 'Laki-laki' | 'Perempuan' | '';
+    birthPlace: string;
+    dateOfBirth: string;
+    religion: string;
+    bloodType: string;
+    education: string;
+    relationship: string;
+    relationshipOther: string;
+    occupation: string;
+    occupationOther: string;
+    baptismStatus: 'Sudah' | 'Belum' | '';
+    baptismPlace: string;
+    baptismDate: string;
+    sidiStatus: 'Sudah' | 'Belum' | '';
+    sidiPlace: string;
+    sidiDate: string;
+}
 
 export interface ProfessionalFamilyMember {
     name: string;
@@ -22,13 +41,19 @@ export interface FormData {
     nik: string;
     fullName: string;
     gender: 'Laki-laki' | 'Perempuan' | '';
+    birthPlace: string;
     dateOfBirth: string;
     bloodType: string;
     maritalStatus: string;
+    marriagePlace: string;
     marriageDate: string;
     marriageType: string[];
     baptismStatus: 'Sudah' | 'Belum' | '';
+    baptismPlace: string;
+    baptismDate: string;
     sidiStatus: 'Sudah' | 'Belum' | '';
+    sidiPlace: string;
+    sidiDate: string;
     phone: string;
     address: string;
     city: string;
@@ -47,12 +72,16 @@ export interface FormData {
     familyMembersNonSidi: string;
     hasNonSidiAdult18: 'Ya' | 'Tidak' | '';
     familyMembersNonSidiNames: string[];
+    familyMembersNonSidiReason: string;
     familyMembersNonBaptizedNames: string[];
+    familyMembersNonBaptizedReason: string;
 
     // Step 2: Diakonia
     diakonia_recipient: 'Ya' | 'Tidak' | '';
     diakonia_year: string;
     diakonia_type: string;
+
+    familyMembersDetails: FamilyMemberDetail[];
 
     // Step 2: Professional
     educationLevel: string;
@@ -78,6 +107,8 @@ export interface FormData {
     education_inSchool_sma: number;
     education_inSchool_university: number; // Added
     education_totalDropout: number; // Added
+    education_hasDropout: 'Ya' | 'Tidak' | ''; // Added
+    education_dropoutReason: string; // Added
     education_dropout_tk_paud: number;
     education_dropout_sd: number;
     education_dropout_smp: number;
@@ -175,11 +206,18 @@ export interface FormData {
     health_chronicDisease: string[];
     health_chronicDiseaseOther: string;
     health_hasBPJS: string;
+    health_bpjsNumber: string;
     health_bpjsNonParticipants: string;
     health_regularTreatment: string;
     health_hasBPJSKetenagakerjaan: string;
+    health_bpjsKetenagakerjaanProgram: string;
     health_socialAssistance: string;
+    health_isKPM: string;
+    health_isPoorNonKPM: string;
+    health_poorNonKPMReason: string;
     health_hasDisability: string;
+    health_willingToDonateBlood: string;
+    health_willingToJoinBloodCommunity: string;
     health_disabilityPhysical: string[];
     health_disabilityPhysicalOther: string;
     health_disabilityIntellectual: string[];
@@ -200,13 +238,19 @@ export const initialFormData: FormData = {
     nik: '',
     fullName: '',
     gender: '',
+    birthPlace: '',
     dateOfBirth: '',
     bloodType: '',
     maritalStatus: '',
+    marriagePlace: '',
     marriageDate: '',
     marriageType: [],
     baptismStatus: '',
+    baptismPlace: '',
+    baptismDate: '',
     sidiStatus: '',
+    sidiPlace: '',
+    sidiDate: '',
     phone: '',
     address: '',
     city: '',
@@ -225,10 +269,13 @@ export const initialFormData: FormData = {
     familyMembersNonSidi: '',
     hasNonSidiAdult18: '',
     familyMembersNonSidiNames: [],
+    familyMembersNonSidiReason: '',
     familyMembersNonBaptizedNames: [],
+    familyMembersNonBaptizedReason: '',
     diakonia_recipient: '',
     diakonia_year: '',
     diakonia_type: '',
+    familyMembersDetails: [],
     educationLevel: '',
     major: '',
     jobCategory: '',
@@ -246,6 +293,8 @@ export const initialFormData: FormData = {
     education_inSchool_sma: 0,
     education_inSchool_university: 0,
     education_totalDropout: 0,
+    education_hasDropout: '',
+    education_dropoutReason: '',
     education_dropout_tk_paud: 0,
     education_dropout_sd: 0,
     education_dropout_smp: 0,
@@ -343,11 +392,19 @@ export const initialFormData: FormData = {
     health_chronicDisease: [],
     health_chronicDiseaseOther: '',
     health_hasBPJS: '',
+    health_bpjsNumber: '',
     health_bpjsNonParticipants: '',
     health_regularTreatment: '',
     health_hasBPJSKetenagakerjaan: '',
+    health_bpjsKetenagakerjaanProgram: '',
     health_socialAssistance: '',
+    health_isKPM: '',
+    health_isPoorNonKPM: '',
+    health_poorNonKPMReason: '',
     health_hasDisability: '',
+    health_willingToDonateBlood: '',
+    health_willingToJoinBloodCommunity: '',
+    health_disabilityDouble: false,
     health_disabilityPhysical: [],
     health_disabilityPhysicalOther: '',
     health_disabilityIntellectual: [],
@@ -356,7 +413,6 @@ export const initialFormData: FormData = {
     health_disabilityMentalOther: '',
     health_disabilitySensory: [],
     health_disabilitySensoryOther: '',
-    health_disabilityDouble: false,
 
     willingnessToServe: '',
     interestAreas: [],

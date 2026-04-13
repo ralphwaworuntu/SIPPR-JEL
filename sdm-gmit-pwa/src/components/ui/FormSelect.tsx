@@ -86,6 +86,7 @@ const FormSelect: React.FC<FormSelectProps> = ({
                     id={id}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
+                    required={required}
                 >
                     <option value="">{placeholder}</option>
                     {normalizedOptions.map((opt) => (

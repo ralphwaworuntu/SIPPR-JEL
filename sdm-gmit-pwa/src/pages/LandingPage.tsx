@@ -184,8 +184,8 @@ const LandingPage = () => {
                         {[
                             { name: 'Beranda', href: '#' },
                             { name: 'Visi Misi', href: '#visi-misi' },
-                            { name: 'Kegiatan', href: '#kegiatan' },
                             { name: 'Pengumuman', href: '#pengumuman' },
+                            { name: 'Kegiatan', href: '#kegiatan' },
                             { name: 'Jadwal', href: '#jadwal' },
                             { name: 'Sejarah', href: '#sejarah' },
                             { name: 'Lokasi', href: '#lokasi' },
@@ -234,8 +234,8 @@ const LandingPage = () => {
                             {[
                                 { name: 'Beranda', href: '#' },
                                 { name: 'Visi Misi', href: '#visi-misi' },
-                                { name: 'Kegiatan', href: '#kegiatan' },
                                 { name: 'Pengumuman', href: '#pengumuman' },
+                                { name: 'Kegiatan', href: '#kegiatan' },
                                 { name: 'Jadwal', href: '#jadwal' },
                                 { name: 'Sejarah', href: '#sejarah' },
                                 { name: 'Lokasi', href: '#lokasi' },

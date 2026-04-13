@@ -156,6 +156,40 @@ const FormPage = () => {
                     if (!formData.diakonia_type.trim()) return handleValidationError('diakonia_type', "Mohon isi Jenis Diakonia yang Diterima");
                 }
 
+                // Family Member Details validation
+                const expectedTotalDetails = total - 1;
+                const currentTotalDetails = formData.familyMembersDetails?.length || 0;
+
+                if (expectedTotalDetails > 0) {
+                    if (currentTotalDetails === 0) {
+                        return handleValidationError('familyMembersDetails', `Mohon lengkapi detail untuk ${expectedTotalDetails} anggota keluarga Anda`);
+                    }
+                    if (currentTotalDetails < expectedTotalDetails) {
+                        return handleValidationError('familyMembersDetails', `Anda baru mengisi ${currentTotalDetails} dari ${expectedTotalDetails} anggota keluarga. Mohon lengkapi sisanya.`);
+                    }
+                    if (currentTotalDetails > expectedTotalDetails) {
+                        return handleValidationError('familyMembersDetails', `Jumlah detail anggota (${currentTotalDetails}) melebihi total anggota keluarga (${expectedTotalDetails} orang selain Kepala Keluarga). Mohon sesuaikan.`);
+                    }
+                }
+
+                if (formData.familyMembersDetails && formData.familyMembersDetails.length > 0) {
+                    for (let i = 0; i < formData.familyMembersDetails.length; i++) {
+                        const member = formData.familyMembersDetails[i];
+                        const prefix = `Anggota ke-${i + 1}:`;
+                        if (!member.nik) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi NIK`);
+                        if (member.nik.length !== 16) return handleValidationError(`member-item-${i}`, `${prefix} NIK harus 16 digit`);
+                        if (!member.fullName) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Nama Lengkap`);
+                        if (!member.gender) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Jenis Kelamin`);
+                        if (!member.birthPlace) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Tempat Lahir`);
+                        if (!member.dateOfBirth) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Tanggal Lahir`);
+                        if (!member.religion) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Agama`);
+                        if (!member.bloodType) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Golongan Darah`);
+                        if (!member.education) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Pendidikan Terakhir`);
+                        if (!member.relationship) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Hubungan dengan KK`);
+                        if (!member.occupation) return handleValidationError(`member-item-${i}`, `${prefix} Mohon lengkapi Pekerjaan`);
+                    }
+                }
+
                 return true;
             case 5:
                 if (formData.professionalFamilyMembers && formData.professionalFamilyMembers.length > 0) {
@@ -202,19 +236,37 @@ const FormPage = () => {
                     if (totalInSchool === 0) {
                         return handleValidationError('education_inSchool_tk_paud', "Anda memilih 'Ya', mohon isi jumlah anak yang bersekolah (minimal 1)");
                     }
+                }
 
-                    // Validasi: Tidak boleh negatif
-                    if (
-                        (formData.education_inSchool_tk_paud < 0) ||
-                        (formData.education_inSchool_sd < 0) ||
-                        (formData.education_inSchool_smp < 0) ||
-                        (formData.education_inSchool_sma < 0)
-                    ) {
-                        return handleValidationError('education_inSchool_tk_paud', "Jumlah anak tidak boleh negatif");
+                // 3. Dropouts validation
+                if (!formData.education_hasDropout) return handleValidationError('education_hasDropout', "Mohon pilih apakah ada anggota keluarga yang putus sekolah");
+                if (formData.education_hasDropout === 'Ya') {
+                    if (!formData.education_dropoutReason) return handleValidationError('education_dropoutReason', "Mohon isi alasan putus sekolah");
+
+                    const totalDropout = formData.education_totalDropout || 0;
+                    const allocatedDropout = (formData.education_dropout_sd || 0) +
+                        (formData.education_dropout_smp || 0) +
+                        (formData.education_dropout_sma || 0) +
+                        (formData.education_dropout_university || 0);
+
+                    if (totalDropout === 0) return handleValidationError('education_totalDropout', "Anda memilih 'Ya', mohon isi jumlah anak yang putus sekolah (minimal 1)");
+                    if (allocatedDropout !== totalDropout) return handleValidationError('education_totalDropout', "Distribusi jenjang putus sekolah harus sama dengan total anak putus sekolah");
+                }
+
+                // 4. Unemployed validation
+                const totalUnemployed = formData.education_totalUnemployed || 0;
+                if (totalUnemployed > 0) {
+                    const allocatedUnemployed = (formData.education_unemployed_sd || 0) +
+                        (formData.education_unemployed_smp || 0) +
+                        (formData.education_unemployed_sma || 0) +
+                        (formData.education_unemployed_university || 0);
+
+                    if (allocatedUnemployed !== totalUnemployed) {
+                        return handleValidationError('totalUnemployed', "Distribusi jenjang anak belum bekerja harus sama dengan total");
                     }
                 }
 
-                // 3. Validasi input lainnya tidak boleh negatif
+                // 5. Validasi input lainnya tidak boleh negatif
                 if (
                     (formData.education_dropout_tk_paud < 0) ||
                     (formData.education_dropout_sd < 0) ||
@@ -228,7 +280,7 @@ const FormPage = () => {
                     return handleValidationError('education_dropout_tk_paud', "Jumlah anak tidak boleh negatif");
                 }
 
-                // 4. Validasi beasiswa lainnya
+                // 5. Validasi beasiswa lainnya
                 if (formData.education_hasScholarship === 'Ya') {
                     if (!formData.education_scholarshipType) return handleValidationError('education_scholarshipType', "Mohon pilih jenis beasiswa");
                     if (formData.education_scholarshipType === 'Beasiswa Lainnya' && !formData.education_scholarshipTypeOther) {
@@ -383,10 +435,16 @@ const FormPage = () => {
                 }
 
                 if (!formData.health_hasBPJS) return handleValidationError('health_hasBPJS', "Mohon pilih Status BPJS Kesehatan");
+                if (formData.health_hasBPJS === 'Ya' && !formData.health_bpjsNumber) return handleValidationError('health_bpjsNumber', "Mohon lengkapi Nomor BPJS Aktif Kepala Keluarga");
                 if (formData.health_hasBPJS === 'Tidak' && !formData.health_bpjsNonParticipants) return handleValidationError('health_bpjsNonParticipants', "Mohon sebutkan nama anggota keluarga yang belum memiliki BPJS Kesehatan");
                 if (!formData.health_regularTreatment) return handleValidationError('health_regularTreatment', "Mohon pilih Status Pengobatan Teratur");
                 if (!formData.health_hasBPJSKetenagakerjaan) return handleValidationError('health_hasBPJSKetenagakerjaan', "Mohon pilih Status BPJS Ketenagakerjaan");
-                if (!formData.health_socialAssistance) return handleValidationError('health_socialAssistance', "Mohon pilih Jenis Bantuan Sosial");
+                if (!formData.health_isKPM) return handleValidationError('health_isKPM', "Mohon pilih status KPM Bansos");
+                if (formData.health_isKPM === 'Ya' && !formData.health_socialAssistance) return handleValidationError('health_socialAssistance', "Mohon pilih jenis bantuan sosial");
+                if (formData.health_isKPM === 'Tidak') {
+                    if (!formData.health_isPoorNonKPM) return handleValidationError('health_isPoorNonKPM', "Mohon lengkapi status KK miskin");
+                    if (formData.health_isPoorNonKPM === 'Ya' && !formData.health_poorNonKPMReason) return handleValidationError('health_poorNonKPMReason', "Mohon tuliskan alasan kategori miskin");
+                }
 
                 if (!formData.health_hasDisability) return handleValidationError('health_hasDisability', "Mohon pilih Status Penyandang Disabilitas");
 
@@ -422,6 +480,9 @@ const FormPage = () => {
                         return handleValidationError('health_disabilitySensory', "Mohon lengkapi keterangan Disabilitas Sensorik lainnya");
                     }
                 }
+
+                if (!formData.health_willingToDonateBlood) return handleValidationError('health_willingToDonateBlood', "Mohon pilih kesediaan Donor Darah");
+                if (formData.health_willingToDonateBlood === 'Ya' && !formData.health_willingToJoinBloodCommunity) return handleValidationError('health_willingToJoinBloodCommunity', "Mohon pilih kesediaan bergabung Komunitas Donor Darah");
 
                 return true;
             case 7:

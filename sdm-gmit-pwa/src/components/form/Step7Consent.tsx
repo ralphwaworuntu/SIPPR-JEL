@@ -107,6 +107,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <LabelValue label="NIK" value={data.nik} />
                             <LabelValue label="Nama Lengkap Kepala Keluarga" value={data.fullName} fullWidth />
                             <LabelValue label="Jenis Kelamin" value={data.gender} />
+                            <LabelValue label="Tempat Lahir" value={data.birthPlace} />
                             <LabelValue label="Tanggal Lahir" value={formatDate(data.dateOfBirth)} />
                             <LabelValue label="Usia" value={`${calculateAge(data.dateOfBirth)} Tahun`} />
 
@@ -115,11 +116,24 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                             <LabelValue label="Golongan Darah" value={data.bloodType} />
                             <LabelValue label="Status Baptis" value={data.baptismStatus} />
                             {data.baptismStatus === 'Sudah' && (
-                                <LabelValue label="Status Sidi" value={data.sidiStatus} />
+                                <>
+                                    <LabelValue label="Tempat Baptis" value={data.baptismPlace} />
+                                    <LabelValue label="Tanggal Baptis" value={formatDate(data.baptismDate || '')} />
+                                    <LabelValue label="Status Sidi" value={data.sidiStatus} />
+                                    {data.sidiStatus === 'Sudah' && (
+                                        <>
+                                            <LabelValue label="Tempat Sidi" value={data.sidiPlace} />
+                                            <LabelValue label="Tanggal Sidi" value={formatDate(data.sidiDate || '')} />
+                                        </>
+                                    )}
+                                </>
                             )}
                             <LabelValue label="Status Pernikahan" value={data.maritalStatus} />
                             {['Sudah Nikah', 'Cerai Hidup', 'Cerai Mati'].includes(data.maritalStatus) && (
                                 <>
+                                    {data.maritalStatus === 'Sudah Nikah' && (
+                                        <LabelValue label="Tempat Pernikahan" value={data.marriagePlace} />
+                                    )}
                                     <LabelValue label="Tanggal Pernikahan" value={formatDate(data.marriageDate || '')} />
                                     <LabelValue label="Usia Pernikahan" value={`${calculateAge(data.marriageDate)} Tahun`} />
                                     <LabelValue label="Jenis Pernikahan" value={
@@ -195,6 +209,14 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                                 ))}
                                             </div>
                                         )}
+                                        {data.hasNonSidiAdult18 === 'Ya' && (
+                                            <div className="mt-2 pt-2 border-t border-amber-100 dark:border-amber-800/30">
+                                                <span className="text-[10px] font-bold text-amber-800 dark:text-amber-200 uppercase mb-1 block">Alasan Belum Sidi:</span>
+                                                <span className="text-sm text-gray-800 dark:text-gray-200 block italic leading-relaxed">
+                                                    "{data.familyMembersNonSidiReason || '-'}"
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -209,6 +231,67 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                             </span>
                                         ))}
                                     </div>
+                                    <div className="mt-2 pt-2 border-t border-orange-100 dark:border-orange-800/30">
+                                        <span className="text-[10px] font-bold text-orange-800 dark:text-orange-200 uppercase mb-1 block">Alasan Belum Dibaptis:</span>
+                                        <span className="text-sm text-gray-800 dark:text-gray-200 block italic leading-relaxed">
+                                            "{data.familyMembersNonBaptizedReason || '-'}"
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Detail Anggota Keluarga Tambahan */}
+                            {data.familyMembersDetails && data.familyMembersDetails.length > 0 && (
+                                <div className="col-span-full border-t border-slate-200 dark:border-slate-700 pt-4 mt-2">
+                                    <span className="text-[11px] uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400 block mb-3">Detail Anggota Keluarga Tambahan</span>
+                                    <div className="grid gap-4 w-full">
+                                        {data.familyMembersDetails.map((member, idx) => (
+                                            <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm w-full">
+                                                <div className="col-span-full font-bold text-slate-800 dark:text-white mb-1 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-sm text-slate-400">person</span>
+                                                    {member.fullName || `Anggota Ke-${idx + 1}`}
+                                                    {member.relationship && (() => {
+                                                        const getRelStyle = (rel: string) => {
+                                                            switch (rel) {
+                                                                case 'Suami': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800/50';
+                                                                case 'Istri': return 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300 border-pink-200 dark:border-pink-800/50';
+                                                                case 'Anak': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50';
+                                                                case 'Orang Tua':
+                                                                case 'Mertua': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800/50';
+                                                                case 'Menantu':
+                                                                case 'Cucu': return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/50';
+                                                                default: return 'bg-slate-100 text-slate-700 dark:bg-slate-700/50 dark:text-slate-300 border-slate-200 dark:border-slate-600/50';
+                                                            }
+                                                        };
+                                                        return (
+                                                            <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border ${getRelStyle(member.relationship)}`}>
+                                                                {member.relationship === 'Lainnya' ? (member.relationshipOther || 'Lainnya') : member.relationship}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                    {!member.relationship && (
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 border-red-200 dark:border-red-800/50">
+                                                            Belum diisi
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <LabelValue label="NIK" value={member.nik || '-'} />
+                                                <LabelValue label="Jenis Kelamin" value={member.gender || '-'} />
+                                                <LabelValue label="Tempat, Tgl Lahir" value={`${member.birthPlace || '-'}, ${formatDate(member.dateOfBirth)}`} />
+                                                <LabelValue label="Usia" value={member.dateOfBirth ? `${calculateAge(member.dateOfBirth)} Tahun` : '-'} />
+
+                                                <LabelValue label="Agama" value={member.religion || '-'} />
+                                                <LabelValue label="Status Baptis" value={member.religion === 'Kristen Protestan' ? (member.baptismStatus === 'Sudah' ? `Sudah (${member.baptismPlace || '-'}, ${formatDate(member.baptismDate || '')})` : member.baptismStatus) : '-'} />
+                                                {member.religion === 'Kristen Protestan' && member.baptismStatus === 'Sudah' && (
+                                                    <LabelValue label="Status Sidi" value={member.sidiStatus === 'Sudah' ? `Sudah (${member.sidiPlace || '-'}, ${formatDate(member.sidiDate || '')})` : member.sidiStatus} />
+                                                )}
+
+                                                <LabelValue label="Golongan Darah" value={member.bloodType || '-'} />
+                                                <LabelValue label="Pendidikan Terakhir" value={member.education || '-'} />
+                                                <LabelValue label="Pekerjaan" value={member.occupation === 'Lainnya' ? (member.occupationOther || 'Lainnya') : (member.occupation || '-')} />
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -219,9 +302,13 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                 <div className="animate-fade-in-up delay-100">
                     <SummaryCard title="Pendidikan Keluarga" icon="school" color="bg-orange-500" stepNumber={3}>
                         <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                 <LabelValue label="Status Anak Sekolah" value={data.education_schoolingStatus} />
                                 <LabelValue label="Anak Bekerja" value={`${data.education_working} Orang`} />
+                                <LabelValue label="Ada Anggota Putus Sekolah" value={data.education_hasDropout} />
+                                {data.education_hasDropout === 'Ya' && (
+                                    <LabelValue label="Alasan Putus Sekolah" value={data.education_dropoutReason} />
+                                )}
                                 <div className="col-span-full border-t border-orange-100 dark:border-white/5 pt-4">
                                     <LabelValue label="Penerima Beasiswa" value={data.education_hasScholarship === 'Ya' ? (data.education_scholarshipType === 'Beasiswa Lainnya' ? `Ya - ${data.education_scholarshipTypeOther}` : `Ya - ${data.education_scholarshipType}`) : 'Tidak'} />
                                 </div>
@@ -241,7 +328,7 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                             </thead>
                                             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                                                 {[
-                                                    { lbl: 'TK / PAUD', sch: data.education_inSchool_tk_paud, drop: data.education_dropout_tk_paud, unem: '-' },
+                                                    { lbl: 'TK / PAUD', sch: data.education_inSchool_tk_paud, drop: '-', unem: '-' },
                                                     { lbl: 'SD / Sederajat', sch: data.education_inSchool_sd, drop: data.education_dropout_sd, unem: data.education_unemployed_sd },
                                                     { lbl: 'SMP / Sederajat', sch: data.education_inSchool_smp, drop: data.education_dropout_smp, unem: data.education_unemployed_smp },
                                                     { lbl: 'SMA / SMK / MA', sch: data.education_inSchool_sma, drop: data.education_dropout_sma, unem: data.education_unemployed_sma },
@@ -271,10 +358,23 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                 <LabelValue label="Sakit Dalam 30 Hari Terakhir" value={data.health_sick30Days} />
                                 <LabelValue label="Sakit menahun" value={data.health_chronicSick} />
                                 <LabelValue label="Pengobatan teratur dari fasilitas kesehatan" value={data.health_regularTreatment} />
-                                <LabelValue label="Memiliki BPJS Kesehatan" value={data.health_hasBPJS === 'Tidak' && data.health_bpjsNonParticipants ? <span>Tidak<div className="text-xs text-red-600 dark:text-red-400 mt-1 whitespace-pre-wrap font-medium">{data.health_bpjsNonParticipants}</div></span> : data.health_hasBPJS} />
+                                <LabelValue label="Memiliki BPJS Kesehatan" value={
+                                    data.health_hasBPJS === 'Ya' ? (
+                                        <span>Ya{data.health_bpjsNumber && <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 whitespace-pre-wrap font-medium">No: {data.health_bpjsNumber}</div>}</span>
+                                    ) : (data.health_hasBPJS === 'Tidak' && data.health_bpjsNonParticipants ? (
+                                        <span>Tidak<div className="text-xs text-red-600 dark:text-red-400 mt-1 whitespace-pre-wrap font-medium">{data.health_bpjsNonParticipants}</div></span>
+                                    ) : data.health_hasBPJS)
+                                } />
                                 <LabelValue label="Penyakit Kronis" value={data.health_chronicSick === 'Ya' && Array.isArray(data.health_chronicDisease) ? (data.health_chronicDisease.map(d => d === 'Lainnya' ? `Lainnya (${data.health_chronicDiseaseOther})` : d).join(', ')) : 'Tidak'} />
-                                <LabelValue label="Memiliki BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan} />
-                                <LabelValue label="Jenis Bantuan Sosial" value={data.health_socialAssistance} />
+                                <LabelValue label="Memiliki BPJS Ketenagakerjaan" value={data.health_hasBPJSKetenagakerjaan === 'Ya' ? `Ya - ${data.health_bpjsKetenagakerjaanProgram || '-'}` : data.health_hasBPJSKetenagakerjaan} />
+                                <LabelValue label="KPM Bansos Pemerintah" value={data.health_isKPM} />
+                                {data.health_isKPM === 'Ya' && <LabelValue label="Jenis Bantuan Sosial" value={data.health_socialAssistance} />}
+                                {data.health_isKPM === 'Tidak' && (
+                                    <>
+                                        <LabelValue label="KK Miskin Non-KPM" value={data.health_isPoorNonKPM} />
+                                        {data.health_isPoorNonKPM === 'Ya' && <LabelValue label="Alasan" value={data.health_poorNonKPMReason} />}
+                                    </>
+                                )}
                             </div>
 
                             <div className="space-y-4">
@@ -309,6 +409,12 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                                         </div>
                                     </div>
                                 )}
+                                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 gap-y-6 gap-x-4">
+                                    <LabelValue label="Bersedia Donor Darah" value={data.health_willingToDonateBlood} />
+                                    {data.health_willingToDonateBlood === 'Ya' && (
+                                        <LabelValue label="Anggota Komunitas Donor" value={data.health_willingToJoinBloodCommunity} />
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </SummaryCard>
@@ -546,10 +652,10 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                     </SummaryCard>
                 </div>
 
-            </div>
+            </div >
 
             {/* ACTION SECTION - Distinct from previous sections but naturally flows */}
-            <div className="z-30 pt-2">
+            < div className="z-30 pt-2" >
                 <div className="bg-white/90 dark:bg-[#1a2e20]/95 backdrop-blur-md border border-emerald-200 dark:border-emerald-800 p-5 rounded-2xl shadow-2xl flex flex-col gap-4 max-w-3xl mx-auto ring-4 ring-emerald-500/10 transform transition-all animate-slide-in-up">
                     <label className="flex items-start gap-4 cursor-pointer group">
                         <div className="relative flex items-center mt-1">
@@ -586,10 +692,10 @@ const Step7Consent: React.FC<StepProps> = ({ data, update, goToStep }) => {
                         </span>
                     </label>
                 </div>
-            </div>
+            </div >
 
             <div className="h-4"></div> {/* Small spacer for final layout */}
-        </div>
+        </div >
     );
 
 };

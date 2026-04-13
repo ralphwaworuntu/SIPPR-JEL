@@ -182,12 +182,13 @@ const mapCongregantToMember = (c: any) => ({
     familyMembersNonBaptized: c.familyMembersNonBaptized || 0,
     familyMembersNonSidi: c.familyMembersNonSidi || 0,
     familyMembersNonSidiNames: safeParseJSON(c.familyMembersNonSidiNames),
+    familyMembersDetails: safeParseJSON(c.familyMembersDetails),
     hasNonSidiAdult18: c.hasNonSidiAdult18 || "",
 
     // Step 2: Diakonia
-    diakonia_recipient: c.diakoniaRecipient || "",
-    diakonia_year: c.diakoniaYear || "",
-    diakonia_type: c.diakoniaType || "",
+    diakonia_recipient: c.diakonia_recipient || "",
+    diakonia_year: c.diakonia_year || "",
+    diakonia_type: c.diakonia_type || "",
 
     // Step 3: Professional Family Members
     professionalFamilyMembers: safeParseJSON(c.professionalFamilyMembers),
@@ -292,10 +293,14 @@ const mapCongregantToMember = (c: any) => ({
     health_chronicDisease: safeParseJSON(c.healthChronicDisease),
     health_chronicDiseaseOther: c.healthChronicDiseaseOther || "",
     health_hasBPJS: c.healthHasBPJS || "",
+    health_bpjsNumber: c.healthBpjsNumber || "",
     health_bpjsNonParticipants: c.healthBpjsNonParticipants || "",
     health_regularTreatment: c.healthRegularTreatment || "",
     health_hasBPJSKetenagakerjaan: c.healthHasBPJSKetenagakerjaan || "",
     health_socialAssistance: c.healthSocialAssistance || "",
+    health_isKPM: c.healthIsKPM || "",
+    health_isPoorNonKPM: c.healthIsPoorNonKPM || "",
+    health_poorNonKPMReason: c.healthPoorNonKPMReason || "",
     health_hasDisability: c.healthHasDisability || "",
     health_disabilityPhysical: safeParseJSON(c.healthDisabilityPhysical),
     health_disabilityPhysicalOther: c.healthDisabilityPhysicalOther || "",
@@ -306,6 +311,8 @@ const mapCongregantToMember = (c: any) => ({
     health_disabilitySensory: safeParseJSON(c.healthDisabilitySensory),
     health_disabilitySensoryOther: c.healthDisabilitySensoryOther || "",
     health_disabilityDouble: c.healthDisabilityDouble || false,
+    health_willingToDonateBlood: c.healthWillingToDonateBlood || "",
+    health_willingToJoinBloodCommunity: c.healthWillingToJoinBloodCommunity || "",
 });
 
 // 1. GET Members (with Search, Filter & optional Pagination)
@@ -419,12 +426,18 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         // Step 1: Identity extras
         kkNumber: data.kkNumber || null,
         nik: data.nik || null,
+        birthPlace: data.birthPlace || null,
         bloodType: data.bloodType || null,
         maritalStatus: data.maritalStatus || null,
         marriageDate: safeDateForDB(data.marriageDate),
+        marriagePlace: data.marriagePlace || null,
         marriageType: data.marriageType || [],
         baptismStatus: data.baptismStatus || null,
+        baptismDate: safeDateForDB(data.baptismDate),
+        baptismPlace: data.baptismPlace || null,
         sidiStatus: data.sidiStatus || null,
+        sidiDate: safeDateForDB(data.sidiDate),
+        sidiPlace: data.sidiPlace || null,
         city: data.city || null,
         district: data.district || null,
         subdistrict: data.subdistrict || null,
@@ -438,13 +451,16 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         familyMembersNonBaptized: safeInt(data.familyMembersNonBaptized),
         familyMembersNonSidi: safeInt(data.familyMembersNonSidi),
         familyMembersNonSidiNames: data.familyMembersNonSidiNames || [],
+        familyMembersNonSidiReason: data.familyMembersNonSidiReason || null,
         familyMembersNonBaptizedNames: data.familyMembersNonBaptizedNames || [],
+        familyMembersNonBaptizedReason: data.familyMembersNonBaptizedReason || null,
+        familyMembersDetails: data.familyMembersDetails || [],
         hasNonSidiAdult18: data.hasNonSidiAdult18 || null,
 
         // Step 2: Diakonia
-        diakoniaRecipient: data.diakonia_recipient || null,
-        diakoniaYear: data.diakonia_year || null,
-        diakoniaType: data.diakonia_type || null,
+        diakonia_recipient: data.diakonia_recipient || null,
+        diakonia_year: data.diakonia_year || null,
+        diakonia_type: data.diakonia_type || null,
 
         // Professional
         educationLevel: data.education || data.educationLevel,
@@ -472,6 +488,8 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         educationInSchoolSma: safeInt(data.education_inSchool_sma),
         educationInSchoolUniversity: safeInt(data.education_inSchool_university),
         educationTotalDropout: safeInt(data.education_totalDropout),
+        educationHasDropout: data.education_hasDropout || null,
+        educationDropoutReason: data.education_dropoutReason || null,
         educationDropoutTkPaud: safeInt(data.education_dropout_tk_paud),
         educationDropoutSd: safeInt(data.education_dropout_sd),
         educationDropoutSmp: safeInt(data.education_dropout_smp),
@@ -569,10 +587,15 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         healthChronicDisease: data.health_chronicDisease || [],
         healthChronicDiseaseOther: data.health_chronicDiseaseOther || null,
         healthHasBPJS: data.health_hasBPJS || null,
+        healthBpjsNumber: data.health_bpjsNumber || null,
         healthBpjsNonParticipants: data.health_bpjsNonParticipants || null,
         healthRegularTreatment: data.health_regularTreatment || null,
         healthHasBPJSKetenagakerjaan: data.health_hasBPJSKetenagakerjaan || null,
+        healthBpjsKetenagakerjaanProgram: data.health_bpjsKetenagakerjaanProgram || null,
         healthSocialAssistance: data.health_socialAssistance || null,
+        healthIsKPM: data.health_isKPM || null,
+        healthIsPoorNonKPM: data.health_isPoorNonKPM || null,
+        healthPoorNonKPMReason: data.health_poorNonKPMReason || null,
         healthHasDisability: data.health_hasDisability || null,
         healthDisabilityPhysical: data.health_disabilityPhysical || [],
         healthDisabilityPhysicalOther: data.health_disabilityPhysicalOther || null,
@@ -583,6 +606,8 @@ const buildCongregantValues = (data: any, isAdmin: boolean = false) => {
         healthDisabilitySensory: data.health_disabilitySensory || [],
         healthDisabilitySensoryOther: data.health_disabilitySensoryOther || null,
         healthDisabilityDouble: data.health_disabilityDouble || false,
+        healthWillingToDonateBlood: data.health_willingToDonateBlood || null,
+        healthWillingToJoinBloodCommunity: data.health_willingToJoinBloodCommunity || null,
 
         // Geo
         status: isAdmin ? (data.status || 'VALIDATED') : 'PENDING',
@@ -637,10 +662,13 @@ app.post("/api/congregants", async (req, res) => {
 
         console.log("Registration Successful:", data.fullName, "ID:", result.insertId);
         res.status(201).json({ success: true, message: "Pendaftaran berhasil", id: result.insertId });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Submission Error:", error);
         console.error("Error saving congregant:", error);
-        res.status(500).json({ error: "Gagal menyimpan data pendaftaran. Pastikan data lengkap." });
+        try {
+            require('fs').writeFileSync('last_error.json', JSON.stringify({ message: error.message, stack: error.stack, sqlMessage: error.sqlMessage, payload: req.body }, null, 2));
+        } catch (e) { }
+        res.status(500).json({ error: "Gagal menyimpan data pendaftaran. Pastikan data lengkap.", detail: error.message || error.sqlMessage || "Unknown Database Error" });
     }
 });
 
@@ -780,67 +808,74 @@ app.get("/api/dashboard/stats", async (req, res) => {
 
         console.log(`[Stats] Fetching dashboard stats for Rayon: ${rayon || 'Semua'}, Lingkungan: ${lingkungan || 'Semua'}`);
 
-        // Parallel queries for performance
-        const [totalRes, soulsRes, genderRes, willingnessRes, educationRes, skillsRes, professionalRes, lingkunganRes, rayonRes, eduSumRes, diakoniaRes, economicsRes, healthRes] = await Promise.all([
-            // 1. Total Households (Records)
-            db.select({ count: sql<number>`count(*)` }).from(congregants).where(baseWhere),
+        // Executing queries sequentially to identify the culprit
+        let totalRes: any[] = [{ count: 0 }];
+        try { totalRes = await db.select({ count: sql<number>`count(*)` }).from(congregants).where(baseWhere); } catch (e: any) { console.error('Error in totalRes:', e.message); }
 
-            // 1b. Total Souls (Aggregated Family Members)
-            db.select({
+        let soulsRes: any[] = [];
+        try {
+            soulsRes = await db.select({
                 totalSouls: sql<number>`SUM(COALESCE(family_members, 0)) + COUNT(*) + SUM(COALESCE(family_members_outside, 0))`,
                 totalMale: sql<number>`SUM(family_members_male)`,
                 totalFemale: sql<number>`SUM(family_members_female)`,
                 totalSidi: sql<number>`SUM(family_members_sidi)`
-            }).from(congregants).where(baseWhere),
+            }).from(congregants).where(baseWhere);
+        } catch (e: any) { console.error('Error in soulsRes:', e.message); }
 
-            // 2. Gender of Head
-            db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.gender),
+        let genderRes: any[] = [];
+        try { genderRes = await db.select({ gender: congregants.gender, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.gender); } catch (e: any) { console.error('Error in genderRes:', e.message); }
 
-            // 4. Willingness Distribution
-            db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.willingnessToServe),
+        let willingnessRes: any[] = [];
+        try { willingnessRes = await db.select({ willingness: congregants.willingnessToServe, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.willingnessToServe); } catch (e: any) { console.error('Error in willingnessRes:', e.message); }
 
-            // 5. Education Distribution
-            db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.educationLevel),
-            // 6. Skills (Get all skills to parse and sum)
-            db.select({ skills: congregants.skills }).from(congregants).where(baseWhere),
+        let educationRes: any[] = [];
+        try { educationRes = await db.select({ education: congregants.educationLevel, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.educationLevel); } catch (e: any) { console.error('Error in educationRes:', e.message); }
 
-            // 7. Professional Count (Filter out non-working categories)
-            db.select({ count: sql<number>`count(*)` })
+        let skillsRes: any[] = [];
+        try { skillsRes = await db.select({ skills: congregants.skills }).from(congregants).where(baseWhere); } catch (e: any) { console.error('Error in skillsRes:', e.message); }
+
+        let professionalRes: any[] = [];
+        try {
+            professionalRes = await db.select({ count: sql<number>`count(*)` })
                 .from(congregants)
-                .where(and(baseWhere, notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-']))),
+                .where(and(baseWhere, notInArray(congregants.jobCategory, ['Pelajar / Mahasiswa', 'Mengurus Rumah Tangga', 'Pensiunan', 'Belum Bekerja', '-'])));
+        } catch (e: any) { console.error('Error in professionalRes:', e.message); }
 
-            // 8. Lingkungan Distribution
-            db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.lingkungan),
+        let lingkunganRes: any[] = [];
+        try { lingkunganRes = await db.select({ lingkungan: congregants.lingkungan, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.lingkungan); } catch (e: any) { console.error('Error in lingkunganRes:', e.message); }
 
-            // 9. Rayon Distribution
-            db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.rayon),
+        let rayonRes: any[] = [];
+        try { rayonRes = await db.select({ rayon: congregants.rayon, count: sql<number>`count(*)` }).from(congregants).where(baseWhere).groupBy(congregants.rayon); } catch (e: any) { console.error('Error in rayonRes:', e.message); }
 
-            // 10. Education Summary (All Child Data)
-            db.select({
+        let eduSumRes: any[] = [];
+        try {
+            eduSumRes = await db.select({
                 total: sql<number>`SUM(
-                    COALESCE(education_in_school_tk_paud, 0) + 
-                    COALESCE(education_in_school_sd, 0) + 
-                    COALESCE(education_in_school_smp, 0) + 
-                    COALESCE(education_in_school_sma, 0) + 
-                    COALESCE(education_in_school_university, 0) +
-                    COALESCE(education_dropout_tk_paud, 0) + 
-                    COALESCE(education_dropout_sd, 0) + 
-                    COALESCE(education_dropout_smp, 0) + 
-                    COALESCE(education_dropout_sma, 0) + 
-                    COALESCE(education_dropout_university, 0) +
-                    COALESCE(education_unemployed_sd, 0) + 
-                    COALESCE(education_unemployed_smp, 0) + 
-                    COALESCE(education_unemployed_sma, 0) + 
-                    COALESCE(education_unemployed_university, 0) +
-                    COALESCE(education_working, 0)
-                )`
-            }).from(congregants).where(baseWhere),
+                COALESCE(education_in_school_tk_paud, 0) + 
+                COALESCE(education_in_school_sd, 0) + 
+                COALESCE(education_in_school_smp, 0) + 
+                COALESCE(education_in_school_sma, 0) + 
+                COALESCE(education_in_school_university, 0) +
+                COALESCE(education_dropout_tk_paud, 0) + 
+                COALESCE(education_dropout_sd, 0) + 
+                COALESCE(education_dropout_smp, 0) + 
+                COALESCE(education_dropout_sma, 0) + 
+                COALESCE(education_dropout_university, 0) +
+                COALESCE(education_unemployed_sd, 0) + 
+                COALESCE(education_unemployed_smp, 0) + 
+                COALESCE(education_unemployed_sma, 0) + 
+                COALESCE(education_unemployed_university, 0) +
+                COALESCE(education_working, 0)
+            )`
+            }).from(congregants).where(baseWhere);
+        } catch (e: any) { console.error('Error in eduSumRes:', e.message); }
 
-            // 11. Diakonia
-            db.select({ type: congregants.diakoniaType, count: sql<number>`count(*)` }).from(congregants).where(and(baseWhere, eq(congregants.diakoniaRecipient, 'Ya'))).groupBy(congregants.diakoniaType),
+        let diakoniaRes: any[] = [];
+        try { diakoniaRes = await db.select({ type: congregants.diakonia_type, count: sql<number>`count(*)` }).from(congregants).where(and(baseWhere, eq(congregants.diakonia_recipient, 'Ya'))).groupBy(congregants.diakonia_type); } catch (e: any) { console.error('Error in diakoniaRes:', e.message); }
 
-            // 12. Economics Raw Data (for processing assets, issues etc)
-            db.select({
+        let economicsRes: any[] = [];
+        try {
+            economicsRes = await db.select({
                 assets: congregants.economicsAssets,
                 businessType: congregants.economicsBusinessType,
                 businessTurnover: congregants.economicsBusinessTurnover,
@@ -848,10 +883,12 @@ app.get("/api/dashboard/stats", async (req, res) => {
                 businessTraining: congregants.economicsBusinessTraining,
                 businessNeeds: congregants.economicsBusinessNeeds,
                 waterSource: congregants.economicsWaterSource
-            }).from(congregants).where(baseWhere),
+            }).from(congregants).where(baseWhere);
+        } catch (e: any) { console.error('Error in economicsRes:', e.message); }
 
-            // 13. Health Raw Data (for processing disabilities and chronics)
-            db.select({
+        let healthRes: any[] = [];
+        try {
+            healthRes = await db.select({
                 disabilityPhysical: congregants.healthDisabilityPhysical,
                 disabilityIntellectual: congregants.healthDisabilityIntellectual,
                 disabilityMental: congregants.healthDisabilityMental,
@@ -859,8 +896,8 @@ app.get("/api/dashboard/stats", async (req, res) => {
                 chronicDisease: congregants.healthChronicDisease,
                 sick30Days: congregants.healthSick30Days,
                 regularTreatment: congregants.healthRegularTreatment
-            }).from(congregants).where(baseWhere)
-        ]);
+            }).from(congregants).where(baseWhere);
+        } catch (e: any) { console.error('Error in healthRes:', e.message); }
 
         const total = totalRes[0]?.count || 0;
         const soulsData = soulsRes[0] || { totalSouls: 0, totalMale: 0, totalFemale: 0, totalSidi: 0 };
@@ -1002,7 +1039,8 @@ app.get("/api/dashboard/stats", async (req, res) => {
         const professionalCount = professionalRes[0]?.count || 0;
 
         // 8. Professional Family Members Count
-        const profFamilyRes = await db.select({ pfm: congregants.professionalFamilyMembers }).from(congregants).where(baseWhere);
+        // Use raw SQL to completely bypass any drizzle schema mapping bugs on this json column
+        const profFamilyRes = await db.select({ pfm: sql<any>`professional_family_members` }).from(congregants).where(baseWhere);
         let professionalFamilyCount = 0;
         profFamilyRes.forEach(row => {
             try {
@@ -1157,8 +1195,12 @@ app.post("/api/members/import", upload.single('file'), async (req, res) => {
                     healthChronicSick: row["Penyakit Kronis"] || "Tidak",
                     healthChronicDisease: safeJSON(row["Daftar Penyakit"]),
                     healthHasBPJS: row["BPJS Kesehatan"] || "Tidak",
+                    healthBpjsNumber: row["Nomor BPJS"] || null,
                     healthHasBPJSKetenagakerjaan: row["BPJS Ketenagakerjaan"] || "Tidak",
-                    healthSocialAssistance: row["Bantuan Sosial"] || "Tidak",
+                    healthSocialAssistance: row["Bantuan Sosial"] || null,
+                    healthIsKPM: row["KPM Bansos"] || null,
+                    healthIsPoorNonKPM: row["Miskin Non-KPM"] || null,
+                    healthPoorNonKPMReason: row["Alasan Miskin Non-KPM"] || null,
                     healthHasDisability: row["Disabilitas"] || "Tidak",
                     healthDisabilityPhysical: safeJSON(row["Daftar Disabilitas"]),
                     marriageDate: safeDateForDB(row["Tanggal Pernikahan"]),

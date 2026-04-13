@@ -57,12 +57,18 @@ export const congregants = mysqlTable("congregants", {
     // Step 1: Identity — New fields
     kkNumber: varchar("kk_number", { length: 20 }),
     nik: varchar("nik", { length: 20 }),
+    birthPlace: varchar("birth_place", { length: 150 }),
     bloodType: varchar("blood_type", { length: 10 }),
     maritalStatus: varchar("marital_status", { length: 50 }),
+    marriagePlace: varchar("marriage_place", { length: 150 }),
     marriageDate: date("marriage_date", { mode: 'string' }),
     marriageType: json("marriage_type"), // string[]
     baptismStatus: varchar("baptism_status", { length: 50 }),
+    baptismPlace: varchar("baptism_place", { length: 150 }),
+    baptismDate: date("baptism_date", { mode: 'string' }),
     sidiStatus: varchar("sidi_status", { length: 50 }),
+    sidiPlace: varchar("sidi_place", { length: 150 }),
+    sidiDate: date("sidi_date", { mode: 'string' }),
 
     // Church Details
     lingkungan: varchar("lingkungan", { length: 50 }),
@@ -84,13 +90,17 @@ export const congregants = mysqlTable("congregants", {
     familyMembersNonBaptized: int("family_members_non_baptized"),
     familyMembersNonSidi: int("family_members_non_sidi"),
     familyMembersNonSidiNames: json("family_members_non_sidi_names"), // string[]
+    familyMembersNonSidiReason: text("family_members_non_sidi_reason"),
     familyMembersNonBaptizedNames: json("family_members_non_baptized_names"), // string[]
+    familyMembersNonBaptizedReason: text("family_members_non_baptized_reason"),
     hasNonSidiAdult18: varchar("has_non_sidi_adult_18", { length: 10 }),
 
     // Step 2: Diakonia
-    diakoniaRecipient: varchar("diakonia_recipient", { length: 10 }),
-    diakoniaYear: varchar("diakonia_year", { length: 10 }),
-    diakoniaType: varchar("diakonia_type", { length: 100 }),
+    diakonia_recipient: varchar("diakonia_recipient", { length: 10 }),
+    diakonia_year: varchar("diakonia_year", { length: 4 }),
+    diakonia_type: text("diakonia_type"),
+
+    familyMembersDetails: json("family_members_details"), // FamilyMemberDetail[]
 
     // Professional
     educationLevel: varchar("education_level", { length: 50 }),
@@ -120,6 +130,8 @@ export const congregants = mysqlTable("congregants", {
     educationInSchoolSma: int("education_in_school_sma").default(0),
     educationInSchoolUniversity: int("education_in_school_university").default(0),
     educationTotalDropout: int("education_total_dropout").default(0),
+    educationHasDropout: varchar("education_has_dropout", { length: 10 }),
+    educationDropoutReason: text("education_dropout_reason"),
     educationDropoutTkPaud: int("education_dropout_tk_paud").default(0),
     educationDropoutSd: int("education_dropout_sd").default(0),
     educationDropoutSmp: int("education_dropout_smp").default(0),
@@ -217,9 +229,14 @@ export const congregants = mysqlTable("congregants", {
     healthChronicDisease: json("health_chronic_disease"), // string[]
     healthChronicDiseaseOther: varchar("health_chronic_disease_other", { length: 100 }),
     healthHasBPJS: varchar("health_has_bpjs", { length: 20 }),
+    healthBpjsNumber: text("health_bpjs_number"),
     healthBpjsNonParticipants: text("health_bpjs_non_participants"),
     healthRegularTreatment: varchar("health_regular_treatment", { length: 10 }),
     healthHasBPJSKetenagakerjaan: varchar("health_has_bpjs_ketenagakerjaan", { length: 20 }),
+    healthBpjsKetenagakerjaanProgram: varchar("health_bpjs_ketenagakerjaan_program", { length: 50 }),
+    healthIsKPM: varchar("health_is_kpm", { length: 20 }),
+    healthIsPoorNonKPM: varchar("health_is_poor_non_kpm", { length: 20 }),
+    healthPoorNonKPMReason: text("health_poor_non_kpm_reason"),
     healthSocialAssistance: varchar("health_social_assistance", { length: 50 }),
     healthHasDisability: varchar("health_has_disability", { length: 10 }),
     healthDisabilityPhysical: json("health_disability_physical"), // string[]
@@ -231,6 +248,8 @@ export const congregants = mysqlTable("congregants", {
     healthDisabilitySensory: json("health_disability_sensory"), // string[]
     healthDisabilitySensoryOther: varchar("health_disability_sensory_other", { length: 100 }),
     healthDisabilityDouble: boolean("health_disability_double").default(false),
+    healthWillingToDonateBlood: varchar("health_willing_to_donate_blood", { length: 20 }),
+    healthWillingToJoinBloodCommunity: varchar("health_willing_to_join_blood_community", { length: 20 }),
 
     // Geolocation
     status: varchar("status", { length: 20 }).default('PENDING'), // PENDING, VALIDATED
